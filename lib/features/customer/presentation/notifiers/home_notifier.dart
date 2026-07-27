@@ -1,0 +1,69 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kebda_zaman/core/di/providers.dart';
+import 'package:kebda_zaman/features/shared/domain/models/category.dart';
+import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
+
+/// Home screen data — aggregates categories, featured, and best sellers.
+class HomeData {
+  final List<Category> categories;
+  final List<MenuItem> featuredItems;
+  final List<MenuItem> bestSellers;
+  final List<MenuItem> offers;
+  final List<MenuItem> recommended;
+  final List<MenuItem> popular;
+  final bool isOpen;
+
+  const HomeData({
+    required this.categories,
+    required this.featuredItems,
+    required this.bestSellers,
+    required this.offers,
+    required this.recommended,
+    required this.popular,
+    required this.isOpen,
+  });
+}
+
+final homeDataProvider = FutureProvider<HomeData>((ref) async {
+  final menuRepo = ref.watch(menuRepositoryProvider);
+  final settings = await ref.watch(restaurantSettingsProvider.future);
+
+  final categoriesResult = await menuRepo.getCategories();
+  final featuredResult = await menuRepo.getFeaturedItems();
+  final bestSellersResult = await menuRepo.getBestSellers();
+  final allItemsResult = await menuRepo.getMenuItems();
+
+  final categories = categoriesResult.fold(
+    (f) => throw Exception(f.message),
+    (data) => data,
+  );
+  final featured = featuredResult.fold(
+    (f) => throw Exception(f.message),
+    (data) => data,
+  );
+  final bestSellers = bestSellersResult.fold(
+    (f) => throw Exception(f.message),
+    (data) => data,
+  );
+  final allItems = allItemsResult.fold(
+    (f) => <MenuItem>[], // default to empty if fails
+    (data) => data,
+  );
+
+  // Derived sections
+  final offers = allItems.where((item) => item.discountPrice != null).toList();
+  // Shuffle allItems for recommended/popular so it looks dynamic (pseudo-random)
+  final recommended = [...allItems]..shuffle();
+  final popular = [...allItems.where((i) => !i.isBestSeller && !i.isFeatured)]
+    ..shuffle();
+
+  return HomeData(
+    categories: categories,
+    featuredItems: featured,
+    bestSellers: bestSellers,
+    offers: offers,
+    recommended: recommended.take(5).toList(),
+    popular: popular.take(5).toList(),
+    isOpen: settings.isOpen,
+  );
+});

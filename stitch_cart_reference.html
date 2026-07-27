@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kebda Zaman - Your Cart</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#aa3600",
+                    "surface-dim": "#dcdad6",
+                    "tertiary": "#0047a5",
+                    "on-secondary-container": "#783d01",
+                    "background": "#fcf9f5",
+                    "on-tertiary-container": "#d8e1ff",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#fcf9f5",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed": "#ffdcc4",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-high": "#eae8e4",
+                    "secondary-fixed-dim": "#ffb780",
+                    "on-secondary": "#ffffff",
+                    "surface-variant": "#e5e2de",
+                    "on-secondary-fixed": "#2f1400",
+                    "tertiary-fixed": "#d9e2ff",
+                    "on-background": "#1c1c1a",
+                    "secondary": "#8e4e14",
+                    "primary-container": "#b43b03",
+                    "secondary-container": "#ffab69",
+                    "inverse-surface": "#31302e",
+                    "inverse-primary": "#ffb59c",
+                    "surface-container-low": "#f6f3ef",
+                    "tertiary-fixed-dim": "#afc6ff",
+                    "outline": "#8d7168",
+                    "on-primary-fixed-variant": "#822700",
+                    "on-error-container": "#93000a",
+                    "primary": "#8c2b00",
+                    "primary-fixed": "#ffdbcf",
+                    "on-surface": "#1c1c1a",
+                    "error": "#ba1a1a",
+                    "on-surface-variant": "#59413a",
+                    "surface-container": "#f0ede9",
+                    "on-primary-fixed": "#390c00",
+                    "surface-container-highest": "#e5e2de",
+                    "on-tertiary-fixed": "#001944",
+                    "on-primary-container": "#ffdacf",
+                    "on-secondary-fixed-variant": "#6f3800",
+                    "outline-variant": "#e1bfb5",
+                    "primary-fixed-dim": "#ffb59c",
+                    "tertiary-container": "#005ed4",
+                    "surface": "#fcf9f5",
+                    "on-tertiary-fixed-variant": "#00429a",
+                    "inverse-on-surface": "#f3f0ec",
+                    "error-container": "#ffdad6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-padding-desktop": "32px",
+                    "container-padding-mobile": "16px",
+                    "card-gap": "12px",
+                    "gutter": "16px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "price-md": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "display": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "label-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "price-md": ["18px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="bg-background sticky top-0 z-50 flex justify-between items-center px-container-padding-mobile py-4 w-full">
+<div class="flex items-center gap-3">
+<button class="text-primary hover:opacity-80 transition-opacity duration-200">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-lg text-headline-lg text-primary">Your Cart</h1>
+</div>
+<button class="text-on-surface-variant font-label-lg text-label-lg hover:opacity-80 transition-opacity duration-200 uppercase tracking-wider">
+            Clear
+        </button>
+</header>
+<main class="max-w-xl mx-auto px-container-padding-mobile space-y-6">
+<!-- Cart Items Section -->
+<section class="space-y-4">
+<div class="bg-surface rounded-xl p-3 flex gap-4 shadow-[0_12px_24px_-12px_rgba(140,43,0,0.08)] border border-outline-variant/30">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A close-up, appetizing shot of an Alexandrian Kebda Sandwich, featuring sautéed beef liver with green peppers and spices in a fresh, soft Egyptian baguette. The lighting is warm and natural, highlighting the rich textures of the meat and the steam rising from the bread. Set against a clean, cream-toned rustic background typical of the Kebda Zaman brand aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvughlQ4GyE5c1Z2w1CArLNgAsnxcX2W8A8ANROvT59Dq44BatOQ0w-S7cHYTwCoDphSqpjQ5wT0GGABrBNlGLPq2S1Mzz047j2udaRxW9Kznak-5_eJ9ruIO7w0SVxKOgguuJmujJLA_uKx-SW0dlhPuOA9QFUvvuVkOjDIdOYda2GxGPx9Yg-yXdMswg2IxTSYfJMSsHyVSOen8rWyvqYrEo_F3SM06supvgGlE9Bn8LJ-Bp0xnSzOyWW2ZqWByRoDN49HF2Zhc"/>
+</div>
+<div class="flex-1 flex flex-col justify-between py-1">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline-md text-headline-md text-on-surface">Alexandrian Kebda Sandwich</h3>
+<span class="font-price-md text-price-md text-primary">45 EGP</span>
+</div>
+<div class="flex gap-4 mt-1">
+<button class="text-secondary font-label-lg text-label-lg hover:underline transition-all">Edit</button>
+<button class="text-error font-label-lg text-label-lg hover:underline transition-all">Remove</button>
+</div>
+</div>
+<div class="flex justify-end items-center mt-2">
+<div class="flex items-center bg-surface-container rounded-full px-2 py-1 gap-4">
+<button class="w-8 h-8 flex items-center justify-center rounded-full bg-white text-secondary shadow-sm hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="font-price-md text-price-md text-on-surface">1</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-full bg-primary text-white shadow-sm hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Promo Code Section -->
+<section class="bg-white rounded-xl p-4 border border-dashed border-outline-variant/60">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">sell</span>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-body-lg font-body-lg placeholder:text-on-surface-variant/50" placeholder="Enter promo code" type="text"/>
+<button class="text-primary font-label-lg text-label-lg uppercase font-bold tracking-tight">Apply</button>
+</div>
+</section>
+<!-- Order Summary -->
+<section class="bg-surface-container-low rounded-2xl p-6 space-y-4">
+<h2 class="font-headline-md text-headline-md text-on-surface border-b border-outline-variant/30 pb-2">Order Summary</h2>
+<div class="space-y-3">
+<div class="flex justify-between text-body-lg font-body-lg text-on-surface-variant">
+<span>Subtotal</span>
+<span>45 EGP</span>
+</div>
+<div class="flex justify-between text-body-lg font-body-lg text-on-surface-variant">
+<span>Delivery Fee</span>
+<span>20 EGP</span>
+</div>
+<div class="flex justify-between text-body-lg font-body-lg text-on-surface-variant">
+<span>Tax</span>
+<span>6 EGP</span>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 flex justify-between items-center">
+<span class="font-headline-lg text-headline-lg text-on-surface">Total Amount</span>
+<span class="font-display text-display text-primary">71 EGP</span>
+</div>
+</div>
+</section>
+<!-- Often Ordered With -->
+<section class="space-y-4 overflow-hidden">
+<div class="flex justify-between items-center">
+<h2 class="font-headline-md text-headline-md text-on-surface">Often ordered with</h2>
+<button class="text-secondary text-label-lg font-label-lg">See All</button>
+</div>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-4 -mx-4 px-4">
+<!-- Item 1 -->
+<div class="flex-shrink-0 w-40 bg-white rounded-xl p-3 shadow-sm border border-outline-variant/20">
+<div class="w-full h-28 rounded-lg overflow-hidden mb-3">
+<img class="w-full h-full object-cover" data-alt="A small side dish of crispy Egyptian fries seasoned with traditional spices, presented in a paper cone. High-quality food photography with warm lighting, focusing on the golden texture of the fries against a clean cream background. Professional culinary styling for Kebda Zaman's modern-tactile interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYg0kU7pTNkeq1vX41cpw5J7Z6t5KxARYwbuT-SVwtABgaf-etqjQFB5OdZEo2q-TLUYDC4Duwgyw5uQdbYI56AIKvwOORNEIOc499wo1y0KQAY-3DNz_vGHGsIisiZU_wPeVqV3hPJKM2b6qBfRSZjuzgPZxDZMWJbfsdpku_I502WpS546x54o5sQB6O-wMQE-pSdAEZ6DgaPmH7_xFoz99CcOX8L1I3bK3cHPeqZQwsS0mtKB9ep-ScrvEKy_SnCXRg1FfPjQw"/>
+</div>
+<h4 class="font-label-lg text-label-lg text-on-surface truncate">Spiced Fries</h4>
+<div class="flex justify-between items-center mt-1">
+<span class="text-primary font-price-md text-[14px]">15 EGP</span>
+<button class="bg-primary text-white p-1 rounded-full hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex-shrink-0 w-40 bg-white rounded-xl p-3 shadow-sm border border-outline-variant/20">
+<div class="w-full h-28 rounded-lg overflow-hidden mb-3">
+<img class="w-full h-full object-cover" data-alt="A refreshing bottle of cold Egyptian soda, condensation glistening on the glass. The shot is bright and clean, with the terracotta and cream brand colors subtly reflected in the environment. High-end product photography for a food ordering app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdzJlkODSyOI0VhxQGf51WmLRUaG5VZC-i7oLRJPcc4FjCRuRJy-omkC28ToAu3ScNkZj96-dnDo17yu8YI4Z_7v2HjHqWcHMnq116t80T8SBrdcEFTAZlhUuXVd1Rziwg_lqONccy0g4h7EugV_ryvKXEby7DWOuVg7OGixwjSZzA-1rnxle3bRokqtSnyUyu88ouA_Wiqb0IK7Vz2kszBgi99fIfjeYCNN959vJRr93q9pY0jXGacTL5b67K5um0tFFBHF8njLI"/>
+</div>
+<h4 class="font-label-lg text-label-lg text-on-surface truncate">Cold Soda</h4>
+<div class="flex justify-between items-center mt-1">
+<span class="text-primary font-price-md text-[14px]">12 EGP</span>
+<button class="bg-primary text-white p-1 rounded-full hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex-shrink-0 w-40 bg-white rounded-xl p-3 shadow-sm border border-outline-variant/20">
+<div class="w-full h-28 rounded-lg overflow-hidden mb-3">
+<img class="w-full h-full object-cover" data-alt="A bowl of creamy, authentic Egyptian Tahini sauce drizzled with olive oil and a pinch of paprika. Soft, appetizing lighting capturing the smooth texture, set within the Heritage Street design system's warm cream aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEEJFDPaibL8hnKUFua4Goe5NJBi7UdIIdHF3KKiPeQGFEe8ncu8twKle51OQ6mFax-6xwg-gWBSXppKUqeGkB6PCIERi7_Kvq_OSEjRD4hxZkKI6gfSATOxBNfsn4ZP_gihEEqfyaOV2slaCGKNUR8DW8Jk8EFl6v4dEYclvH1Y_ABNvSV2_Q3wmQxq054YKsRw0TAfFHoPnOYQf0_9Ijb8ItO2b7TnzmbtdWf69IW8KPwR8ZOfT1e5tOTTWgfR00mrIrEiOEvcU"/>
+</div>
+<h4 class="font-label-lg text-label-lg text-on-surface truncate">Extra Tahini</h4>
+<div class="flex justify-between items-center mt-1">
+<span class="text-primary font-price-md text-[14px]">5 EGP</span>
+<button class="bg-primary text-white p-1 rounded-full hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Sticky Checkout Button -->
+<div class="fixed bottom-[84px] left-0 w-full px-container-padding-mobile z-40 bg-gradient-to-t from-background via-background/90 to-transparent pt-8 pb-4">
+<button class="w-full bg-primary-container text-on-primary-container py-4 rounded-full font-headline-md text-headline-md shadow-lg flex justify-center items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all group">
+<span>Proceed to Checkout</span>
+<span class="opacity-30">•</span>
+<span>71 EGP</span>
+<span class="material-symbols-outlined ml-2 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface border-t border-outline-variant shadow-lg rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-lg text-label-lg">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span class="font-label-lg text-label-lg">Menu</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold scale-105 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+<span class="font-label-lg text-label-lg">Cart</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-lg text-label-lg">Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-lg text-label-lg">Profile</span>
+</a>
+</nav>
+<script>
+        // Micro-interactions for quantity selector and buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // Simple ripple-like effect or state feedback could go here
+                // Logic for cart updates would normally be here
+            });
+        });
+    </script>
+</body></html

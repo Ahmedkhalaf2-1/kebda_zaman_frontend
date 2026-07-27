@@ -1,0 +1,308 @@
+import 'dart:convert';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kebda_zaman/features/shared/domain/models/user.dart';
+import 'package:kebda_zaman/features/shared/domain/repositories/auth_repository.dart';
+import 'package:kebda_zaman/core/di/providers.dart';
+import 'package:kebda_zaman/core/notifications/device_service.dart';
+import 'package:kebda_zaman/core/errors/errors.dart';
+
+class AuthState {
+  final User? user;
+  final bool isLoading;
+  final String? errorMessage;
+  final bool isLoggedIn;
+
+  const AuthState({
+    this.user,
+    this.isLoading = false,
+    this.errorMessage,
+    this.isLoggedIn = false,
+  });
+
+  AuthState copyWith({
+    User? user,
+    bool? isLoading,
+    String? errorMessage,
+    bool? isLoggedIn,
+  }) {
+    return AuthState(
+      user: user ?? this.user,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage,
+      isLoggedIn: isLoggedIn ?? this.isLoggedIn,
+    );
+  }
+}
+
+class AuthNotifier extends StateNotifier<AuthState> {
+  static const String userKey = 'kz_current_user_json';
+  static const String isLoggedInKey = 'kz_is_logged_in';
+  final AuthRepository _authRepository;
+
+  AuthNotifier(this._authRepository) : super(const AuthState(isLoading: true)) {
+    _loadCachedUserForDisplay();
+  }
+
+  /// Loads the cached user (if any) purely for presentation — e.g. so the
+  /// UI can show a name while SessionBootstrapNotifier's cold-start token
+  /// refresh is still in flight. This deliberately never sets
+  /// `isLoggedIn: true`: a cached profile is not a verified active session.
+  /// `isLoggedIn` only becomes true via [confirmRestoredSession] (after a
+  /// real access-token refresh succeeds) or a fresh login/signup.
+  Future<void> _loadCachedUserForDisplay() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasSavedSession = prefs.getBool(isLoggedInKey) ?? false;
+      final userJsonStr = prefs.getString(userKey);
+
+      if (hasSavedSession && userJsonStr != null) {
+        final Map<String, dynamic> userMap = jsonDecode(userJsonStr);
+        final user = User.fromJson(userMap);
+        state = AuthState(user: user, isLoggedIn: false, isLoading: false);
+        return;
+      }
+    } catch (_) {}
+
+    // Default guest/unauthenticated user state
+    state = const AuthState(user: null, isLoggedIn: false, isLoading: false);
+  }
+
+  /// Called by SessionBootstrapNotifier once the cold-start access-token
+  /// refresh has actually succeeded. This is the only place a *restored*
+  /// session (as opposed to a fresh login) is allowed to mark `isLoggedIn`
+  /// true, and it only does so after confirming the profile with the
+  /// backend using the now-valid access token.
+  Future<void> confirmRestoredSession() async {
+    final result = await _authRepository.getCurrentUser();
+    if (result.isSuccess && result.value != null) {
+      final user = result.value!;
+      await _saveUserSession(user);
+      state = AuthState(user: user, isLoggedIn: true, isLoading: false);
+      DeviceService.instance.onSessionEstablished();
+    } else if (result.isFailure && result.failure is AuthFailure) {
+      // Only a genuine auth rejection (expired/invalid credentials) should
+      // force a logout here — a transient network/server error must not
+      // sign the user out over a momentary hiccup right after a successful
+      // token refresh.
+      await logout();
+    } else {
+      // Transient failure fetching the profile. The access token itself is
+      // valid — the refresh already succeeded — so keep the session logged
+      // in using whatever cached user we have rather than punishing a
+      // momentary network blip with a forced logout.
+      final cachedUser = state.user;
+      if (cachedUser != null) {
+        state = state.copyWith(isLoggedIn: true, isLoading: false);
+      }
+    }
+  }
+
+  /// Called by SessionBootstrapNotifier when the refresh endpoint
+  /// definitively rejects the stored refresh token. Clears the locally
+  /// cached session without another backend round-trip — the session is
+  /// already dead server-side (TokenRefreshCoordinator already cleared the
+  /// stored refresh token and in-memory access token).
+  Future<void> clearLocalSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(isLoggedInKey);
+      await prefs.remove(userKey);
+    } catch (_) {}
+    state = const AuthState(user: null, isLoggedIn: false, isLoading: false);
+  }
+
+  Future<bool> login({
+    required String identifier, // Email or Username
+    required String password,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    if (identifier.trim().isEmpty || password.trim().isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Please enter valid credentials',
+      );
+      return false;
+    }
+
+    // The backend account model has no username concept — only a real email
+    // authenticates (see 06_AUTH_REFERENCE.md). Sending anything else always
+    // fails with 401 INVALID_CREDENTIALS, so the identifier is used verbatim.
+    final result = await _authRepository.login(identifier.trim(), password);
+
+    if (result.isSuccess) {
+      final user = result.value;
+      await _saveUserSession(user);
+      state = AuthState(user: user, isLoggedIn: true, isLoading: false);
+      // Register/confirm device token after login
+      DeviceService.instance.onSessionEstablished();
+      return true;
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: result.failure.message,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> adminLogin({
+    required String identifier,
+    required String password,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    if (identifier.trim().isEmpty || password.trim().isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Please enter valid credentials',
+      );
+      return false;
+    }
+
+    final result = await _authRepository.adminLogin(
+      identifier.trim(),
+      password,
+    );
+
+    if (result.isSuccess) {
+      final user = result.value;
+      await _saveUserSession(user);
+      state = AuthState(user: user, isLoggedIn: true, isLoading: false);
+      DeviceService.instance.onSessionEstablished();
+      return true;
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: result.failure.message,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> signUp({
+    required String name,
+    required String email,
+    required String phone,
+    required String password,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    if (name.trim().isEmpty ||
+        email.trim().isEmpty ||
+        password.trim().isEmpty) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Please fill in all required fields',
+      );
+      return false;
+    }
+
+    final result = await _authRepository.register(
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim().isNotEmpty ? phone.trim() : '01000000000',
+      password: password,
+    );
+
+    if (result.isSuccess) {
+      final user = result.value;
+      await _saveUserSession(user);
+      state = AuthState(user: user, isLoggedIn: true, isLoading: false);
+      // Register/confirm device token after sign-up
+      DeviceService.instance.onSessionEstablished();
+      return true;
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: result.failure.message,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> continueAsGuest() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    final result = await _authRepository.guestLogin();
+
+    if (result.isSuccess) {
+      final user = result.value;
+      await _saveUserSession(user);
+      state = AuthState(user: user, isLoggedIn: true, isLoading: false);
+      // Register/confirm device token for guest session too
+      DeviceService.instance.onSessionEstablished();
+      return true;
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: result.failure.message,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> updateProfile({
+    String? name,
+    String? phone,
+    String? avatarUrl,
+    String? locale,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    final result = await _authRepository.updateProfile(
+      name: name,
+      phone: phone,
+      avatarUrl: avatarUrl,
+      locale: locale,
+    );
+
+    if (result.isSuccess) {
+      final user = result.value;
+      await _saveUserSession(user);
+      state = state.copyWith(user: user, isLoading: false);
+      return true;
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: result.failure.message,
+      );
+      return false;
+    }
+  }
+
+  Future<void> _saveUserSession(User user) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(isLoggedInKey, true);
+      await prefs.setString(userKey, jsonEncode(user.toJson()));
+    } catch (_) {}
+  }
+
+  Future<void> logout() async {
+    state = state.copyWith(isLoading: true);
+
+    // 1. Delete device token BEFORE invalidating the backend session
+    //    (must happen while the access token is still valid)
+    await DeviceService.instance.onBeforeLogout();
+
+    // 2. Call the backend to invalidate the refresh token
+    await _authRepository.logout();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(isLoggedInKey);
+      await prefs.remove(userKey);
+    } catch (_) {}
+
+    state = const AuthState(user: null, isLoggedIn: false, isLoading: false);
+  }
+}
+
+final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((
+  ref,
+) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return AuthNotifier(authRepository);
+});

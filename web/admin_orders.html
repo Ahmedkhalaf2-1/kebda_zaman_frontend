@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Kebda Zaman | Order Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface-bright": "#faf9f5",
+                "secondary": "#5f5e5f",
+                "primary": "#ab3500",
+                "inverse-on-surface": "#f2f1ed",
+                "surface-container-low": "#f4f4f0",
+                "secondary-container": "#e2dfe0",
+                "on-surface-variant": "#594139",
+                "on-tertiary-fixed": "#002204",
+                "on-surface": "#1b1c1a",
+                "surface-container-highest": "#e3e2df",
+                "on-secondary-fixed": "#1b1b1c",
+                "surface": "#faf9f5",
+                "surface-tint": "#ab3500",
+                "tertiary-fixed-dim": "#78dc77",
+                "on-tertiary-fixed-variant": "#005313",
+                "surface-variant": "#e3e2df",
+                "on-secondary-fixed-variant": "#474647",
+                "primary-fixed": "#ffdbd0",
+                "on-secondary-container": "#636263",
+                "primary-container": "#ff6b35",
+                "outline": "#8d7168",
+                "on-primary-fixed": "#390c00",
+                "outline-variant": "#e1bfb5",
+                "secondary-fixed": "#e5e2e3",
+                "tertiary": "#006e1c",
+                "surface-dim": "#dbdad6",
+                "inverse-primary": "#ffb59d",
+                "tertiary-fixed": "#94f990",
+                "inverse-surface": "#2f312e",
+                "primary-fixed-dim": "#ffb59d",
+                "on-error": "#ffffff",
+                "error": "#ba1a1a",
+                "tertiary-container": "#4aad4e",
+                "secondary-fixed-dim": "#c8c6c7",
+                "surface-container-high": "#e9e8e4",
+                "on-secondary": "#ffffff",
+                "on-primary": "#ffffff",
+                "on-background": "#1b1c1a",
+                "surface-container": "#efeeea",
+                "on-tertiary": "#ffffff",
+                "surface-container-lowest": "#ffffff",
+                "background": "#faf9f5",
+                "on-primary-fixed-variant": "#832600",
+                "on-error-container": "#93000a",
+                "on-tertiary-container": "#003a0b",
+                "on-primary-container": "#5f1900",
+                "error-container": "#ffdad6"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "md": "16px",
+                "sm": "8px",
+                "gutter": "16px",
+                "container-padding": "20px",
+                "lg": "24px",
+                "base": "4px",
+                "xxl": "48px",
+                "xs": "4px",
+                "xl": "32px"
+            },
+            "fontFamily": {
+                "body-sm": ["Inter"],
+                "h2": ["Montserrat"],
+                "label-md": ["Inter"],
+                "h1": ["Montserrat"],
+                "display": ["Montserrat"],
+                "display-mobile": ["Montserrat"],
+                "caption": ["Inter"],
+                "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "h2": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                "h1": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "display": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "display-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                "caption": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #faf9f5;
+            -webkit-tap-highlight-color: transparent;
+            min-height: max(884px, 100dvh);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .order-card-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="font-body-lg text-on-surface">
+<!-- Top AppBar -->
+<header class="bg-surface-bright dark:bg-surface-dim shadow-sm docked full-width fixed top-0 left-0 right-0 z-50">
+<div class="flex justify-between items-center px-container-padding h-16 w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-sm">
+<span class="material-symbols-outlined text-xl">restaurant</span>
+</div>
+<h1 class="font-h1 text-h1-mobile font-bold text-primary dark:text-primary-fixed-dim">Kebda Zaman</h1>
+</div>
+<button class="transition-all duration-200 ease-in-out active:scale-95 p-2 rounded-full hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+</div>
+</header>
+<main class="pt-20 pb-24 px-container-padding min-h-screen">
+<!-- Segmented Control / Tabs -->
+<div class="sticky top-20 z-40 mb-md">
+<div class="bg-surface-container-low rounded-full p-1 flex items-center gap-1 shadow-sm border border-outline-variant/30">
+<button class="flex-1 py-2 rounded-full font-label-md text-label-md transition-all duration-200 bg-primary text-on-primary shadow-sm" id="tab-new" onclick="switchTab('new')">
+                    New
+                </button>
+<button class="flex-1 py-2 rounded-full font-label-md text-label-md transition-all duration-200 text-on-surface-variant hover:bg-surface-container-high" id="tab-active" onclick="switchTab('active')">
+                    Active
+                </button>
+<button class="flex-1 py-2 rounded-full font-label-md text-label-md transition-all duration-200 text-on-surface-variant hover:bg-surface-container-high" id="tab-history" onclick="switchTab('history')">
+                    History
+                </button>
+</div>
+</div>
+<!-- Order List Section -->
+<div class="space-y-md" id="order-container">
+<!-- Active Order Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant/20 order-card-shadow transition-transform active:scale-[0.98]">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<span class="font-label-md text-primary bg-primary/10 px-2 py-0.5 rounded text-xs">#ORD-2489</span>
+<h3 class="font-h2 text-h2 mt-1">Sara Mahmoud</h3>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-bold text-on-surface text-lg">450.00 EGP</span>
+<span class="text-xs text-secondary font-medium">3 items • 12:45 PM</span>
+</div>
+</div>
+<div class="flex gap-3 mb-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=200&q=80"/>
+</div>
+<div class="flex-1">
+<p class="text-body-sm text-on-surface-variant line-clamp-1">Spicy Tuna Tartare, Saffron Risotto, Sparkling Water</p>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<div class="flex-1 bg-surface-container-low rounded-lg px-3 py-2 border border-outline-variant/10">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span class="text-xs font-bold text-tertiary">Accepted</span>
+</div>
+</div>
+<button class="flex-[2] bg-primary text-on-primary font-label-md text-label-md py-3 px-4 rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                        Start Preparing
+                    </button>
+</div>
+</div>
+<!-- Active Order Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant/20 order-card-shadow transition-transform active:scale-[0.98]">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<span class="font-label-md text-primary bg-primary/10 px-2 py-0.5 rounded text-xs">#ORD-2490</span>
+<h3 class="font-h2 text-h2 mt-1">Omar Khaled</h3>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-bold text-on-surface text-lg">890.00 EGP</span>
+<span class="text-xs text-secondary font-medium">5 items • 12:52 PM</span>
+</div>
+</div>
+<div class="flex gap-3 mb-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=200&q=80"/>
+</div>
+<div class="flex-1">
+<p class="text-body-sm text-on-surface-variant line-clamp-1">Prime Ribeye Steak, Truffle Mash, Red Wine Jus...</p>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<div class="flex-1 bg-surface-container-low rounded-lg px-3 py-2 border border-outline-variant/10">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="text-xs font-bold text-on-primary-container">Preparing</span>
+</div>
+</div>
+<button class="flex-[2] bg-tertiary text-on-primary font-label-md text-label-md py-3 px-4 rounded-xl shadow-lg shadow-tertiary/20 active:scale-95 transition-transform">
+                        Mark Ready
+                    </button>
+</div>
+</div>
+<!-- Active Order Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant/20 order-card-shadow transition-transform active:scale-[0.98]">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<span class="font-label-md text-primary bg-primary/10 px-2 py-0.5 rounded text-xs">#ORD-2491</span>
+<h3 class="font-h2 text-h2 mt-1">Layla Hassan</h3>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-bold text-on-surface text-lg">310.00 EGP</span>
+<span class="text-xs text-secondary font-medium">2 items • 12:58 PM</span>
+</div>
+</div>
+<div class="flex gap-3 mb-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=200&q=80"/>
+</div>
+<div class="flex-1">
+<p class="text-body-sm text-on-surface-variant line-clamp-1">Garden Buddha Bowl, Green Detox Juice</p>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<div class="flex-1 bg-surface-container-low rounded-lg px-3 py-2 border border-outline-variant/10">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="text-xs font-bold text-error">New</span>
+</div>
+</div>
+<button class="flex-[2] bg-primary text-on-primary font-label-md text-label-md py-3 px-4 rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                        Accept Order
+                    </button>
+</div>
+</div>
+<!-- Active Order Card 4 -->
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant/20 order-card-shadow transition-transform active:scale-[0.98]">
+<div class="flex justify-between items-start mb-sm">
+<div>
+<span class="font-label-md text-primary bg-primary/10 px-2 py-0.5 rounded text-xs">#ORD-2485</span>
+<h3 class="font-h2 text-h2 mt-1">Karim Ahmed</h3>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-bold text-on-surface text-lg">1,250.00 EGP</span>
+<span class="text-xs text-secondary font-medium">8 items • 12:30 PM</span>
+</div>
+</div>
+<div class="flex gap-3 mb-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=200&q=80"/>
+</div>
+<div class="flex-1">
+<p class="text-body-sm text-on-surface-variant line-clamp-1">Grand Mezza Platter, Seafood Paella, Mixed Grill...</p>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<div class="flex-1 bg-surface-container-low rounded-lg px-3 py-2 border border-outline-variant/10">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-xs font-bold text-tertiary">Ready</span>
+</div>
+</div>
+<button class="flex-[2] bg-secondary text-on-secondary font-label-md text-label-md py-3 px-4 rounded-xl shadow-lg shadow-secondary/20 active:scale-95 transition-transform">
+                        Mark Out For Delivery
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface dark:bg-inverse-surface border-t border-outline-variant dark:border-outline shadow-[0_-4px_20px_rgba(0,0,0,0.05)] rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high px-3 py-1">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md mt-1">Dashboard</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim bg-primary-container/10 rounded-xl px-4 py-1.5 transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-label-md text-label-md mt-1 font-bold">Orders</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high px-3 py-1">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span class="font-label-md text-label-md mt-1">Menu</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-high px-3 py-1">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md mt-1">Settings</span>
+</button>
+</nav>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-6 w-14 h-14 bg-primary-container text-on-primary-container rounded-full shadow-2xl flex items-center justify-center active:scale-90 transition-transform duration-150 z-40">
+<span class="material-symbols-outlined text-2xl">add</span>
+</button>
+<script>
+        function switchTab(tabId) {
+            const tabs = ['new', 'active', 'history'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tabId) {
+                    btn.classList.remove('text-on-surface-variant', 'hover:bg-surface-container-high');
+                    btn.classList.add('bg-primary', 'text-on-primary', 'shadow-sm');
+                } else {
+                    btn.classList.add('text-on-surface-variant', 'hover:bg-surface-container-high');
+                    btn.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm');
+                }
+            });
+            const container = document.getElementById('order-container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                container.style.transition = 'all 0.3s ease-out';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        }
+    </script>
+</body>
+</html>

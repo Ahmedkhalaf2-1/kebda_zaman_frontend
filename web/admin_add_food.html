@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Kebda Zaman - Add Food Item</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#002204",
+                    "surface-container-low": "#f4f4f0",
+                    "on-surface": "#1b1c1a",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "inverse-on-surface": "#f2f1ed",
+                    "surface-container-highest": "#e3e2df",
+                    "secondary-fixed-dim": "#c8c6c7",
+                    "on-primary-container": "#5f1900",
+                    "on-secondary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed-dim": "#78dc77",
+                    "surface-container-high": "#e9e8e4",
+                    "inverse-surface": "#2f312e",
+                    "surface-dim": "#dbdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed": "#e5e2e3",
+                    "secondary": "#5f5e5f",
+                    "on-background": "#1b1c1a",
+                    "primary-fixed-dim": "#ffb59d",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#e2dfe0",
+                    "on-tertiary-container": "#003a0b",
+                    "outline": "#8d7168",
+                    "surface-bright": "#faf9f5",
+                    "surface-tint": "#ab3500",
+                    "primary-fixed": "#ffdbd0",
+                    "primary": "#ab3500",
+                    "outline-variant": "#e1bfb5",
+                    "on-primary": "#ffffff",
+                    "background": "#faf9f5",
+                    "tertiary-fixed": "#94f990",
+                    "primary-container": "#ff6b35",
+                    "tertiary-container": "#4aad4e",
+                    "inverse-primary": "#ffb59d",
+                    "on-secondary-container": "#636263",
+                    "on-primary-fixed-variant": "#832600",
+                    "surface-container": "#efeeea",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#006e1c",
+                    "on-tertiary-fixed-variant": "#005313",
+                    "surface-variant": "#e3e2df",
+                    "on-secondary-fixed": "#1b1b1c",
+                    "on-secondary-fixed-variant": "#474647",
+                    "on-primary-fixed": "#390c00",
+                    "surface": "#faf9f5",
+                    "on-surface-variant": "#594139"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-padding": "20px",
+                    "md": "16px",
+                    "xs": "4px",
+                    "sm": "8px",
+                    "xxl": "48px",
+                    "lg": "24px",
+                    "gutter": "16px",
+                    "base": "4px",
+                    "xl": "32px"
+            },
+            "fontFamily": {
+                    "display": ["Montserrat"],
+                    "label-md": ["Inter"],
+                    "h1": ["Montserrat"],
+                    "caption": ["Inter"],
+                    "h2": ["Montserrat"],
+                    "display-mobile": ["Montserrat"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "display": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "h1": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "caption": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "h2": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #FDFCF8;
+            color: #1b1c1a;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .form-card {
+            box-shadow: 0 4px 20px rgba(171, 53, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="font-body-lg text-body-lg min-h-screen pb-32">
+<header class="bg-surface-bright sticky top-0 z-50 flex justify-between items-center px-container-padding h-16 w-full shadow-sm">
+<div class="flex items-center gap-4">
+<a class="text-primary" href="admin_menu.html">
+<span class="material-symbols-outlined text-[28px]">arrow_back</span>
+</a>
+<h1 class="font-h1 text-h1-mobile font-bold text-primary">Add New Item</h1>
+</div>
+</header>
+<main class="max-w-3xl mx-auto px-container-padding pt-lg space-y-lg">
+<section class="relative group">
+<div class="w-full h-44 rounded-xl border-2 border-dashed border-outline-variant bg-surface-container-low flex flex-col items-center justify-center p-md">
+<span class="material-symbols-outlined text-primary text-[40px] mb-sm">cloud_upload</span>
+<p class="font-h2 text-h2 text-on-surface">Upload Food Image</p>
+<p class="font-caption text-caption text-on-surface-variant mt-xs">High-resolution JPG or PNG</p>
+</div>
+</section>
+<section class="bg-surface-container-lowest p-lg rounded-xl form-card space-y-md">
+<div class="flex items-center gap-2 mb-sm">
+<span class="material-symbols-outlined text-primary">info</span>
+<h3 class="font-h2 text-h2 text-on-surface">Basic Information</h3>
+</div>
+<div class="space-y-gutter">
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Product Name</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg p-md font-body-lg" placeholder="e.g., Kebda Iskandarani Sandwich" type="text"/>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Description</label>
+<textarea class="w-full bg-surface-bright border border-outline-variant rounded-lg p-md font-body-lg" placeholder="Describe the ingredients..." rows="3"></textarea>
+</div>
+<div class="grid grid-cols-2 gap-gutter">
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Category</label>
+<select class="w-full bg-surface-bright border border-outline-variant rounded-lg p-md font-body-lg">
+<option>Main Course</option>
+<option>Appetizers</option>
+<option>Desserts</option>
+<option>Beverages</option>
+</select>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-label-md text-on-surface-variant">Base Price (EGP)</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg p-md font-body-lg" placeholder="0.00" type="number"/>
+</div>
+</div>
+</div>
+</section>
+</main>
+<footer class="fixed bottom-0 left-0 right-0 p-container-padding bg-surface-container-lowest/80 backdrop-blur-md shadow-[0_-8px_32px_rgba(0,0,0,0.08)] z-[60]">
+<div class="max-w-3xl mx-auto flex gap-md">
+<a class="flex-[1] text-center py-md bg-surface-container-high text-secondary rounded-xl font-bold" href="admin_menu.html">Discard</a>
+<button class="flex-[2] py-md bg-primary text-on-primary rounded-full font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">save</span>
+Save Product
+</button>
+</div>
+</footer>
+</body>
+</html>

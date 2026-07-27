@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "168591231387",
+    "project_id": "keebda-zaman",
+    "storage_bucket": "keebda-zaman.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168591231387:android:6b974a472375be7942793e",
+        "android_client_info": {
+          "package_name": "com.example.kebda_zaman"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDit0ZuQAPZiPvgbtSqdMp-QVltOmGRktc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

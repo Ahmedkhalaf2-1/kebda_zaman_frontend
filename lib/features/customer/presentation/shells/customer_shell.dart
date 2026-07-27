@@ -1,0 +1,272 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:kebda_zaman/core/responsive/responsive_breakpoints.dart';
+import '../notifiers/cart_notifier.dart';
+import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+
+class CustomerShell extends ConsumerWidget {
+  final StatefulNavigationShell navigationShell;
+
+  const CustomerShell({super.key, required this.navigationShell});
+
+  static const Color primaryColor = KZ.primary;
+  static const Color unselectedColor = Color(0xFF6E6E6E);
+  static const Color backgroundColor = KZ.surface;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cartAsync = ref.watch(cartProvider);
+    final itemCount =
+        cartAsync.valueOrNull?.items.fold<int>(
+          0,
+          (sum, i) => sum + i.quantity,
+        ) ??
+        0;
+    final currentIndex = navigationShell.currentIndex;
+    final isDesktop = context.isDesktop;
+
+    if (isDesktop) {
+      return Scaffold(
+        backgroundColor: backgroundColor,
+        body: Row(
+          children: [
+            NavigationRail(
+              selectedIndex: currentIndex,
+              onDestinationSelected: (index) {
+                navigationShell.goBranch(
+                  index,
+                  initialLocation: index == currentIndex,
+                );
+              },
+              backgroundColor: backgroundColor,
+              indicatorColor: primaryColor.withValues(alpha: 0.15),
+              selectedIconTheme: const IconThemeData(
+                color: primaryColor,
+                size: 26,
+              ),
+              unselectedIconTheme: const IconThemeData(
+                color: unselectedColor,
+                size: 24,
+              ),
+              selectedLabelTextStyle: const TextStyle(
+                color: primaryColor,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                fontSize: 13,
+              ),
+              unselectedLabelTextStyle: const TextStyle(
+                color: unselectedColor,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Montserrat',
+                fontSize: 13,
+              ),
+              labelType: NavigationRailLabelType.all,
+              leading: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: const BoxDecoration(
+                        color: primaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.restaurant_menu,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Kebda Zaman',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              destinations: [
+                NavigationRailDestination(
+                  icon: const Icon(Icons.home_outlined),
+                  selectedIcon: const Icon(Icons.home),
+                  label: Text('nav.home'.tr()),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.flatware_outlined),
+                  selectedIcon: const Icon(Icons.flatware),
+                  label: Text('nav.menu'.tr()),
+                ),
+                NavigationRailDestination(
+                  icon: _buildCartIcon(itemCount, isSelected: false),
+                  selectedIcon: _buildCartIcon(itemCount, isSelected: true),
+                  label: Text('nav.cart'.tr()),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  selectedIcon: const Icon(Icons.receipt_long),
+                  label: Text('nav.orders'.tr()),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.person_outline),
+                  selectedIcon: const Icon(Icons.person),
+                  label: Text('nav.profile'.tr()),
+                ),
+              ],
+            ),
+            const VerticalDivider(
+              thickness: 1,
+              width: 1,
+              color: Color(0xFFECE7E1),
+            ),
+            Expanded(child: navigationShell),
+          ],
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      body: navigationShell,
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: backgroundColor,
+          border: Border(top: BorderSide(color: Color(0xFFECE7E1), width: 1.0)),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 10,
+              offset: Offset(0, -2),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: currentIndex,
+          onTap: (index) {
+            navigationShell.goBranch(
+              index,
+              initialLocation: index == currentIndex,
+            );
+          },
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: backgroundColor,
+          selectedItemColor: primaryColor,
+          unselectedItemColor: unselectedColor,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontFamily: 'Montserrat',
+            height: 1.4,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Montserrat',
+            height: 1.4,
+          ),
+          elevation: 0,
+          items: [
+            BottomNavigationBarItem(
+              icon: const Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.home_outlined, size: 24),
+              ),
+              activeIcon: const Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.home, size: 24),
+              ),
+              label: 'nav.home'.tr(),
+            ),
+            BottomNavigationBarItem(
+              icon: const Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.flatware_outlined, size: 24),
+              ),
+              activeIcon: const Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.flatware, size: 24),
+              ),
+              label: 'nav.menu'.tr(),
+            ),
+            BottomNavigationBarItem(
+              icon: Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: _buildCartIcon(itemCount, isSelected: false),
+              ),
+              activeIcon: Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: _buildCartIcon(itemCount, isSelected: true),
+              ),
+              label: 'nav.cart'.tr(),
+            ),
+            BottomNavigationBarItem(
+              icon: const Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.receipt_long_outlined, size: 24),
+              ),
+              activeIcon: const Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.receipt_long, size: 24),
+              ),
+              label: 'nav.orders'.tr(),
+            ),
+            BottomNavigationBarItem(
+              icon: const Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.person_outline, size: 24),
+              ),
+              activeIcon: const Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Icon(Icons.person, size: 24),
+              ),
+              label: 'nav.profile'.tr(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCartIcon(int count, {required bool isSelected}) {
+    final iconColor = isSelected ? primaryColor : unselectedColor;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Icon(
+          isSelected ? Icons.shopping_cart : Icons.shopping_cart_outlined,
+          size: 24,
+          color: iconColor,
+        ),
+        if (count > 0)
+          Positioned(
+            top: -5,
+            right: -8,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: const BoxDecoration(
+                color: primaryColor,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
+              child: Center(
+                child: Text(
+                  '$count',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    height: 1.0,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}

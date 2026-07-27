@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "kebda_zaman (Web)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--web-port=8080"
+      ]
+    },
+    {
+      "name": "kebda_zaman (Mobile)",
+      "request": "launch",
+      "type": "dart"
+    }
+  ]
+}

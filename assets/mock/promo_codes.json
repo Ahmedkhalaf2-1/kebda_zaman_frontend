@@ -1,0 +1,26 @@
+[
+  {
+    "id": "promo_1",
+    "code": "WELCOME20",
+    "discountType": "percentage",
+    "value": 20.0,
+    "minOrderValue": 50.0,
+    "startDate": "2026-01-01T00:00:00.000",
+    "endDate": "2026-12-31T23:59:59.000",
+    "isActive": true,
+    "usageLimit": 1000,
+    "perUserLimit": 1
+  },
+  {
+    "id": "promo_2",
+    "code": "KEBDA10",
+    "discountType": "fixed",
+    "value": 10.0,
+    "minOrderValue": 80.0,
+    "startDate": "2026-01-01T00:00:00.000",
+    "endDate": "2026-12-31T23:59:59.000",
+    "isActive": true,
+    "usageLimit": null,
+    "perUserLimit": 3
+  }
+]
