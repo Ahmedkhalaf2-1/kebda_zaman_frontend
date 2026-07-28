@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 
 class OrdersData {
@@ -16,11 +17,14 @@ class OrdersNotifier extends AutoDisposeAsyncNotifier<OrdersData> {
   }
 
   Future<OrdersData> _fetchOrders() async {
+    // Guard: do not call GET /orders while unauthenticated.
+    final authState = ref.read(authNotifierProvider);
+    if (!authState.isLoggedIn) {
+      return OrdersData(activeOrders: [], previousOrders: []);
+    }
+
     final repo = ref.read(orderRepositoryProvider);
-
-    // In a real app we get current user id, for fake we just pass null to get customer orders
     final result = await repo.getOrders();
-
     final allOrders = result.fold((f) => throw f, (data) => data);
 
     final active = allOrders

@@ -233,6 +233,48 @@ void main() {
         expect(stack.adapter.callCounts['/auth/refresh'], 1);
       },
     );
+
+    test('login 401 does not call /auth/refresh', () async {
+      const secureStorage = FlutterSecureStorage();
+      await secureStorage.write(
+        key: TokenRefreshCoordinator.refreshTokenKey,
+        value: 'valid-refresh-token',
+      );
+
+      final stack = buildStack({
+        '/auth/login': [
+          _statusError(401, {'code': 'INVALID_CREDENTIALS'}),
+        ],
+      });
+
+      await expectLater(
+        stack.dio.post('/auth/login', data: {'email': 'a', 'password': 'b'}),
+        throwsA(isA<DioException>()),
+      );
+      expect(stack.adapter.callCounts['/auth/refresh'], isNull);
+      expect(stack.adapter.callCounts['/auth/login'], 1);
+    });
+
+    test('admin login 401 does not call /auth/refresh', () async {
+      const secureStorage = FlutterSecureStorage();
+      await secureStorage.write(
+        key: TokenRefreshCoordinator.refreshTokenKey,
+        value: 'valid-refresh-token',
+      );
+
+      final stack = buildStack({
+        '/admin/auth/login': [
+          _statusError(401, {'code': 'INVALID_CREDENTIALS'}),
+        ],
+      });
+
+      await expectLater(
+        stack.dio.post('/admin/auth/login', data: {'email': 'admin', 'password': 'b'}),
+        throwsA(isA<DioException>()),
+      );
+      expect(stack.adapter.callCounts['/auth/refresh'], isNull);
+      expect(stack.adapter.callCounts['/admin/auth/login'], 1);
+    });
   });
 
   group('RetryInterceptor', () {
@@ -344,5 +386,39 @@ void main() {
         expect(stack.adapter.callCounts['/orders'], 1); // exactly 1 attempt
       },
     );
+
+    test('POST /checkout without Idempotency-Key header never retries', () async {
+      final stack = buildRetryStack({
+        '/checkout': [
+          _statusError(503, {'error': 'Service Unavailable'}),
+          _jsonSuccess({'id': 'ord-123'}),
+        ],
+      });
+
+      await expectLater(
+        stack.dio.post('/checkout', data: {'total': 100}),
+        throwsA(isA<DioException>()),
+      );
+      expect(stack.adapter.callCounts['/checkout'], 1);
+    });
+
+    test('POST /checkout with an empty Idempotency-Key header never retries', () async {
+      final stack = buildRetryStack({
+        '/checkout': [
+          _statusError(503, {'error': 'Service Unavailable'}),
+          _jsonSuccess({'id': 'ord-123'}),
+        ],
+      });
+
+      await expectLater(
+        stack.dio.post(
+          '/checkout',
+          data: {'total': 100},
+          options: Options(headers: {'Idempotency-Key': '   '}),
+        ),
+        throwsA(isA<DioException>()),
+      );
+      expect(stack.adapter.callCounts['/checkout'], 1);
+    });
   });
 }

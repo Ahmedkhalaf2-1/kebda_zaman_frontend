@@ -14,16 +14,17 @@ class User with _$User {
     @Default([]) List<String> favoriteItemIds,
     String? loyaltyAccountId,
     String? role,
+    // Backend-authoritative guest flag — avoids the fragile name/email heuristic.
+    @Default(false) bool isGuest,
     required DateTime createdAt,
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 }
 
+/// Prefer [User.isGuest] for all eligibility logic.
+/// This extension is kept only for callers that still use it externally;
+/// it now simply delegates to the backend field.
 extension UserGuestExtension on User {
-  bool get isGuest =>
-      email == null ||
-      email!.isEmpty ||
-      email!.toLowerCase().contains('guest') ||
-      name.toLowerCase().contains('guest');
+  bool get isGuestUser => isGuest;
 }

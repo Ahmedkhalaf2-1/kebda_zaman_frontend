@@ -47,10 +47,22 @@ class AuthInterceptor extends Interceptor {
 
     // 2. Automatic 401 -> refresh token (single-flight) -> retry original request ONCE
     if (err.response?.statusCode == 401) {
-      // Never attempt to refresh for the refresh endpoint's own failures —
-      // that would recurse forever.
-      if (err.requestOptions.path.contains('/auth/refresh')) {
-        return handler.next(err);
+      // Never attempt to refresh for public auth endpoints or the refresh
+      // endpoint itself.
+      const noRefreshPaths = {
+        '/auth/login',
+        '/auth/register',
+        '/auth/signup',
+        '/auth/guest',
+        '/admin/auth/login',
+        '/auth/admin/login',
+        '/auth/refresh',
+        '/auth/logout',
+      };
+      for (final blocked in noRefreshPaths) {
+        if (err.requestOptions.path.contains(blocked)) {
+          return handler.next(err);
+        }
       }
 
       // Prevent infinite retry loops: a request is only ever retried once
@@ -129,9 +141,21 @@ class RetryInterceptor extends Interceptor {
       return false;
     }
 
-    // 3. Checkout is the only approved mutation for automatic retry.
-    //    The repository layer is responsible for the stable Idempotency-Key.
-    if (method == 'POST' && path == _checkoutPath) return false;
+    // 3. Checkout is the only approved mutation for automatic retry,
+    //    and ONLY when a non-empty Idempotency-Key header is present.
+    if (method == 'POST' && path == _checkoutPath) {
+      String? idempotencyKey;
+      for (final entry in options.headers.entries) {
+        if (entry.key.toLowerCase() == 'idempotency-key') {
+          idempotencyKey = entry.value?.toString();
+          break;
+        }
+      }
+      if (idempotencyKey != null && idempotencyKey.trim().isNotEmpty) {
+        return false;
+      }
+      return true;
+    }
 
     // 4. Every other mutation is unsafe to retry automatically.
     return true;

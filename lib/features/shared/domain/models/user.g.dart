@@ -23,6 +23,7 @@ _$UserImpl _$$UserImplFromJson(Map<String, dynamic> json) => _$UserImpl(
       const [],
   loyaltyAccountId: json['loyaltyAccountId'] as String?,
   role: json['role'] as String?,
+  isGuest: json['isGuest'] as bool? ?? false,
   createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
@@ -36,5 +37,6 @@ Map<String, dynamic> _$$UserImplToJson(_$UserImpl instance) =>
       'favoriteItemIds': instance.favoriteItemIds,
       'loyaltyAccountId': instance.loyaltyAccountId,
       'role': instance.role,
+      'isGuest': instance.isGuest,
       'createdAt': instance.createdAt.toIso8601String(),
     };

@@ -29,6 +29,7 @@ mixin _$User {
   List<String> get favoriteItemIds => throw _privateConstructorUsedError;
   String? get loyaltyAccountId => throw _privateConstructorUsedError;
   String? get role => throw _privateConstructorUsedError;
+  bool get isGuest => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this User to a JSON map.
@@ -54,6 +55,7 @@ abstract class $UserCopyWith<$Res> {
     List<String> favoriteItemIds,
     String? loyaltyAccountId,
     String? role,
+    bool isGuest,
     DateTime createdAt,
   });
 }
@@ -81,6 +83,7 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? favoriteItemIds = null,
     Object? loyaltyAccountId = freezed,
     Object? role = freezed,
+    Object? isGuest = null,
     Object? createdAt = null,
   }) {
     return _then(
@@ -117,6 +120,10 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
                 ? _value.role
                 : role // ignore: cast_nullable_to_non_nullable
                       as String?,
+            isGuest: null == isGuest
+                ? _value.isGuest
+                : isGuest // ignore: cast_nullable_to_non_nullable
+                      as bool,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -144,6 +151,7 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
     List<String> favoriteItemIds,
     String? loyaltyAccountId,
     String? role,
+    bool isGuest,
     DateTime createdAt,
   });
 }
@@ -168,6 +176,7 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? favoriteItemIds = null,
     Object? loyaltyAccountId = freezed,
     Object? role = freezed,
+    Object? isGuest = null,
     Object? createdAt = null,
   }) {
     return _then(
@@ -204,6 +213,10 @@ class __$$UserImplCopyWithImpl<$Res>
             ? _value.role
             : role // ignore: cast_nullable_to_non_nullable
                   as String?,
+        isGuest: null == isGuest
+            ? _value.isGuest
+            : isGuest // ignore: cast_nullable_to_non_nullable
+                  as bool,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -225,6 +238,7 @@ class _$UserImpl implements _User {
     final List<String> favoriteItemIds = const [],
     this.loyaltyAccountId,
     this.role,
+    this.isGuest = false,
     required this.createdAt,
   }) : _addressIds = addressIds,
        _favoriteItemIds = favoriteItemIds;
@@ -263,11 +277,13 @@ class _$UserImpl implements _User {
   @override
   final String? role;
   @override
+  final bool isGuest;
+  @override
   final DateTime createdAt;
 
   @override
   String toString() {
-    return 'User(id: $id, phone: $phone, name: $name, email: $email, addressIds: $addressIds, favoriteItemIds: $favoriteItemIds, loyaltyAccountId: $loyaltyAccountId, role: $role, createdAt: $createdAt)';
+    return 'User(id: $id, phone: $phone, name: $name, email: $email, addressIds: $addressIds, favoriteItemIds: $favoriteItemIds, loyaltyAccountId: $loyaltyAccountId, role: $role, isGuest: $isGuest, createdAt: $createdAt)';
   }
 
   @override
@@ -290,6 +306,7 @@ class _$UserImpl implements _User {
             (identical(other.loyaltyAccountId, loyaltyAccountId) ||
                 other.loyaltyAccountId == loyaltyAccountId) &&
             (identical(other.role, role) || other.role == role) &&
+            (identical(other.isGuest, isGuest) || other.isGuest == isGuest) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -306,6 +323,7 @@ class _$UserImpl implements _User {
     const DeepCollectionEquality().hash(_favoriteItemIds),
     loyaltyAccountId,
     role,
+    isGuest,
     createdAt,
   );
 
@@ -333,6 +351,7 @@ abstract class _User implements User {
     final List<String> favoriteItemIds,
     final String? loyaltyAccountId,
     final String? role,
+    final bool isGuest,
     required final DateTime createdAt,
   }) = _$UserImpl;
 
@@ -354,6 +373,8 @@ abstract class _User implements User {
   String? get loyaltyAccountId;
   @override
   String? get role;
+  @override
+  bool get isGuest;
   @override
   DateTime get createdAt;
 
