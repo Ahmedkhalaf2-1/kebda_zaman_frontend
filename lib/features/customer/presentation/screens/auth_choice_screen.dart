@@ -172,7 +172,8 @@ class _KebdaLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = KZ.primary // #8c2b00
+      ..color = KZ
+          .primary // #8c2b00
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round

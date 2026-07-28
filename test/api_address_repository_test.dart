@@ -73,24 +73,27 @@ void main() {
       expect(apiJson['isDefault'], isTrue);
     });
 
-    test('FakeAddressRepository performs CRUD and maintains default state', () async {
-      final repo = FakeAddressRepository();
+    test(
+      'FakeAddressRepository performs CRUD and maintains default state',
+      () async {
+        final repo = FakeAddressRepository();
 
-      final listResult = await repo.getAddresses();
-      expect(listResult.isSuccess, isTrue);
-      expect(listResult.value.length, equals(2));
+        final listResult = await repo.getAddresses();
+        expect(listResult.isSuccess, isTrue);
+        expect(listResult.value.length, equals(2));
 
-      // Set default
-      final setDefaultRes = await repo.setDefaultAddress('addr-2');
-      expect(setDefaultRes.isSuccess, isTrue);
-      expect(setDefaultRes.value.isDefault, isTrue);
+        // Set default
+        final setDefaultRes = await repo.setDefaultAddress('addr-2');
+        expect(setDefaultRes.isSuccess, isTrue);
+        expect(setDefaultRes.value.isDefault, isTrue);
 
-      final updatedList = await repo.getAddresses();
-      final addr1 = updatedList.value.firstWhere((a) => a.id == 'addr-1');
-      final addr2 = updatedList.value.firstWhere((a) => a.id == 'addr-2');
+        final updatedList = await repo.getAddresses();
+        final addr1 = updatedList.value.firstWhere((a) => a.id == 'addr-1');
+        final addr2 = updatedList.value.firstWhere((a) => a.id == 'addr-2');
 
-      expect(addr1.isDefault, isFalse);
-      expect(addr2.isDefault, isTrue);
-    });
+        expect(addr1.isDefault, isFalse);
+        expect(addr2.isDefault, isTrue);
+      },
+    );
   });
 }

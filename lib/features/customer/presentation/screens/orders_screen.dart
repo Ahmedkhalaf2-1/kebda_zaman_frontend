@@ -84,10 +84,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: KZ.primaryFixed.withValues(alpha: 0.3),
-                          border: Border.all(
-                            color: KZ.primary,
-                            width: 2,
-                          ),
+                          border: Border.all(color: KZ.primary, width: 2),
                         ),
                         child: const Icon(
                           Icons.person_rounded,
@@ -181,10 +178,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
     return Center(
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 32,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -464,7 +458,10 @@ class _OrderCard extends ConsumerWidget {
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: KZ.outlineVariant, width: 2),
+                        side: const BorderSide(
+                          color: KZ.outlineVariant,
+                          width: 2,
+                        ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 18,
                           vertical: 10,

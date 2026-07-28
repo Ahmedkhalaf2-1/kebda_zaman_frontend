@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
+import 'package:kebda_zaman/core/api/api_exceptions.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 
 import '../notifiers/cart_notifier.dart';
@@ -373,7 +374,20 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                   );
                 } catch (e) {
                   if (!context.mounted) return;
-                  final errorMsg = e.toString().replaceAll('Exception: ', '');
+                  String errorMsg = 'cart.invalid_promo'.tr();
+                  if (e is ApiException) {
+                    if (e.code == 'PROMO_NOT_STARTED') {
+                      errorMsg = 'cart.promo_not_started'.tr();
+                    } else if (e.code == 'MIN_ORDER_NOT_MET') {
+                      errorMsg = 'cart.promo_min_order'.tr();
+                    } else if (e.code == 'INVALID_PROMO') {
+                      errorMsg = 'cart.invalid_promo'.tr();
+                    } else {
+                      errorMsg = e.message;
+                    }
+                  } else {
+                    errorMsg = e.toString().replaceAll('Exception: ', '');
+                  }
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(errorMsg),

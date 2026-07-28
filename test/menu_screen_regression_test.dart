@@ -145,7 +145,8 @@ void main() {
     final overrides = [
       ...baseOverrides,
       menuNotifierProvider.overrideWith(
-        () => _FixedMenuNotifier(MenuData(categories: const [], items: const [])),
+        () =>
+            _FixedMenuNotifier(MenuData(categories: const [], items: const [])),
       ),
     ];
 

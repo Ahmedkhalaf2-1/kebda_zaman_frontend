@@ -58,7 +58,9 @@ class OrderSuccessScreen extends StatelessWidget {
                     children: [
                       Text(
                         'app_name'.tr(),
-                        style: KZ.pageTitle.copyWith(color: OrderSuccessScreen.primaryColor),
+                        style: KZ.pageTitle.copyWith(
+                          color: OrderSuccessScreen.primaryColor,
+                        ),
                       ),
                       Semantics(
                         button: true,
@@ -135,14 +137,20 @@ class OrderSuccessScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          Text('order_success.title'.tr(), style: KZ.display.copyWith(fontSize: 28)),
+                          Text(
+                            'order_success.title'.tr(),
+                            style: KZ.display.copyWith(fontSize: 28),
+                          ),
                           const SizedBox(height: 8),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24),
                             child: Text(
                               'order_success.subtitle'.tr(),
                               textAlign: TextAlign.center,
-                              style: KZ.bodyLarge.copyWith(color: OrderSuccessScreen.secondaryColor, height: 1.4),
+                              style: KZ.bodyLarge.copyWith(
+                                color: OrderSuccessScreen.secondaryColor,
+                                height: 1.4,
+                              ),
                             ),
                           ),
                         ],
@@ -155,10 +163,18 @@ class OrderSuccessScreen extends StatelessWidget {
                           // Order Number Card
                           Expanded(
                             child: KZCard(
-                              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 20,
+                                horizontal: 16,
+                              ),
                               child: Column(
                                 children: [
-                                  Text('order_success.order_number_label'.tr(), style: KZ.statusLabel.copyWith(color: OrderSuccessScreen.secondaryColor)),
+                                  Text(
+                                    'order_success.order_number_label'.tr(),
+                                    style: KZ.statusLabel.copyWith(
+                                      color: OrderSuccessScreen.secondaryColor,
+                                    ),
+                                  ),
                                   const SizedBox(height: 6),
                                   Text(orderNumDisplay, style: KZ.priceLarge),
                                 ],
@@ -170,14 +186,24 @@ class OrderSuccessScreen extends StatelessWidget {
                           // Delivery Time Card
                           Expanded(
                             child: KZCard(
-                              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 20,
+                                horizontal: 16,
+                              ),
                               child: Column(
                                 children: [
-                                  Text('order_success.estimated_time_label'.tr(), style: KZ.statusLabel.copyWith(color: OrderSuccessScreen.secondaryColor)),
+                                  Text(
+                                    'order_success.estimated_time_label'.tr(),
+                                    style: KZ.statusLabel.copyWith(
+                                      color: OrderSuccessScreen.secondaryColor,
+                                    ),
+                                  ),
                                   const SizedBox(height: 6),
                                   Text(
                                     estimatedTimeDisplay,
-                                    style: KZ.priceLarge.copyWith(color: OrderSuccessScreen.tertiaryColor),
+                                    style: KZ.priceLarge.copyWith(
+                                      color: OrderSuccessScreen.tertiaryColor,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -316,9 +342,15 @@ class OrderSuccessScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     'order_success.earned_points_notice'.tr(
-                                      namedArgs: {'points': '${order.loyaltyPointsEarned}'},
+                                      namedArgs: {
+                                        'points':
+                                            '${order.loyaltyPointsEarned}',
+                                      },
                                     ),
-                                    style: KZ.bodyLarge.copyWith(fontWeight: FontWeight.w700, color: KZ.onSurface),
+                                    style: KZ.bodyLarge.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: KZ.onSurface,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(

@@ -68,10 +68,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: KZ.primaryFixed.withValues(alpha: 0.3),
-                        border: Border.all(
-                          color: KZ.primary,
-                          width: 2,
-                        ),
+                        border: Border.all(color: KZ.primary, width: 2),
                       ),
                       child: const Icon(
                         Icons.person_rounded,
@@ -131,11 +128,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF1B5E20), // brand-green
+                                    color: const Color(
+                                      0xFF1B5E20,
+                                    ), // brand-green
                                     borderRadius: BorderRadius.circular(999),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.15),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.15,
+                                        ),
                                         blurRadius: 8,
                                         offset: const Offset(0, 2),
                                       ),
@@ -301,7 +302,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             _buildSettingRow(
                               icon: Icons.edit_rounded,
                               title: 'profile.edit_profile'.tr(),
-                              onTap: () => _showEditProfileDialog(context, user!),
+                              onTap: () =>
+                                  _showEditProfileDialog(context, user!),
                             ),
                             _buildDivider(),
                           ],
@@ -343,7 +345,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Divider(
       height: 1,
       thickness: 1,
-      color: KZ.outlineVariant.withValues(alpha: 0.25), // divide-orange-50 equivalent
+      color: KZ.outlineVariant.withValues(
+        alpha: 0.25,
+      ), // divide-orange-50 equivalent
     );
   }
 
@@ -580,14 +584,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: KZ.primaryFixed.withValues(alpha: 0.45), // orange-100 tint
+                  color: KZ.primaryFixed.withValues(
+                    alpha: 0.45,
+                  ), // orange-100 tint
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  icon,
-                  color: KZ.primary,
-                  size: 24,
-                ),
+                child: Icon(icon, color: KZ.primary, size: 24),
               ),
               const SizedBox(height: 12),
               Text(
@@ -620,7 +622,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: KZ.primaryFixed.withValues(alpha: 0.35), // orange-50 tint
+                  color: KZ.primaryFixed.withValues(
+                    alpha: 0.35,
+                  ), // orange-50 tint
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -665,9 +669,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   behavior: HitTestBehavior.opaque,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: currentLang == 'ar' ? KZ.primary : Colors.transparent,
+                      color: currentLang == 'ar'
+                          ? KZ.primary
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(999),
                       boxShadow: currentLang == 'ar'
                           ? [
@@ -706,9 +715,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   behavior: HitTestBehavior.opaque,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: currentLang == 'en' ? KZ.primary : Colors.transparent,
+                      color: currentLang == 'en'
+                          ? KZ.primary
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(999),
                       boxShadow: currentLang == 'en'
                           ? [
@@ -811,11 +825,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       color: KZ.primaryFixed.withValues(alpha: 0.35),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
-                      icon,
-                      color: KZ.primary,
-                      size: 20,
-                    ),
+                    child: Icon(icon, color: KZ.primary, size: 20),
                   ),
                   const SizedBox(width: 14),
                   Text(
@@ -875,14 +885,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  authState.isLoggedIn ? Icons.logout_rounded : Icons.login_rounded,
+                  authState.isLoggedIn
+                      ? Icons.logout_rounded
+                      : Icons.login_rounded,
                   color: KZ.primary,
                   size: 20,
                 ),
               ),
               const SizedBox(width: 14),
               Text(
-                authState.isLoggedIn ? 'profile.logout'.tr() : 'auth.login_btn'.tr(),
+                authState.isLoggedIn
+                    ? 'profile.logout'.tr()
+                    : 'auth.login_btn'.tr(),
                 style: const TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 15,

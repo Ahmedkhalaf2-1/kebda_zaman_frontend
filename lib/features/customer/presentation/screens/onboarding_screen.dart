@@ -266,9 +266,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     color: KZ.primaryFixed, // #ffdbcf (peach pill background)
                     borderRadius: BorderRadius.circular(999),
                     border: Border.all(
-                      color: const Color(0xFFFFB59C).withValues(
-                        alpha: 0.6,
-                      ), // #ffb59c
+                      color: const Color(
+                        0xFFFFB59C,
+                      ).withValues(alpha: 0.6), // #ffb59c
                       width: 1.5,
                     ),
                     boxShadow: [

@@ -63,7 +63,9 @@ class KZEmptyState extends StatelessWidget {
               height: 110,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: KZ.primaryFixed.withValues(alpha: 0.4), // soft brand orange-100 tint
+                color: KZ.primaryFixed.withValues(
+                  alpha: 0.4,
+                ), // soft brand orange-100 tint
                 border: Border.all(
                   color: KZ.primary.withValues(alpha: 0.3),
                   width: 2,
@@ -80,7 +82,8 @@ class KZEmptyState extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: 52,
-                  color: KZ.primary, // #8c2b00 (our signature terracotta primary!)
+                  color:
+                      KZ.primary, // #8c2b00 (our signature terracotta primary!)
                 ),
               ),
             ),
@@ -122,7 +125,10 @@ class KZEmptyState extends StatelessWidget {
                   foregroundColor: Colors.white,
                   elevation: 6,
                   shadowColor: KZ.primary.withValues(alpha: 0.4),
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 14,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
@@ -219,7 +225,10 @@ class KZErrorState extends StatelessWidget {
                   foregroundColor: Colors.white,
                   elevation: 4,
                   shadowColor: KZ.primary.withValues(alpha: 0.3),
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
@@ -232,5 +241,3 @@ class KZErrorState extends StatelessWidget {
     );
   }
 }
-
-

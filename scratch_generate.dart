@@ -18,13 +18,15 @@ class ModifierOption {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'priceModifier': priceModifier,
-        'isDefault': isDefault,
-        'isAvailable': true,
-        'nestedModifierGroups': nestedModifierGroups.map((e) => e.toJson()).toList(),
-      };
+    'id': id,
+    'name': name,
+    'priceModifier': priceModifier,
+    'isDefault': isDefault,
+    'isAvailable': true,
+    'nestedModifierGroups': nestedModifierGroups
+        .map((e) => e.toJson())
+        .toList(),
+  };
 }
 
 class ModifierGroup {
@@ -47,14 +49,14 @@ class ModifierGroup {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'isRequired': isRequired,
-        'selectionType': selectionType,
-        'minSelections': minSelections,
-        'maxSelections': maxSelections,
-        'options': options.map((e) => e.toJson()).toList(),
-      };
+    'id': id,
+    'name': name,
+    'isRequired': isRequired,
+    'selectionType': selectionType,
+    'minSelections': minSelections,
+    'maxSelections': maxSelections,
+    'options': options.map((e) => e.toJson()).toList(),
+  };
 }
 
 void main() {
@@ -66,8 +68,17 @@ void main() {
     minSelections: 1,
     maxSelections: 1,
     options: [
-      ModifierOption(id: 'opt_drink_size_reg', name: 'Regular', priceModifier: 0.0, isDefault: true),
-      ModifierOption(id: 'opt_drink_size_lrg', name: 'Large Drink', priceModifier: 10.0),
+      ModifierOption(
+        id: 'opt_drink_size_reg',
+        name: 'Regular',
+        priceModifier: 0.0,
+        isDefault: true,
+      ),
+      ModifierOption(
+        id: 'opt_drink_size_lrg',
+        name: 'Large Drink',
+        priceModifier: 10.0,
+      ),
     ],
   );
   final doubleBurger = {
@@ -76,7 +87,8 @@ void main() {
     'name': 'Double Burger',
     'description': 'Two juicy beef patties with our signature sauce.',
     'basePrice': 120.0,
-    'imageUrl': 'https://placehold.co/400x300/e65100/ffffff.png?text=Double+Burger',
+    'imageUrl':
+        'https://placehold.co/400x300/e65100/ffffff.png?text=Double+Burger',
     'isAvailable': true,
     'isFeatured': true,
     'isBestSeller': true,
@@ -91,8 +103,17 @@ void main() {
         minSelections: 1,
         maxSelections: 1,
         options: [
-          ModifierOption(id: 'opt_size_reg', name: 'Regular', priceModifier: 0.0, isDefault: true),
-          ModifierOption(id: 'opt_size_lrg', name: 'Large', priceModifier: 30.0),
+          ModifierOption(
+            id: 'opt_size_reg',
+            name: 'Regular',
+            priceModifier: 0.0,
+            isDefault: true,
+          ),
+          ModifierOption(
+            id: 'opt_size_lrg',
+            name: 'Large',
+            priceModifier: 30.0,
+          ),
         ],
       ).toJson(),
       ModifierGroup(
@@ -116,8 +137,16 @@ void main() {
                 minSelections: 1,
                 maxSelections: 1,
                 options: [
-                  ModifierOption(id: 'opt_fries_reg', name: 'Regular Fries', isDefault: true),
-                  ModifierOption(id: 'opt_fries_lrg', name: 'Large Fries', priceModifier: 15.0),
+                  ModifierOption(
+                    id: 'opt_fries_reg',
+                    name: 'Regular Fries',
+                    isDefault: true,
+                  ),
+                  ModifierOption(
+                    id: 'opt_fries_lrg',
+                    name: 'Large Fries',
+                    priceModifier: 15.0,
+                  ),
                 ],
               ),
               ModifierGroup(
@@ -128,8 +157,17 @@ void main() {
                 minSelections: 1,
                 maxSelections: 1,
                 options: [
-                  ModifierOption(id: 'opt_drink_coke', name: 'Coca-Cola', isDefault: true, nestedModifierGroups: [drinkSizeGroup]),
-                  ModifierOption(id: 'opt_drink_sprite', name: 'Sprite', nestedModifierGroups: [drinkSizeGroup]),
+                  ModifierOption(
+                    id: 'opt_drink_coke',
+                    name: 'Coca-Cola',
+                    isDefault: true,
+                    nestedModifierGroups: [drinkSizeGroup],
+                  ),
+                  ModifierOption(
+                    id: 'opt_drink_sprite',
+                    name: 'Sprite',
+                    nestedModifierGroups: [drinkSizeGroup],
+                  ),
                 ],
               ),
             ],
@@ -144,8 +182,16 @@ void main() {
         minSelections: 0,
         maxSelections: 5,
         options: [
-          ModifierOption(id: 'opt_extra_cheese', name: 'Extra Cheese', priceModifier: 15.0),
-          ModifierOption(id: 'opt_extra_beef', name: 'Extra Beef', priceModifier: 50.0),
+          ModifierOption(
+            id: 'opt_extra_cheese',
+            name: 'Extra Cheese',
+            priceModifier: 15.0,
+          ),
+          ModifierOption(
+            id: 'opt_extra_beef',
+            name: 'Extra Beef',
+            priceModifier: 50.0,
+          ),
         ],
       ).toJson(),
       ModifierGroup(
@@ -156,12 +202,24 @@ void main() {
         minSelections: 0,
         maxSelections: 5,
         options: [
-          ModifierOption(id: 'opt_remove_onion', name: 'Onion', priceModifier: 0.0),
-          ModifierOption(id: 'opt_remove_pickles', name: 'Pickles', priceModifier: 0.0),
-          ModifierOption(id: 'opt_remove_tomato', name: 'Tomato', priceModifier: 0.0),
+          ModifierOption(
+            id: 'opt_remove_onion',
+            name: 'Onion',
+            priceModifier: 0.0,
+          ),
+          ModifierOption(
+            id: 'opt_remove_pickles',
+            name: 'Pickles',
+            priceModifier: 0.0,
+          ),
+          ModifierOption(
+            id: 'opt_remove_tomato',
+            name: 'Tomato',
+            priceModifier: 0.0,
+          ),
         ],
       ).toJson(),
-    ]
+    ],
   };
 
   final items = [
@@ -173,7 +231,8 @@ void main() {
       'name': 'Chicken Alfredo Pasta',
       'description': 'Creamy pasta with grilled chicken and mushrooms.',
       'basePrice': 95.0,
-      'imageUrl': 'https://placehold.co/400x300/ff6d00/ffffff.png?text=Chicken+Pasta',
+      'imageUrl':
+          'https://placehold.co/400x300/ff6d00/ffffff.png?text=Chicken+Pasta',
       'isAvailable': true,
       'isFeatured': false,
       'isBestSeller': true,
@@ -188,9 +247,17 @@ void main() {
           minSelections: 1,
           maxSelections: 1,
           options: [
-            ModifierOption(id: 'opt_pasta_reg', name: 'Regular', isDefault: true),
-            ModifierOption(id: 'opt_pasta_fam', name: 'Family Size', priceModifier: 70.0),
-          ]
+            ModifierOption(
+              id: 'opt_pasta_reg',
+              name: 'Regular',
+              isDefault: true,
+            ),
+            ModifierOption(
+              id: 'opt_pasta_fam',
+              name: 'Family Size',
+              priceModifier: 70.0,
+            ),
+          ],
         ).toJson(),
         ModifierGroup(
           id: 'grp_pasta_extras',
@@ -198,12 +265,24 @@ void main() {
           selectionType: 'MULTIPLE',
           maxSelections: 3,
           options: [
-            ModifierOption(id: 'opt_xtra_mush', name: 'Extra Mushrooms', priceModifier: 10.0),
-            ModifierOption(id: 'opt_xtra_chick', name: 'Extra Chicken', priceModifier: 30.0),
-            ModifierOption(id: 'opt_xtra_parm', name: 'Extra Parmesan', priceModifier: 15.0),
-          ]
-        ).toJson()
-      ]
+            ModifierOption(
+              id: 'opt_xtra_mush',
+              name: 'Extra Mushrooms',
+              priceModifier: 10.0,
+            ),
+            ModifierOption(
+              id: 'opt_xtra_chick',
+              name: 'Extra Chicken',
+              priceModifier: 30.0,
+            ),
+            ModifierOption(
+              id: 'opt_xtra_parm',
+              name: 'Extra Parmesan',
+              priceModifier: 15.0,
+            ),
+          ],
+        ).toJson(),
+      ],
     },
     {
       'id': 'item_dessert_1',
@@ -211,7 +290,8 @@ void main() {
       'name': 'Chocolate Molten Cake',
       'description': 'Warm chocolate cake with a gooey center.',
       'basePrice': 60.0,
-      'imageUrl': 'https://placehold.co/400x300/4e342e/ffffff.png?text=Molten+Cake',
+      'imageUrl':
+          'https://placehold.co/400x300/4e342e/ffffff.png?text=Molten+Cake',
       'isAvailable': true,
       'isFeatured': true,
       'isBestSeller': false,
@@ -224,12 +304,20 @@ void main() {
           selectionType: 'QUANTITY',
           maxSelections: 3,
           options: [
-            ModifierOption(id: 'opt_ic_vanilla', name: 'Vanilla Scoop', priceModifier: 15.0),
-            ModifierOption(id: 'opt_ic_choc', name: 'Chocolate Scoop', priceModifier: 15.0),
-          ]
-        ).toJson()
-      ]
-    }
+            ModifierOption(
+              id: 'opt_ic_vanilla',
+              name: 'Vanilla Scoop',
+              priceModifier: 15.0,
+            ),
+            ModifierOption(
+              id: 'opt_ic_choc',
+              name: 'Chocolate Scoop',
+              priceModifier: 15.0,
+            ),
+          ],
+        ).toJson(),
+      ],
+    },
   ];
 
   File('assets/mock/menu.json').writeAsStringSync(jsonEncode(items));

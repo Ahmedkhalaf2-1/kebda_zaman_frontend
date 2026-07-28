@@ -14,7 +14,8 @@ GoRouter _buildTestRouter() {
       GoRoute(path: '/orders', builder: (context, state) => _screen('orders')),
       GoRoute(
         path: '/orders/tracking/:id',
-        builder: (context, state) => _screen('order-tracking-${state.pathParameters['id']}'),
+        builder: (context, state) =>
+            _screen('order-tracking-${state.pathParameters['id']}'),
       ),
       GoRoute(
         path: '/admin/order-notifications',
@@ -22,7 +23,8 @@ GoRouter _buildTestRouter() {
       ),
       GoRoute(
         path: '/admin/orders/:id',
-        builder: (context, state) => _screen('admin-order-details-${state.pathParameters['id']}'),
+        builder: (context, state) =>
+            _screen('admin-order-details-${state.pathParameters['id']}'),
       ),
     ],
   );
@@ -68,7 +70,9 @@ void main() {
 
         // No router attached yet — must not throw, must buffer instead.
         expect(
-          () => NotificationNavigationService.instance.handleNotificationTap(payload),
+          () => NotificationNavigationService.instance.handleNotificationTap(
+            payload,
+          ),
           returnsNormally,
         );
 
@@ -79,7 +83,10 @@ void main() {
 
         NotificationNavigationService.instance.setRouter(router);
         await tester.pumpAndSettle();
-        expect(_screenFinder('admin-order-details-order-buffered'), findsOneWidget);
+        expect(
+          _screenFinder('admin-order-details-order-buffered'),
+          findsOneWidget,
+        );
 
         // A second router attach (mirrors KebdaZamanApp.build() re-running
         // on every rebuild) must NOT replay the stale buffered payload again.
@@ -93,55 +100,68 @@ void main() {
       },
     );
 
-    testWidgets('NEW_ORDER tap with a non-empty orderId opens Admin Order Details', (tester) async {
-      final router = _buildTestRouter();
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-      await tester.pumpAndSettle();
-      NotificationNavigationService.instance.setRouter(router);
+    testWidgets(
+      'NEW_ORDER tap with a non-empty orderId opens Admin Order Details',
+      (tester) async {
+        final router = _buildTestRouter();
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
+        NotificationNavigationService.instance.setRouter(router);
 
-      NotificationNavigationService.instance
-          .handleNotificationTap(_newOrderPayload(orderId: 'order-42'));
-      await tester.pumpAndSettle();
+        NotificationNavigationService.instance.handleNotificationTap(
+          _newOrderPayload(orderId: 'order-42'),
+        );
+        await tester.pumpAndSettle();
 
-      expect(_screenFinder('admin-order-details-order-42'), findsOneWidget);
-    });
+        expect(_screenFinder('admin-order-details-order-42'), findsOneWidget);
+      },
+    );
 
-    testWidgets('NEW_ORDER tap with a missing/empty orderId opens the Admin Notification Center',
-        (tester) async {
-      final router = _buildTestRouter();
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-      await tester.pumpAndSettle();
-      NotificationNavigationService.instance.setRouter(router);
+    testWidgets(
+      'NEW_ORDER tap with a missing/empty orderId opens the Admin Notification Center',
+      (tester) async {
+        final router = _buildTestRouter();
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
+        NotificationNavigationService.instance.setRouter(router);
 
-      NotificationNavigationService.instance.handleNotificationTap(_newOrderPayload());
-      await tester.pumpAndSettle();
+        NotificationNavigationService.instance.handleNotificationTap(
+          _newOrderPayload(),
+        );
+        await tester.pumpAndSettle();
 
-      expect(_screenFinder('admin-notification-center'), findsOneWidget);
-    });
+        expect(_screenFinder('admin-notification-center'), findsOneWidget);
+      },
+    );
 
-    testWidgets('a non-NEW_ORDER message never triggers the admin routing branch', (tester) async {
-      final router = _buildTestRouter();
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-      await tester.pumpAndSettle();
-      NotificationNavigationService.instance.setRouter(router);
+    testWidgets(
+      'a non-NEW_ORDER message never triggers the admin routing branch',
+      (tester) async {
+        final router = _buildTestRouter();
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
+        NotificationNavigationService.instance.setRouter(router);
 
-      final customerPayload = AppNotificationPayload(
-        id: 'n2',
-        type: NotificationType.orderCreated,
-        title: 'Order placed',
-        body: 'Your order was placed',
-        entityId: 'order-99',
-        timestamp: DateTime(2026, 7, 25),
-        rawData: {'type': 'order_created', 'entityId': 'order-99'},
-      );
+        final customerPayload = AppNotificationPayload(
+          id: 'n2',
+          type: NotificationType.orderCreated,
+          title: 'Order placed',
+          body: 'Your order was placed',
+          entityId: 'order-99',
+          timestamp: DateTime(2026, 7, 25),
+          rawData: {'type': 'order_created', 'entityId': 'order-99'},
+        );
 
-      NotificationNavigationService.instance.handleNotificationTap(customerPayload);
-      await tester.pumpAndSettle();
+        NotificationNavigationService.instance.handleNotificationTap(
+          customerPayload,
+        );
+        await tester.pumpAndSettle();
 
-      expect(_screenFinder('order-tracking-order-99'), findsOneWidget);
-      expect(_screenFinder('admin-notification-center'), findsNothing);
-      expect(_screenFinder('admin-order-details-order-99'), findsNothing);
-    });
+        expect(_screenFinder('order-tracking-order-99'), findsOneWidget);
+        expect(_screenFinder('admin-notification-center'), findsNothing);
+        expect(_screenFinder('admin-order-details-order-99'), findsNothing);
+      },
+    );
 
     testWidgets(
       'tapping a NEW_ORDER notification for the order already being viewed does nothing',
@@ -151,8 +171,9 @@ void main() {
         await tester.pumpAndSettle();
         NotificationNavigationService.instance.setRouter(router);
 
-        NotificationNavigationService.instance
-            .handleNotificationTap(_newOrderPayload(orderId: 'order-42'));
+        NotificationNavigationService.instance.handleNotificationTap(
+          _newOrderPayload(orderId: 'order-42'),
+        );
         await tester.pumpAndSettle();
         expect(_screenFinder('admin-order-details-order-42'), findsOneWidget);
         // Diagnostic: confirm the exact signal the dedup guard reads
@@ -165,8 +186,9 @@ void main() {
         // rejects with a duplicate-GlobalKey-style error — so this call must
         // not throw either.)
         expect(
-          () => NotificationNavigationService.instance
-              .handleNotificationTap(_newOrderPayload(orderId: 'order-42')),
+          () => NotificationNavigationService.instance.handleNotificationTap(
+            _newOrderPayload(orderId: 'order-42'),
+          ),
           returnsNormally,
         );
         await tester.pumpAndSettle();
@@ -183,13 +205,15 @@ void main() {
         await tester.pumpAndSettle();
         NotificationNavigationService.instance.setRouter(router);
 
-        NotificationNavigationService.instance
-            .handleNotificationTap(_newOrderPayload(orderId: 'order-42'));
+        NotificationNavigationService.instance.handleNotificationTap(
+          _newOrderPayload(orderId: 'order-42'),
+        );
         await tester.pumpAndSettle();
         expect(_screenFinder('admin-order-details-order-42'), findsOneWidget);
 
-        NotificationNavigationService.instance
-            .handleNotificationTap(_newOrderPayload(orderId: 'order-77'));
+        NotificationNavigationService.instance.handleNotificationTap(
+          _newOrderPayload(orderId: 'order-77'),
+        );
         await tester.pumpAndSettle();
 
         expect(_screenFinder('admin-order-details-order-77'), findsOneWidget);
@@ -208,8 +232,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(_screenFinder('admin-notification-center'), findsOneWidget);
 
-        NotificationNavigationService.instance
-            .handleNotificationTap(_newOrderPayload(orderId: 'order-5'));
+        NotificationNavigationService.instance.handleNotificationTap(
+          _newOrderPayload(orderId: 'order-5'),
+        );
         await tester.pumpAndSettle();
 
         expect(_screenFinder('admin-order-details-order-5'), findsOneWidget);

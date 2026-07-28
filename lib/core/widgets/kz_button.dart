@@ -88,7 +88,9 @@ class KZButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = _palette;
     final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(KZ.radiusFull), // 999px pill unified everywhere
+      borderRadius: BorderRadius.circular(
+        KZ.radiusFull,
+      ), // 999px pill unified everywhere
       side: palette.border != null
           ? BorderSide(
               color: _disabled

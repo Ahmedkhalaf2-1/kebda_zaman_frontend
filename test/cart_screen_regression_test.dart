@@ -9,24 +9,22 @@ import 'package:kebda_zaman/features/customer/presentation/screens/cart_screen.d
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/generated/codegen_loader.g.dart';
 
-CartItem _item(
-  String id, {
-  String? specialInstructions,
-  String? longName,
-}) => CartItem(
-  id: id,
-  menuItemId: 'mi_$id',
-  productName:
-      longName ?? 'Alexandrian Kebda Sandwich $id — Extra Long Product Name',
-  productImage: '',
-  basePrice: 45.5,
-  quantity: 2,
-  selectedOptions: const {},
-  extraQuantities: const {},
-  specialInstructions: specialInstructions ?? '',
-  unitPrice: 45.5,
-  lineTotal: 91.0,
-);
+CartItem _item(String id, {String? specialInstructions, String? longName}) =>
+    CartItem(
+      id: id,
+      menuItemId: 'mi_$id',
+      productName:
+          longName ??
+          'Alexandrian Kebda Sandwich $id — Extra Long Product Name',
+      productImage: '',
+      basePrice: 45.5,
+      quantity: 2,
+      selectedOptions: const {},
+      extraQuantities: const {},
+      specialInstructions: specialInstructions ?? '',
+      unitPrice: 45.5,
+      lineTotal: 91.0,
+    );
 
 Cart _cart({
   List<CartItem>? items,
@@ -35,7 +33,12 @@ Cart _cart({
   double taxTotal = 0,
 }) => Cart(
   id: 'cart1',
-  items: items ?? [_item('i1'), _item('i2', specialInstructions: 'No onions, extra spicy please')],
+  items:
+      items ??
+      [
+        _item('i1'),
+        _item('i2', specialInstructions: 'No onions, extra spicy please'),
+      ],
   promoCodeId: promoCodeId,
   deliveryFee: 20,
   subtotal: 182,
@@ -107,11 +110,7 @@ void main() {
         final overrides = [
           cartProvider.overrideWith(
             () => _FixedCartNotifier(
-              _cart(
-                promoCodeId: 'KEBDA20',
-                discountTotal: 15,
-                taxTotal: 8,
-              ),
+              _cart(promoCodeId: 'KEBDA20', discountTotal: 15, taxTotal: 8),
             ),
           ),
         ];
@@ -141,7 +140,9 @@ void main() {
   testWidgets('renders without exceptions: null cart', (tester) async {
     await setViewport(tester, const Size(375, 812));
 
-    final overrides = [cartProvider.overrideWith(() => _FixedCartNotifier(null))];
+    final overrides = [
+      cartProvider.overrideWith(() => _FixedCartNotifier(null)),
+    ];
 
     await _pump(tester, overrides);
     await tester.pumpAndSettle();
@@ -162,26 +163,25 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'expanding the promo code field renders without exceptions',
-    (tester) async {
-      await setViewport(tester, const Size(375, 812));
+  testWidgets('expanding the promo code field renders without exceptions', (
+    tester,
+  ) async {
+    await setViewport(tester, const Size(375, 812));
 
-      final overrides = [
-        cartProvider.overrideWith(() => _FixedCartNotifier(_cart())),
-      ];
+    final overrides = [
+      cartProvider.overrideWith(() => _FixedCartNotifier(_cart())),
+    ];
 
-      await _pump(tester, overrides);
-      await tester.pumpAndSettle();
+    await _pump(tester, overrides);
+    await tester.pumpAndSettle();
 
-      // Tap by icon, not text — translation keys don't resolve reliably in
-      // this test harness (a pre-existing, investigated limitation; see
-      // home_screen_regression_test.dart), so assert on structure instead.
-      await tester.tap(find.byIcon(Icons.sell_rounded));
-      await tester.pumpAndSettle();
+    // Tap by icon, not text — translation keys don't resolve reliably in
+    // this test harness (a pre-existing, investigated limitation; see
+    // home_screen_regression_test.dart), so assert on structure instead.
+    await tester.tap(find.byIcon(Icons.sell_rounded));
+    await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      expect(find.byType(TextField), findsOneWidget);
-    },
-  );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(TextField), findsOneWidget);
+  });
 }

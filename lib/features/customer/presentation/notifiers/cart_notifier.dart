@@ -3,6 +3,7 @@ import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/errors/result.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
+import 'package:kebda_zaman/core/api/api_exceptions.dart';
 
 class CartNotifier extends AutoDisposeAsyncNotifier<Cart?> {
   @override
@@ -76,14 +77,29 @@ class CartNotifier extends AutoDisposeAsyncNotifier<Cart?> {
     state = await AsyncValue.guard(_fetchCart);
   }
 
+  bool _isApplyingPromo = false;
+
   Future<void> applyPromoCode(String code) async {
+    if (_isApplyingPromo) return;
+    _isApplyingPromo = true;
+    
+    final previousState = state;
     state = const AsyncLoading<Cart?>().copyWithPrevious(state);
+    
     final repo = ref.read(cartRepositoryProvider);
     final result = await repo.applyPromoCode(code);
+    
+    _isApplyingPromo = false;
+    
     return result.fold((failure) {
-      AsyncValue.guard(_fetchCart).then((s) => state = s);
+      state = previousState;
+      if (failure.cause is ApiException) {
+        throw failure.cause as ApiException;
+      }
       throw Exception(failure.message);
-    }, (data) async => state = await AsyncValue.guard(_fetchCart));
+    }, (data) {
+      state = AsyncData(data);
+    });
   }
 
   Future<void> removePromoCode() async {

@@ -139,13 +139,15 @@ class ApiOrderRepository implements OrderRepository {
       yield currentOrder;
     }
 
-    while (currentOrder != null) {
-      if (currentOrder.status == OrderStatus.delivered ||
-          currentOrder.status == OrderStatus.cancelled) {
-        break; // Terminal state, stop polling
-      }
+    if (currentOrder?.status == OrderStatus.delivered ||
+        currentOrder?.status == OrderStatus.cancelled) {
+      return;
+    }
 
-      await Future.delayed(const Duration(seconds: 10));
+    int retryCount = 0;
+    const maxRetries = 3;
+
+    await for (final _ in Stream.periodic(const Duration(seconds: 10))) {
       try {
         final response = await _apiClient.dio.get('/orders/$id/status');
         final data = response.data;
@@ -170,19 +172,41 @@ class ApiOrderRepository implements OrderRepository {
           );
         }).toList();
 
-        currentOrder = currentOrder.copyWith(
+        currentOrder = currentOrder?.copyWith(
           status: status,
           statusHistory: statusHistory,
           estimatedTime: data['estimatedDeliveryTime']?.toString(),
         );
-        yield currentOrder;
+        retryCount = 0;
+        if (currentOrder != null) yield currentOrder;
+        
+        if (status == OrderStatus.delivered || status == OrderStatus.cancelled) {
+          break;
+        }
       } on DioException catch (e) {
-        if (e.error is ApiException) {
-          yield* Stream.error(
-            NetworkFailure((e.error as ApiException).message, e.error as ApiException),
-          );
+        final statusCode = e.response?.statusCode;
+        final apiError = e.error is ApiException ? e.error as ApiException : null;
+
+        if (statusCode == 404 || apiError?.code == 'ORDER_NOT_FOUND') {
+          yield* Stream.error(const NotFoundFailure('Order not found'));
+          break;
+        } else if (statusCode == 401 || statusCode == 403) {
+          yield* Stream.error(const AuthFailure('Unauthorized'));
+          break;
+        } else if (statusCode != null && statusCode >= 400 && statusCode < 500) {
+          yield* Stream.error(NetworkFailure(apiError?.message ?? 'Client error'));
+          break;
+        }
+
+        if (apiError != null) {
+          yield* Stream.error(NetworkFailure(apiError.message, apiError));
         } else {
           yield* Stream.error(const NetworkFailure('Network error'));
+        }
+
+        retryCount++;
+        if (retryCount >= maxRetries) {
+          break;
         }
       } catch (e) {
         yield* Stream.error(UnknownFailure(e.toString()));

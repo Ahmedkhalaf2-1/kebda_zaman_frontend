@@ -11,7 +11,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
-final orderTrackingProvider = StreamProvider.family<Order, String>((ref, id) {
+final orderTrackingProvider = StreamProvider.autoDispose.family<Order, String>((ref, id) {
   final repo = ref.read(orderRepositoryProvider);
   return repo.watchOrder(id);
 });
@@ -154,6 +154,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
               // Main Content Area
               Expanded(
                 child: streamAsync.when(
+                  skipError: true,
                   loading: () => const Center(
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
@@ -866,7 +867,9 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
         status: OrderStatus.outForDelivery,
         title: isPickup ? 'Ready for Pickup' : 'Out for Delivery',
         subtitle: 'Expected soon',
-        icon: isPickup ? Icons.storefront_rounded : Icons.delivery_dining_rounded,
+        icon: isPickup
+            ? Icons.storefront_rounded
+            : Icons.delivery_dining_rounded,
       ),
       _TrackingStepData(
         status: OrderStatus.delivered,
@@ -904,7 +907,9 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: OrderTrackingScreen.primaryColor.withValues(alpha: 0.25),
+                            color: OrderTrackingScreen.primaryColor.withValues(
+                              alpha: 0.25,
+                            ),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -926,7 +931,9 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: OrderTrackingScreen.primaryColor.withValues(alpha: 0.3),
+                          color: OrderTrackingScreen.primaryColor.withValues(
+                            alpha: 0.3,
+                          ),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
@@ -946,13 +953,16 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                       color: OrderTrackingScreen.surfaceContainerHighestColor,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: OrderTrackingScreen.outlineVariantColor.withValues(alpha: 0.5),
+                        color: OrderTrackingScreen.outlineVariantColor
+                            .withValues(alpha: 0.5),
                         width: 1.5,
                       ),
                     ),
                     child: Icon(
                       step.icon,
-                      color: OrderTrackingScreen.secondaryColor.withValues(alpha: 0.7),
+                      color: OrderTrackingScreen.secondaryColor.withValues(
+                        alpha: 0.7,
+                      ),
                       size: 20,
                     ),
                   ),
@@ -969,10 +979,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(
-                  top: 6,
-                  bottom: isLast ? 0 : 28,
-                ),
+                padding: EdgeInsets.only(top: 6, bottom: isLast ? 0 : 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -981,12 +988,17 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                       style: TextStyle(
                         fontFamily: 'Plus Jakarta Sans',
                         fontSize: isActive ? 18 : 16,
-                        fontWeight: isActive || isCompleted ? FontWeight.w800 : FontWeight.w700,
+                        fontWeight: isActive || isCompleted
+                            ? FontWeight.w800
+                            : FontWeight.w700,
                         color: isActive
-                            ? OrderTrackingScreen.onSurfaceColor // Extra bold slate-900 when active!
+                            ? OrderTrackingScreen
+                                  .onSurfaceColor // Extra bold slate-900 when active!
                             : (isCompleted
-                                  ? OrderTrackingScreen.primaryColor // Heritage orange when completed!
-                                  : OrderTrackingScreen.secondaryColor.withValues(alpha: 0.7)),
+                                  ? OrderTrackingScreen
+                                        .primaryColor // Heritage orange when completed!
+                                  : OrderTrackingScreen.secondaryColor
+                                        .withValues(alpha: 0.7)),
                         letterSpacing: -0.3,
                         height: 1.2,
                       ),
@@ -997,10 +1009,14 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                       style: TextStyle(
                         fontFamily: 'Plus Jakarta Sans',
                         fontSize: isActive ? 14 : 13,
-                        fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                        fontWeight: isActive
+                            ? FontWeight.w600
+                            : FontWeight.w500,
                         color: isActive
                             ? OrderTrackingScreen.onSurfaceVariantColor
-                            : OrderTrackingScreen.secondaryColor.withValues(alpha: 0.7),
+                            : OrderTrackingScreen.secondaryColor.withValues(
+                                alpha: 0.7,
+                              ),
                       ),
                     ),
                   ],
@@ -1055,7 +1071,8 @@ class _PulseRing extends StatefulWidget {
   State<_PulseRing> createState() => _PulseRingState();
 }
 
-class _PulseRingState extends State<_PulseRing> with SingleTickerProviderStateMixin {
+class _PulseRingState extends State<_PulseRing>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1600),
@@ -1079,7 +1096,9 @@ class _PulseRingState extends State<_PulseRing> with SingleTickerProviderStateMi
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: OrderTrackingScreen.primaryColor.withValues(alpha: 0.2 + (0.25 * _controller.value)),
+                  color: OrderTrackingScreen.primaryColor.withValues(
+                    alpha: 0.2 + (0.25 * _controller.value),
+                  ),
                   blurRadius: 10 + (10 * _controller.value),
                   spreadRadius: 1 + (3 * _controller.value),
                 ),
@@ -1093,4 +1112,3 @@ class _PulseRingState extends State<_PulseRing> with SingleTickerProviderStateMi
     );
   }
 }
-

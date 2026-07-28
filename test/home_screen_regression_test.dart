@@ -161,10 +161,7 @@ class _FakeOrderRepository implements OrderRepository {
   Future<Result<List<Order>>> getAllOrders() async => Success(orders);
 }
 
-Future<void> _pump(
-  WidgetTester tester,
-  List<Override> overrides,
-) async {
+Future<void> _pump(WidgetTester tester, List<Override> overrides) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: overrides,
@@ -340,9 +337,7 @@ void main() {
         ),
         homeDataProvider.overrideWith(
           (ref) async => HomeData(
-            categories: const [
-              Category(id: 'c1', name: 'Sandwiches'),
-            ],
+            categories: const [Category(id: 'c1', name: 'Sandwiches')],
             featuredItems: [_testItem('f1')],
             bestSellers: [_testItem('b1')],
             offers: [_testItem('o1', discountPrice: 40)],

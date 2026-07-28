@@ -37,7 +37,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (!_agreeTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${'auth.terms_agree'.tr()}${'auth.terms_service'.tr()}'),
+          content: Text(
+            '${'auth.terms_agree'.tr()}${'auth.terms_service'.tr()}',
+          ),
           backgroundColor: KZ.error,
         ),
       );
@@ -78,11 +80,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         fontSize: 15,
         fontWeight: FontWeight.w400,
       ),
-      prefixIcon: Icon(
-        prefixIcon,
-        color: KZ.onSurfaceVariant,
-        size: 22,
-      ),
+      prefixIcon: Icon(prefixIcon, color: KZ.onSurfaceVariant, size: 22),
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: Colors.white,
@@ -181,11 +179,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               alignment: Alignment.centerLeft,
               child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: KZ.primary,
-                  size: 26,
-                ),
+                icon: const Icon(Icons.arrow_back, color: KZ.primary, size: 26),
                 tooltip: 'common.back'.tr(),
                 splashRadius: 22,
                 onPressed: () {
@@ -365,7 +359,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
                             // Terms Checkbox
                             Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4,
+                                horizontal: 2,
+                              ),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -400,7 +397,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                           height: 1.4,
                                         ),
                                         children: [
-                                          TextSpan(text: 'auth.terms_agree'.tr()),
+                                          TextSpan(
+                                            text: 'auth.terms_agree'.tr(),
+                                          ),
                                           TextSpan(
                                             text: 'auth.terms_service'.tr(),
                                             style: const TextStyle(
@@ -432,7 +431,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               height: 56,
                               decoration: BoxDecoration(
                                 color: KZ.primary,
-                                borderRadius: BorderRadius.circular(999), // rounded-full (pill)
+                                borderRadius: BorderRadius.circular(
+                                  999,
+                                ), // rounded-full (pill)
                                 boxShadow: [
                                   BoxShadow(
                                     color: KZ.primary.withValues(alpha: 0.25),
@@ -444,7 +445,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                  onTap: authState.isLoading ? null : _handleSignUp,
+                                  onTap: authState.isLoading
+                                      ? null
+                                      : _handleSignUp,
                                   borderRadius: BorderRadius.circular(999),
                                   child: Center(
                                     child: authState.isLoading
@@ -514,9 +517,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             icon: const SizedBox(
                               width: 20,
                               height: 20,
-                              child: CustomPaint(
-                                painter: _GoogleLogoPainter(),
-                              ),
+                              child: CustomPaint(painter: _GoogleLogoPainter()),
                             ),
                             onTap: () {},
                           ),
@@ -602,11 +603,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             ],
           ),
           child: const Center(
-            child: Icon(
-              Icons.restaurant_rounded,
-              size: 40,
-              color: KZ.primary,
-            ),
+            child: Icon(Icons.restaurant_rounded, size: 40, color: KZ.primary),
           ),
         ),
 
@@ -671,7 +668,12 @@ class _GoogleLogoPainter extends CustomPainter {
     // Blue horizontal bar
     paint.style = PaintingStyle.fill;
     canvas.drawRect(
-      Rect.fromLTRB(size.width * 0.45, size.height * 0.42, size.width * 0.9, size.height * 0.58),
+      Rect.fromLTRB(
+        size.width * 0.45,
+        size.height * 0.42,
+        size.width * 0.9,
+        size.height * 0.58,
+      ),
       paint,
     );
   }
