@@ -100,7 +100,7 @@ class RestaurantSettings {
       taxRatePercent: (json['taxRatePercent'] as num?)?.toDouble() ?? 0,
       deliveryFee: (json['deliveryFee'] as num?)?.toDouble() ?? 0,
       minOrderAmount: (json['minOrderAmount'] as num?)?.toDouble() ?? 0,
-      currency: json['currency'] as String? ?? 'EGP',
+      currency: json['currency'] as String? ?? 'SAR',
       workingHours: hoursJson
           .map((e) => DayWorkingHours.fromJson(e as Map<String, dynamic>))
           .toList(),

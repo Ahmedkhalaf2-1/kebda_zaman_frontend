@@ -47,8 +47,8 @@ const List<_LoyaltyReward> _kLoyaltyRewards = [
     pointsCost: 100,
     deliveryOnly: true,
   ),
-  _LoyaltyReward(id: 'discount-10', name: '10 EGP Off', pointsCost: 150),
-  _LoyaltyReward(id: 'discount-25', name: '25 EGP Off', pointsCost: 350),
+  _LoyaltyReward(id: 'discount-10', name: 'Discount Tier 10', pointsCost: 150),
+  _LoyaltyReward(id: 'discount-25', name: 'Discount Tier 25', pointsCost: 350),
 ];
 
 /// Localized display name for a [_LoyaltyReward] — the reward catalog's
