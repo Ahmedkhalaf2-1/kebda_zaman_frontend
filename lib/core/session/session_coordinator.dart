@@ -20,6 +20,12 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/checkout_no
 /// authNotifierProvider state, and this listener reacts.
 ///
 /// Initialized once from app.dart via [ref.watch(sessionLifecycleProvider)].
+/// Favorites/Addresses/Cart/Orders/Loyalty/Checkout are all CUSTOMER-only
+/// (`/me/*`) resources server-side. Guests are issued role `CUSTOMER` too
+/// (per KZ_API_CONTRACT_FOR_FLUTTER.md), so they're included here — only
+/// ADMIN and CASHIER sessions must never trigger these providers.
+bool _isCustomerRole(String? role) => role == null || role == 'CUSTOMER';
+
 final sessionLifecycleProvider = Provider<void>((ref) {
   AuthState? _previous;
 
@@ -34,16 +40,23 @@ final sessionLifecycleProvider = Provider<void>((ref) {
     final nowLoggedIn = next.isLoggedIn;
     final prevUserId = prev.user?.id;
     final nextUserId = next.user?.id;
+    final wasCustomer = wasLoggedIn && _isCustomerRole(prev.user?.role);
+    final nowCustomer = nowLoggedIn && _isCustomerRole(next.user?.role);
 
     // ── authenticated → unauthenticated ─────────────────────────────────
     if (wasLoggedIn && !nowLoggedIn) {
-      _clearUserScopedState(ref);
+      // An ADMIN/CASHIER session never loaded these providers in the first
+      // place (see below), so there's nothing customer-scoped to clear.
+      if (wasCustomer) _clearUserScopedState(ref);
       return;
     }
 
     // ── unauthenticated → authenticated ─────────────────────────────────
     if (!wasLoggedIn && nowLoggedIn) {
-      _reloadUserScopedState(ref, isGuest: next.user?.isGuest ?? true);
+      // Only a CUSTOMER (incl. guest) session may fetch /me/* customer data.
+      if (nowCustomer) {
+        _reloadUserScopedState(ref, isGuest: next.user?.isGuest ?? true);
+      }
       return;
     }
 
@@ -53,8 +66,10 @@ final sessionLifecycleProvider = Provider<void>((ref) {
         prevUserId != null &&
         nextUserId != null &&
         prevUserId != nextUserId) {
-      _clearUserScopedState(ref);
-      _reloadUserScopedState(ref, isGuest: next.user?.isGuest ?? true);
+      if (wasCustomer) _clearUserScopedState(ref);
+      if (nowCustomer) {
+        _reloadUserScopedState(ref, isGuest: next.user?.isGuest ?? true);
+      }
       return;
     }
   }, fireImmediately: false);

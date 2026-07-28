@@ -50,25 +50,28 @@ GoRouter router(Ref ref) {
   return GoRouter(
     initialLocation: '/splash',
     redirect: (context, state) {
-      final role = ref.read(authNotifierProvider).user?.role;
       final path = state.uri.path;
+      if (!path.startsWith('/admin')) return null;
+
+      final auth = ref.read(authNotifierProvider);
+      final role = auth.user?.role;
+
+      // Unauthenticated users never reach any /admin/* route.
+      if (!auth.isLoggedIn) return '/login';
+
+      // ADMIN has full access to every /admin/* route.
+      if (role == 'ADMIN') return null;
 
       // A cashier may only reach Orders Management inside /admin — every
       // other admin section (dashboard metrics, menu, promos, settings,
       // staff, etc.) redirects back there even on a direct/manual navigation.
-      if (role == 'CASHIER' &&
-          path.startsWith('/admin') &&
-          !path.startsWith('/admin/orders')) {
-        return '/admin/orders';
+      if (role == 'CASHIER') {
+        return path.startsWith('/admin/orders') ? null : '/admin/orders';
       }
 
-      // Staff management is ADMIN-only, even for a cashier or anyone else
-      // navigating to it manually.
-      if (path.startsWith('/admin/staff') && role != 'ADMIN') {
-        return role == 'CASHIER' ? '/admin/orders' : '/login';
-      }
-
-      return null;
+      // Any other authenticated role (CUSTOMER, incl. guest) is not admin
+      // staff at all — send them back to customer navigation.
+      return '/home';
     },
     routes: [
       GoRoute(
