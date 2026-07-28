@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
@@ -50,53 +51,62 @@ class OffersManagementScreen extends ConsumerWidget {
               ),
               const SizedBox(height: KZ.sp16),
               Expanded(
-                child: stateAsync.when(
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: KZ.primary),
-                  ),
-                  error: (e, st) => KZErrorState(
-                    message: 'offers.load_error'.tr(),
-                    retryLabel: 'common.retry'.tr(),
-                    onRetry: () => ref.invalidate(offersAdminProvider),
-                  ),
-                  data: (promos) {
-                    if (promos.isEmpty) {
-                      return KZEmptyState(
-                        icon: Icons.local_offer_outlined,
-                        title: 'offers.empty'.tr(),
-                        actionLabel: 'offers.add_promo'.tr(),
-                        onAction: () => context.push('/admin/offers/add'),
-                      );
-                    }
-                    return RefreshIndicator(
-                      color: KZ.primary,
-                      onRefresh: () async =>
-                          ref.invalidate(offersAdminProvider),
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final isWide = constraints.maxWidth >= 700;
-                          return ListView.separated(
-                            itemCount: promos.length,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(height: KZ.sp10),
-                            itemBuilder: (context, index) => _PromoRow(
-                              promo: promos[index],
-                              isWide: isWide,
-                              onEdit: () => context.push(
-                                '/admin/offers/edit',
-                                extra: promos[index],
+                child: AnimatedSwitcher(
+                  duration: KZMotion.durationFor(context, KZMotion.standard),
+                  transitionBuilder: (child, animation) =>
+                      FadeTransition(opacity: animation, child: child),
+                  child: stateAsync.when(
+                    loading: () => const Center(
+                      key: ValueKey('loading'),
+                      child: CircularProgressIndicator(color: KZ.primary),
+                    ),
+                    error: (e, st) => KZErrorState(
+                      key: const ValueKey('error'),
+                      message: 'offers.load_error'.tr(),
+                      retryLabel: 'common.retry'.tr(),
+                      onRetry: () => ref.invalidate(offersAdminProvider),
+                    ),
+                    data: (promos) {
+                      if (promos.isEmpty) {
+                        return KZEmptyState(
+                          key: const ValueKey('empty'),
+                          icon: Icons.local_offer_outlined,
+                          title: 'offers.empty'.tr(),
+                          actionLabel: 'offers.add_promo'.tr(),
+                          onAction: () => context.push('/admin/offers/add'),
+                        );
+                      }
+                      return RefreshIndicator(
+                        key: const ValueKey('data'),
+                        color: KZ.primary,
+                        onRefresh: () async =>
+                            ref.invalidate(offersAdminProvider),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isWide = constraints.maxWidth >= 700;
+                            return ListView.separated(
+                              itemCount: promos.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: KZ.sp10),
+                              itemBuilder: (context, index) => _PromoRow(
+                                promo: promos[index],
+                                isWide: isWide,
+                                onEdit: () => context.push(
+                                  '/admin/offers/edit',
+                                  extra: promos[index],
+                                ),
+                                onToggle: () => ref
+                                    .read(offersAdminProvider.notifier)
+                                    .togglePromoAvailability(promos[index]),
+                                onDelete: () =>
+                                    _confirmDelete(context, ref, promos[index]),
                               ),
-                              onToggle: () => ref
-                                  .read(offersAdminProvider.notifier)
-                                  .togglePromoAvailability(promos[index]),
-                              onDelete: () =>
-                                  _confirmDelete(context, ref, promos[index]),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ],

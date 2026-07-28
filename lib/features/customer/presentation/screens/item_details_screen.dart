@@ -12,6 +12,7 @@ import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import '../notifiers/item_details_notifier.dart';
 import '../notifiers/favorites_notifier.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_quantity_stepper.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
@@ -46,6 +47,7 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
   final Set<String> removedIngredients = {};
   final TextEditingController notesController = TextEditingController();
   bool _isInitialized = false;
+  bool _isAddingToCart = false;
 
   @override
   void initState() {
@@ -852,7 +854,9 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                 .read(customerFavoritesProvider.notifier)
                                 .toggleFavorite(widget.itemId);
                             if (!success && context.mounted) {
-                              final err = ref.read(customerFavoritesProvider).errorMessage;
+                              final err = ref
+                                  .read(customerFavoritesProvider)
+                                  .errorMessage;
                               if (err != null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
@@ -878,12 +882,22 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                 ),
                               ],
                             ),
-                            child: Icon(
-                              isFav
-                                  ? Icons.favorite_rounded
-                                  : Icons.favorite_border_rounded,
-                              color: ItemDetailsScreen.primaryColor,
-                              size: KZ.iconControl,
+                            child: Center(
+                              child: AnimatedScale(
+                                scale: isFav ? 1.1 : 1.0,
+                                duration: KZMotion.durationFor(
+                                  context,
+                                  KZMotion.fast,
+                                ),
+                                curve: KZMotion.press,
+                                child: Icon(
+                                  isFav
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border_rounded,
+                                  color: ItemDetailsScreen.primaryColor,
+                                  size: KZ.iconControl,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -951,166 +965,225 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                         // Add to Cart Button
                         Expanded(
                           child: InkWell(
-                            onTap: () async {
-                              // GET /menu/items/:id does not filter on isAvailable (unlike the list
-                              // endpoint), so an out-of-stock item is still reachable here directly —
-                              // must gate add-to-cart client-side (see 02_API_REFERENCE.md).
-                              if (!item.isAvailable) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('menu.item_unavailable'.tr()),
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                                return;
-                              }
-
-                              final missingRequired = _getMissingRequiredGroups(
-                                item.modifierGroups,
-                              );
-
-                              if (missingRequired.isNotEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'item_details.required_field_named'.tr(
-                                        namedArgs: {
-                                          'names': missingRequired
-                                              .map((e) => e.name)
-                                              .join(', '),
-                                        },
-                                      ),
-                                    ),
-                                    backgroundColor:
-                                        ItemDetailsScreen.errorColor,
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                                return;
-                              }
-
-                              final allSelectedOptions =
-                                  <String, List<String>>{};
-                              selectedSingleOptions.forEach(
-                                (k, v) => allSelectedOptions[k] = [v],
-                              );
-                              selectedMultipleOptions.forEach(
-                                (k, v) => allSelectedOptions[k] = v,
-                              );
-
-                              final flattenedQuantities = <String, int>{};
-                              for (final map in extraQuantities.values) {
-                                flattenedQuantities.addAll(map);
-                              }
-
-                              String finalInstructions = notesController.text
-                                  .trim();
-                              if (removedIngredients.isNotEmpty) {
-                                final removeNote =
-                                    'NO ${removedIngredients.join(', ').toUpperCase()}';
-                                finalInstructions = finalInstructions.isEmpty
-                                    ? removeNote
-                                    : '$finalInstructions ($removeNote)';
-                              }
-
-                              final cartItem = CartItem(
-                                id:
-                                    widget.cartItemId ??
-                                    'ci_${DateTime.now().millisecondsSinceEpoch}',
-                                menuItemId: item.id,
-                                productName: item.name,
-                                productImage: item.imageUrl,
-                                basePrice: item.discountPrice ?? item.basePrice,
-                                quantity: quantity,
-                                selectedOptions: allSelectedOptions,
-                                extraQuantities: flattenedQuantities,
-                                specialInstructions: finalInstructions,
-                                unitPrice: unitPrice,
-                                lineTotal: totalPrice,
-                              );
-
-                              try {
-                                // Editing an existing cart line (cartItemId set) must replace
-                                // that line in place — calling addItem() here would instead
-                                // create a brand-new line alongside the original, duplicating
-                                // the item in the cart.
-                                if (widget.cartItemId != null) {
-                                  await ref
-                                      .read(cartProvider.notifier)
-                                      .replaceItem(
-                                        widget.cartItemId!,
-                                        cartItem,
+                            onTap: _isAddingToCart
+                                ? null
+                                : () async {
+                                    // GET /menu/items/:id does not filter on isAvailable (unlike the list
+                                    // endpoint), so an out-of-stock item is still reachable here directly —
+                                    // must gate add-to-cart client-side (see 02_API_REFERENCE.md).
+                                    if (!item.isAvailable) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'menu.item_unavailable'.tr(),
+                                          ),
+                                          behavior: SnackBarBehavior.floating,
+                                        ),
                                       );
-                                } else {
-                                  await ref
-                                      .read(cartProvider.notifier)
-                                      .addItem(cartItem);
-                                }
+                                      return;
+                                    }
 
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      widget.cartItemId != null
-                                          ? 'item_details.updated_success'.tr()
-                                          : 'item_details.added_success'.tr(),
-                                    ),
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                );
+                                    final missingRequired =
+                                        _getMissingRequiredGroups(
+                                          item.modifierGroups,
+                                        );
 
-                                context.pop();
-                              } catch (e) {
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'common.something_wrong'.tr(),
-                                    ),
-                                    backgroundColor:
-                                        ItemDetailsScreen.errorColor,
-                                  ),
-                                );
-                              }
-                            },
+                                    if (missingRequired.isNotEmpty) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'item_details.required_field_named'
+                                                .tr(
+                                                  namedArgs: {
+                                                    'names': missingRequired
+                                                        .map((e) => e.name)
+                                                        .join(', '),
+                                                  },
+                                                ),
+                                          ),
+                                          backgroundColor:
+                                              ItemDetailsScreen.errorColor,
+                                          behavior: SnackBarBehavior.floating,
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    final allSelectedOptions =
+                                        <String, List<String>>{};
+                                    selectedSingleOptions.forEach(
+                                      (k, v) => allSelectedOptions[k] = [v],
+                                    );
+                                    selectedMultipleOptions.forEach(
+                                      (k, v) => allSelectedOptions[k] = v,
+                                    );
+
+                                    final flattenedQuantities = <String, int>{};
+                                    for (final map in extraQuantities.values) {
+                                      flattenedQuantities.addAll(map);
+                                    }
+
+                                    String finalInstructions = notesController
+                                        .text
+                                        .trim();
+                                    if (removedIngredients.isNotEmpty) {
+                                      final removeNote =
+                                          'NO ${removedIngredients.join(', ').toUpperCase()}';
+                                      finalInstructions =
+                                          finalInstructions.isEmpty
+                                          ? removeNote
+                                          : '$finalInstructions ($removeNote)';
+                                    }
+
+                                    final cartItem = CartItem(
+                                      id:
+                                          widget.cartItemId ??
+                                          'ci_${DateTime.now().millisecondsSinceEpoch}',
+                                      menuItemId: item.id,
+                                      productName: item.name,
+                                      productImage: item.imageUrl,
+                                      basePrice:
+                                          item.discountPrice ?? item.basePrice,
+                                      quantity: quantity,
+                                      selectedOptions: allSelectedOptions,
+                                      extraQuantities: flattenedQuantities,
+                                      specialInstructions: finalInstructions,
+                                      unitPrice: unitPrice,
+                                      lineTotal: totalPrice,
+                                    );
+
+                                    setState(() => _isAddingToCart = true);
+                                    try {
+                                      // Editing an existing cart line (cartItemId set) must replace
+                                      // that line in place — calling addItem() here would instead
+                                      // create a brand-new line alongside the original, duplicating
+                                      // the item in the cart.
+                                      if (widget.cartItemId != null) {
+                                        await ref
+                                            .read(cartProvider.notifier)
+                                            .replaceItem(
+                                              widget.cartItemId!,
+                                              cartItem,
+                                            );
+                                      } else {
+                                        await ref
+                                            .read(cartProvider.notifier)
+                                            .addItem(cartItem);
+                                      }
+
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            widget.cartItemId != null
+                                                ? 'item_details.updated_success'
+                                                      .tr()
+                                                : 'item_details.added_success'
+                                                      .tr(),
+                                          ),
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+
+                                      context.pop();
+                                    } catch (e) {
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'common.something_wrong'.tr(),
+                                          ),
+                                          backgroundColor:
+                                              ItemDetailsScreen.errorColor,
+                                        ),
+                                      );
+                                    } finally {
+                                      if (mounted) {
+                                        setState(() => _isAddingToCart = false);
+                                      }
+                                    }
+                                  },
                             borderRadius: BorderRadius.circular(KZ.radiusMd),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              decoration: BoxDecoration(
-                                color: ItemDetailsScreen.primaryColor,
-                                borderRadius: BorderRadius.circular(
-                                  KZ.radiusMd,
+                            child: KZPressableScale(
+                              enabled: !_isAddingToCart,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: ItemDetailsScreen.primaryColor
-                                        .withValues(alpha: 0.25),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 4),
+                                decoration: BoxDecoration(
+                                  color: ItemDetailsScreen.primaryColor
+                                      .withValues(
+                                        alpha: _isAddingToCart ? 0.7 : 1,
+                                      ),
+                                  borderRadius: BorderRadius.circular(
+                                    KZ.radiusMd,
                                   ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    widget.cartItemId != null
-                                        ? 'item_details.update_cart'.tr()
-                                        : 'item_details.add_to_cart'.tr(),
-                                    style: KZ.buttonLabel.copyWith(
-                                      color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: ItemDetailsScreen.primaryColor
+                                          .withValues(alpha: 0.25),
+                                      blurRadius: 16,
+                                      offset: const Offset(0, 4),
                                     ),
+                                  ],
+                                ),
+                                child: AnimatedSwitcher(
+                                  duration: KZMotion.durationFor(
+                                    context,
+                                    KZMotion.fast,
                                   ),
-                                  const SizedBox(width: 8),
-                                  const Icon(
-                                    Icons.shopping_bag_rounded,
-                                    color: Colors.white,
-                                    size: KZ.iconControl,
-                                  ),
-                                ],
+                                  transitionBuilder: (child, animation) =>
+                                      FadeTransition(
+                                        opacity: animation,
+                                        child: child,
+                                      ),
+                                  child: _isAddingToCart
+                                      ? const SizedBox(
+                                          key: ValueKey('adding'),
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : Row(
+                                          key: const ValueKey('idle'),
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              widget.cartItemId != null
+                                                  ? 'item_details.update_cart'
+                                                        .tr()
+                                                  : 'item_details.add_to_cart'
+                                                        .tr(),
+                                              style: KZ.buttonLabel.copyWith(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            const Icon(
+                                              Icons.shopping_bag_rounded,
+                                              color: Colors.white,
+                                              size: KZ.iconControl,
+                                            ),
+                                          ],
+                                        ),
+                                ),
                               ),
                             ),
                           ),

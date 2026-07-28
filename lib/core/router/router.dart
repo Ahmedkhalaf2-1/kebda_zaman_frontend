@@ -45,6 +45,7 @@ import '../../features/shared/domain/models/menu_item.dart';
 import '../../features/shared/domain/models/category.dart';
 import '../../features/shared/domain/models/promo_code.dart';
 import '../../features/shared/domain/models/address.dart';
+import 'kz_page_transitions.dart';
 
 part 'router.g.dart';
 
@@ -180,53 +181,71 @@ GoRouter router(Ref ref) {
           ),
         ],
       ),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/login',
+        pageBuilder: (context, state) =>
+            kzFadeSlidePage(state: state, child: const LoginScreen()),
+      ),
       GoRoute(
         path: '/signup',
-        builder: (context, state) => const SignupScreen(),
+        pageBuilder: (context, state) =>
+            kzFadeSlidePage(state: state, child: const SignupScreen()),
       ),
       GoRoute(
         path: '/search',
-        builder: (context, state) => const SearchScreen(),
+        pageBuilder: (context, state) =>
+            kzFadeSlidePage(state: state, child: const SearchScreen()),
       ),
       GoRoute(
         path: '/item/:id',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
-          return ItemDetailsScreen(
-            itemId: state.pathParameters['id']!,
-            cartItemId: extra?['cartItemId'] as String?,
+          return kzFadeSlidePage(
+            state: state,
+            child: ItemDetailsScreen(
+              itemId: state.pathParameters['id']!,
+              cartItemId: extra?['cartItemId'] as String?,
+            ),
           );
         },
       ),
       GoRoute(
         path: '/home/item/:id',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
-          return ItemDetailsScreen(
-            itemId: state.pathParameters['id']!,
-            cartItemId: extra?['cartItemId'] as String?,
+          return kzFadeSlidePage(
+            state: state,
+            child: ItemDetailsScreen(
+              itemId: state.pathParameters['id']!,
+              cartItemId: extra?['cartItemId'] as String?,
+            ),
           );
         },
       ),
       GoRoute(
         path: '/menu/item/:id',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
-          return ItemDetailsScreen(
-            itemId: state.pathParameters['id']!,
-            cartItemId: extra?['cartItemId'] as String?,
+          return kzFadeSlidePage(
+            state: state,
+            child: ItemDetailsScreen(
+              itemId: state.pathParameters['id']!,
+              cartItemId: extra?['cartItemId'] as String?,
+            ),
           );
         },
       ),
       GoRoute(
         path: '/checkout',
-        builder: (context, state) => const CheckoutScreen(),
+        pageBuilder: (context, state) =>
+            kzFadeSlidePage(state: state, child: const CheckoutScreen()),
         routes: [
           GoRoute(
             path: 'success',
-            builder: (context, state) =>
-                OrderSuccessScreen(order: state.extra as Order),
+            pageBuilder: (context, state) => kzFadeSlidePage(
+              state: state,
+              child: OrderSuccessScreen(order: state.extra as Order),
+            ),
             redirect: (context, state) {
               if (state.extra == null || state.extra is! Order) {
                 return '/home';
@@ -241,11 +260,13 @@ GoRouter router(Ref ref) {
         routes: [
           GoRoute(
             path: '/admin/dashboard',
-            builder: (context, state) => const DashboardScreen(),
+            pageBuilder: (context, state) =>
+                kzAdminPage(state: state, child: const DashboardScreen()),
           ),
           GoRoute(
             path: '/admin/menu',
-            builder: (context, state) => const MenuManagementScreen(),
+            pageBuilder: (context, state) =>
+                kzAdminPage(state: state, child: const MenuManagementScreen()),
             routes: [
               GoRoute(
                 path: 'add',
@@ -270,7 +291,8 @@ GoRouter router(Ref ref) {
           ),
           GoRoute(
             path: '/admin/orders',
-            builder: (context, state) => const OrderManagementScreen(),
+            pageBuilder: (context, state) =>
+                kzAdminPage(state: state, child: const OrderManagementScreen()),
             routes: [
               GoRoute(
                 path: ':id',
@@ -282,11 +304,17 @@ GoRouter router(Ref ref) {
           ),
           GoRoute(
             path: '/admin/order-notifications',
-            builder: (context, state) => const AdminNotificationCenterScreen(),
+            pageBuilder: (context, state) => kzAdminPage(
+              state: state,
+              child: const AdminNotificationCenterScreen(),
+            ),
           ),
           GoRoute(
             path: '/admin/offers',
-            builder: (context, state) => const OffersManagementScreen(),
+            pageBuilder: (context, state) => kzAdminPage(
+              state: state,
+              child: const OffersManagementScreen(),
+            ),
             routes: [
               GoRoute(
                 path: 'add',
@@ -302,23 +330,32 @@ GoRouter router(Ref ref) {
           ),
           GoRoute(
             path: '/admin/notifications',
-            builder: (context, state) => const AdminNotificationsScreen(),
+            pageBuilder: (context, state) => kzAdminPage(
+              state: state,
+              child: const AdminNotificationsScreen(),
+            ),
           ),
           GoRoute(
             path: '/admin/settings',
-            builder: (context, state) => const AdminSettingsScreen(),
+            pageBuilder: (context, state) =>
+                kzAdminPage(state: state, child: const AdminSettingsScreen()),
           ),
           GoRoute(
             path: '/admin/staff',
-            builder: (context, state) => const StaffManagementScreen(),
+            pageBuilder: (context, state) =>
+                kzAdminPage(state: state, child: const StaffManagementScreen()),
           ),
           GoRoute(
             path: '/admin/delivery-zones',
-            builder: (context, state) => const DeliveryZonesScreen(),
+            pageBuilder: (context, state) =>
+                kzAdminPage(state: state, child: const DeliveryZonesScreen()),
           ),
           GoRoute(
             path: '/admin/customers',
-            builder: (context, state) => const CustomerManagementScreen(),
+            pageBuilder: (context, state) => kzAdminPage(
+              state: state,
+              child: const CustomerManagementScreen(),
+            ),
             routes: [
               GoRoute(
                 path: ':id',

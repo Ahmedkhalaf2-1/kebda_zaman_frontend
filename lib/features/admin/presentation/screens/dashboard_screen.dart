@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
@@ -26,20 +27,27 @@ class DashboardScreen extends ConsumerWidget {
     final filter = ref.watch(reportsFilterProvider);
 
     Widget body;
+    // Keyed by state kind only (not by data), so a background refresh that
+    // keeps showing stale data (`isRefreshing`) never re-triggers this
+    // fade — only the loading->content->error transition should animate.
+    final String stateKey;
     if (asyncData.hasValue) {
       body = _DashboardContent(
         data: asyncData.value!,
         filter: filter,
         isRefreshing: asyncData.isLoading,
       );
+      stateKey = 'data';
     } else if (asyncData.hasError) {
       body = KZErrorState(
         message: 'dashboard.failed_to_load'.tr(),
         onRetry: () => ref.read(reportsDashboardProvider.notifier).refresh(),
         retryLabel: 'common.retry'.tr(),
       );
+      stateKey = 'error';
     } else {
       body = const Center(child: CircularProgressIndicator(color: KZ.primary));
+      stateKey = 'loading';
     }
 
     return Scaffold(
@@ -48,7 +56,12 @@ class DashboardScreen extends ConsumerWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: _kMaxContentWidth),
-            child: body,
+            child: AnimatedSwitcher(
+              duration: KZMotion.durationFor(context, KZMotion.standard),
+              transitionBuilder: (child, animation) =>
+                  FadeTransition(opacity: animation, child: child),
+              child: KeyedSubtree(key: ValueKey(stateKey), child: body),
+            ),
           ),
         ),
       ),
@@ -178,24 +191,31 @@ class _DashboardHeader extends ConsumerWidget {
             ],
           ),
         ),
-        isRefreshing
-            ? const Padding(
-                padding: EdgeInsets.all(KZ.sp12),
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: KZ.primary,
+        AnimatedSwitcher(
+          duration: KZMotion.durationFor(context, KZMotion.fast),
+          transitionBuilder: (child, animation) =>
+              FadeTransition(opacity: animation, child: child),
+          child: isRefreshing
+              ? const Padding(
+                  key: ValueKey('refreshing'),
+                  padding: EdgeInsets.all(KZ.sp12),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: KZ.primary,
+                    ),
                   ),
+                )
+              : KZIconButton(
+                  key: const ValueKey('idle'),
+                  icon: Icons.refresh_rounded,
+                  tooltip: 'dashboard.refresh'.tr(),
+                  onPressed: () =>
+                      ref.read(reportsDashboardProvider.notifier).refresh(),
                 ),
-              )
-            : KZIconButton(
-                icon: Icons.refresh_rounded,
-                tooltip: 'dashboard.refresh'.tr(),
-                onPressed: () =>
-                    ref.read(reportsDashboardProvider.notifier).refresh(),
-              ),
+        ),
       ],
     );
   }

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 
 class _AdminNavEntry {
@@ -275,39 +276,49 @@ class _SidebarTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Material(
-        color: selected
-            ? KZ.primaryFixed.withValues(alpha: 0.5)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(KZ.radiusMd),
-        child: InkWell(
+      child: KZPressableScale(
+        child: Material(
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(KZ.radiusMd),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: KZ.sp12,
-              vertical: KZ.sp10,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  selected ? entry.activeIcon : entry.icon,
-                  size: KZ.iconControl,
-                  color: selected ? KZ.primary : KZ.secondary,
-                ),
-                const SizedBox(width: KZ.sp12),
-                Expanded(
-                  child: Text(
-                    entry.label,
-                    style: KZ.body.copyWith(
-                      color: selected ? KZ.primary : KZ.onSurface,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(KZ.radiusMd),
+            onTap: onTap,
+            child: AnimatedContainer(
+              duration: KZMotion.durationFor(context, KZMotion.fast),
+              curve: KZMotion.stateChange,
+              decoration: BoxDecoration(
+                color: selected
+                    ? KZ.primaryFixed.withValues(alpha: 0.5)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(KZ.radiusMd),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: KZ.sp12,
+                vertical: KZ.sp10,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    selected ? entry.activeIcon : entry.icon,
+                    size: KZ.iconControl,
+                    color: selected ? KZ.primary : KZ.secondary,
                   ),
-                ),
-              ],
+                  const SizedBox(width: KZ.sp12),
+                  Expanded(
+                    child: Text(
+                      entry.label,
+                      style: KZ.body.copyWith(
+                        color: selected ? KZ.primary : KZ.onSurface,
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

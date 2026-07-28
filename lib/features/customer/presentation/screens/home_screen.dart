@@ -17,6 +17,7 @@ import 'package:kebda_zaman/features/shared/domain/models/user.dart';
 import 'package:kebda_zaman/core/responsive/responsive_breakpoints.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
@@ -1237,6 +1238,11 @@ class _PromoHero extends StatelessWidget {
                   child: CachedNetworkImage(
                     imageUrl: item.imageUrl,
                     fit: BoxFit.cover,
+                    // Fixed-height hero container (above) already prevents
+                    // layout shift; fade-in just avoids a hard flicker once
+                    // the image arrives.
+                    fadeInDuration: KZMotion.standard,
+                    fadeInCurve: KZMotion.enterExit,
                     placeholder: (context, url) => Container(
                       color: HomeScreen.surfaceContainerHighestColor,
                     ),

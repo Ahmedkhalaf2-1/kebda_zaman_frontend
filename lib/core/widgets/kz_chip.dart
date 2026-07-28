@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 
 /// A togglable pill — used for filters, category selection, and any other
 /// "pick one/some of these" control. One widget covers all three, since
@@ -23,30 +24,39 @@ class KZChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final foreground = selected ? Colors.white : KZ.onSurfaceVariant;
-    return Material(
-      color: selected ? KZ.primary : KZ.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(KZ.radiusFull),
-      child: InkWell(
+    return KZPressableScale(
+      enabled: onTap != null,
+      child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(KZ.radiusFull),
-        onTap: onTap,
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 40),
-          padding: const EdgeInsets.symmetric(
-            horizontal: KZ.sp16,
-            vertical: KZ.sp8,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: KZ.iconInline, color: foreground),
-                const SizedBox(width: KZ.sp6),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(KZ.radiusFull),
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: KZMotion.durationFor(context, KZMotion.fast),
+            curve: KZMotion.stateChange,
+            constraints: const BoxConstraints(minHeight: 40),
+            padding: const EdgeInsets.symmetric(
+              horizontal: KZ.sp16,
+              vertical: KZ.sp8,
+            ),
+            decoration: BoxDecoration(
+              color: selected ? KZ.primary : KZ.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(KZ.radiusFull),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: KZ.iconInline, color: foreground),
+                  const SizedBox(width: KZ.sp6),
+                ],
+                Text(
+                  label,
+                  style: KZ.label.copyWith(color: foreground, fontSize: 13),
+                ),
               ],
-              Text(
-                label,
-                style: KZ.label.copyWith(color: foreground, fontSize: 13),
-              ),
-            ],
+            ),
           ),
         ),
       ),

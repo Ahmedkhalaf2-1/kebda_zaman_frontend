@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 
 /// The one shared quantity control for cart lines and item customization.
 ///
@@ -50,7 +51,17 @@ class KZQuantityStepper extends StatelessWidget {
           SizedBox(
             width: 32,
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 150),
+              duration: KZMotion.durationFor(context, KZMotion.fast),
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.3),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              ),
               child: Text(
                 '$quantity',
                 key: ValueKey<int>(quantity),
@@ -88,19 +99,22 @@ class _StepButton extends StatelessWidget {
       button: true,
       label: semanticLabel,
       enabled: enabled,
-      child: Material(
-        color: Colors.transparent,
-        shape: const CircleBorder(),
-        child: InkWell(
-          onTap: onTap,
-          customBorder: const CircleBorder(),
-          child: SizedBox(
-            width: KZ.iconTapTargetMin,
-            height: KZ.iconTapTargetMin,
-            child: Icon(
-              icon,
-              size: KZ.iconControl,
-              color: enabled ? KZ.onSurface : KZ.outline,
+      child: KZPressableScale(
+        enabled: enabled,
+        child: Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: InkWell(
+            onTap: onTap,
+            customBorder: const CircleBorder(),
+            child: SizedBox(
+              width: KZ.iconTapTargetMin,
+              height: KZ.iconTapTargetMin,
+              child: Icon(
+                icon,
+                size: KZ.iconControl,
+                color: enabled ? KZ.onSurface : KZ.outline,
+              ),
             ),
           ),
         ),

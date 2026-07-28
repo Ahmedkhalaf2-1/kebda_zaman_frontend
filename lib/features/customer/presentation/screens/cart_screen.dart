@@ -7,8 +7,8 @@ import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 
 import '../notifiers/cart_notifier.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
-import 'package:kebda_zaman/core/widgets/kz_quantity_stepper.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
 /// Two-tier spacing rhythm for the whole screen: [_blockGap] between major
@@ -38,6 +38,10 @@ class CartScreen extends ConsumerStatefulWidget {
 
 class _CartScreenState extends ConsumerState<CartScreen> {
   final TextEditingController _promoController = TextEditingController();
+  // Keyed by cart item id — blocks a second quantity/remove tap on the same
+  // row while its previous mutation is still in flight (rapid double-taps
+  // must not fire two overlapping updateItem/removeItem calls).
+  final Set<String> _pendingItemIds = {};
 
   @override
   void dispose() {
@@ -45,13 +49,23 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     super.dispose();
   }
 
-  void _runCartAction(Future<void> Function() action) {
-    action().catchError((Object e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('common.something_wrong'.tr())));
-    });
+  void _runCartAction(Future<void> Function() action, {String? itemId}) {
+    if (itemId != null) {
+      if (_pendingItemIds.contains(itemId)) return;
+      setState(() => _pendingItemIds.add(itemId));
+    }
+    action()
+        .catchError((Object e) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('common.something_wrong'.tr())),
+          );
+        })
+        .whenComplete(() {
+          if (itemId != null && mounted) {
+            setState(() => _pendingItemIds.remove(itemId));
+          }
+        });
   }
 
   @override
@@ -148,6 +162,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             for (final item in cart.items) ...[
                               _CartItemCard(
                                 item: item,
+                                isPending: _pendingItemIds.contains(item.id),
                                 onEdit: () => context.push(
                                   '/item/${item.menuItemId}',
                                   extra: {'cartItemId': item.id},
@@ -156,6 +171,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                   () => ref
                                       .read(cartProvider.notifier)
                                       .removeItem(item.id),
+                                  itemId: item.id,
                                 ),
                                 onQuantityChanged: (newQuantity) {
                                   if (newQuantity == 0) {
@@ -163,12 +179,14 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                       () => ref
                                           .read(cartProvider.notifier)
                                           .removeItem(item.id),
+                                      itemId: item.id,
                                     );
                                   } else {
                                     _runCartAction(
                                       () => ref
                                           .read(cartProvider.notifier)
                                           .updateItem(item.id, newQuantity),
+                                      itemId: item.id,
                                     );
                                   }
                                 },
@@ -614,12 +632,14 @@ class _CartScreenState extends ConsumerState<CartScreen> {
 // ── Cart item card matching Stitch HTML ──
 class _CartItemCard extends StatelessWidget {
   final CartItem item;
+  final bool isPending;
   final VoidCallback onEdit;
   final VoidCallback onRemove;
   final ValueChanged<int> onQuantityChanged;
 
   const _CartItemCard({
     required this.item,
+    this.isPending = false,
     required this.onEdit,
     required this.onRemove,
     required this.onQuantityChanged,
@@ -758,27 +778,36 @@ class _CartItemCard extends StatelessWidget {
                         Semantics(
                           button: true,
                           label: 'Decrease quantity',
-                          child: InkWell(
-                            onTap: () => onQuantityChanged(item.quantity - 1),
-                            customBorder: const CircleBorder(),
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.06),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.remove_rounded,
-                                size: 18,
-                                color: CartScreen.secondaryColor,
+                          child: KZPressableScale(
+                            enabled: !isPending,
+                            child: InkWell(
+                              onTap: isPending
+                                  ? null
+                                  : () => onQuantityChanged(item.quantity - 1),
+                              customBorder: const CircleBorder(),
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.06,
+                                      ),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.remove_rounded,
+                                  size: 18,
+                                  color: isPending
+                                      ? CartScreen.outlineVariantColor
+                                      : CartScreen.secondaryColor,
+                                ),
                               ),
                             ),
                           ),
@@ -786,40 +815,61 @@ class _CartItemCard extends StatelessWidget {
                         Container(
                           constraints: const BoxConstraints(minWidth: 36),
                           alignment: Alignment.center,
-                          child: Text(
-                            '${item.quantity}',
-                            style: KZ.priceLarge.copyWith(
-                              fontSize: 18,
-                              color: CartScreen.onSurfaceColor,
+                          child: AnimatedSwitcher(
+                            duration: KZMotion.durationFor(
+                              context,
+                              KZMotion.fast,
+                            ),
+                            transitionBuilder: (child, animation) =>
+                                FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                ),
+                            child: Text(
+                              '${item.quantity}',
+                              key: ValueKey<int>(item.quantity),
+                              style: KZ.priceLarge.copyWith(
+                                fontSize: 18,
+                                color: CartScreen.onSurfaceColor,
+                              ),
                             ),
                           ),
                         ),
                         Semantics(
                           button: true,
                           label: 'Increase quantity',
-                          child: InkWell(
-                            onTap: () => onQuantityChanged(item.quantity + 1),
-                            customBorder: const CircleBorder(),
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: CartScreen.primaryColor,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: CartScreen.primaryColor.withValues(
-                                      alpha: 0.25,
+                          child: KZPressableScale(
+                            enabled: !isPending,
+                            child: InkWell(
+                              onTap: isPending
+                                  ? null
+                                  : () => onQuantityChanged(item.quantity + 1),
+                              customBorder: const CircleBorder(),
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: isPending
+                                      ? CartScreen.primaryColor.withValues(
+                                          alpha: 0.5,
+                                        )
+                                      : CartScreen.primaryColor,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: CartScreen.primaryColor.withValues(
+                                        alpha: 0.25,
+                                      ),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
                                     ),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.add_rounded,
-                                size: 18,
-                                color: Colors.white,
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.add_rounded,
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),

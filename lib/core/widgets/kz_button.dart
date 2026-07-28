@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 
 /// Which semantic role a [KZButton] plays. Pick by meaning, not by how you
 /// want it to look — the variant already encodes the correct visual
@@ -88,7 +89,9 @@ class KZButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = _palette;
     final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(KZ.radiusFull), // 999px pill unified everywhere
+      borderRadius: BorderRadius.circular(
+        KZ.radiusFull,
+      ), // 999px pill unified everywhere
       side: palette.border != null
           ? BorderSide(
               color: _disabled
@@ -101,6 +104,7 @@ class KZButton extends StatelessWidget {
 
     final Widget content = loading
         ? SizedBox(
+            key: const ValueKey('loading'),
             width: 20,
             height: 20,
             child: CircularProgressIndicator(
@@ -109,6 +113,7 @@ class KZButton extends StatelessWidget {
             ),
           )
         : Row(
+            key: const ValueKey('label'),
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -131,6 +136,8 @@ class KZButton extends StatelessWidget {
           );
 
     final button = ElevatedButton(
+      // `loading` blocks re-entry the same way `_disabled` does — a button
+      // mid-submit must reject repeated taps, not just look busy.
       onPressed: _disabled ? null : onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: palette.background,
@@ -151,10 +158,17 @@ class KZButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: KZ.sp20),
         shape: shape,
       ),
-      child: content,
+      child: AnimatedSwitcher(
+        duration: KZMotion.durationFor(context, KZMotion.fast),
+        transitionBuilder: (child, animation) =>
+            FadeTransition(opacity: animation, child: child),
+        child: content,
+      ),
     );
 
-    return fullWidth ? SizedBox(width: double.infinity, child: button) : button;
+    final scaled = KZPressableScale(enabled: !_disabled, child: button);
+
+    return fullWidth ? SizedBox(width: double.infinity, child: scaled) : scaled;
   }
 }
 
@@ -195,6 +209,7 @@ class KZIconButton extends StatelessWidget {
         ),
       ),
     );
-    return tooltip == null ? button : Semantics(label: tooltip, child: button);
+    final scaled = KZPressableScale(enabled: onPressed != null, child: button);
+    return tooltip == null ? scaled : Semantics(label: tooltip, child: scaled);
   }
 }

@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 
@@ -58,7 +59,9 @@ class OrderSuccessScreen extends StatelessWidget {
                     children: [
                       Text(
                         'app_name'.tr(),
-                        style: KZ.pageTitle.copyWith(color: OrderSuccessScreen.primaryColor),
+                        style: KZ.pageTitle.copyWith(
+                          color: OrderSuccessScreen.primaryColor,
+                        ),
                       ),
                       Semantics(
                         button: true,
@@ -96,53 +99,74 @@ class OrderSuccessScreen extends StatelessWidget {
                     children: [
                       const SizedBox(height: 10),
 
-                      // Success Animation Hero Section
+                      // Success Animation Hero Section — one restrained
+                      // entrance emphasis (scale + fade), not a loop.
                       Column(
                         children: [
-                          Container(
-                            width: 108,
-                            height: 108,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: OrderSuccessScreen.tertiaryColor
-                                    .withValues(alpha: 0.2),
-                                width: 4,
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.7, end: 1.0),
+                            duration: MediaQuery.of(context).disableAnimations
+                                ? Duration.zero
+                                : KZMotion.emphasized,
+                            curve: KZMotion.successEmphasis,
+                            builder: (context, value, child) => Opacity(
+                              opacity: value.clamp(0.0, 1.0),
+                              child: Transform.scale(
+                                scale: value,
+                                child: child,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.06),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
                             ),
-                            child: Center(
-                              child: Container(
-                                width: 58,
-                                height: 58,
-                                decoration: const BoxDecoration(
-                                  color: OrderSuccessScreen.tertiaryColor,
-                                  shape: BoxShape.circle,
+                            child: Container(
+                              width: 108,
+                              height: 108,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: OrderSuccessScreen.tertiaryColor
+                                      .withValues(alpha: 0.2),
+                                  width: 4,
                                 ),
-                                child: const Icon(
-                                  Icons.check_rounded,
-                                  color: Colors.white,
-                                  size: 34,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.06),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Container(
+                                  width: 58,
+                                  height: 58,
+                                  decoration: const BoxDecoration(
+                                    color: OrderSuccessScreen.tertiaryColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.check_rounded,
+                                    color: Colors.white,
+                                    size: 34,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                           const SizedBox(height: 20),
-                          Text('order_success.title'.tr(), style: KZ.display.copyWith(fontSize: 28)),
+                          Text(
+                            'order_success.title'.tr(),
+                            style: KZ.display.copyWith(fontSize: 28),
+                          ),
                           const SizedBox(height: 8),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24),
                             child: Text(
                               'order_success.subtitle'.tr(),
                               textAlign: TextAlign.center,
-                              style: KZ.bodyLarge.copyWith(color: OrderSuccessScreen.secondaryColor, height: 1.4),
+                              style: KZ.bodyLarge.copyWith(
+                                color: OrderSuccessScreen.secondaryColor,
+                                height: 1.4,
+                              ),
                             ),
                           ),
                         ],
@@ -155,10 +179,18 @@ class OrderSuccessScreen extends StatelessWidget {
                           // Order Number Card
                           Expanded(
                             child: KZCard(
-                              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 20,
+                                horizontal: 16,
+                              ),
                               child: Column(
                                 children: [
-                                  Text('order_success.order_number_label'.tr(), style: KZ.statusLabel.copyWith(color: OrderSuccessScreen.secondaryColor)),
+                                  Text(
+                                    'order_success.order_number_label'.tr(),
+                                    style: KZ.statusLabel.copyWith(
+                                      color: OrderSuccessScreen.secondaryColor,
+                                    ),
+                                  ),
                                   const SizedBox(height: 6),
                                   Text(orderNumDisplay, style: KZ.priceLarge),
                                 ],
@@ -170,14 +202,24 @@ class OrderSuccessScreen extends StatelessWidget {
                           // Delivery Time Card
                           Expanded(
                             child: KZCard(
-                              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 20,
+                                horizontal: 16,
+                              ),
                               child: Column(
                                 children: [
-                                  Text('order_success.estimated_time_label'.tr(), style: KZ.statusLabel.copyWith(color: OrderSuccessScreen.secondaryColor)),
+                                  Text(
+                                    'order_success.estimated_time_label'.tr(),
+                                    style: KZ.statusLabel.copyWith(
+                                      color: OrderSuccessScreen.secondaryColor,
+                                    ),
+                                  ),
                                   const SizedBox(height: 6),
                                   Text(
                                     estimatedTimeDisplay,
-                                    style: KZ.priceLarge.copyWith(color: OrderSuccessScreen.tertiaryColor),
+                                    style: KZ.priceLarge.copyWith(
+                                      color: OrderSuccessScreen.tertiaryColor,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -316,9 +358,15 @@ class OrderSuccessScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     'order_success.earned_points_notice'.tr(
-                                      namedArgs: {'points': '${order.loyaltyPointsEarned}'},
+                                      namedArgs: {
+                                        'points':
+                                            '${order.loyaltyPointsEarned}',
+                                      },
                                     ),
-                                    style: KZ.bodyLarge.copyWith(fontWeight: FontWeight.w700, color: KZ.onSurface),
+                                    style: KZ.bodyLarge.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: KZ.onSurface,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(

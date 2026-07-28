@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/responsive/responsive_breakpoints.dart';
 import '../notifiers/cart_notifier.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 
 class CustomerShell extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
@@ -103,8 +104,12 @@ class CustomerShell extends ConsumerWidget {
                   label: Text('nav.menu'.tr()),
                 ),
                 NavigationRailDestination(
-                  icon: _buildCartIcon(itemCount, isSelected: false),
-                  selectedIcon: _buildCartIcon(itemCount, isSelected: true),
+                  icon: _buildCartIcon(context, itemCount, isSelected: false),
+                  selectedIcon: _buildCartIcon(
+                    context,
+                    itemCount,
+                    isSelected: true,
+                  ),
                   label: Text('nav.cart'.tr()),
                 ),
                 NavigationRailDestination(
@@ -196,11 +201,11 @@ class CustomerShell extends ConsumerWidget {
             BottomNavigationBarItem(
               icon: Padding(
                 padding: const EdgeInsets.only(bottom: 4),
-                child: _buildCartIcon(itemCount, isSelected: false),
+                child: _buildCartIcon(context, itemCount, isSelected: false),
               ),
               activeIcon: Padding(
                 padding: const EdgeInsets.only(bottom: 4),
-                child: _buildCartIcon(itemCount, isSelected: true),
+                child: _buildCartIcon(context, itemCount, isSelected: true),
               ),
               label: 'nav.cart'.tr(),
             ),
@@ -232,7 +237,11 @@ class CustomerShell extends ConsumerWidget {
     );
   }
 
-  Widget _buildCartIcon(int count, {required bool isSelected}) {
+  Widget _buildCartIcon(
+    BuildContext context,
+    int count, {
+    required bool isSelected,
+  }) {
     final iconColor = isSelected ? primaryColor : unselectedColor;
     return Stack(
       clipBehavior: Clip.none,
@@ -242,30 +251,40 @@ class CustomerShell extends ConsumerWidget {
           size: 24,
           color: iconColor,
         ),
-        if (count > 0)
-          Positioned(
-            top: -5,
-            right: -8,
-            child: Container(
-              padding: const EdgeInsets.all(3),
-              decoration: const BoxDecoration(
-                color: primaryColor,
-                shape: BoxShape.circle,
-              ),
-              constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
-              child: Center(
-                child: Text(
-                  '$count',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    height: 1.0,
-                  ),
-                ),
-              ),
-            ),
+        Positioned(
+          top: -5,
+          right: -8,
+          child: AnimatedSwitcher(
+            duration: KZMotion.durationFor(context, KZMotion.fast),
+            transitionBuilder: (child, animation) =>
+                ScaleTransition(scale: animation, child: child),
+            child: count > 0
+                ? Container(
+                    key: ValueKey<int>(count),
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(
+                      color: primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 17,
+                      minHeight: 17,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$count',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          height: 1.0,
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(key: ValueKey('empty')),
           ),
+        ),
       ],
     );
   }

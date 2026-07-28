@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 
 /// The one shared surface for every card-like container — product/food
 /// cards, order cards, summary/info cards, admin metric cards. Wraps
@@ -27,7 +28,7 @@ class KZCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final card = Container(
       clipBehavior: onTap != null ? Clip.antiAlias : Clip.none,
       decoration: KZ.cardDecoration(color: color),
       child: onTap == null
@@ -40,6 +41,7 @@ class KZCard extends StatelessWidget {
               ),
             ),
     );
+    return onTap == null ? card : KZPressableScale(child: card);
   }
 }
 
@@ -72,6 +74,12 @@ class KZFoodImage extends StatelessWidget {
           : CachedNetworkImage(
               imageUrl: imageUrl,
               fit: BoxFit.cover,
+              // Stable-size placeholder (this `AspectRatio` box) avoids any
+              // layout shift while loading; the fade-in itself just makes
+              // the swap from placeholder to photo feel intentional rather
+              // than a flicker.
+              fadeInDuration: KZMotion.standard,
+              fadeInCurve: KZMotion.enterExit,
               placeholder: (context, url) =>
                   Container(color: KZ.surfaceContainerLow),
               errorWidget: (context, url, error) => Container(
