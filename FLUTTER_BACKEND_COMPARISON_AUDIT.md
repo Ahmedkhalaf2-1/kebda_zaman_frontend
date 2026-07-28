@@ -1041,6 +1041,37 @@ Required behavior:
 
 **Current status (2026-07-28): RESOLVED.** Phase 5 added an initial `redirect` callback on the top-level `GoRouter` (`lib/core/router/router.dart`) confining `CASHIER` to `/admin/orders*` and gating `/admin/staff` to `ADMIN`. `fix/phase-5-role-session-guards` then made the guard comprehensive: any `/admin/*` path now requires an authenticated session (`!auth.isLoggedIn` → `/login`), `ADMIN` gets full access, `CASHIER` is confined to `/admin/orders*`, and any other authenticated role (`CUSTOMER`, incl. guest) is redirected to `/home` — closing the exact gap this finding described (no guard against an unauthenticated or CUSTOMER session reaching `/admin/*`). `AdminShell` also hides all owner-only nav destinations (dashboard, menu, offers, notifications, settings, staff, and now Customers — Phase 6) for `CASHIER`. Phase 6 added `/admin/customers` and `/admin/customers/:id`, which are automatically covered by this same guard with no new guard code needed (CASHIER's allow-list stays `/admin/orders*` only). Backend authorization (`@Roles(...)`) remains the real security boundary either way; this is a client-side UX/routing improvement on top of it.
 
+## Dashboard analytics used client-side approximation (new finding, resolved 2026-07-28)
+
+**Files (pre-Phase 7):**
+
+```text
+lib/features/shared/domain/repositories/admin_analytics_repository.dart
+lib/features/admin/presentation/notifiers/dashboard_notifier.dart
+lib/features/admin/presentation/screens/dashboard_screen.dart
+```
+
+The admin dashboard previously computed all of its numbers client-side by
+fetching every order via `getAllOrders()` and looping over the in-memory
+list — today's order count, today's revenue, best/low-performing items — and
+displayed a fabricated `"+{todaysOrders * 5}%"` trend badge with no backend
+basis. None of this scaled past a small order volume and none of it matched
+a real reporting contract.
+
+**Current status (2026-07-28): RESOLVED.** Phase 7 added
+`GET /admin/reports/{overview,sales,orders,top-items}`
+(`PHASE_7_REPORTS_ANALYTICS_API_CONTRACT.md`, backend repo), and the
+dashboard was rewritten to consume them directly: `ReportsRepository` /
+`ApiReportsRepository` (`lib/features/admin/data/api_reports_repository.dart`)
++ `reportsDashboardProvider`
+(`lib/features/admin/presentation/notifiers/reports_dashboard_notifier.dart`)
+replace `AdminAnalyticsRepository`/`DashboardNotifier` entirely (both
+deleted — no remaining callers). Revenue, order counts, average order value,
+customer counts, sales-timeline points, order/fulfillment/payment breakdowns,
+and top-selling items are now all backend-computed; the fabricated trend
+badge was removed rather than replaced with a real one, since the backend
+does not return a trend/delta field.
+
 ---
 
 # 12. API Configuration

@@ -1675,6 +1675,42 @@ GUESTS
 
 ---
 
+# 21a. Admin Reports & Analytics API (Phase 7)
+
+All require `ADMIN` only (unlike `admin/orders`, `CASHIER` is rejected here with
+`403 FORBIDDEN`). Consumed by the admin dashboard's analytics sections
+(`ReportsRepository` / `ApiReportsRepository` / `reportsDashboardProvider`).
+
+```http
+GET /admin/reports/overview?from=&to=
+GET /admin/reports/sales?from=&to=&groupBy=day|week|month
+GET /admin/reports/orders?from=&to=
+GET /admin/reports/top-items?from=&to=&limit=10
+```
+
+- `from`/`to` are UTC date-only strings (`"YYYY-MM-DD"`); `to` is inclusive.
+  Omitted on `overview`/`orders`/`top-items` means "all time"; `sales` defaults
+  to a trailing 30-UTC-day window when omitted.
+- `overview` — `totalRevenue`, `totalOrders`, `deliveredOrders`,
+  `cancelledOrders`, `averageOrderValue`, `activeCustomers`, `newCustomers`,
+  `deliveryOrders`, `pickupOrders`, `cashOrders`, `cardOrders`. Revenue/average
+  are delivered-orders-only; `activeCustomers` is a global snapshot, not
+  date-scoped.
+- `sales` — array of `{ period, revenue, orderCount, deliveredOrderCount }`,
+  already sorted ascending and gap-filled by the backend. Never re-sort,
+  interpolate, or re-bucket client-side.
+- `orders` — `{ byStatus[], byFulfillmentType[], byPaymentMethod[] }`, every
+  enum value always present with `count: 0` (6 statuses, 2 fulfillment types,
+  3 payment methods incl. `WALLET`).
+- `top-items` — array of `{ menuItemId, nameAr, nameEn, quantitySold, revenue }`,
+  delivered-orders-only, sorted by `quantitySold` desc then `revenue` desc.
+- Do not recompute any of these numbers client-side — every field comes
+  straight from the backend. See
+  `PHASE_7_REPORTS_ANALYTICS_API_CONTRACT.md` (backend repo) for full field
+  semantics and the `INVALID_DATE_RANGE`/`DATE_RANGE_TOO_LARGE` error codes.
+
+---
+
 # 22. API-Facing Enums
 
 | Enum | Wire values |
