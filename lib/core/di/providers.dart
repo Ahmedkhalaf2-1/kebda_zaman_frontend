@@ -18,7 +18,6 @@ import 'package:kebda_zaman/features/shared/domain/repositories/promo_repository
 import 'package:kebda_zaman/features/shared/data/fake_promo_repository.dart';
 import 'package:kebda_zaman/features/shared/data/api_promo_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/settings_repository.dart';
-import 'package:kebda_zaman/features/shared/data/fake_settings_repository.dart';
 import 'package:kebda_zaman/features/shared/data/api_settings_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/models/restaurant_settings.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/admin_notification_repository.dart';
@@ -32,6 +31,8 @@ import 'package:kebda_zaman/features/admin/domain/repositories/customer_reposito
 import 'package:kebda_zaman/features/admin/data/api_customer_repository.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/reports_repository.dart';
 import 'package:kebda_zaman/features/admin/data/api_reports_repository.dart';
+import 'package:kebda_zaman/features/shared/domain/repositories/delivery_zone_repository.dart';
+import 'package:kebda_zaman/features/shared/data/api_delivery_zone_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kebda_zaman/core/api/api_client.dart';
 import 'package:kebda_zaman/core/api/api_interceptors.dart';
@@ -133,6 +134,10 @@ final customerRepositoryProvider = Provider<CustomerRepository>((ref) {
 
 final reportsRepositoryProvider = Provider<ReportsRepository>((ref) {
   return ApiReportsRepository(ref.watch(apiClientProvider));
+});
+
+final deliveryZoneRepositoryProvider = Provider<DeliveryZoneRepository>((ref) {
+  return ApiDeliveryZoneRepository(ref.watch(apiClientProvider));
 });
 
 final adminOrderNotificationRepositoryProvider =

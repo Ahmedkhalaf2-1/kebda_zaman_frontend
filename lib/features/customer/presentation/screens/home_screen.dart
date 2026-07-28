@@ -177,7 +177,7 @@ class HomeScreen extends ConsumerWidget {
                   const SliverToBoxAdapter(child: _DeliveryAddressCard()),
 
                   // Closed Notice Banner (if applicable)
-                  if (!data.isOpen)
+                  if (!data.acceptingOrders)
                     SliverToBoxAdapter(
                       child: Container(
                         margin: const EdgeInsets.symmetric(
@@ -202,7 +202,10 @@ class HomeScreen extends ConsumerWidget {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'home.closed_notice'.tr(),
+                                (context.locale.languageCode == 'ar'
+                                        ? data.closedMessageAr
+                                        : data.closedMessageEn) ??
+                                    'home.closed_notice'.tr(),
                                 style: KZ.body.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: const Color(0xFF93000A),
@@ -400,17 +403,22 @@ class HomeScreen extends ConsumerWidget {
                                     isFavorite: isFav,
                                     onToggleFavorite: () async {
                                       final success = await ref
-                                          .read(customerFavoritesProvider.notifier)
+                                          .read(
+                                            customerFavoritesProvider.notifier,
+                                          )
                                           .toggleFavorite(item.id);
                                       if (!success && context.mounted) {
                                         final err = ref
                                             .read(customerFavoritesProvider)
                                             .errorMessage;
                                         if (err != null) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(err),
-                                              behavior: SnackBarBehavior.floating,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
                                             ),
                                           );
                                         }

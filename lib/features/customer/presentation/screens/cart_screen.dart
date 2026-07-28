@@ -143,7 +143,6 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                           physics: const BouncingScrollPhysics(),
                           padding: const EdgeInsets.fromLTRB(20, 12, 20, 160),
                           children: [
-
                             // Cart Items — grouped together, small gaps
                             // between each card since they're one section.
                             for (final item in cart.items) ...[
@@ -346,7 +345,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               decoration: InputDecoration(
                 hintText: 'cart.promo_hint'.tr(),
                 hintStyle: KZ.bodyLarge.copyWith(
-                  color: CartScreen.onSurfaceVariantColor.withValues(alpha: 0.5),
+                  color: CartScreen.onSurfaceVariantColor.withValues(
+                    alpha: 0.5,
+                  ),
                 ),
                 border: InputBorder.none,
                 isCollapsed: true,
@@ -472,7 +473,10 @@ class _CartScreenState extends ConsumerState<CartScreen> {
             ),
           row(
             'cart.delivery_fee'.tr(),
-            '${cart.deliveryFee.toStringAsFixed(0)} ${'common.egp'.tr()}',
+            // Cart-stage deliveryFee is always 0 (zone-specific pricing is
+            // resolved at checkout, not before a zone is chosen) — showing
+            // "0 EGP" here would read as "free delivery", which it isn't.
+            'cart.delivery_fee_at_checkout'.tr(),
           ),
           if (cart.taxTotal > 0)
             row(

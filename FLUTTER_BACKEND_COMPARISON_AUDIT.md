@@ -538,7 +538,21 @@ Choose one explicit source:
 
 Do not imply that `/settings` supplied values it did not return.
 
-**Current status (2026-07-28): NOT RE-VERIFIED.** This finding lives primarily in `api_settings_repository.dart`, outside this pass's Loyalty-only scope — not reinspected.
+**Current status (2026-07-28): RESOLVED.** Confirmed against
+`PHASE_8_RESTAURANT_SETTINGS_API_CONTRACT.md` and the backend Prisma schema
+that `RestaurantSettings` has no loyalty-policy fields at all — loyalty
+lives entirely in `LoyaltyAccount`/`LoyaltyTransaction`, with no policy
+endpoint anywhere in the API. `RestaurantSettings.loyaltyEgpStep` etc. were
+removed from the model (which was rewritten for Phase 8's real fields
+anyway); the same four values now live in a standalone `LoyaltyPolicy`
+constant (`lib/features/shared/domain/models/restaurant_settings.dart`) that
+`LoyaltyNotifier` (`lib/features/customer/presentation/notifiers/loyalty_notifier.dart`)
+exposes via `LoyaltyData.policy` instead of `LoyaltyData.settings`. This
+picks option 2 from the required fix above — a versioned client constant,
+honestly labeled as such — and `loyalty_screen.dart`/`profile_screen.dart`
+were updated to read `data.policy.*` instead of `data.settings.loyalty*`.
+No behavior change (same numeric values), but the model no longer implies
+`/settings` returned them.
 
 ## 5.5 Loyalty errors are hidden in Profile
 

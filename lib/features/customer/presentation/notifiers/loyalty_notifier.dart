@@ -7,12 +7,12 @@ import 'package:kebda_zaman/features/shared/domain/models/restaurant_settings.da
 class LoyaltyData {
   final LoyaltyAccount account;
   final List<LoyaltyTransaction> history;
-  final RestaurantSettings settings;
+  final LoyaltyPolicy policy;
 
   LoyaltyData({
     required this.account,
     required this.history,
-    required this.settings,
+    required this.policy,
   });
 }
 
@@ -20,8 +20,8 @@ class LoyaltyNotifier extends AutoDisposeAsyncNotifier<LoyaltyData> {
   @override
   Future<LoyaltyData> build() async {
     final repo = ref.read(loyaltyRepositoryProvider);
-    final settings = await ref.watch(restaurantSettingsProvider.future);
     final authState = ref.read(authNotifierProvider);
+    const policy = LoyaltyPolicy.standard;
 
     if (!authState.isLoggedIn || (authState.user?.isGuest ?? false)) {
       return LoyaltyData(
@@ -31,7 +31,7 @@ class LoyaltyNotifier extends AutoDisposeAsyncNotifier<LoyaltyData> {
           lifetimePointsEarned: 0,
         ),
         history: [],
-        settings: settings,
+        policy: policy,
       );
     }
 
@@ -45,7 +45,7 @@ class LoyaltyNotifier extends AutoDisposeAsyncNotifier<LoyaltyData> {
     final account = accResult.fold((f) => throw f, (data) => data);
     final history = histResult.fold((f) => throw f, (data) => data);
 
-    return LoyaltyData(account: account, history: history, settings: settings);
+    return LoyaltyData(account: account, history: history, policy: policy);
   }
 }
 

@@ -649,30 +649,38 @@ Errors:
 
 ---
 
-# 7. Restaurant Settings API
+# 7. Restaurant Settings API (updated — Phase 8)
 
 ```http
 GET /settings
 ```
 
-Public.
-
-Response:
+Public. Response (`RestaurantSettings` — `lib/features/shared/domain/models/restaurant_settings.dart`):
 
 ```json
 {
-  "deliveryFee": 20,
-  "taxRatePercent": 14,
-  "minOrderAmount": 50,
-  "workingHours": {
-    "open": "10:00",
-    "close": "02:00"
-  },
+  "restaurantNameAr": "...", "restaurantNameEn": "...", "logoUrl": null,
+  "phone": "...", "addressAr": "...", "addressEn": "...",
+  "deliveryFee": 20, "taxRatePercent": 14, "minOrderAmount": 50,
+  "workingHours": [
+    { "dayOfWeek": 0, "isOpen": true, "openTime": "10:00", "closeTime": "02:00" }
+    /* ... 7 entries, dayOfWeek 0-6, 0 = Sunday */
+  ],
+  "timezone": "Africa/Cairo",
+  "acceptingOrders": true, "closedMessageAr": null, "closedMessageEn": null,
   "isMaintenanceMode": false
 }
 ```
 
-Flutter must enforce the maintenance-mode UI. The backend does not block all endpoints automatically.
+- `workingHours` is informational/display only (an "Hours" screen) — it never
+  gates checkout. `acceptingOrders` is the **only** checkout gate; read it
+  (plus `closedMessageAr`/`closedMessageEn`) to show a proactive "currently
+  closed" banner, but the backend enforces it regardless of what the client
+  shows.
+- `deliveryFee` here is a legacy/unused field kept for backward compatibility
+  — DELIVERY pricing is zone-specific (see §8 and the Delivery Zones API
+  below) and never reads this value.
+- Full details: `PHASE_8_RESTAURANT_SETTINGS_API_CONTRACT.md` (backend repo).
 
 ---
 
@@ -707,6 +715,7 @@ Request:
     "apartment": "5",
     "city": "Jeddah"
   },
+  "deliveryZoneId": "uuid",
   "promoCode": "WELCOME10",
   "notes": "Call on arrival"
 }
@@ -721,15 +730,23 @@ For pickup:
 }
 ```
 
-Do not send price, subtotal, fee, tax, discount, or total fields.
+Do not send price, subtotal, fee, tax, discount, or total fields — and,
+since Phase 8, never send a delivery fee at all: `deliveryZoneId` (uuid,
+**required for `DELIVERY`**) is the only delivery-related field, fetched
+from `GET /delivery-zones` and picked by the customer at checkout. `PICKUP`
+ignores it if sent.
 
-Response `201`: full order object.
+Response `201`: full order object, now with an additive `deliveryZone: {id,
+nameAr, nameEn} | null` field (null for `PICKUP` and pre-Phase-8 orders).
 
 Errors include:
 
 - `422 DELIVERY_ADDRESS_REQUIRED`
 - `409 EMPTY_CART`
-- `422 BELOW_MIN_ORDER`
+- `422 BELOW_MIN_ORDER` — store-wide floor (`settings.minOrderAmount`).
+- `422 MINIMUM_ORDER_NOT_MET` — zone-specific floor (`details.minimumOrder`), checked before `BELOW_MIN_ORDER`.
+- `422 DELIVERY_ZONE_UNAVAILABLE` — missing/unknown/inactive/deleted zone id.
+- `422 RESTAURANT_NOT_ACCEPTING_ORDERS` — `settings.acceptingOrders === false`; `details: {closedMessageAr, closedMessageEn}`. Checked first, before cart/zone validation. Cart/menu browsing stay unaffected — only this write path is gated.
 - Promo errors
 - `404 ITEM_UNAVAILABLE`
 - `422 INVALID_VARIANT`
@@ -1582,33 +1599,58 @@ Codes are normalized to uppercase.
 
 ---
 
-# 20. Admin Settings API
+# 20. Admin Settings API (updated — Phase 8)
 
-All require `ADMIN`.
+All require `ADMIN` (`CASHIER`/`CUSTOMER` → `403`).
 
 ```http
 GET /admin/settings
 PUT /admin/settings
 ```
 
-`PUT` is full replacement.
+`GET` returns everything the public `/settings` shape returns (§7) plus `id`,
+`currency`, `updatedAt`. `PUT` is full replacement — see §7's example payload
+for the exact shape (`restaurantNameAr/En`, `logoUrl`, `phone`, `addressAr/En`,
+`taxRatePercent`, `deliveryFee`, `minOrderAmount`, `currency`, `workingHours`
+[7 entries], `timezone`, `isMaintenanceMode`, `acceptingOrders`,
+`closedMessageAr/En`). `logoUrl`/`closedMessageAr`/`closedMessageEn` are the
+only nullable/optional fields; everything else is required on every `PUT`.
 
-```json
-{
-  "restaurantName": "Kebda Zaman",
-  "phone": "+966500000000",
-  "addressText": "Jeddah",
-  "taxRatePercent": 15,
-  "deliveryFee": 10,
-  "minOrderAmount": 30,
-  "currency": "SAR",
-  "workingHours": {
-    "open": "10:00",
-    "close": "02:00"
-  },
-  "isMaintenanceMode": false
-}
+Flutter's Settings Center (`lib/features/admin/presentation/screens/admin_settings_screen.dart`)
+edits one shared draft across three tabs (Restaurant Profile / Working Hours /
+Order Acceptance) and always submits the full object, never a partial one.
+Logo upload reuses the existing `POST /admin/uploads/image` — there is no
+dedicated logo endpoint.
+
+---
+
+# 20a. Delivery Zones API (Phase 8)
+
+```http
+GET  /delivery-zones                 (public, no auth)
+GET  /admin/delivery-zones           (ADMIN only)
+POST /admin/delivery-zones           (ADMIN only)
+PATCH /admin/delivery-zones/:id      (ADMIN only)
+DELETE /admin/delivery-zones/:id     (ADMIN only, soft delete)
 ```
+
+`DeliveryZone`: `{ id, nameAr, nameEn, deliveryFee, minimumOrder, isActive,
+sortOrder }`. Public endpoint omits `isActive`/timestamps and only ever
+returns active, non-deleted zones, sorted `sortOrder` asc then `createdAt`
+asc — safe to feed directly into a picker. Admin endpoint returns every
+non-deleted zone (active and inactive).
+
+`POST`/`PATCH` body: `{ nameAr, nameEn, deliveryFee>=0, minimumOrder>=0,
+isActive?, sortOrder? }`. `PATCH` is full-replace-style (not a partial
+merge), matching the approved spec for this resource. `DELETE` is a soft
+delete (`204`) — not blocked by historical orders, since `Order` snapshots
+the zone's name/fee at checkout time and the FK is `onDelete: SetNull`.
+
+Flutter: `DeliveryZoneRepository`/`ApiDeliveryZoneRepository`
+(`lib/features/shared/`) back both `deliveryZonesProvider` (public, used by
+checkout) and `deliveryZoneAdminProvider` (admin CRUD screen at
+`/admin/delivery-zones`). No maps, polygons, or radius config — a zone is
+just a named area with a flat fee and minimum.
 
 ---
 
@@ -1708,6 +1750,45 @@ GET /admin/reports/top-items?from=&to=&limit=10
   straight from the backend. See
   `PHASE_7_REPORTS_ANALYTICS_API_CONTRACT.md` (backend repo) for full field
   semantics and the `INVALID_DATE_RANGE`/`DATE_RANGE_TOO_LARGE` error codes.
+
+---
+
+# 21b. Admin Panel Information Architecture (Phase 8)
+
+Reorganized `AdminShell` (`lib/features/admin/presentation/shells/admin_shell.dart`)
+into grouped sections instead of a flat list — same routes, no new screens
+for Promo Codes or Notifications (both reuse their existing screens/routes
+as-is):
+
+```text
+Dashboard                          /admin/dashboard
+Orders                             /admin/orders
+Catalog
+  Menu                             /admin/menu
+  Promo Codes / Offers             /admin/offers          (existing screen, repositioned)
+Marketing                          /admin/notifications    (existing compose+history screen, repositioned)
+Operations
+  Staff                            /admin/staff
+  Delivery Zones                   /admin/delivery-zones   (new — Phase 8)
+Customers                          /admin/customers
+Settings                           /admin/settings          (rebuilt as a 3-tab Settings Center)
+```
+
+`/admin/order-notifications` (the order-arrival notification bell/history —
+a distinct operational feature, not a marketing campaign) is unchanged and
+was not folded into the "Marketing" grouping.
+
+- Desktop/tablet: a fixed grouped sidebar (`_AdminSidebar`) with section
+  labels, replacing the old flat `NavigationRail`.
+- Mobile: a `Drawer` reachable from a slim top bar (`_AdminMobileShell`),
+  replacing the old bottom-navigation bar — too many destinations now for an
+  unlabeled icon row to stay scannable.
+- `CASHIER` keeps the exact pre-Phase-8 single-destination layout
+  (`_CashierShell`) — Orders Management + logout, nothing else — since
+  `CASHIER` gains none of the new sections and a sidebar/drawer would be
+  pure clutter for one destination. The Phase 5 router guard
+  (`lib/core/router/router.dart`'s `redirect` callback) is unchanged and
+  still the sole enforcement point.
 
 ---
 

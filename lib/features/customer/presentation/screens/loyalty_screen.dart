@@ -116,10 +116,8 @@ class LoyaltyScreen extends ConsumerWidget {
                         title: 'loyalty.earn_title'.tr(),
                         subtitle: 'loyalty.earn_sub'.tr(
                           namedArgs: {
-                            'points': '${data.settings.loyaltyPointsPerStep}',
-                            'egp': data.settings.loyaltyEgpStep.toStringAsFixed(
-                              0,
-                            ),
+                            'points': '${data.policy.pointsPerStep}',
+                            'egp': data.policy.egpStep.toStringAsFixed(0),
                           },
                         ),
                       ),
@@ -129,8 +127,7 @@ class LoyaltyScreen extends ConsumerWidget {
                         title: 'loyalty.redeem_title'.tr(),
                         subtitle: 'loyalty.redeem_sub'.tr(
                           namedArgs: {
-                            'min':
-                                '${data.settings.loyaltyMinRedemptionPoints}',
+                            'min': '${data.policy.minRedemptionPoints}',
                           },
                         ),
                       ),

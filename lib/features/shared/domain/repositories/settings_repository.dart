@@ -5,7 +5,7 @@ abstract class SettingsRepository {
   Future<Result<RestaurantSettings>> getSettings();
 
   /// Admin-only: hits `/admin/settings`, includes fields not present on the
-  /// public shape (phone, taxRatePercent, currency, workingHours) so a
+  /// public shape (`id`, `currency`, `updatedAt` per the contract) so a
   /// subsequent [updateSettings] full-replace call doesn't clobber them.
   Future<Result<RestaurantSettings>> getAdminSettings();
 

@@ -69,6 +69,7 @@ class ApiOrderRepository implements OrderRepository {
     required FulfillmentType deliveryMethod,
     required String paymentMethod,
     Map<String, dynamic>? deliveryAddress,
+    String? deliveryZoneId,
     String? promoCode,
     String? redeemRewardId,
     String? notes,
@@ -85,6 +86,14 @@ class ApiOrderRepository implements OrderRepository {
       if (deliveryMethod == FulfillmentType.delivery &&
           deliveryAddress != null) {
         payload['deliveryAddress'] = deliveryAddress;
+      }
+      // Required for DELIVERY, ignored (and never sent) for PICKUP — the
+      // backend re-reads the zone fresh from the DB; there is nowhere to put
+      // a client-supplied fee (CheckoutDto has no such field at all).
+      if (deliveryMethod == FulfillmentType.delivery &&
+          deliveryZoneId != null &&
+          deliveryZoneId.isNotEmpty) {
+        payload['deliveryZoneId'] = deliveryZoneId;
       }
       // promoCode and redeemRewardId are mutually exclusive server-side
       // (422 PROMO_AND_LOYALTY_MUTUALLY_EXCLUSIVE if both are sent) — the

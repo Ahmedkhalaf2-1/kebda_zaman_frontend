@@ -14,6 +14,7 @@ abstract class OrderRepository {
     required FulfillmentType deliveryMethod,
     required String paymentMethod,
     Map<String, dynamic>? deliveryAddress,
+    String? deliveryZoneId,
     String? promoCode,
     String? redeemRewardId,
     String? notes,

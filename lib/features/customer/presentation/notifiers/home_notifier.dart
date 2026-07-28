@@ -11,7 +11,9 @@ class HomeData {
   final List<MenuItem> offers;
   final List<MenuItem> recommended;
   final List<MenuItem> popular;
-  final bool isOpen;
+  final bool acceptingOrders;
+  final String? closedMessageAr;
+  final String? closedMessageEn;
 
   const HomeData({
     required this.categories,
@@ -20,7 +22,9 @@ class HomeData {
     required this.offers,
     required this.recommended,
     required this.popular,
-    required this.isOpen,
+    required this.acceptingOrders,
+    this.closedMessageAr,
+    this.closedMessageEn,
   });
 }
 
@@ -64,6 +68,8 @@ final homeDataProvider = FutureProvider<HomeData>((ref) async {
     offers: offers,
     recommended: recommended.take(5).toList(),
     popular: popular.take(5).toList(),
-    isOpen: settings.isOpen,
+    acceptingOrders: settings.acceptingOrders,
+    closedMessageAr: settings.closedMessageAr,
+    closedMessageEn: settings.closedMessageEn,
   );
 });
