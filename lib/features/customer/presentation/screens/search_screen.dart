@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import '../notifiers/search_notifier.dart';
 
@@ -201,13 +202,21 @@ class SearchScreen extends ConsumerWidget {
                         Row(
                           children: [
                             Text(
-                              '${hasDiscount ? item.discountPrice : item.basePrice} ${'common.egp'.tr()}',
+                              formatCurrency(
+                                hasDiscount
+                                    ? item.discountPrice!
+                                    : item.basePrice,
+                                locale: context.locale,
+                              ),
                               style: KZ.price,
                             ),
                             if (hasDiscount) ...[
                               const SizedBox(width: KZ.sp8),
                               Text(
-                                '${item.basePrice} ${'common.egp'.tr()}',
+                                formatCurrency(
+                                  item.basePrice,
+                                  locale: context.locale,
+                                ),
                                 style: KZ.bodySmall.copyWith(
                                   decoration: TextDecoration.lineThrough,
                                 ),

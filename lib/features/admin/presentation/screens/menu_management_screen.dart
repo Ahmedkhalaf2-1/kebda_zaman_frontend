@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/menu_admin_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
@@ -460,7 +461,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '${item.basePrice.toStringAsFixed(0)} EGP',
+                  formatCurrency(item.basePrice, locale: context.locale),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,

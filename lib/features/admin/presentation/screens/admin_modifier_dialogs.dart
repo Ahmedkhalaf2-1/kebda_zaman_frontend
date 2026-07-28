@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 
 /// Shows a dialog to create or edit a Modifier Group (e.g., "Extra Toppings", "Sandwich Size")
@@ -509,8 +510,8 @@ class _ModifierGroupDialogState extends State<_ModifierGroupDialog> {
                                     const SizedBox(height: 2),
                                     Text(
                                       opt.priceModifier > 0
-                                          ? '+${opt.priceModifier.toStringAsFixed(0)} EGP'
-                                          : 'Free (0 EGP)',
+                                          ? '+${formatCurrency(opt.priceModifier, locale: Localizations.localeOf(context))}'
+                                          : 'Free (${formatCurrency(0, locale: Localizations.localeOf(context))})',
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
@@ -751,7 +752,7 @@ class _ModifierOptionDialogState extends State<_ModifierOptionDialog> {
 
               // Extra Price Input
               const Text(
-                'Extra Price (EGP)',
+                'Extra Price (SAR)',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -764,7 +765,7 @@ class _ModifierOptionDialogState extends State<_ModifierOptionDialog> {
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   hintText: '0 (Free) or enter amount',
-                  suffixText: 'EGP',
+                  suffixText: 'SAR',
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(

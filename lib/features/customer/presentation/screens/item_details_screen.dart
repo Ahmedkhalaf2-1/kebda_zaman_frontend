@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/responsive/responsive_breakpoints.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/cart_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
@@ -199,7 +200,7 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
   }
 
   // Build Modifier Group Card
-  Widget _buildModifierGroupSection(ModifierGroup group) {
+  Widget _buildModifierGroupSection(BuildContext context, ModifierGroup group) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 32.0),
       child: Column(
@@ -261,8 +262,8 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                           ),
                           Text(
                             opt.priceModifier == 0
-                                ? '+0 ${'common.egp'.tr()}'
-                                : '+${opt.priceModifier.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                                ? '+${formatCurrency(0, locale: context.locale)}'
+                                : '+${formatCurrency(opt.priceModifier, locale: context.locale)}',
                             style: KZ.body,
                           ),
                         ],
@@ -367,7 +368,7 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  '+${opt.priceModifier.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                                  '+${formatCurrency(opt.priceModifier, locale: context.locale)}',
                                   style: KZ.bodySmall,
                                 ),
                               ],
@@ -455,7 +456,7 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '+${opt.priceModifier.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                              '+${formatCurrency(opt.priceModifier, locale: context.locale)}',
                               style: KZ.bodySmall,
                             ),
                           ],
@@ -692,7 +693,7 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
 
                               // Modifier Groups (Size, Extras, etc.)
                               for (final group in item.modifierGroups)
-                                _buildModifierGroupSection(group),
+                                _buildModifierGroupSection(context, group),
 
                               // Customize Ingredients Section
                               Padding(
@@ -944,19 +945,37 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.baseline,
                               textBaseline: TextBaseline.alphabetic,
-                              children: [
-                                Text(
-                                  totalPrice.toStringAsFixed(0),
-                                  style: KZ.priceLarge.copyWith(fontSize: 28),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'common.egp'.tr(),
-                                  style: KZ.label.copyWith(
-                                    color: ItemDetailsScreen.primaryColor,
-                                  ),
-                                ),
-                              ],
+                              children: context.locale.languageCode == 'ar'
+                                  ? [
+                                      Text(
+                                        totalPrice.toStringAsFixed(0),
+                                        style: KZ.priceLarge.copyWith(
+                                          fontSize: 28,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'ر.س',
+                                        style: KZ.label.copyWith(
+                                          color: ItemDetailsScreen.primaryColor,
+                                        ),
+                                      ),
+                                    ]
+                                  : [
+                                      Text(
+                                        'SAR',
+                                        style: KZ.label.copyWith(
+                                          color: ItemDetailsScreen.primaryColor,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        totalPrice.toStringAsFixed(0),
+                                        style: KZ.priceLarge.copyWith(
+                                          fontSize: 28,
+                                        ),
+                                      ),
+                                    ],
                             ),
                           ],
                         ),

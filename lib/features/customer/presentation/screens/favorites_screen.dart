@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
@@ -115,7 +116,9 @@ class _FavoriteItemCard extends ConsumerWidget {
                             .read(customerFavoritesProvider.notifier)
                             .toggleFavorite(item.id);
                         if (!success && context.mounted) {
-                          final err = ref.read(customerFavoritesProvider).errorMessage;
+                          final err = ref
+                              .read(customerFavoritesProvider)
+                              .errorMessage;
                           if (err != null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -149,7 +152,10 @@ class _FavoriteItemCard extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      '${hasDiscount ? item.discountPrice : item.basePrice} ${'common.egp'.tr()}',
+                      formatCurrency(
+                        hasDiscount ? item.discountPrice! : item.basePrice,
+                        locale: context.locale,
+                      ),
                       style: KZ.price,
                     ),
                   ],

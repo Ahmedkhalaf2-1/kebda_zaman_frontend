@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_details_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
@@ -78,12 +79,12 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
             ],
           ),
         ),
-        data: (order) => _buildOrderDetails(order),
+        data: (order) => _buildOrderDetails(context, order),
       ),
     );
   }
 
-  Widget _buildOrderDetails(Order order) {
+  Widget _buildOrderDetails(BuildContext context, Order order) {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
@@ -169,7 +170,10 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
                           ),
                         ),
                         Text(
-                          '${item.lineTotal.toStringAsFixed(0)} EGP',
+                          formatCurrency(
+                            item.lineTotal,
+                            locale: context.locale,
+                          ),
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -190,13 +194,13 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTotalRow('Subtotal', order.subtotal),
+              _buildTotalRow(context, 'Subtotal', order.subtotal),
               if (order.deliveryFee > 0)
-                _buildTotalRow('Delivery Fee', order.deliveryFee),
+                _buildTotalRow(context, 'Delivery Fee', order.deliveryFee),
               if (order.discountTotal > 0)
-                _buildTotalRow('Discount', -order.discountTotal),
+                _buildTotalRow(context, 'Discount', -order.discountTotal),
               const Divider(height: 20),
-              _buildTotalRow('Total', order.grandTotal, bold: true),
+              _buildTotalRow(context, 'Total', order.grandTotal, bold: true),
               if (order.paymentMethod != null) ...[
                 const SizedBox(height: 8),
                 Text(
@@ -218,7 +222,12 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTotalRow(String label, double amount, {bool bold = false}) {
+  Widget _buildTotalRow(
+    BuildContext context,
+    String label,
+    double amount, {
+    bool bold = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
@@ -233,7 +242,7 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
             ),
           ),
           Text(
-            '${amount.toStringAsFixed(0)} EGP',
+            formatCurrency(amount, locale: context.locale),
             style: TextStyle(
               fontSize: bold ? 15 : 13,
               fontWeight: bold ? FontWeight.w700 : FontWeight.w400,

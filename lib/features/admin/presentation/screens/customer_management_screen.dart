@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/features/admin/domain/models/customer_summary.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/customer_management_notifier.dart';
@@ -344,7 +345,7 @@ class _CustomerCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     '${'customers.orders'.tr()}: ${customer.orderCount}  •  '
-                    '${'customers.total_spent'.tr()}: ${customer.totalSpent.toStringAsFixed(0)} EGP',
+                    '${'customers.total_spent'.tr()}: ${formatCurrency(customer.totalSpent, locale: context.locale)}',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

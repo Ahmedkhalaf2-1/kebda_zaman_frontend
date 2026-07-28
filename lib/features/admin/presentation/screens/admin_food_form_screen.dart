@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_image_picker.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
@@ -706,7 +707,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
                       runSpacing: 6,
                       children: group.options.map((opt) {
                         final priceStr = opt.priceModifier > 0
-                            ? ' (+${opt.priceModifier.toStringAsFixed(0)} ${'common.egp'.tr()})'
+                            ? ' (+${formatCurrency(opt.priceModifier, locale: context.locale)})'
                             : ' (${'form.free'.tr()})';
                         return Chip(
                           avatar: Icon(

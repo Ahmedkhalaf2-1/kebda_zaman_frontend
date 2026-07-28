@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 
 import '../notifiers/cart_notifier.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
@@ -197,7 +198,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             const SizedBox(height: _blockGap),
                             _buildPromoSection(cart),
                             const SizedBox(height: _blockGap),
-                            _buildOrderSummarySection(cart),
+                            _buildOrderSummarySection(context, cart),
                             const SizedBox(height: _blockGap),
                             _buildRecommendationsSection(),
                           ],
@@ -425,7 +426,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
   }
 
   // ── Order Summary Section matching Stitch HTML ──
-  Widget _buildOrderSummarySection(Cart cart) {
+  Widget _buildOrderSummarySection(BuildContext context, Cart cart) {
     Widget row(String label, String value, {Color? color}) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
@@ -481,25 +482,25 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           const SizedBox(height: 8),
           row(
             'cart.subtotal'.tr(),
-            '${cart.subtotal.toStringAsFixed(0)} ${'common.egp'.tr()}',
+            formatCurrency(cart.subtotal, locale: context.locale),
           ),
           if (cart.discountTotal > 0)
             row(
               'cart.discount'.tr(),
-              '-${cart.discountTotal.toStringAsFixed(0)} ${'common.egp'.tr()}',
+              '-${formatCurrency(cart.discountTotal, locale: context.locale)}',
               color: KZ.error,
             ),
           row(
             'cart.delivery_fee'.tr(),
             // Cart-stage deliveryFee is always 0 (zone-specific pricing is
             // resolved at checkout, not before a zone is chosen) — showing
-            // "0 EGP" here would read as "free delivery", which it isn't.
+            // "0 SAR" here would read as "free delivery", which it isn't.
             'cart.delivery_fee_at_checkout'.tr(),
           ),
           if (cart.taxTotal > 0)
             row(
               'common.tax'.tr(),
-              '${cart.taxTotal.toStringAsFixed(0)} ${'common.egp'.tr()}',
+              formatCurrency(cart.taxTotal, locale: context.locale),
             ),
           Padding(
             padding: const EdgeInsets.only(top: 16, bottom: 16),
@@ -528,7 +529,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                   fit: BoxFit.scaleDown,
                   alignment: AlignmentDirectional.centerEnd,
                   child: Text(
-                    '${cart.grandTotal.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                    formatCurrency(cart.grandTotal, locale: context.locale),
                     style: KZ.priceLarge.copyWith(
                       fontSize: 32,
                       color: CartScreen.primaryColor,
@@ -702,7 +703,10 @@ class _CartItemCard extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: AlignmentDirectional.centerEnd,
                         child: Text(
-                          '${item.lineTotal.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                          formatCurrency(
+                            item.lineTotal,
+                            locale: context.locale,
+                          ),
                           style: KZ.priceLarge.copyWith(
                             fontSize: 18,
                             color: CartScreen.primaryColor,
@@ -949,7 +953,7 @@ class _RecommendationCard extends StatelessWidget {
               children: [
                 Flexible(
                   child: Text(
-                    '${price.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                    formatCurrency(price, locale: context.locale),
                     style: KZ.priceLarge.copyWith(
                       fontSize: 14,
                       color: CartScreen.primaryColor,
@@ -1066,7 +1070,7 @@ class _CheckoutButtonState extends State<_CheckoutButton> {
                       ),
                     ),
                     Text(
-                      '${widget.total.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                      formatCurrency(widget.total, locale: context.locale),
                       style: KZ.buttonLabel.copyWith(
                         fontSize: 18,
                         color: Colors.white,

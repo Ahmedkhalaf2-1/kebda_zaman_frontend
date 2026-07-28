@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/features/admin/domain/models/customer_summary.dart';
@@ -248,7 +249,10 @@ class CustomerDetailsScreen extends ConsumerWidget {
             Expanded(
               child: _StatTile(
                 label: 'customers.total_spent'.tr(),
-                value: '${customer.totalSpent.toStringAsFixed(0)} EGP',
+                value: formatCurrency(
+                  customer.totalSpent,
+                  locale: context.locale,
+                ),
               ),
             ),
           ],
@@ -404,7 +408,7 @@ class _RecentOrderTile extends StatelessWidget {
             ),
           ),
           Text(
-            '${order.totalAmount.toStringAsFixed(0)} EGP',
+            formatCurrency(order.totalAmount, locale: context.locale),
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
@@ -370,11 +371,10 @@ class _KpiSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final egp = 'common.egp'.tr();
     final primary = [
       _KpiSpec(
         'dashboard.total_revenue'.tr(),
-        '${overview.totalRevenue.toStringAsFixed(0)} $egp',
+        formatCurrency(overview.totalRevenue, locale: context.locale),
         Icons.payments_rounded,
         KZ.primary,
       ),
@@ -386,7 +386,7 @@ class _KpiSection extends StatelessWidget {
       ),
       _KpiSpec(
         'dashboard.average_order_value'.tr(),
-        '${overview.averageOrderValue.toStringAsFixed(1)} $egp',
+        formatCurrency(overview.averageOrderValue, locale: context.locale),
         Icons.bar_chart_rounded,
         const Color(0xFF00838F),
       ),
@@ -1079,7 +1079,6 @@ class _TopItemRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = isArabic ? item.nameAr : item.nameEn;
-    final egp = 'common.egp'.tr();
     final rankBadge = Container(
       width: 28,
       height: 28,
@@ -1125,7 +1124,7 @@ class _TopItemRow extends StatelessWidget {
             Expanded(
               flex: 2,
               child: Text(
-                '${item.revenue.toStringAsFixed(0)} $egp',
+                formatCurrency(item.revenue, locale: context.locale),
                 textAlign: TextAlign.end,
                 style: KZ.price,
               ),
@@ -1159,7 +1158,10 @@ class _TopItemRow extends StatelessWidget {
               ],
             ),
           ),
-          Text('${item.revenue.toStringAsFixed(0)} $egp', style: KZ.price),
+          Text(
+            formatCurrency(item.revenue, locale: context.locale),
+            style: KZ.price,
+          ),
         ],
       ),
     );

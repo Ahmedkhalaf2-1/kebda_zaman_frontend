@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_notification_notifier.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/order_management_notifier.dart';
@@ -123,7 +124,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                       itemCount: filteredOrders.length,
                       itemBuilder: (context, index) {
                         final order = filteredOrders[index];
-                        return _buildOrderCard(order);
+                        return _buildOrderCard(context, order);
                       },
                     ),
                   );
@@ -322,7 +323,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
     }
   }
 
-  Widget _buildOrderCard(Order order) {
+  Widget _buildOrderCard(BuildContext context, Order order) {
     final itemsSummary = order.items.map((i) => i.name).join(', ');
     final itemCount = order.items.fold(0, (sum, item) => sum + item.quantity);
     final timeStr = formatOrderTimestamp(order.placedAt);
@@ -418,7 +419,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '${order.grandTotal.toStringAsFixed(0)} EGP',
+                    formatCurrency(order.grandTotal, locale: context.locale),
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,

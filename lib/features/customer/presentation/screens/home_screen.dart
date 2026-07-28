@@ -16,6 +16,7 @@ import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 import 'package:kebda_zaman/features/shared/domain/models/user.dart';
 import 'package:kebda_zaman/core/responsive/responsive_breakpoints.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
@@ -755,14 +756,22 @@ class _BestSellerCard extends ConsumerWidget {
                         children: [
                           if (hasDiscount)
                             Text(
-                              '${item.basePrice} ${'common.egp'.tr()}',
+                              formatCurrency(
+                                item.basePrice,
+                                locale: context.locale,
+                              ),
                               style: KZ.bodySmall.copyWith(
                                 decoration: TextDecoration.lineThrough,
                                 fontSize: 11,
                               ),
                             ),
                           Text(
-                            '${hasDiscount ? item.discountPrice : item.basePrice} ${'common.egp'.tr()}',
+                            formatCurrency(
+                              hasDiscount
+                                  ? item.discountPrice!
+                                  : item.basePrice,
+                              locale: context.locale,
+                            ),
                             style: KZ.priceLarge.copyWith(fontSize: 17),
                           ),
                         ],
@@ -872,13 +881,21 @@ class _ShowcaseTile extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            '${hasDiscount ? item.discountPrice : item.basePrice} ${'common.egp'.tr()}',
+                            formatCurrency(
+                              hasDiscount
+                                  ? item.discountPrice!
+                                  : item.basePrice,
+                              locale: context.locale,
+                            ),
                             style: KZ.price.copyWith(color: Colors.white),
                           ),
                           if (hasDiscount) ...[
                             const SizedBox(width: KZ.sp8),
                             Text(
-                              '${item.basePrice} ${'common.egp'.tr()}',
+                              formatCurrency(
+                                item.basePrice,
+                                locale: context.locale,
+                              ),
                               style: KZ.bodySmall.copyWith(
                                 color: Colors.white.withValues(alpha: 0.75),
                                 decoration: TextDecoration.lineThrough,
@@ -998,13 +1015,21 @@ class _RecommendedTile extends ConsumerWidget {
                       child: Row(
                         children: [
                           Text(
-                            '${hasDiscount ? item.discountPrice : item.basePrice} ${'common.egp'.tr()}',
+                            formatCurrency(
+                              hasDiscount
+                                  ? item.discountPrice!
+                                  : item.basePrice,
+                              locale: context.locale,
+                            ),
                             style: KZ.price,
                           ),
                           if (hasDiscount) ...[
                             const SizedBox(width: 6),
                             Text(
-                              '${item.basePrice} ${'common.egp'.tr()}',
+                              formatCurrency(
+                                item.basePrice,
+                                locale: context.locale,
+                              ),
                               style: KZ.bodySmall.copyWith(
                                 decoration: TextDecoration.lineThrough,
                               ),
@@ -1382,7 +1407,10 @@ class _RecentOrderTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 2),
-            Text('${item.unitPrice} ${'common.egp'.tr()}', style: KZ.bodySmall),
+            Text(
+              formatCurrency(item.unitPrice, locale: context.locale),
+              style: KZ.bodySmall,
+            ),
           ],
         ),
       ),

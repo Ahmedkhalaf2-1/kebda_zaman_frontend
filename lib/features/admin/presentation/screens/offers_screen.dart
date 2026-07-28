@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
@@ -156,10 +157,10 @@ class _PromoRow extends StatelessWidget {
     required this.onDelete,
   });
 
-  String _discountLabel() {
+  String _discountLabel(BuildContext context) {
     return promo.discountType == DiscountType.percentage
         ? '${promo.value.toStringAsFixed(0)}%'
-        : '${promo.value.toStringAsFixed(0)} ${'common.egp'.tr()}';
+        : formatCurrency(promo.value, locale: context.locale);
   }
 
   String _formatDate(DateTime d) =>
@@ -221,7 +222,7 @@ class _PromoRow extends StatelessWidget {
                 ),
                 Expanded(
                   flex: 2,
-                  child: Text(_discountLabel(), style: KZ.body),
+                  child: Text(_discountLabel(context), style: KZ.body),
                 ),
                 Expanded(flex: 3, child: Text(metaLine, style: KZ.bodySmall)),
                 statusBadge,
@@ -242,7 +243,7 @@ class _PromoRow extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: KZ.sp4),
-                Text(_discountLabel(), style: KZ.body),
+                Text(_discountLabel(context), style: KZ.body),
                 const SizedBox(height: 2),
                 Text(metaLine, style: KZ.bodySmall),
                 Align(

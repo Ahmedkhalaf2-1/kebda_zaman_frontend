@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
@@ -189,7 +190,6 @@ class _ZoneRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final egp = 'common.egp'.tr();
     final statusBadge = KZStatusBadge(
       label: zone.isActive
           ? 'delivery_zones.active'.tr()
@@ -240,14 +240,14 @@ class _ZoneRow extends StatelessWidget {
             Expanded(
               flex: 2,
               child: Text(
-                '${'delivery_zones.delivery_fee'.tr()}: ${zone.deliveryFee.toStringAsFixed(0)} $egp',
+                '${'delivery_zones.delivery_fee'.tr()}: ${formatCurrency(zone.deliveryFee, locale: context.locale)}',
                 style: KZ.bodySmall,
               ),
             ),
             Expanded(
               flex: 2,
               child: Text(
-                '${'delivery_zones.minimum_order'.tr()}: ${zone.minimumOrder.toStringAsFixed(0)} $egp',
+                '${'delivery_zones.minimum_order'.tr()}: ${formatCurrency(zone.minimumOrder, locale: context.locale)}',
                 style: KZ.bodySmall,
               ),
             ),
@@ -283,11 +283,11 @@ class _ZoneRow extends StatelessWidget {
             runSpacing: KZ.sp4,
             children: [
               Text(
-                '${'delivery_zones.delivery_fee'.tr()}: ${zone.deliveryFee.toStringAsFixed(0)} $egp',
+                '${'delivery_zones.delivery_fee'.tr()}: ${formatCurrency(zone.deliveryFee, locale: context.locale)}',
                 style: KZ.bodySmall,
               ),
               Text(
-                '${'delivery_zones.minimum_order'.tr()}: ${zone.minimumOrder.toStringAsFixed(0)} $egp',
+                '${'delivery_zones.minimum_order'.tr()}: ${formatCurrency(zone.minimumOrder, locale: context.locale)}',
                 style: KZ.bodySmall,
               ),
               Text(

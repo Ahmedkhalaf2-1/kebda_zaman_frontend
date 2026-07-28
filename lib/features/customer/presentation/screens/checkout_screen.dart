@@ -16,6 +16,7 @@ import 'package:kebda_zaman/features/shared/domain/models/address.dart';
 import 'package:kebda_zaman/features/shared/domain/models/delivery_zone.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/core/api/api_exceptions.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
@@ -438,13 +439,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 break;
               case 'MINIMUM_ORDER_NOT_MET':
                 {
-                  final minimumOrder =
-                      (cause.details?['minimumOrder'] as num?)?.toStringAsFixed(
-                        0,
-                      ) ??
-                      '';
+                  final minimumOrder = cause.details?['minimumOrder'] as num?;
                   message = 'checkout.zone_minimum_order_error'.tr(
-                    namedArgs: {'min': minimumOrder},
+                    namedArgs: {
+                      'min': minimumOrder != null
+                          ? formatCurrency(minimumOrder, locale: context.locale)
+                          : '',
+                    },
                   );
                 }
                 break;
@@ -1120,7 +1121,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         style: KZ.bodyLarge,
                                       ),
                                       Text(
-                                        '${cart.subtotal.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                                        formatCurrency(
+                                          cart.subtotal,
+                                          locale: context.locale,
+                                        ),
                                         style: KZ.bodyLarge.copyWith(
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -1139,7 +1143,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                       Text(
                                         effectiveDeliveryFee == 0
                                             ? 'checkout.free'.tr().toUpperCase()
-                                            : '${effectiveDeliveryFee.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                                            : formatCurrency(
+                                                effectiveDeliveryFee,
+                                                locale: context.locale,
+                                              ),
                                         style: effectiveDeliveryFee == 0
                                             ? KZ.bodyLarge.copyWith(
                                                 fontWeight: FontWeight.w800,
@@ -1163,7 +1170,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                           style: KZ.bodyLarge,
                                         ),
                                         Text(
-                                          '${effectiveTax.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                                          formatCurrency(
+                                            effectiveTax,
+                                            locale: context.locale,
+                                          ),
                                           style: KZ.bodyLarge.copyWith(
                                             fontWeight: FontWeight.w600,
                                           ),
@@ -1187,7 +1197,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                           ),
                                         ),
                                         Text(
-                                          '-${totalDiscount.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                                          '-${formatCurrency(totalDiscount, locale: context.locale)}',
                                           style: KZ.body.copyWith(
                                             color: CheckoutScreen.errorColor,
                                             fontWeight: FontWeight.w600,
@@ -1218,7 +1228,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         ),
                                       ),
                                       Text(
-                                        '${grandTotal.toStringAsFixed(0)} ${'common.egp'.tr()}',
+                                        formatCurrency(
+                                          grandTotal,
+                                          locale: context.locale,
+                                        ),
                                         style: KZ.priceLarge.copyWith(
                                           fontSize: 28,
                                           color: CheckoutScreen.primaryColor,
@@ -1410,9 +1423,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 child: Text(
                                   'checkout.min_order_notice'.tr(
                                     namedArgs: {
-                                      'remaining': remaining.toStringAsFixed(0),
-                                      'min': settings.minOrderAmount
-                                          .toStringAsFixed(0),
+                                      'remaining': formatCurrency(
+                                        remaining,
+                                        locale: context.locale,
+                                      ),
+                                      'min': formatCurrency(
+                                        settings.minOrderAmount,
+                                        locale: context.locale,
+                                      ),
                                     },
                                   ),
                                   style: KZ.body.copyWith(
@@ -1439,7 +1457,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               icon: Icons.arrow_forward_rounded,
                               label: 'checkout.place_order_total'.tr(
                                 namedArgs: {
-                                  'amount': grandTotal.toStringAsFixed(0),
+                                  'amount': formatCurrency(
+                                    grandTotal,
+                                    locale: context.locale,
+                                  ),
                                 },
                               ),
                               onPressed:
@@ -1738,7 +1759,6 @@ class _DeliveryZoneCard extends StatelessWidget {
                 );
               }
               final isArabic = context.locale.languageCode == 'ar';
-              final egp = 'common.egp'.tr();
               return Column(
                 children: zones.map((zone) {
                   final selected = zone.id == selectedZoneId;
@@ -1789,9 +1809,9 @@ class _DeliveryZoneCard extends StatelessWidget {
                                   const SizedBox(height: 2),
                                   Text(
                                     '${'checkout.delivery_fee'.tr()}: '
-                                    '${zone.deliveryFee.toStringAsFixed(0)} $egp'
+                                    '${formatCurrency(zone.deliveryFee, locale: context.locale)}'
                                     '  ·  ${'checkout.zone_minimum_order'.tr()}: '
-                                    '${zone.minimumOrder.toStringAsFixed(0)} $egp',
+                                    '${formatCurrency(zone.minimumOrder, locale: context.locale)}',
                                     style: KZ.caption,
                                   ),
                                 ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/features/admin/domain/models/order_notification.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_notification_notifier.dart';
@@ -226,7 +227,7 @@ class _NotificationCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'New order #${notification.orderNumber} • ${notification.totalAmount.toStringAsFixed(0)} EGP',
+                    'New order #${notification.orderNumber} • ${formatCurrency(notification.totalAmount, locale: Localizations.localeOf(context))}',
                     style: const TextStyle(fontSize: 13, color: KZ.secondary),
                   ),
                 ],
