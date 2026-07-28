@@ -397,6 +397,27 @@
     "error_password": "يجب ألا تقل كلمة المرور عن 8 أحرف",
     "error_generic": "حدث خطأ ما. حاول مرة أخرى."
   },
+  "customers": {
+    "title": "العملاء",
+    "search_hint": "ابحث عن عميل",
+    "filter_all": "الكل",
+    "active": "مفعّل",
+    "inactive": "غير مفعّل",
+    "guest": "زائر",
+    "orders": "الطلبات",
+    "total_spent": "إجمالي الإنفاق",
+    "customer_since": "عميل منذ",
+    "recent_orders": "أحدث الطلبات",
+    "no_recent_orders": "لا توجد طلبات بعد.",
+    "activate": "تفعيل",
+    "deactivate": "إلغاء التفعيل",
+    "empty": "لا يوجد عملاء.",
+    "status": "الحالة",
+    "details_title": "بيانات العميل",
+    "error_generic": "حدث خطأ ما. حاول مرة أخرى.",
+    "activated_success": "تم تفعيل العميل بنجاح.",
+    "deactivated_success": "تم إلغاء تفعيل العميل بنجاح."
+  },
   "admin_notifications": {
     "title": "حملات الإشعارات",
     "compose_title": "إنشاء إشعار جديد",

@@ -451,6 +451,27 @@
     "error_password": "Password must be at least 8 characters",
     "error_generic": "Something went wrong. Please try again."
   },
+  "customers": {
+    "title": "Customers",
+    "search_hint": "Search customers",
+    "filter_all": "All",
+    "active": "Active",
+    "inactive": "Inactive",
+    "guest": "Guest",
+    "orders": "Orders",
+    "total_spent": "Total spent",
+    "customer_since": "Customer since",
+    "recent_orders": "Recent orders",
+    "no_recent_orders": "No orders yet.",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "empty": "No customers found.",
+    "status": "Status",
+    "details_title": "Customer Details",
+    "error_generic": "Something went wrong. Please try again.",
+    "activated_success": "Customer activated successfully.",
+    "deactivated_success": "Customer deactivated successfully."
+  },
   "admin_notifications": {
     "title": "Push notification campaigns",
     "compose_title": "Compose push notification",

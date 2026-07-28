@@ -1423,7 +1423,56 @@ normal Argon2id flow (no reset-token flow). `200 StaffResponseDto`. Errors:
 ## Routes still ADMIN-only (unchanged, `CASHIER` gets `403 FORBIDDEN`)
 
 Categories, Menu, Promos, Settings, Notification campaigns, Notification
-center, Uploads, Staff management itself, and both admin login routes.
+center, Uploads, Staff management itself, Customer management (below), and
+both admin login routes.
+
+---
+
+# 16b. Customer Management API (Phase 6)
+
+Source: `PHASE_6_CUSTOMER_MANAGEMENT_API_CONTRACT.md` (backend branch
+`feat/phase-6-customer-management`, commit `561ccd1`). All routes
+`@Roles('ADMIN')` only — `CASHIER` gets `403 FORBIDDEN`, same as the rest of
+`/admin/*`.
+
+```http
+GET /admin/customers?q=<TEXT>&isActive=<bool>&page=1&limit=20
+```
+Lists `CUSTOMER`-role accounts only (ADMIN/CASHIER accounts excluded
+server-side). Plain JSON array, no envelope — same convention as
+`GET /admin/orders`. `q` matches name/email/phone (case-insensitive
+contains). `limit` is 1-100, default 20.
+
+`CustomerListItemDto`:
+```json
+{
+  "id": "uuid", "name": "string", "email": "string | null",
+  "phone": "string | null", "isGuest": true, "isActive": true,
+  "createdAt": "ISO 8601", "orderCount": 0, "totalSpent": 0
+}
+```
+
+```http
+GET /admin/customers/:id
+```
+Returns `CustomerDetailDto` = `CustomerListItemDto` + `recentOrders` (most
+recent 10, newest first, concise fields: `id`, `orderNumber`, `status`,
+`totalAmount`, `paymentMethod`, `fulfillmentType`, `createdAt`). Errors:
+`404 CUSTOMER_NOT_FOUND`.
+
+```http
+PATCH /admin/customers/:id/status
+Body: { "isActive": true }
+```
+Reuses the `User.deletedAt` soft-delete column (same mechanism as Phase 5
+cashier deactivation) — `isActive: false` sets `deletedAt`, blocking login/
+refresh; `isActive: true` clears it. Returns the updated `CustomerDetailDto`.
+Errors: `404 CUSTOMER_NOT_FOUND` (an ADMIN/CASHIER id 404s here too — this
+endpoint can never touch a staff account).
+
+`totalSpent` = sum of `Order.totalAmount` for `DELIVERED` orders only.
+`orderCount` = count of all orders, any status. Both computed server-side —
+never calculate locally in Flutter.
 
 ---
 
