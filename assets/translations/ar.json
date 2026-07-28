@@ -9,7 +9,8 @@
     "search": "بحث",
     "dashboard": "لوحة التحكم",
     "settings": "الإعدادات",
-    "offers": "العروض"
+    "offers": "العروض",
+    "notifications": "الإشعارات"
   },
   "home": {
     "tagline": "أصيل طعم الشارع المصري",
@@ -376,6 +377,25 @@
     "quick_order_soon": "ميزة إنشاء طلب سريع ستكون متاحة قريباً.",
     "new_order_tooltip": "إنشاء طلب جديد",
     "more_options": "خيارات إضافية"
+  },
+  "staff": {
+    "title": "الكاشير",
+    "empty": "لا يوجد حسابات كاشير بعد.",
+    "add_cashier": "إضافة كاشير",
+    "edit_cashier": "تعديل الكاشير",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "password": "كلمة المرور",
+    "password_optional": "كلمة مرور جديدة (اختياري)",
+    "active": "مفعّل",
+    "inactive": "غير مفعّل",
+    "activate": "تفعيل",
+    "deactivate": "إلغاء التفعيل",
+    "error_name": "أدخل اسماً صحيحاً",
+    "error_email": "أدخل بريداً إلكترونياً صحيحاً",
+    "error_password": "يجب ألا تقل كلمة المرور عن 8 أحرف",
+    "error_generic": "حدث خطأ ما. حاول مرة أخرى."
   },
   "admin_notifications": {
     "title": "حملات الإشعارات",

@@ -9,7 +9,8 @@
     "search": "Search",
     "dashboard": "Dashboard",
     "settings": "Settings",
-    "offers": "Offers"
+    "offers": "Offers",
+    "notifications": "Notifications"
   },
   "home": {
     "tagline": "Authentic Egyptian Street Food",
@@ -430,6 +431,25 @@
     "quick_order_soon": "Quick order creation is coming soon.",
     "new_order_tooltip": "Create new order",
     "more_options": "More options"
+  },
+  "staff": {
+    "title": "Cashiers",
+    "empty": "No cashier accounts yet.",
+    "add_cashier": "Add Cashier",
+    "edit_cashier": "Edit Cashier",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Password",
+    "password_optional": "New password (optional)",
+    "active": "Active",
+    "inactive": "Inactive",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "error_name": "Enter a valid name",
+    "error_email": "Enter a valid email",
+    "error_password": "Password must be at least 8 characters",
+    "error_generic": "Something went wrong. Please try again."
   },
   "admin_notifications": {
     "title": "Push notification campaigns",

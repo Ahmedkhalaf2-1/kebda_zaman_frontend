@@ -26,6 +26,8 @@ import 'package:kebda_zaman/features/admin/data/fake_admin_notification_reposito
 import 'package:kebda_zaman/features/admin/data/api_admin_notification_repository.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/admin_order_notification_repository.dart';
 import 'package:kebda_zaman/features/admin/data/api_admin_order_notification_repository.dart';
+import 'package:kebda_zaman/features/admin/domain/repositories/staff_repository.dart';
+import 'package:kebda_zaman/features/admin/data/api_staff_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kebda_zaman/core/api/api_client.dart';
 import 'package:kebda_zaman/core/api/api_interceptors.dart';
@@ -116,6 +118,10 @@ final adminNotificationRepositoryProvider =
     Provider<AdminNotificationRepository>((ref) {
       return ApiAdminNotificationRepository(ref.watch(apiClientProvider));
     });
+
+final staffRepositoryProvider = Provider<StaffRepository>((ref) {
+  return ApiStaffRepository(ref.watch(apiClientProvider));
+});
 
 final adminOrderNotificationRepositoryProvider =
     Provider<AdminOrderNotificationRepository>((ref) {

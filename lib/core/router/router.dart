@@ -35,6 +35,8 @@ import '../../features/admin/presentation/screens/admin_settings_screen.dart';
 import '../../features/admin/presentation/screens/admin_notifications_screen.dart';
 import '../../features/admin/presentation/screens/admin_notification_center_screen.dart';
 import '../../features/admin/presentation/screens/admin_order_details_screen.dart';
+import '../../features/admin/presentation/screens/staff_management_screen.dart';
+import '../../features/customer/presentation/notifiers/auth_notifier.dart';
 import '../../features/shared/domain/models/order.dart';
 import '../../features/shared/domain/models/menu_item.dart';
 import '../../features/shared/domain/models/category.dart';
@@ -47,6 +49,27 @@ part 'router.g.dart';
 GoRouter router(Ref ref) {
   return GoRouter(
     initialLocation: '/splash',
+    redirect: (context, state) {
+      final role = ref.read(authNotifierProvider).user?.role;
+      final path = state.uri.path;
+
+      // A cashier may only reach Orders Management inside /admin — every
+      // other admin section (dashboard metrics, menu, promos, settings,
+      // staff, etc.) redirects back there even on a direct/manual navigation.
+      if (role == 'CASHIER' &&
+          path.startsWith('/admin') &&
+          !path.startsWith('/admin/orders')) {
+        return '/admin/orders';
+      }
+
+      // Staff management is ADMIN-only, even for a cashier or anyone else
+      // navigating to it manually.
+      if (path.startsWith('/admin/staff') && role != 'ADMIN') {
+        return role == 'CASHIER' ? '/admin/orders' : '/login';
+      }
+
+      return null;
+    },
     routes: [
       GoRoute(
         path: '/splash',
@@ -278,6 +301,10 @@ GoRouter router(Ref ref) {
           GoRoute(
             path: '/admin/settings',
             builder: (context, state) => const AdminSettingsScreen(),
+          ),
+          GoRoute(
+            path: '/admin/staff',
+            builder: (context, state) => const StaffManagementScreen(),
           ),
         ],
       ),

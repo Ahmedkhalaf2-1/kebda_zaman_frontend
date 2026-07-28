@@ -49,6 +49,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final user = ref.read(authNotifierProvider).user;
       if (_isAdminLogin || user?.role == 'ADMIN') {
         context.go('/admin/dashboard');
+      } else if (user?.role == 'CASHIER') {
+        // Cashiers never see customer navigation — they land directly on
+        // Orders Management, the only admin section they're allowed into.
+        context.go('/admin/orders');
       } else {
         context.go('/home');
       }
@@ -68,11 +72,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         fontSize: 15,
         fontWeight: FontWeight.w400,
       ),
-      prefixIcon: Icon(
-        prefixIcon,
-        color: KZ.onSurfaceVariant,
-        size: 22,
-      ),
+      prefixIcon: Icon(prefixIcon, color: KZ.onSurfaceVariant, size: 22),
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: Colors.white,
@@ -169,7 +169,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             if (Navigator.canPop(context))
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 alignment: Alignment.centerLeft,
                 child: IconButton(
                   icon: const Icon(
@@ -320,7 +323,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   },
                                   behavior: HitTestBehavior.opaque,
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4,
+                                    ),
                                     child: Text(
                                       _isAdminLogin
                                           ? 'auth.switch_to_customer_login'.tr()
@@ -340,7 +345,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   },
                                   behavior: HitTestBehavior.opaque,
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4,
+                                    ),
                                     child: Text(
                                       'auth.forgot_password'.tr(),
                                       style: const TextStyle(
@@ -363,7 +370,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               height: 56,
                               decoration: BoxDecoration(
                                 color: KZ.primary,
-                                borderRadius: BorderRadius.circular(999), // rounded-full
+                                borderRadius: BorderRadius.circular(
+                                  999,
+                                ), // rounded-full
                                 boxShadow: [
                                   BoxShadow(
                                     color: KZ.primary.withValues(alpha: 0.25),
@@ -375,7 +384,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                  onTap: authState.isLoading ? null : _handleLogin,
+                                  onTap: authState.isLoading
+                                      ? null
+                                      : _handleLogin,
                                   borderRadius: BorderRadius.circular(999),
                                   child: Center(
                                     child: authState.isLoading
@@ -445,9 +456,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             icon: const SizedBox(
                               width: 20,
                               height: 20,
-                              child: CustomPaint(
-                                painter: _GoogleLogoPainter(),
-                              ),
+                              child: CustomPaint(painter: _GoogleLogoPainter()),
                             ),
                             onTap: () {},
                           ),
@@ -527,11 +536,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ],
           ),
           child: const Center(
-            child: Icon(
-              Icons.restaurant_rounded,
-              size: 40,
-              color: KZ.primary,
-            ),
+            child: Icon(Icons.restaurant_rounded, size: 40, color: KZ.primary),
           ),
         ),
 
@@ -596,7 +601,12 @@ class _GoogleLogoPainter extends CustomPainter {
     // Blue horizontal bar
     paint.style = PaintingStyle.fill;
     canvas.drawRect(
-      Rect.fromLTRB(size.width * 0.45, size.height * 0.42, size.width * 0.9, size.height * 0.58),
+      Rect.fromLTRB(
+        size.width * 0.45,
+        size.height * 0.42,
+        size.width * 0.9,
+        size.height * 0.58,
+      ),
       paint,
     );
   }

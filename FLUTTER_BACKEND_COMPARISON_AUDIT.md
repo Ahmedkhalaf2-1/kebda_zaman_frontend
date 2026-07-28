@@ -1039,6 +1039,8 @@ Required behavior:
 - Redirect CUSTOMER users away from `/admin/*`.
 - Keep backend authorization as the final security boundary.
 
+**Current status (2026-07-28): PARTIALLY RESOLVED (CASHIER scope only).** Phase 5 added a `redirect` callback on the top-level `GoRouter` (`lib/core/router/router.dart`) that: (1) confines a `CASHIER` role to `/admin/orders*` — any other `/admin/*` path redirects back there, even on direct/manual navigation; (2) gates the new `/admin/staff` route to `role == 'ADMIN'` only, redirecting a cashier to `/admin/orders` and anyone else to `/login`. `AdminShell` (`lib/features/admin/presentation/shells/admin_shell.dart`) also hides all owner-only nav destinations (dashboard, menu, offers, notifications, settings, staff) for `CASHIER`, showing only Orders + a new Logout action. **Still open / not touched this pass:** no guard yet for an unauthenticated user or a plain `CUSTOMER` navigating to `/admin/*` — that part of the original finding remains as described above. Backend authorization (`@Roles(...)`) is unaffected and remains the real security boundary either way.
+
 ---
 
 # 12. API Configuration

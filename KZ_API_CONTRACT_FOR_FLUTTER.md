@@ -1309,7 +1309,9 @@ This endpoint is for the admin application, not the customer Flutter app.
 
 # 16. Admin Orders API
 
-All require `ADMIN`.
+Require `ADMIN` or `CASHIER` (Phase 5 — `PHASE_5_CASHIER_API_CONTRACT.md`).
+Behavior and validation are identical for both roles; a cashier account has no
+reduced capability on these three routes.
 
 ## List
 
@@ -1359,6 +1361,69 @@ On `delivered`:
 - Cash payment settles to `PAID`.
 - Loyalty points are credited.
 - Push notification is attempted.
+
+---
+
+# 16a. Cashier / Staff API (Phase 5)
+
+Source: `PHASE_5_CASHIER_API_CONTRACT.md` (backend branch
+`feat/phase-5-cashier-staff`, commit `5830166`).
+
+`UserRole` gains a `CASHIER` value alongside `CUSTOMER`/`ADMIN`. A cashier
+logs in through the existing normal login endpoint — no new login system:
+
+```http
+POST /api/v1/auth/login
+Body: { "email": string, "password": string }
+```
+
+`POST /admin/auth/login` (and its `/auth/admin/login` alias) stay
+**ADMIN-only** — a cashier gets `403 NOT_ADMIN` there.
+
+A deactivated cashier (`isActive: false`, backed by `User.deletedAt`) cannot
+log in (`401 INVALID_CREDENTIALS`) or refresh (`401 INVALID_REFRESH_TOKEN`).
+An already-issued access token stays valid until its normal short TTL expiry
+— there is no separate revocation mechanism.
+
+## Staff endpoints (`ADMIN` only — `CASHIER` gets `403 FORBIDDEN`)
+
+```http
+GET /admin/staff
+```
+Lists all cashier accounts (active and deactivated), newest first. Returns `StaffResponseDto[]`.
+
+```http
+POST /admin/staff
+Body: { "name": string, "email": string, "password": string (8-72 chars), "phone"?: string }
+```
+Creates a cashier. `201 StaffResponseDto`. Errors: `409 EMAIL_ALREADY_EXISTS`.
+
+```http
+PATCH /admin/staff/:id
+Body: { "name"?, "email"?, "phone"?, "isActive"?: boolean, "password"?: string }
+```
+Partial update, all fields optional. `isActive: false` deactivates
+(sets `deletedAt`); `isActive: true` reactivates. `password` re-hashes via the
+normal Argon2id flow (no reset-token flow). `200 StaffResponseDto`. Errors:
+`404 STAFF_NOT_FOUND`, `409 EMAIL_ALREADY_EXISTS`.
+
+`StaffResponseDto`:
+
+```json
+{
+  "id": "uuid",
+  "name": "string",
+  "email": "string | null",
+  "phone": "string | null",
+  "isActive": true,
+  "createdAt": "2026-07-28T00:00:00.000Z"
+}
+```
+
+## Routes still ADMIN-only (unchanged, `CASHIER` gets `403 FORBIDDEN`)
+
+Categories, Menu, Promos, Settings, Notification campaigns, Notification
+center, Uploads, Staff management itself, and both admin login routes.
 
 ---
 
