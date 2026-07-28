@@ -176,8 +176,17 @@ class ApiOrderRepository implements OrderRepository {
           estimatedTime: data['estimatedDeliveryTime']?.toString(),
         );
         yield currentOrder;
+      } on DioException catch (e) {
+        if (e.error is ApiException) {
+          yield* Stream.error(
+            NetworkFailure((e.error as ApiException).message, e.error as ApiException),
+          );
+        } else {
+          yield* Stream.error(const NetworkFailure('Network error'));
+        }
       } catch (e) {
-        // Ignore errors and keep polling
+        yield* Stream.error(UnknownFailure(e.toString()));
+        break;
       }
     }
   }

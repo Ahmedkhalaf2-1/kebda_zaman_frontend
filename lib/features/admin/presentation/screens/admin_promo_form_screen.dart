@@ -253,7 +253,7 @@ class _AdminPromoFormScreenState extends ConsumerState<AdminPromoFormScreen> {
           icon: isNew ? Icons.add_circle_outline_rounded : Icons.check_rounded,
           fullWidth: true,
           pill: true,
-          isLoading: _isSaving,
+          loading: _isSaving,
           onPressed: _isSaving ? () {} : _save,
         ),
       ),
