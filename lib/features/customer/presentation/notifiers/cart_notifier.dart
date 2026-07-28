@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/errors/result.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 
 class CartNotifier extends AutoDisposeAsyncNotifier<Cart?> {
@@ -10,6 +11,12 @@ class CartNotifier extends AutoDisposeAsyncNotifier<Cart?> {
   }
 
   Future<Cart?> _fetchCart() async {
+    // Do not issue GET /cart while unauthenticated — the route is protected
+    // and issuing it after logout (while the UI still holds the provider)
+    // would produce a 401 and unnecessary noise.
+    final authState = ref.read(authNotifierProvider);
+    if (!authState.isLoggedIn) return null;
+
     final repo = ref.read(cartRepositoryProvider);
     final result = await repo.getCart();
     return result.fold((f) => throw f, (data) => data);

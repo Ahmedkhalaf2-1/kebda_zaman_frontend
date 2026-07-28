@@ -56,9 +56,11 @@ class CustomerFavoritesNotifier extends StateNotifier<FavoritesState> {
 
     result.fold(
       (failure) {
+        if (!mounted) return;
         state = state.copyWith(isLoading: false, errorMessage: failure.message);
       },
       (items) {
+        if (!mounted) return;
         state = FavoritesState(
           favoriteItems: items,
           favoriteIds: items.map((i) => i.id).toSet(),

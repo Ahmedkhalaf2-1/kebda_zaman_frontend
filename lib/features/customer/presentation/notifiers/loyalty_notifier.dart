@@ -3,7 +3,6 @@ import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/loyalty.dart';
 import 'package:kebda_zaman/features/shared/domain/models/restaurant_settings.dart';
-import 'package:kebda_zaman/features/shared/domain/models/user.dart';
 
 class LoyaltyData {
   final LoyaltyAccount account;
@@ -39,18 +38,12 @@ class LoyaltyNotifier extends AutoDisposeAsyncNotifier<LoyaltyData> {
     final accResult = await repo.getMeLoyalty();
     final histResult = await repo.getMeLoyaltyTransactions();
 
-    final account = accResult.fold(
-      (f) => const LoyaltyAccount(
-        userId: '',
-        pointsBalance: 0,
-        lifetimePointsEarned: 0,
-      ),
-      (data) => data,
-    );
-    final history = histResult.fold(
-      (f) => <LoyaltyTransaction>[],
-      (data) => data,
-    );
+    // Do NOT convert failures to zero/empty — that hides real API errors and
+    // makes a failed request indistinguishable from a legitimate zero balance.
+    // Throw the failure so the AutoDisposeAsyncNotifier surfaces AsyncError,
+    // which the UI can display separately from a successful zero-point balance.
+    final account = accResult.fold((f) => throw f, (data) => data);
+    final history = histResult.fold((f) => throw f, (data) => data);
 
     return LoyaltyData(account: account, history: history, settings: settings);
   }

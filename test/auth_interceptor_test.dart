@@ -4,7 +4,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_secure_storage/test/test_flutter_secure_storage_platform.dart';
-import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
+import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart'
+    hide Options;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kebda_zaman/core/api/api_interceptors.dart';
 import 'package:kebda_zaman/core/api/token_refresh_coordinator.dart';
@@ -230,6 +231,117 @@ void main() {
         // Only the one call we made ourselves — the interceptor must not have
         // tried to "refresh" in response to /auth/refresh's own failure.
         expect(stack.adapter.callCounts['/auth/refresh'], 1);
+      },
+    );
+  });
+
+  group('RetryInterceptor', () {
+    ({Dio dio, _RoutedScriptedAdapter adapter}) buildRetryStack(
+      Map<String, List<Future<ResponseBody> Function(RequestOptions)>> scripts,
+    ) {
+      final dio = Dio(BaseOptions(baseUrl: 'https://example.test'));
+      final adapter = _RoutedScriptedAdapter(scripts);
+      dio.httpClientAdapter = adapter;
+      dio.interceptors.add(RetryInterceptor(dio, maxRetries: 2));
+      return (dio: dio, adapter: adapter);
+    }
+
+    test('GET requests may retry on 503 or network errors', () async {
+      final stack = buildRetryStack({
+        '/menu': [
+          _statusError(503, {'error': 'Service Unavailable'}),
+          _jsonSuccess({'items': []}),
+        ],
+      });
+
+      final response = await stack.dio.get('/menu');
+      expect(response.statusCode, 200);
+      expect(stack.adapter.callCounts['/menu'], 2); // 1 initial + 1 retry
+    });
+
+    test('/auth/refresh is never retried even on 503', () async {
+      final stack = buildRetryStack({
+        '/auth/refresh': [
+          _statusError(503, {'error': 'Service Unavailable'}),
+          _statusError(503, {'error': 'Service Unavailable'}),
+        ],
+      });
+
+      await expectLater(
+        stack.dio.post('/auth/refresh', data: {'refreshToken': 'abc'}),
+        throwsA(isA<DioException>()),
+      );
+      expect(
+        stack.adapter.callCounts['/auth/refresh'],
+        1,
+      ); // exactly 1 attempt, 0 retries
+    });
+
+    test('unsafe POST/PUT/PATCH/DELETE are not retried even on 503', () async {
+      final stack = buildRetryStack({
+        '/cart/items': [
+          _statusError(503, {'error': 'Service Unavailable'}),
+        ],
+        '/me/favorites': [
+          _statusError(503, {'error': 'Service Unavailable'}),
+        ],
+        '/orders/123': [
+          _statusError(503, {'error': 'Service Unavailable'}),
+        ],
+      });
+
+      await expectLater(
+        stack.dio.post('/cart/items', data: {'id': '1'}),
+        throwsA(isA<DioException>()),
+      );
+      expect(stack.adapter.callCounts['/cart/items'], 1);
+
+      await expectLater(
+        stack.dio.put('/me/favorites', data: {'id': '1'}),
+        throwsA(isA<DioException>()),
+      );
+      expect(stack.adapter.callCounts['/me/favorites'], 1);
+
+      await expectLater(
+        stack.dio.delete('/orders/123'),
+        throwsA(isA<DioException>()),
+      );
+      expect(stack.adapter.callCounts['/orders/123'], 1);
+    });
+
+    test(
+      'checkout retries only with exact approved path and stable Idempotency-Key',
+      () async {
+        final stack = buildRetryStack({
+          '/checkout': [
+            _statusError(503, {'error': 'Service Unavailable'}),
+            _jsonSuccess({'id': 'ord-123'}),
+          ],
+          '/orders': [
+            _statusError(503, {'error': 'Service Unavailable'}),
+            _jsonSuccess({'id': 'ord-999'}),
+          ],
+        });
+
+        // POST /checkout should retry
+        final checkoutRes = await stack.dio.post(
+          '/checkout',
+          data: {'total': 100},
+          options: Options(headers: {'Idempotency-Key': 'key-123'}),
+        );
+        expect(checkoutRes.statusCode, 200);
+        expect(stack.adapter.callCounts['/checkout'], 2); // 1 initial + 1 retry
+
+        // POST /orders (different path) even with Idempotency-Key must NOT retry
+        await expectLater(
+          stack.dio.post(
+            '/orders',
+            data: {'total': 100},
+            options: Options(headers: {'Idempotency-Key': 'key-456'}),
+          ),
+          throwsA(isA<DioException>()),
+        );
+        expect(stack.adapter.callCounts['/orders'], 1); // exactly 1 attempt
       },
     );
   });

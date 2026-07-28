@@ -18,9 +18,20 @@ class ApiAuthRepository implements AuthRepository {
     required this.tokenStorage,
   });
 
+  /// Atomically persists both tokens.
+  ///
+  /// The refresh token is written to durable storage FIRST. Only after that
+  /// succeeds is the access token exposed in the in-memory [TokenStorage].
+  /// This ordering means: if the process dies between the two writes, the
+  /// next cold-start still has a valid refresh token to exchange — it will
+  /// never be left with an in-memory access token and no stored refresh token.
+  ///
+  /// Returns normally on success, throws on storage failure so callers can
+  /// treat a write error as a login failure rather than silently proceeding.
   Future<void> _saveTokens(String accessToken, String refreshToken) async {
-    tokenStorage.accessToken = accessToken;
     await secureStorage.write(key: 'refreshToken', value: refreshToken);
+    // Access token exposed in memory only after the durable write succeeds.
+    tokenStorage.accessToken = accessToken;
   }
 
   Future<void> _clearTokens() async {
@@ -28,14 +39,29 @@ class ApiAuthRepository implements AuthRepository {
     await secureStorage.delete(key: 'refreshToken');
   }
 
-  Result<User> _handleAuthResult(Response response) {
+  /// Parses an auth response, atomically persists tokens, and returns the User.
+  ///
+  /// If secure-storage persistence fails the tokens are cleared and an
+  /// [AuthFailure] is returned — the UI must never enter an authenticated
+  /// state without a durably stored refresh token.
+  Future<Result<User>> _handleAuthResult(Response response) async {
     try {
       final data = response.data as Map<String, dynamic>;
       final user = User.fromJson(data['user']);
       final accessToken = data['accessToken'] as String;
       final refreshToken = data['refreshToken'] as String;
 
-      _saveTokens(accessToken, refreshToken);
+      try {
+        await _saveTokens(accessToken, refreshToken);
+      } catch (_) {
+        // Secure storage write failed — clear any partial state and surface a
+        // proper failure so the UI does not navigate into an authenticated screen.
+        await _clearTokens();
+        return const Err(
+          AuthFailure('Failed to persist session. Please try again.'),
+        );
+      }
+
       return Success(user);
     } catch (e) {
       return const Err(AuthFailure('Failed to parse user data'));
@@ -68,7 +94,7 @@ class ApiAuthRepository implements AuthRepository {
         '/auth/login',
         data: {'email': email, 'password': password},
       );
-      return _handleAuthResult(response);
+      return await _handleAuthResult(response);
     } catch (e) {
       return Err(_handleError(e));
     }
@@ -81,7 +107,7 @@ class ApiAuthRepository implements AuthRepository {
         '/admin/auth/login',
         data: {'email': email, 'password': password},
       );
-      return _handleAuthResult(response);
+      return await _handleAuthResult(response);
     } catch (e) {
       return Err(_handleError(e));
     }
@@ -104,7 +130,7 @@ class ApiAuthRepository implements AuthRepository {
           'password': password,
         },
       );
-      return _handleAuthResult(response);
+      return await _handleAuthResult(response);
     } catch (e) {
       return Err(_handleError(e));
     }
@@ -114,7 +140,7 @@ class ApiAuthRepository implements AuthRepository {
   Future<Result<User>> guestLogin() async {
     try {
       final response = await apiClient.dio.post('/auth/guest', data: {});
-      return _handleAuthResult(response);
+      return await _handleAuthResult(response);
     } catch (e) {
       return Err(_handleError(e));
     }

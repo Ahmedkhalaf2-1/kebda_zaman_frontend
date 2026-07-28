@@ -5,6 +5,7 @@ import 'core/router/router.dart';
 import 'core/theme/kz_design_system.dart';
 import 'core/widgets/kz_responsive_wrapper.dart';
 import 'core/di/providers.dart';
+import 'core/session/session_coordinator.dart';
 
 import 'core/notifications/notification_navigation_service.dart';
 import 'core/notifications/notification_service.dart';
@@ -18,6 +19,10 @@ class KebdaZamanApp extends ConsumerWidget {
     // Eagerly initialize device repository so DeviceService is configured
     // before AuthNotifier restores the session and calls onSessionEstablished()
     ref.watch(deviceRepositoryProvider);
+    // Initialize the root session lifecycle listener. This single watch starts
+    // the auth-state listener that clears/reloads user-scoped providers on
+    // every auth transition (login, logout, user switch, session restoration).
+    ref.watch(sessionLifecycleProvider);
     NotificationNavigationService.instance.setRouter(goRouter);
     NotificationService.instance.attachProviderContainer(
       ProviderScope.containerOf(context),

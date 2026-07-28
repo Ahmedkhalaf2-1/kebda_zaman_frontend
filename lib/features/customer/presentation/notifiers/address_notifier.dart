@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/address.dart';
-import 'package:kebda_zaman/features/shared/domain/models/user.dart';
 
 class AddressState {
   final List<Address> addresses;
@@ -57,9 +56,11 @@ class AddressNotifier extends StateNotifier<AddressState> {
 
     result.fold(
       (failure) {
+        if (!mounted) return;
         state = state.copyWith(isLoading: false, errorMessage: failure.message);
       },
       (addresses) {
+        if (!mounted) return;
         state = AddressState(addresses: addresses, isLoading: false);
       },
     );
