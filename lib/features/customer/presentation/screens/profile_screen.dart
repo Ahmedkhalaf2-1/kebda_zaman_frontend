@@ -363,7 +363,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: CircularProgressIndicator(color: Colors.white),
         ),
       ),
-      error: (e, st) => const SizedBox(),
+      error: (e, st) => Container(
+        height: 180,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: KZ.primary,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                color: Colors.white,
+                size: 28,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'common.something_wrong'.tr(),
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => ref.invalidate(loyaltyProvider),
+                child: Text(
+                  'common.retry'.tr(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       data: (data) {
         final points = data.account.pointsBalance;
         final step = data.settings.loyaltyEgpStep;

@@ -151,6 +151,7 @@
     "reward_free_delivery": "Free delivery",
     "reward_discount_10": "10 EGP off",
     "reward_discount_25": "25 EGP off",
+    "loyalty_points_suffix": "{points} Pts",
     "loyalty_rewards": "Loyalty Rewards",
     "guest_loyalty_notice": "Sign in to earn and redeem loyalty points on your orders.",
     "sign_in": "Sign In",

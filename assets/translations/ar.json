@@ -150,7 +150,8 @@
     "place_order_total": "تأكيد الطلب • {amount} ج.م",
     "reward_free_delivery": "توصيل مجاني",
     "reward_discount_10": "خصم 10 ج.م",
-    "reward_discount_25": "خصم 25 ج.م"
+    "reward_discount_25": "خصم 25 ج.م",
+    "loyalty_points_suffix": "{points} نقطة"
   },
   "order_success": {
     "title": "تم تأكيد الطلب!",

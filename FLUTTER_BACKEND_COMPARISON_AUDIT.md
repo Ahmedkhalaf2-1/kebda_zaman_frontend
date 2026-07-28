@@ -417,6 +417,8 @@ history: []
 
 unless the backend successfully returned those values.
 
+**Current status (2026-07-28): RESOLVED.** `LoyaltyNotifier.build()` (`lib/features/customer/presentation/notifiers/loyalty_notifier.dart:38-48`) now throws the `Failure` from `accResult`/`histResult` instead of folding to a zero balance or empty history, which surfaces as `AsyncError` to the UI. No remaining fallback-to-zero code path found.
+
 ## 5.2 Auth dependency is not reactive
 
 The notifier uses:
@@ -446,6 +448,8 @@ The provider should:
 - return a controlled “guest not eligible” state for guests;
 - fetch server data for authenticated non-guests;
 - clear cached data when the active user changes.
+
+**Current status (2026-07-28): RESOLVED (via a different mechanism than proposed).** The notifier still uses `ref.read(authNotifierProvider)` (not `watch`), but `lib/core/session/session_coordinator.dart` (`sessionLifecycleProvider`, wired in `lib/app.dart:26`) centrally `ref.invalidate(loyaltyProvider)` on login, logout, and user-switch transitions, which disposes the AutoDispose notifier and forces a fresh `build()` with the new auth state. Manually verified this covers logout/login/switch; no separate fix needed here.
 
 ## 5.3 P1-03 — Loyalty model mapping fabricates fields
 
@@ -503,6 +507,8 @@ int get absolutePoints => delta.abs();
 
 Do not store fake `balanceAfter` or fake lifetime points.
 
+**Current status (2026-07-28): STILL OPEN.** `ApiLoyaltyRepository._mapAccount`/`_mapTransaction` (`lib/features/shared/data/api_loyalty_repository.dart:35-58`) still set `lifetimePointsEarned = pointsBalance`, `userId = ''` on transactions, and `balanceAfter = 0`. Left unchanged this pass — neither field is currently rendered anywhere in the UI (checked `loyalty_screen.dart` and `profile_screen.dart`), so it is not a confirmed user-visible defect, and reworking the frozen model/DTO was out of scope for this focused pass.
+
 ## 5.4 Loyalty policy UI uses unmapped defaults
 
 **Files:**
@@ -532,6 +538,8 @@ Choose one explicit source:
 
 Do not imply that `/settings` supplied values it did not return.
 
+**Current status (2026-07-28): NOT RE-VERIFIED.** This finding lives primarily in `api_settings_repository.dart`, outside this pass's Loyalty-only scope — not reinspected.
+
 ## 5.5 Loyalty errors are hidden in Profile
 
 `ProfileScreen._buildLoyaltyCard()` returns an empty `SizedBox` on error.
@@ -541,6 +549,8 @@ The user receives no explanation or retry path.
 ### Required fix
 
 Show a compact error state with retry, or a clear “Rewards unavailable” state. Do not hide the entire feature silently.
+
+**Current status (2026-07-28): RESOLVED.** `ProfileScreen._buildLoyaltyCard()` (`lib/features/customer/presentation/screens/profile_screen.dart`) now renders an error card (icon + `common.something_wrong` message + `common.retry` button that calls `ref.invalidate(loyaltyProvider)`) instead of `const SizedBox()`.
 
 ## 5.6 Loyalty redemption integration
 
@@ -558,17 +568,29 @@ Backend verification required
 
 until controller/DTO/service source confirms the active contract.
 
+**Current status (2026-07-28): ALREADY WORKING, differs from `KZ_API_CONTRACT_FOR_FLUTTER.md` §13.** Redemption is not driven through the standalone `POST /me/loyalty/redeem` call — `ApiLoyaltyRepository.redeemReward()` exists but is unused by any screen. Instead, `CheckoutScreen` sends the selected `rewardId` as `redeemRewardId` on `POST /orders` (`lib/features/shared/data/api_order_repository.dart:92-93`), and the response's `loyaltyRedemption` field (mapped at `api_order_repository.dart:252-279`) triggers `ref.invalidate(loyaltyProvider)` in `checkout_notifier.dart:57-58` after a successful order. This is backend-authoritative (server computes the discount and debits points atomically with order creation) and was not touched this pass, since the code and its inline comments indicate it is an intentional, working design — not a bug. The contract doc's dedicated redeem endpoint appears to be for a future/alternate non-order-tied redemption flow; flagging the discrepancy for backend-doc reconciliation rather than changing checkout behavior, per scope (Loyalty-only, no checkout/order redesign).
+
+## 5.8 Localization key displayed raw on Checkout (new finding, 2026-07-28)
+
+**File:** `lib/features/customer/presentation/screens/checkout_screen.dart:215,325`
+
+`'checkout.loyalty_points_suffix'.tr(namedArgs: {'points': ...})` was called for the loyalty-rewards header points count and each reward's point cost, but `checkout.loyalty_points_suffix` did not exist in `assets/translations/en.json` or `ar.json`. `easy_localization` falls back to printing the raw key when a key is missing, which is the exact bug the user reported ("loyalty.some_key" shown instead of translated text) — it surfaces on the Checkout screen rather than the Loyalty screen itself, since that's where the key is used.
+
+**Status: RESOLVED.** Added `"loyalty_points_suffix": "{points} Pts"` (en) / `"{points} نقطة"` (ar) under `checkout` in both translation files. No `.tr()` call sites or reward IDs changed.
+
+Also corrected `loyalty_screen.dart`'s and `profile_screen.dart`'s error-state copy from the menu-specific `home.failed_load` / `home.retry` keys to the generic `common.something_wrong` / `common.retry` keys — the old keys rendered "Failed to load menu" on a Loyalty error, which is misleading but not a raw-key bug.
+
 ## 5.7 Loyalty acceptance criteria
 
-- [ ] Authenticated user sees server balance, not a local default.
-- [ ] Failure never becomes `0`.
-- [ ] Transaction failure never becomes `[]`.
-- [ ] Guest state is distinct from zero balance.
-- [ ] Account and transaction models match actual JSON.
-- [ ] Data reloads after login/session restoration.
-- [ ] Data clears on logout/user switch.
-- [ ] Profile shows loading/error/data states explicitly.
-- [ ] Loyalty screen shows loading/error/empty/data states explicitly.
+- [x] Authenticated user sees server balance, not a local default.
+- [x] Failure never becomes `0`.
+- [x] Transaction failure never becomes `[]`.
+- [x] Guest state is distinct from zero balance.
+- [ ] Account and transaction models match actual JSON. (still fabricates `lifetimePointsEarned`/`balanceAfter`/`userId`, see 5.3 — unused by UI, left open)
+- [x] Data reloads after login/session restoration.
+- [x] Data clears on logout/user switch.
+- [x] Profile shows loading/error/data states explicitly.
+- [x] Loyalty screen shows loading/error/empty/data states explicitly.
 - [ ] Reward redemption uses a confirmed backend contract.
 - [ ] Tests cover relogin, user switching, 401 refresh, 403 guest, 500, malformed JSON, and offline behavior.
 

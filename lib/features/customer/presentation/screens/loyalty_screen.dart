@@ -20,8 +20,8 @@ class LoyaltyScreen extends ConsumerWidget {
         loading: () =>
             const Center(child: CircularProgressIndicator(color: KZ.primary)),
         error: (e, st) => KZErrorState(
-          message: 'home.failed_load'.tr(),
-          retryLabel: 'home.retry'.tr(),
+          message: 'common.something_wrong'.tr(),
+          retryLabel: 'common.retry'.tr(),
           onRetry: () => ref.invalidate(loyaltyProvider),
         ),
         data: (data) {
