@@ -23,9 +23,9 @@ class FavoritesScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: KZ.surface,
       appBar: KZ.formAppBar(context: context, title: 'favorites.title'.tr()),
-      body: favState.isLoading
+      body: favState.isLoading && favState.favoriteItems.isEmpty
           ? const Center(child: CircularProgressIndicator(color: KZ.primary))
-          : favState.errorMessage != null
+          : favState.errorMessage != null && favState.favoriteItems.isEmpty
           ? KZErrorState(
               message: 'home.failed_load'.tr(),
               retryLabel: 'home.retry'.tr(),
