@@ -29,6 +29,7 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
   grandTotal: (json['grandTotal'] as num).toDouble(),
   paymentId: json['paymentId'] as String?,
   paymentStatus: json['paymentStatus'] as String?,
+  paymentMethod: json['paymentMethod'] as String?,
   placedAt: DateTime.parse(json['placedAt'] as String),
   statusHistory:
       (json['statusHistory'] as List<dynamic>?)
@@ -62,6 +63,7 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'grandTotal': instance.grandTotal,
       'paymentId': instance.paymentId,
       'paymentStatus': instance.paymentStatus,
+      'paymentMethod': instance.paymentMethod,
       'placedAt': instance.placedAt.toIso8601String(),
       'statusHistory': instance.statusHistory,
       'estimatedTime': instance.estimatedTime,

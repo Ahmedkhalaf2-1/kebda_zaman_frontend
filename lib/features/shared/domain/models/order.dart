@@ -39,6 +39,7 @@ class Order with _$Order {
     required double grandTotal,
     String? paymentId,
     String? paymentStatus,
+    String? paymentMethod,
     required DateTime placedAt,
     @Default([]) List<OrderStatusEntry> statusHistory,
     String? estimatedTime,

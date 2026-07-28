@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_details_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+
+/// Maps the backend's raw payment method string ('CASH'/'CARD'/'WALLET',
+/// case-insensitive) to a localized display label, falling back to the raw
+/// value for any method the app doesn't recognize yet.
+String paymentMethodLabel(String? method) {
+  switch (method?.toUpperCase()) {
+    case 'CASH':
+      return 'admin.payment_cash'.tr();
+    case 'CARD':
+      return 'admin.payment_card'.tr();
+    case 'WALLET':
+      return 'admin.payment_wallet'.tr();
+    default:
+      return method ?? '';
+  }
+}
 
 class AdminOrderDetailsScreen extends ConsumerWidget {
   final String orderId;
@@ -180,6 +197,13 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
                 _buildTotalRow('Discount', -order.discountTotal),
               const Divider(height: 20),
               _buildTotalRow('Total', order.grandTotal, bold: true),
+              if (order.paymentMethod != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Payment method: ${paymentMethodLabel(order.paymentMethod)}',
+                  style: const TextStyle(fontSize: 13, color: KZ.secondary),
+                ),
+              ],
               if (order.paymentStatus != null) ...[
                 const SizedBox(height: 8),
                 Text(

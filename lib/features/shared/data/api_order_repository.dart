@@ -179,7 +179,10 @@ class ApiOrderRepository implements OrderRepository {
       } on DioException catch (e) {
         if (e.error is ApiException) {
           yield* Stream.error(
-            NetworkFailure((e.error as ApiException).message, e.error as ApiException),
+            NetworkFailure(
+              (e.error as ApiException).message,
+              e.error as ApiException,
+            ),
           );
         } else {
           yield* Stream.error(const NetworkFailure('Network error'));
@@ -268,6 +271,7 @@ class ApiOrderRepository implements OrderRepository {
       discountTotal: (json['discount'] as num?)?.toDouble() ?? 0.0,
       grandTotal: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
       paymentStatus: json['paymentStatus'], // Order model has paymentStatus.
+      paymentMethod: json['paymentMethod'],
       placedAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt']).toLocal()
           : DateTime.now(),

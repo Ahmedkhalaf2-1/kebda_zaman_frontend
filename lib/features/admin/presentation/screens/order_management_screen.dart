@@ -7,6 +7,8 @@ import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_no
 import 'package:kebda_zaman/features/admin/presentation/notifiers/order_management_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/features/admin/presentation/screens/admin_order_details_screen.dart'
+    show paymentMethodLabel;
 
 class OrderManagementScreen extends ConsumerStatefulWidget {
   const OrderManagementScreen({super.key});
@@ -432,6 +434,17 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
                       color: KZ.secondary,
                     ),
                   ),
+                  if (order.paymentMethod != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      paymentMethodLabel(order.paymentMethod),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: KZ.primary,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],
