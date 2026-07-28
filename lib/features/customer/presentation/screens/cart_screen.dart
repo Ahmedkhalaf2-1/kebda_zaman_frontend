@@ -373,10 +373,12 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                   );
                 } catch (e) {
                   if (!context.mounted) return;
+                  final errorMsg = e.toString().replaceAll('Exception: ', '');
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('cart.invalid_promo'.tr()),
+                      content: Text(errorMsg),
                       behavior: SnackBarBehavior.floating,
+                      backgroundColor: KZ.error,
                     ),
                   );
                 }

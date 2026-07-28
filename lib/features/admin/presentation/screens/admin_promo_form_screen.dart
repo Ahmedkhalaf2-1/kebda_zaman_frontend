@@ -9,6 +9,7 @@ import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/features/shared/domain/models/promo_code.dart';
+import 'package:kebda_zaman/features/admin/presentation/notifiers/offers_admin_notifier.dart';
 
 class AdminPromoFormScreen extends ConsumerStatefulWidget {
   final PromoCode? existingPromo;
@@ -29,6 +30,7 @@ class _AdminPromoFormScreenState extends ConsumerState<AdminPromoFormScreen> {
 
   DiscountType _discountType = DiscountType.percentage;
   bool _isActive = true;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -55,7 +57,10 @@ class _AdminPromoFormScreenState extends ConsumerState<AdminPromoFormScreen> {
   }
 
   void _save() async {
+    if (_isSaving) return;
     if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSaving = true);
 
     final value = double.tryParse(_valueCtrl.text) ?? 0.0;
     final minOrderValue = double.tryParse(_minOrderCtrl.text) ?? 0.0;
@@ -74,19 +79,33 @@ class _AdminPromoFormScreenState extends ConsumerState<AdminPromoFormScreen> {
     );
 
     final repo = ref.read(promoRepositoryProvider);
-    if (widget.existingPromo == null) {
-      await repo.createPromo(promo);
-    } else {
-      await repo.updatePromo(promo);
-    }
-
-    ref.invalidate(promoRepositoryProvider);
+    final res = widget.existingPromo == null 
+        ? await repo.createPromo(promo) 
+        : await repo.updatePromo(promo);
 
     if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('form.save_promo_success'.tr())));
-      context.pop();
+      setState(() => _isSaving = false);
+      res.fold(
+        (failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(failure.message),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: KZ.error,
+            ),
+          );
+        },
+        (_) {
+          ref.invalidate(offersAdminProvider);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('form.save_promo_success'.tr()),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          context.pop();
+        },
+      );
     }
   }
 
@@ -234,7 +253,8 @@ class _AdminPromoFormScreenState extends ConsumerState<AdminPromoFormScreen> {
           icon: isNew ? Icons.add_circle_outline_rounded : Icons.check_rounded,
           fullWidth: true,
           pill: true,
-          onPressed: _save,
+          isLoading: _isSaving,
+          onPressed: _isSaving ? () {} : _save,
         ),
       ),
     );

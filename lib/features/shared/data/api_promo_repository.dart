@@ -145,8 +145,8 @@ class ApiPromoRepository implements PromoRepository {
       'maxUsage': promo.usageLimit ?? 100,
       'perUserLimit': promo.perUserLimit ?? 1,
       'isActive': promo.isActive,
-      'startsAt': promo.startDate.toIso8601String(),
-      'expiresAt': promo.endDate.toIso8601String(),
+      'startsAt': promo.startDate.toUtc().toIso8601String(),
+      'expiresAt': promo.endDate.toUtc().toIso8601String(),
     };
   }
 
