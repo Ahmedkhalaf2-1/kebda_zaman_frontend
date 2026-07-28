@@ -6,11 +6,13 @@ import 'package:easy_localization/easy_localization.dart';
 import '../notifiers/orders_notifier.dart';
 import '../notifiers/cart_notifier.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
+import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
@@ -68,7 +70,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Changed from Kebda Zaman to Orders exactly as requested!
                     Text(
                       'nav.orders'.tr(),
                       style: KZ.pageTitle.copyWith(
@@ -84,10 +85,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: KZ.primaryFixed.withValues(alpha: 0.3),
-                          border: Border.all(
-                            color: KZ.primary,
-                            width: 2,
-                          ),
+                          border: Border.all(color: KZ.primary, width: 2),
                         ),
                         child: const Icon(
                           Icons.person_rounded,
@@ -102,72 +100,80 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
 
               // ── Orders Content Area ──
               Expanded(
-                child: ordersAsync.when(
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(KZ.primary),
+                child: AnimatedSwitcher(
+                  duration: KZMotion.durationFor(context, KZMotion.standard),
+                  transitionBuilder: (child, animation) =>
+                      FadeTransition(opacity: animation, child: child),
+                  child: ordersAsync.when(
+                    loading: () => const Center(
+                      key: ValueKey('loading'),
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(KZ.primary),
+                      ),
                     ),
-                  ),
-                  error: (e, st) => KZErrorState(
-                    message: 'orders.load_error'.tr(),
-                    onRetry: () => ref.invalidate(ordersProvider),
-                    retryLabel: 'common.retry'.tr(),
-                  ),
-                  data: (data) {
-                    if (data.activeOrders.isEmpty &&
-                        data.previousOrders.isEmpty) {
-                      return _buildEmptyState(context);
-                    }
+                    error: (e, st) => KZErrorState(
+                      key: const ValueKey('error'),
+                      message: 'orders.load_error'.tr(),
+                      onRetry: () => ref.invalidate(ordersProvider),
+                      retryLabel: 'common.retry'.tr(),
+                    ),
+                    data: (data) {
+                      if (data.activeOrders.isEmpty &&
+                          data.previousOrders.isEmpty) {
+                        return _buildEmptyState(context);
+                      }
 
-                    return RefreshIndicator(
-                      color: KZ.primary,
-                      onRefresh: () async => ref.invalidate(ordersProvider),
-                      child: ListView(
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
-                        children: [
-                          if (data.activeOrders.isNotEmpty) ...[
-                            Text(
-                              'orders.active'.tr(),
-                              style: const TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: KZ.onSurface,
+                      return RefreshIndicator(
+                        key: const ValueKey('data'),
+                        color: KZ.primary,
+                        onRefresh: () async => ref.invalidate(ordersProvider),
+                        child: ListView(
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+                          children: [
+                            if (data.activeOrders.isNotEmpty) ...[
+                              Text(
+                                'orders.active'.tr(),
+                                style: const TextStyle(
+                                  fontFamily: 'Plus Jakarta Sans',
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: KZ.onSurface,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 14),
-                            ...data.activeOrders.map(
-                              (o) => Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: _OrderCard(order: o),
+                              const SizedBox(height: 14),
+                              ...data.activeOrders.map(
+                                (o) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: _OrderCard(order: o),
+                                ),
                               ),
-                            ),
+                              const SizedBox(height: 24),
+                            ],
+                            if (data.previousOrders.isNotEmpty) ...[
+                              Text(
+                                'orders.previous'.tr(),
+                                style: const TextStyle(
+                                  fontFamily: 'Plus Jakarta Sans',
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: KZ.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              ...data.previousOrders.map(
+                                (o) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: _OrderCard(order: o),
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 24),
                           ],
-                          if (data.previousOrders.isNotEmpty) ...[
-                            Text(
-                              'orders.previous'.tr(),
-                              style: const TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: KZ.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            ...data.previousOrders.map(
-                              (o) => Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: _OrderCard(order: o),
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 24),
-                        ],
-                      ),
-                    );
-                  },
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
@@ -179,12 +185,10 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
 
   Widget _buildEmptyState(BuildContext context) {
     return Center(
+      key: const ValueKey('empty'),
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 32,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -208,11 +212,21 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
   }
 }
 
-class _OrderCard extends ConsumerWidget {
+class _OrderCard extends ConsumerStatefulWidget {
   final Order order;
   const _OrderCard({required this.order});
 
+  @override
+  ConsumerState<_OrderCard> createState() => _OrderCardState();
+}
+
+class _OrderCardState extends ConsumerState<_OrderCard> {
+  bool _isReordering = false;
+
   Future<void> _handleReorder(BuildContext context, WidgetRef ref) async {
+    if (_isReordering) return;
+    setState(() => _isReordering = true);
+
     final menuRepo = ref.read(menuRepositoryProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
 
@@ -227,44 +241,51 @@ class _OrderCard extends ConsumerWidget {
     int unavailableCount = 0;
     int failedCount = 0;
 
-    for (final item in order.items) {
-      final res = await menuRepo.getMenuItemById(item.menuItemId);
-      await res.fold(
-        (f) async {
-          unavailableCount++;
-        },
-        (menuItem) async {
-          if (!menuItem.isAvailable) {
+    try {
+      for (final item in widget.order.items) {
+        final res = await menuRepo.getMenuItemById(item.menuItemId);
+        await res.fold(
+          (f) async {
             unavailableCount++;
-            return;
-          }
+          },
+          (menuItem) async {
+            if (!menuItem.isAvailable) {
+              unavailableCount++;
+              return;
+            }
 
-          final basePrice = menuItem.discountPrice ?? menuItem.basePrice;
+            final basePrice = menuItem.discountPrice ?? menuItem.basePrice;
 
-          final cartItem = CartItem(
-            id: 'ci_${DateTime.now().millisecondsSinceEpoch}_${item.menuItemId}',
-            menuItemId: item.menuItemId,
-            productName: menuItem.name,
-            productImage: menuItem.imageUrl,
-            basePrice: basePrice,
-            quantity: item.quantity,
-            selectedOptions: item.selectedOptions,
-            nestedSelections: item.nestedSelections,
-            extraQuantities: item.extraQuantities,
-            removedIngredients: item.removedIngredients,
-            specialInstructions: 'Reordered from previous order',
-            unitPrice: item.unitPrice,
-            lineTotal: item.unitPrice * item.quantity,
-          );
+            final cartItem = CartItem(
+              id: 'ci_${DateTime.now().millisecondsSinceEpoch}_${item.menuItemId}',
+              menuItemId: item.menuItemId,
+              productName: menuItem.name,
+              productImage: menuItem.imageUrl,
+              basePrice: basePrice,
+              quantity: item.quantity,
+              selectedOptions: item.selectedOptions,
+              nestedSelections: item.nestedSelections,
+              extraQuantities: item.extraQuantities,
+              removedIngredients: item.removedIngredients,
+              // Reuse the original item's own authoritative instructions —
+              // never inject a fabricated system note into the customer's
+              // special instructions.
+              specialInstructions: item.specialInstructions,
+              unitPrice: item.unitPrice,
+              lineTotal: item.unitPrice * item.quantity,
+            );
 
-          try {
-            await cartNotifier.addItem(cartItem);
-            addedCount++;
-          } catch (e) {
-            failedCount++;
-          }
-        },
-      );
+            try {
+              await cartNotifier.addItem(cartItem);
+              addedCount++;
+            } catch (e) {
+              failedCount++;
+            }
+          },
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isReordering = false);
     }
 
     if (!context.mounted) return;
@@ -310,7 +331,8 @@ class _OrderCard extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final order = widget.order;
     final isActive =
         order.status != OrderStatus.delivered &&
         order.status != OrderStatus.cancelled;
@@ -318,172 +340,213 @@ class _OrderCard extends ConsumerWidget {
     final dateStr =
         '${order.placedAt.day}/${order.placedAt.month}/${order.placedAt.year} ${order.placedAt.hour}:${order.placedAt.minute.toString().padLeft(2, '0')}';
 
-    final orderNumDisplay = order.orderNumber.isNotEmpty
-        ? 'Order #${order.orderNumber}'
-        : 'Order #KZ-${order.id.length >= 8 ? order.id.substring(0, 8) : order.id}';
+    final orderNumDisplay = 'orders.order_num'.tr(
+      namedArgs: {
+        'id': order.orderNumber.isNotEmpty
+            ? order.orderNumber
+            : 'KZ-${order.id.length >= 8 ? order.id.substring(0, 8) : order.id}',
+      },
+    );
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.push('/orders/tracking/${order.id}'),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: KZ.outlineVariant.withValues(alpha: 0.5),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: KZ.primary.withValues(alpha: 0.05),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
+    return KZPressableScale(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.push('/orders/tracking/${order.id}'),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: KZ.outlineVariant.withValues(alpha: 0.5),
+                width: 1,
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Top Row: Order ID & Date on left, Pill Status Badge on right ──
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
+              boxShadow: [
+                BoxShadow(
+                  color: KZ.primary.withValues(alpha: 0.05),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Top Row: Order ID & Date on left, Pill Status Badge on right ──
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            orderNumDisplay,
+                            style: const TextStyle(
+                              fontFamily: 'Plus Jakarta Sans',
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: KZ.onSurface,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            dateStr,
+                            style: TextStyle(
+                              fontFamily: 'Plus Jakarta Sans',
+                              fontSize: 12,
+                              color: KZ.onSurfaceVariant.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    AnimatedSwitcher(
+                      duration: KZMotion.durationFor(context, KZMotion.fast),
+                      transitionBuilder: (child, animation) =>
+                          FadeTransition(opacity: animation, child: child),
+                      child: _StatusPill(
+                        key: ValueKey(order.status),
+                        status: order.status,
+                        isPickup:
+                            order.fulfillmentType == FulfillmentType.pickup,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 14),
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: KZ.outlineVariant.withValues(alpha: 0.3),
+                ),
+                const SizedBox(height: 14),
+
+                // ── Bottom Row: Total Price on left, Action Button on right ──
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          orderNumDisplay,
+                          'orders.total_label'.tr(),
                           style: const TextStyle(
                             fontFamily: 'Plus Jakarta Sans',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: KZ.onSurface,
+                            fontSize: 12,
+                            color: KZ.onSurfaceVariant,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          dateStr,
+                          formatCurrency(
+                            order.grandTotal,
+                            locale: context.locale,
+                          ),
                           style: TextStyle(
                             fontFamily: 'Plus Jakarta Sans',
-                            fontSize: 12,
-                            color: KZ.onSurfaceVariant.withValues(alpha: 0.7),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: isActive ? KZ.primary : KZ.secondary,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStatusPill(order.status),
-                ],
-              ),
-
-              const SizedBox(height: 14),
-              Divider(
-                height: 1,
-                thickness: 1,
-                color: KZ.outlineVariant.withValues(alpha: 0.3),
-              ),
-              const SizedBox(height: 14),
-
-              // ── Bottom Row: Total Price on left, Action Button on right ──
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'orders.total_label'.tr(),
-                        style: const TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 12,
-                          color: KZ.onSurfaceVariant,
+                    if (isActive)
+                      ElevatedButton(
+                        onPressed: () =>
+                            context.push('/orders/tracking/${order.id}'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: KZ.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 4,
+                          shadowColor: KZ.primary.withValues(alpha: 0.4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                        child: Text(
+                          'orders.track'.tr(),
+                          style: const TextStyle(
+                            fontFamily: 'Plus Jakarta Sans',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      )
+                    else
+                      OutlinedButton.icon(
+                        onPressed: _isReordering
+                            ? null
+                            : () => _handleReorder(context, ref),
+                        icon: _isReordering
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: KZ.onSurface,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.history_rounded,
+                                size: 18,
+                                color: KZ.onSurface,
+                              ),
+                        label: Text(
+                          'orders.reorder'.tr(),
+                          style: const TextStyle(
+                            fontFamily: 'Plus Jakarta Sans',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: KZ.onSurface,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: KZ.outlineVariant,
+                            width: 2,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${order.grandTotal.toStringAsFixed(0)} EGP',
-                        style: TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: isActive ? KZ.primary : KZ.secondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (isActive)
-                    ElevatedButton(
-                      onPressed: () =>
-                          context.push('/orders/tracking/${order.id}'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: KZ.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 4,
-                        shadowColor: KZ.primary.withValues(alpha: 0.4),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                      child: Text(
-                        'orders.track'.tr(),
-                        style: const TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    )
-                  else
-                    OutlinedButton.icon(
-                      onPressed: () => _handleReorder(context, ref),
-                      icon: const Icon(
-                        Icons.history_rounded,
-                        size: 18,
-                        color: KZ.onSurface,
-                      ),
-                      label: Text(
-                        'orders.reorder'.tr(),
-                        style: const TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: KZ.onSurface,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: KZ.outlineVariant, width: 2),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildStatusPill(OrderStatus status) {
+class _StatusPill extends StatelessWidget {
+  final OrderStatus status;
+  final bool isPickup;
+
+  const _StatusPill({super.key, required this.status, required this.isPickup});
+
+  @override
+  Widget build(BuildContext context) {
     Color bgColor;
     Color textColor;
     IconData icon;
@@ -511,14 +574,23 @@ class _OrderCard extends ConsumerWidget {
       case OrderStatus.outForDelivery:
         bgColor = KZ.primaryFixed.withValues(alpha: 0.4);
         textColor = KZ.primary;
-        icon = Icons.delivery_dining_rounded;
-        labelText = 'orders.status.out_for_delivery'.tr();
+        icon = isPickup
+            ? Icons.storefront_rounded
+            : Icons.delivery_dining_rounded;
+        // Backend has no dedicated "ready for pickup" status — pickup
+        // orders reuse outForDelivery, so only the label is translated,
+        // the actual status value is untouched.
+        labelText = isPickup
+            ? 'tracking.step_ready_pickup'.tr()
+            : 'orders.status.out_for_delivery'.tr();
         break;
       case OrderStatus.delivered:
         bgColor = const Color(0xFFE8F5E9); // green-50/100 tint from HTML
         textColor = const Color(0xFF1B5E20); // green-700 from HTML
         icon = Icons.check_circle_rounded;
-        labelText = 'orders.status.delivered'.tr();
+        labelText = isPickup
+            ? 'tracking.step_picked_up'.tr()
+            : 'orders.status.delivered'.tr();
         break;
       case OrderStatus.cancelled:
         bgColor = const Color(0xFFFEE2E2);

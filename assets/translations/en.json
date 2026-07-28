@@ -271,6 +271,7 @@
     "status_desc_pending": "Order placed! Waiting for restaurant confirmation",
     "status_desc_preparing": "Chef is preparing your meal",
     "status_desc_out_for_delivery": "Driver is on the way to your location",
+    "status_desc_ready_pickup": "Your order is ready for pickup at the restaurant",
     "status_desc_picked_up": "Order picked up successfully!",
     "status_desc_delivered": "Order delivered successfully. Enjoy your meal!",
     "status_desc_cancelled": "Order has been cancelled",
@@ -282,7 +283,9 @@
     "support_connecting": "Support chat is connecting...",
     "change_order_prompt": "Need to change your order? ",
     "chat_with_us": "Chat with us",
-    "opening_chat": "Opening live chat with support..."
+    "opening_chat": "Opening live chat with support...",
+    "step_picked_up": "Picked Up",
+    "estimate_unavailable": "Estimated time will be updated soon"
   },
   "profile": {
     "title": "My Profile",
