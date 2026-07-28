@@ -398,12 +398,23 @@ class HomeScreen extends ConsumerWidget {
                                   return _BestSellerCard(
                                     item: item,
                                     isFavorite: isFav,
-                                    onToggleFavorite: () {
-                                      ref
-                                          .read(
-                                            customerFavoritesProvider.notifier,
-                                          )
+                                    onToggleFavorite: () async {
+                                      final success = await ref
+                                          .read(customerFavoritesProvider.notifier)
                                           .toggleFavorite(item.id);
+                                      if (!success && context.mounted) {
+                                        final err = ref
+                                            .read(customerFavoritesProvider)
+                                            .errorMessage;
+                                        if (err != null) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text(err),
+                                              behavior: SnackBarBehavior.floating,
+                                            ),
+                                          );
+                                        }
+                                      }
                                     },
                                   );
                                 },
@@ -427,10 +438,23 @@ class HomeScreen extends ConsumerWidget {
                             item: item,
                             isFavorite: isFav,
                             isGrid: true,
-                            onToggleFavorite: () {
-                              ref
+                            onToggleFavorite: () async {
+                              final success = await ref
                                   .read(customerFavoritesProvider.notifier)
                                   .toggleFavorite(item.id);
+                              if (!success && context.mounted) {
+                                final err = ref
+                                    .read(customerFavoritesProvider)
+                                    .errorMessage;
+                                if (err != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(err),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                }
+                              }
                             },
                           );
                         }, childCount: bestSellers.length),

@@ -10,14 +10,10 @@ import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 
 import '../notifiers/item_details_notifier.dart';
+import '../notifiers/favorites_notifier.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_quantity_stepper.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
-
-// State provider for item detail favorite status
-final itemFavoriteProvider = StateProvider.family<bool, String>(
-  (ref, itemId) => false,
-);
 
 class ItemDetailsScreen extends ConsumerStatefulWidget {
   final String itemId;
@@ -494,7 +490,8 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final itemAsync = ref.watch(itemDetailsProvider(widget.itemId));
-    final isFav = ref.watch(itemFavoriteProvider(widget.itemId));
+    final favoritesState = ref.watch(customerFavoritesProvider);
+    final isFav = favoritesState.favoriteIds.contains(widget.itemId);
 
     return itemAsync.when(
       loading: () => const Scaffold(
@@ -850,15 +847,21 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                         button: true,
                         label: 'profile.my_favorites'.tr(),
                         child: InkWell(
-                          onTap: () {
-                            ref
-                                    .read(
-                                      itemFavoriteProvider(
-                                        widget.itemId,
-                                      ).notifier,
-                                    )
-                                    .state =
-                                !isFav;
+                          onTap: () async {
+                            final success = await ref
+                                .read(customerFavoritesProvider.notifier)
+                                .toggleFavorite(widget.itemId);
+                            if (!success && context.mounted) {
+                              final err = ref.read(customerFavoritesProvider).errorMessage;
+                              if (err != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(err),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              }
+                            }
                           },
                           customBorder: const CircleBorder(),
                           child: Container(

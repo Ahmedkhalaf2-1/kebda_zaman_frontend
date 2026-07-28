@@ -33,6 +33,7 @@ class FavoritesState {
 
 class CustomerFavoritesNotifier extends StateNotifier<FavoritesState> {
   final Ref _ref;
+  final Set<String> _mutatingIds = {};
 
   CustomerFavoritesNotifier(this._ref)
     : super(const FavoritesState(isLoading: true)) {
@@ -74,38 +75,60 @@ class CustomerFavoritesNotifier extends StateNotifier<FavoritesState> {
     final authState = _ref.read(authNotifierProvider);
     if (!authState.isLoggedIn) return false;
 
-    final repo = _ref.read(favoritesRepositoryProvider);
-    final isFav = state.favoriteIds.contains(menuItemId);
+    if (_mutatingIds.contains(menuItemId)) return false;
+    _mutatingIds.add(menuItemId);
 
-    if (isFav) {
-      final newIds = Set<String>.from(state.favoriteIds)..remove(menuItemId);
-      final newItems = state.favoriteItems
-          .where((i) => i.id != menuItemId)
-          .toList();
-      state = state.copyWith(favoriteIds: newIds, favoriteItems: newItems);
+    try {
+      final repo = _ref.read(favoritesRepositoryProvider);
+      final isFav = state.favoriteIds.contains(menuItemId);
+      final previousState = state;
 
-      final result = await repo.removeFavorite(menuItemId);
-      if (result.isFailure) {
-        await loadFavorites();
-        return false;
+      if (isFav) {
+        final newIds = Set<String>.from(state.favoriteIds)..remove(menuItemId);
+        final newItems = state.favoriteItems
+            .where((i) => i.id != menuItemId)
+            .toList();
+        state = state.copyWith(
+          favoriteIds: newIds,
+          favoriteItems: newItems,
+          errorMessage: null,
+        );
+
+        final result = await repo.removeFavorite(menuItemId);
+        return result.fold(
+          (failure) {
+            if (!mounted) return false;
+            state = previousState.copyWith(errorMessage: failure.message);
+            return false;
+          },
+          (_) {
+            return true;
+          },
+        );
+      } else {
+        final newIds = Set<String>.from(state.favoriteIds)..add(menuItemId);
+        state = state.copyWith(favoriteIds: newIds, errorMessage: null);
+
+        final result = await repo.addFavorite(menuItemId);
+        return result.fold(
+          (failure) {
+            if (!mounted) return false;
+            state = previousState.copyWith(errorMessage: failure.message);
+            return false;
+          },
+          (updatedItems) {
+            if (!mounted) return false;
+            state = FavoritesState(
+              favoriteItems: updatedItems,
+              favoriteIds: updatedItems.map((i) => i.id).toSet(),
+              isLoading: false,
+            );
+            return true;
+          },
+        );
       }
-      return true;
-    } else {
-      final result = await repo.addFavorite(menuItemId);
-      return result.fold(
-        (failure) async {
-          await loadFavorites();
-          return false;
-        },
-        (updatedItems) {
-          state = FavoritesState(
-            favoriteItems: updatedItems,
-            favoriteIds: updatedItems.map((i) => i.id).toSet(),
-            isLoading: false,
-          );
-          return true;
-        },
-      );
+    } finally {
+      _mutatingIds.remove(menuItemId);
     }
   }
 

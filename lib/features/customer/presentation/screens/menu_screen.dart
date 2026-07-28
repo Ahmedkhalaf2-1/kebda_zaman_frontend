@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../notifiers/menu_notifier.dart';
 import '../notifiers/cart_notifier.dart';
 import '../notifiers/auth_notifier.dart';
+import '../notifiers/favorites_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
@@ -14,9 +15,6 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
-
-// State provider for menu screen user favorites
-final menuFavoritesProvider = StateProvider<Set<String>>((ref) => {});
 
 // Whether the compact weekly-special strip has been dismissed this session.
 final menuHeroDismissedProvider = StateProvider<bool>((ref) => false);
@@ -40,7 +38,8 @@ class MenuScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final menuAsync = ref.watch(menuNotifierProvider);
-    final favorites = ref.watch(menuFavoritesProvider);
+    final favoritesState = ref.watch(customerFavoritesProvider);
+    final favorites = favoritesState.favoriteIds;
     final heroDismissed = ref.watch(menuHeroDismissedProvider);
 
     return Scaffold(
@@ -175,14 +174,21 @@ class MenuScreen extends ConsumerWidget {
                       return _MenuProductCard(
                         item: item,
                         isFavorite: isFav,
-                        onToggleFavorite: () {
-                          final set = Set<String>.from(favorites);
-                          if (isFav) {
-                            set.remove(item.id);
-                          } else {
-                            set.add(item.id);
+                        onToggleFavorite: () async {
+                          final success = await ref
+                              .read(customerFavoritesProvider.notifier)
+                              .toggleFavorite(item.id);
+                          if (!success && context.mounted) {
+                            final err = ref.read(customerFavoritesProvider).errorMessage;
+                            if (err != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(err),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
                           }
-                          ref.read(menuFavoritesProvider.notifier).state = set;
                         },
                       );
                     }, childCount: data.items.length),

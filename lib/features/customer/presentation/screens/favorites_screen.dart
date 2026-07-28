@@ -110,9 +110,22 @@ class _FavoriteItemCard extends ConsumerWidget {
                     right: KZ.sp4,
                     child: KZIconButton(
                       icon: Icons.favorite_rounded,
-                      onPressed: () => ref
-                          .read(customerFavoritesProvider.notifier)
-                          .toggleFavorite(item.id),
+                      onPressed: () async {
+                        final success = await ref
+                            .read(customerFavoritesProvider.notifier)
+                            .toggleFavorite(item.id);
+                        if (!success && context.mounted) {
+                          final err = ref.read(customerFavoritesProvider).errorMessage;
+                          if (err != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(err),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        }
+                      },
                       tooltip: 'profile.my_favorites'.tr(),
                       background: Colors.white.withValues(alpha: 0.9),
                       foreground: KZ.error,
