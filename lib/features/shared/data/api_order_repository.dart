@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:kebda_zaman/core/api/api_client.dart';
 import 'package:kebda_zaman/core/api/api_exceptions.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
@@ -9,6 +10,13 @@ class ApiOrderRepository implements OrderRepository {
   final ApiClient _apiClient;
 
   ApiOrderRepository(this._apiClient);
+
+  /// Test-only seam onto the private order-mapping logic used by every
+  /// endpoint in this repository (customer list/detail, checkout, admin
+  /// list/status-update). Avoids duplicating the mapping rules in tests.
+  @visibleForTesting
+  static Order mapOrderForTesting(Map<String, dynamic> json) =>
+      _mapOrder(json);
 
   @override
   Future<Result<List<Order>>> getOrders({
@@ -136,7 +144,6 @@ class ApiOrderRepository implements OrderRepository {
   }
 
   @override
-  @override
   Stream<Order> watchOrder(String id) async* {
     Order? currentOrder;
     try {
@@ -252,7 +259,45 @@ class ApiOrderRepository implements OrderRepository {
     }
   }
 
-  Order _mapOrder(Map<String, dynamic> json) {
+  /// Maps the backend `deliveryMethod` wire value ('DELIVERY' | 'PICKUP').
+  ///
+  /// Deliberately does NOT default missing/malformed/unknown values to
+  /// [FulfillmentType.delivery] — silently doing so could misrepresent a
+  /// pickup order or hide an API-contract regression. Any unexpected value
+  /// is surfaced as an error instead.
+  static FulfillmentType _mapFulfillmentType(Object? value) {
+    switch (value) {
+      case 'DELIVERY':
+        return FulfillmentType.delivery;
+      case 'PICKUP':
+        return FulfillmentType.pickup;
+      default:
+        throw const FormatException('Unknown order delivery method');
+    }
+  }
+
+  static const _validPaymentStatuses = {
+    'PENDING',
+    'PAID',
+    'FAILED',
+    'REFUNDED',
+  };
+
+  /// Maps the backend `paymentStatus` wire value. The wire format
+  /// ('PENDING' | 'PAID' | 'FAILED' | 'REFUNDED') is preserved as-is: the
+  /// only current UI call site (admin order details) just interpolates the
+  /// raw value for display, so there is no lowercase/enum expectation to
+  /// satisfy — but a missing or unrecognized value from a live API response
+  /// is rejected rather than silently passed through, since no legacy/mock
+  /// path currently feeds JSON through this repository's mapper.
+  static String _mapPaymentStatus(Object? value) {
+    if (value is String && _validPaymentStatuses.contains(value)) {
+      return value;
+    }
+    throw const FormatException('Unknown order payment status');
+  }
+
+  static Order _mapOrder(Map<String, dynamic> json) {
     final statusStr = json['status'] as String? ?? 'pending';
     final status = OrderStatus.values.firstWhere(
       (e) => e.name == statusStr,
@@ -271,15 +316,13 @@ class ApiOrderRepository implements OrderRepository {
       userId: json['userId'] ?? userJson?['id'] ?? '',
       customerName: userJson?['name'] as String?,
       items: itemsList.map((i) => _mapOrderItem(i)).toList(),
-      fulfillmentType: json['deliveryMethod'] == 'PICKUP'
-          ? FulfillmentType.pickup
-          : FulfillmentType.delivery,
+      fulfillmentType: _mapFulfillmentType(json['deliveryMethod']),
       status: status,
       subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
       deliveryFee: (json['deliveryFee'] as num?)?.toDouble() ?? 0.0,
       discountTotal: (json['discount'] as num?)?.toDouble() ?? 0.0,
       grandTotal: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
-      paymentStatus: json['paymentStatus'], // Order model has paymentStatus.
+      paymentStatus: _mapPaymentStatus(json['paymentStatus']),
       paymentMethod: json['paymentMethod'],
       placedAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt']).toLocal()
@@ -299,7 +342,7 @@ class ApiOrderRepository implements OrderRepository {
     );
   }
 
-  OrderItem _mapOrderItem(Map<String, dynamic> json) {
+  static OrderItem _mapOrderItem(Map<String, dynamic> json) {
     final menuItem = json['menuItem'] ?? {};
     return OrderItem(
       menuItemId: json['id'] ?? '',
