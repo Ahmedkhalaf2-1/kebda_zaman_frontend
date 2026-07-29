@@ -97,10 +97,14 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'cart.title'.tr(),
-                          style: KZ.pageTitle.copyWith(
-                            color: CartScreen.primaryColor,
+                        Flexible(
+                          child: Text(
+                            'cart.title'.tr(),
+                            style: KZ.pageTitle.copyWith(
+                              color: CartScreen.primaryColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (cartAsync.valueOrNull != null &&
@@ -444,13 +448,16 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              value,
-              style: KZ.bodyLarge.copyWith(
-                color: color ?? CartScreen.onSurfaceVariantColor,
+            Flexible(
+              child: Text(
+                value,
+                style: KZ.bodyLarge.copyWith(
+                  color: color ?? CartScreen.onSurfaceVariantColor,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -559,11 +566,15 @@ class _CartScreenState extends ConsumerState<CartScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'cart.often_ordered_with'.tr(),
-              style: KZ.sectionTitle.copyWith(
-                fontSize: 18,
-                color: CartScreen.onSurfaceColor,
+            Flexible(
+              child: Text(
+                'cart.often_ordered_with'.tr(),
+                style: KZ.sectionTitle.copyWith(
+                  fontSize: 18,
+                  color: CartScreen.onSurfaceColor,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             TextButton(
@@ -723,39 +734,47 @@ class _CartItemCard extends StatelessWidget {
                 // Edit and Remove Actions
                 Row(
                   children: [
-                    InkWell(
-                      onTap: onEdit,
-                      borderRadius: BorderRadius.circular(4),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 2,
-                          horizontal: 4,
-                        ),
-                        child: Text(
-                          'common.edit'.tr(),
-                          style: KZ.labelLarge.copyWith(
-                            color: CartScreen.secondaryColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                    Flexible(
+                      child: InkWell(
+                        onTap: onEdit,
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 2,
+                            horizontal: 4,
+                          ),
+                          child: Text(
+                            'common.edit'.tr(),
+                            style: KZ.labelLarge.copyWith(
+                              color: CartScreen.secondaryColor,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 16),
-                    InkWell(
-                      onTap: onRemove,
-                      borderRadius: BorderRadius.circular(4),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 2,
-                          horizontal: 4,
-                        ),
-                        child: Text(
-                          'cart.remove'.tr(),
-                          style: KZ.labelLarge.copyWith(
-                            color: CartScreen.errorColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                    Flexible(
+                      child: InkWell(
+                        onTap: onRemove,
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 2,
+                            horizontal: 4,
+                          ),
+                          child: Text(
+                            'cart.remove'.tr(),
+                            style: KZ.labelLarge.copyWith(
+                              color: CartScreen.errorColor,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),

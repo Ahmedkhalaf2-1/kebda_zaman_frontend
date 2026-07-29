@@ -61,6 +61,7 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
             final cartItem = cart.items.firstWhere(
               (item) => item.id == widget.cartItemId,
             );
+            if (!mounted) return;
             setState(() {
               quantity = cartItem.quantity;
               notesController.text = cartItem.specialInstructions;

@@ -190,14 +190,17 @@ void main() {
     await EasyLocalization.ensureInitialized();
   });
 
-  Future<void> setMobileViewport(WidgetTester tester) async {
+  Future<void> setMobileViewport(
+    WidgetTester tester, [
+    Size size = const Size(375, 812),
+  ]) async {
     // Flutter's default test surface is ~800x600 — ABOVE the 600px mobile
     // breakpoint (ResponsiveBreakpoints.mobileMax), so without this every
     // test above exercised the tablet/desktop branch only. Force a real
-    // phone width (iPhone-SE-class, 375 logical px) to actually hit
-    // context.isMobile == true.
-    await tester.binding.setSurfaceSize(const Size(375, 812));
-    tester.view.physicalSize = const Size(375, 812);
+    // phone width (iPhone-SE-class, 375 logical px by default) to actually
+    // hit context.isMobile == true.
+    await tester.binding.setSurfaceSize(size);
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
       tester.view.resetPhysicalSize();
@@ -241,6 +244,55 @@ void main() {
       expect(find.byType(HomeScreen), findsOneWidget);
     },
   );
+
+  // Regression coverage for the Best Sellers header row (home_screen.dart)
+  // overflowing at narrow widths when the best-sellers list is empty — see
+  // the all-empty-state scenario above, repeated across the specific
+  // widths this was confirmed to fail at.
+  for (final entry in {
+    'mobile 320 (320x690)': const Size(320, 690),
+    'mobile 360 (360x800)': const Size(360, 800),
+    'mobile 375 (375x812)': const Size(375, 812),
+    'mobile 390 (390x844)': const Size(390, 844),
+    'mobile 430 (430x932)': const Size(430, 932),
+  }.entries) {
+    testWidgets(
+      'renders without exceptions on ${entry.key} — empty best sellers, '
+      'no user, no address',
+      (tester) async {
+        final overrides = [
+          authRepositoryProvider.overrideWithValue(
+            _FakeAuthRepository(_testUser(guest: true)),
+          ),
+          addressRepositoryProvider.overrideWithValue(
+            _FakeAddressRepository(const []),
+          ),
+          favoritesRepositoryProvider.overrideWithValue(
+            _FakeFavoritesRepository(),
+          ),
+          orderRepositoryProvider.overrideWithValue(_FakeOrderRepository()),
+          homeDataProvider.overrideWith(
+            (ref) async => const HomeData(
+              categories: [],
+              featuredItems: [],
+              bestSellers: [],
+              offers: [],
+              recommended: [],
+              popular: [],
+              acceptingOrders: true,
+            ),
+          ),
+        ];
+
+        await setMobileViewport(tester, entry.value);
+        await _pump(tester, overrides);
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(find.byType(HomeScreen), findsOneWidget);
+      },
+    );
+  }
 
   testWidgets(
     'renders without exceptions: homeDataProvider returns an API error',

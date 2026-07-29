@@ -246,9 +246,13 @@ class HomeScreen extends ConsumerWidget {
                                     size: KZ.iconControl,
                                   ),
                                   const SizedBox(width: 12),
-                                  Text(
-                                    'home.search_hint'.tr(),
-                                    style: KZ.bodyLarge,
+                                  Flexible(
+                                    child: Text(
+                                      'home.search_hint'.tr(),
+                                      style: KZ.bodyLarge,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -363,9 +367,13 @@ class HomeScreen extends ConsumerWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'home.best_sellers'.tr(),
-                            style: KZ.sectionTitle,
+                          Flexible(
+                            child: Text(
+                              'home.best_sellers'.tr(),
+                              style: KZ.sectionTitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           GestureDetector(
                             onTap: () => context.push('/home/menu'),
