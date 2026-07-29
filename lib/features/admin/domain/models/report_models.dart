@@ -114,8 +114,16 @@ class OrdersBreakdown {
       'CANCELLED' => OrderStatus.cancelled,
       _ => OrderStatus.unknown,
     };
-    FulfillmentType mapFulfillment(String s) =>
-        s == 'PICKUP' ? FulfillmentType.pickup : FulfillmentType.delivery;
+    FulfillmentType mapFulfillment(Object? value) {
+      switch (value) {
+        case 'DELIVERY':
+          return FulfillmentType.delivery;
+        case 'PICKUP':
+          return FulfillmentType.pickup;
+        default:
+          throw const FormatException('Unknown report fulfillment type');
+      }
+    }
 
     final byStatusJson = (json['byStatus'] as List?) ?? const [];
     final byFulfillmentJson = (json['byFulfillmentType'] as List?) ?? const [];
@@ -133,7 +141,7 @@ class OrdersBreakdown {
       byFulfillmentType: byFulfillmentJson
           .map(
             (e) => EnumCount<FulfillmentType>(
-              key: mapFulfillment(e['type'] as String? ?? ''),
+              key: mapFulfillment(e['type']),
               count: (e['count'] as num?)?.toInt() ?? 0,
             ),
           )
