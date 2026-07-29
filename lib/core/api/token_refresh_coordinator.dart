@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kebda_zaman/core/notifications/device_service.dart';
 import 'api_interceptors.dart';
 
 /// Result of a single refresh attempt. Mirrors the sealed Result/Failure
@@ -76,10 +77,13 @@ class TokenRefreshCoordinator {
     }
 
     try {
-      final response = await dio.post(
-        '/auth/refresh',
-        data: {'refreshToken': refreshToken},
-      );
+      final deviceToken = await DeviceService.instance.getStoredToken();
+      final requestBody = <String, dynamic>{
+        'refreshToken': refreshToken,
+        if (deviceToken != null && deviceToken.isNotEmpty)
+          'deviceToken': deviceToken,
+      };
+      final response = await dio.post('/auth/refresh', data: requestBody);
       final data = response.data as Map<String, dynamic>;
       final newAccessToken = data['accessToken'] as String;
       final newRefreshToken = data['refreshToken'] as String;
@@ -98,6 +102,7 @@ class TokenRefreshCoordinator {
         // expired, revoked, or reused (reuse detection) — end the session.
         tokenStorage.accessToken = null;
         await secureStorage.delete(key: refreshTokenKey);
+        await DeviceService.instance.onSessionInvalidated();
         return const RefreshRejected();
       }
       // Timeout, connection error, DNS failure, 5xx, etc. — transient

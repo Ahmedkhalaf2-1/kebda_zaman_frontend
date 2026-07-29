@@ -109,6 +109,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await prefs.remove(isLoggedInKey);
       await prefs.remove(userKey);
     } catch (_) {}
+    // Local-only device token cleanup — by this point the access token has
+    // already been rejected/cleared by TokenRefreshCoordinator, so an
+    // authenticated DELETE /devices/token request (onBeforeLogout) is no
+    // longer reliable. This never calls the backend.
+    await DeviceService.instance.onSessionInvalidated();
     state = const AuthState(user: null, isLoggedIn: false, isLoading: false);
   }
 

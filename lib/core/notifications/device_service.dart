@@ -106,6 +106,30 @@ class DeviceService {
     }
   }
 
+  /// Safe, side-effect-free read of the currently known device token
+  /// (in-memory if available, otherwise whatever is persisted locally).
+  /// Never throws, never makes a backend call.
+  Future<String?> getStoredToken() async {
+    return _currentToken ?? await _loadStoredToken();
+  }
+
+  /// Call when a session is discovered to be dead purely from the client's
+  /// perspective (e.g. the refresh token was rejected by the backend) and
+  /// there is no reliable access token left to authenticate a cleanup
+  /// request with.
+  ///
+  /// This is local-only: it never calls the backend (no DELETE
+  /// /devices/token) and never throws. It just forgets the locally cached
+  /// device token so a future session start re-registers cleanly. Safe to
+  /// call multiple times (idempotent).
+  Future<void> onSessionInvalidated() async {
+    try {
+      await _clearStoredToken();
+    } finally {
+      _currentToken = null;
+    }
+  }
+
   // ── Private helpers ────────────────────────────────────────────────────────
 
   void _attachRefreshListener() {

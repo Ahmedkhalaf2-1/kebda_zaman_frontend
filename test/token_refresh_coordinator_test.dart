@@ -6,8 +6,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_secure_storage/test/test_flutter_secure_storage_platform.dart';
 import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kebda_zaman/core/api/api_interceptors.dart';
 import 'package:kebda_zaman/core/api/token_refresh_coordinator.dart';
+import 'package:kebda_zaman/core/notifications/device_service.dart';
+
+const String _devicePrefKey = 'kz_fcm_device_token';
 
 /// A scripted HttpClientAdapter: each call to fetch() consumes the next
 /// entry from [script], so tests can precisely dictate what the
@@ -73,12 +77,17 @@ Dio _dioWith(_ScriptedAdapter adapter) {
 }
 
 void main() {
-  setUp(() {
+  setUp(() async {
     // Officially-bundled in-memory fake for FlutterSecureStorage — avoids
     // hitting a real platform channel in plain `test()` runs.
     FlutterSecureStoragePlatform.instance = TestFlutterSecureStoragePlatform(
       {},
     );
+    // DeviceService.instance is a process-wide singleton — reset its
+    // in-memory + persisted state before every test so tests don't leak
+    // into each other.
+    SharedPreferences.setMockInitialValues({});
+    await DeviceService.instance.onSessionInvalidated();
   });
 
   group('TokenRefreshCoordinator', () {
@@ -298,6 +307,192 @@ void main() {
         expect(adapter.callCount, 2);
         expect((first as RefreshSuccess).accessToken, 'access-1');
         expect((second as RefreshSuccess).accessToken, 'access-2');
+      },
+    );
+
+    test(
+      'a stored device token is included in the /auth/refresh request body',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          _devicePrefKey: 'stored-device-token',
+        });
+
+        const secureStorage = FlutterSecureStorage();
+        await secureStorage.write(
+          key: TokenRefreshCoordinator.refreshTokenKey,
+          value: 'old-refresh-token',
+        );
+
+        RequestOptions? captured;
+        final adapter = _ScriptedAdapter([
+          (options) async {
+            captured = options;
+            return ResponseBody.fromString(
+              jsonEncode({
+                'accessToken': 'new-access-token',
+                'refreshToken': 'new-refresh-token',
+              }),
+              200,
+              headers: {
+                Headers.contentTypeHeader: [Headers.jsonContentType],
+              },
+            );
+          },
+        ]);
+        final tokenStorage = TokenStorage();
+        final coordinator = TokenRefreshCoordinator(
+          dio: _dioWith(adapter),
+          secureStorage: secureStorage,
+          tokenStorage: tokenStorage,
+        );
+
+        final outcome = await coordinator.refresh();
+
+        expect(outcome, isA<RefreshSuccess>());
+        final body = captured!.data as Map<String, dynamic>;
+        expect(body['refreshToken'], 'old-refresh-token');
+        expect(body['deviceToken'], 'stored-device-token');
+      },
+    );
+
+    test(
+      'no stored device token: /auth/refresh request body omits deviceToken',
+      () async {
+        // Nothing stored under the device-token key (setUp already reset it).
+        const secureStorage = FlutterSecureStorage();
+        await secureStorage.write(
+          key: TokenRefreshCoordinator.refreshTokenKey,
+          value: 'old-refresh-token',
+        );
+
+        RequestOptions? captured;
+        final adapter = _ScriptedAdapter([
+          (options) async {
+            captured = options;
+            return ResponseBody.fromString(
+              jsonEncode({
+                'accessToken': 'new-access-token',
+                'refreshToken': 'new-refresh-token',
+              }),
+              200,
+              headers: {
+                Headers.contentTypeHeader: [Headers.jsonContentType],
+              },
+            );
+          },
+        ]);
+        final tokenStorage = TokenStorage();
+        final coordinator = TokenRefreshCoordinator(
+          dio: _dioWith(adapter),
+          secureStorage: secureStorage,
+          tokenStorage: tokenStorage,
+        );
+
+        final outcome = await coordinator.refresh();
+
+        expect(outcome, isA<RefreshSuccess>());
+        final body = captured!.data as Map<String, dynamic>;
+        expect(body.containsKey('deviceToken'), isFalse);
+      },
+    );
+
+    test(
+      'successful refresh leaves the locally stored device token untouched',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          _devicePrefKey: 'stored-device-token',
+        });
+
+        const secureStorage = FlutterSecureStorage();
+        await secureStorage.write(
+          key: TokenRefreshCoordinator.refreshTokenKey,
+          value: 'old-refresh-token',
+        );
+
+        final adapter = _ScriptedAdapter([
+          _jsonSuccess({
+            'accessToken': 'new-access-token',
+            'refreshToken': 'new-refresh-token',
+          }),
+        ]);
+        final tokenStorage = TokenStorage();
+        final coordinator = TokenRefreshCoordinator(
+          dio: _dioWith(adapter),
+          secureStorage: secureStorage,
+          tokenStorage: tokenStorage,
+        );
+
+        final outcome = await coordinator.refresh();
+
+        expect(outcome, isA<RefreshSuccess>());
+        expect(
+          await DeviceService.instance.getStoredToken(),
+          'stored-device-token',
+        );
+      },
+    );
+
+    test(
+      'refresh endpoint returns 401: DeviceService local device token is also cleared',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          _devicePrefKey: 'stored-device-token',
+        });
+
+        const secureStorage = FlutterSecureStorage();
+        await secureStorage.write(
+          key: TokenRefreshCoordinator.refreshTokenKey,
+          value: 'reused-refresh-token',
+        );
+
+        final adapter = _ScriptedAdapter([
+          _statusError(401, {'code': 'REFRESH_TOKEN_INVALID'}),
+        ]);
+        final tokenStorage = TokenStorage()..accessToken = 'stale-access-token';
+        final coordinator = TokenRefreshCoordinator(
+          dio: _dioWith(adapter),
+          secureStorage: secureStorage,
+          tokenStorage: tokenStorage,
+        );
+
+        final outcome = await coordinator.refresh();
+
+        expect(outcome, isA<RefreshRejected>());
+        expect(tokenStorage.accessToken, isNull);
+        expect(await DeviceService.instance.getStoredToken(), isNull);
+      },
+    );
+
+    test(
+      'transient failure (timeout): device token is preserved untouched',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          _devicePrefKey: 'stored-device-token',
+        });
+
+        const secureStorage = FlutterSecureStorage();
+        await secureStorage.write(
+          key: TokenRefreshCoordinator.refreshTokenKey,
+          value: 'still-valid-refresh-token',
+        );
+
+        final adapter = _ScriptedAdapter([
+          _transportError(DioExceptionType.connectionTimeout),
+        ]);
+        final tokenStorage = TokenStorage();
+        final coordinator = TokenRefreshCoordinator(
+          dio: _dioWith(adapter),
+          secureStorage: secureStorage,
+          tokenStorage: tokenStorage,
+        );
+
+        final outcome = await coordinator.refresh();
+
+        expect(outcome, isA<RefreshTransientFailure>());
+        expect(
+          await DeviceService.instance.getStoredToken(),
+          'stored-device-token',
+        );
       },
     );
   });
