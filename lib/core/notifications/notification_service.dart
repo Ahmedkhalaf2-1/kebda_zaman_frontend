@@ -18,22 +18,39 @@ import 'notification_permission_service.dart';
 /// customer navigation.
 const String _kNewOrderNotificationType = 'NEW_ORDER';
 
+/// Whether the background/terminated handler should manually display a
+/// local notification for [message].
+///
+/// When the backend sends a `notification:` block (with or without a
+/// `data:` payload), the OS displays it automatically while the app is
+/// backgrounded or terminated — showing a local notification on top of that
+/// would duplicate it. Only data-only messages (no `notification:` block)
+/// need this handler to synthesize the visible notification itself.
+@visibleForTesting
+bool shouldShowLocalNotificationForBackgroundMessage(RemoteMessage message) =>
+    message.notification == null;
+
 /// Top-level background message handler for FCM.
 ///
 /// Runs in a separate isolate (Android), so it cannot rely on any state from
 /// the main isolate's NotificationService instance — it must initialize
 /// Firebase and flutter_local_notifications itself.
 ///
-/// Every push from this backend is data-only (no `notification:` block — see
-/// 08_NOTIFICATION_REFERENCE.md), so the OS will NOT auto-display anything
-/// for a backgrounded app unless this handler explicitly shows a local
-/// notification, exactly as the foreground handler does.
+/// A data-only push (no `notification:` block — see
+/// 08_NOTIFICATION_REFERENCE.md) requires this handler to explicitly show a
+/// local notification, since the OS will NOT auto-display anything for a
+/// backgrounded/terminated app in that case. When a `notification:` block is
+/// present, the OS already displays it automatically, so this handler must
+/// skip local display to avoid a duplicate — see
+/// [shouldShowLocalNotificationForBackgroundMessage].
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    if (!shouldShowLocalNotificationForBackgroundMessage(message)) return;
 
     final payload = AppNotificationPayload.fromRemoteMessage(message);
 
