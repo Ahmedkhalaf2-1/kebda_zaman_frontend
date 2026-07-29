@@ -26,6 +26,22 @@ class DeviceService {
 
   bool _listenerAttached = false;
 
+  /// Test-only seam: whether the `onTokenRefresh` subscription has actually
+  /// been attached. Used to prove the guard-ordering fix — Firebase not
+  /// being ready must NOT permanently mark this true, otherwise a later
+  /// retry (once Firebase becomes ready) would be silently skipped.
+  @visibleForTesting
+  bool get debugListenerAttached => _listenerAttached;
+
+  /// Test-only seam: resets singleton state between tests. Production code
+  /// never calls this.
+  @visibleForTesting
+  void debugReset() {
+    _listenerAttached = false;
+    _currentToken = null;
+    _deviceRepository = null;
+  }
+
   static const String _tokenPrefKey = 'kz_fcm_device_token';
 
   // ── Public API ─────────────────────────────────────────────────────────────
@@ -134,9 +150,9 @@ class DeviceService {
 
   void _attachRefreshListener() {
     if (_listenerAttached) return;
-    _listenerAttached = true;
-
     if (!NotificationService.instance.isFirebaseInitialized) return;
+
+    _listenerAttached = true;
 
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
       debugPrint('🔄 [DeviceService] FCM token refreshed');
@@ -153,6 +169,21 @@ class DeviceService {
       }
     });
   }
+
+  /// Test-only seam exposing [_sendToBackend]'s rotate/register/persist
+  /// logic directly, since exercising it through [onSessionEstablished] or
+  /// the real `onTokenRefresh` listener would require mocking FCM platform
+  /// channels (not set up in this test suite).
+  @visibleForTesting
+  Future<void> debugSendToBackend({
+    required String token,
+    required String? previousToken,
+    required String platform,
+  }) => _sendToBackend(
+    token: token,
+    previousToken: previousToken,
+    platform: platform,
+  );
 
   Future<void> _sendToBackend({
     required String token,

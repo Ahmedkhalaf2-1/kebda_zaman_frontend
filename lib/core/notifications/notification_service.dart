@@ -166,9 +166,6 @@ class NotificationService {
 
     // 6. Check Initial Terminated Launch Message
     _checkInitialMessage();
-
-    // 7. Token Management & Refresh Listener
-    _initTokenListeners();
   }
 
   /// Initialize Android & iOS local notification settings
@@ -286,20 +283,6 @@ class NotificationService {
     } catch (_) {}
   }
 
-  /// Listen for FCM Token and token refreshes
-  void _initTokenListeners() async {
-    try {
-      final token = await FirebaseMessaging.instance.getToken();
-      if (token != null) {
-        syncTokenWithBackend(token);
-      }
-
-      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-        syncTokenWithBackend(newToken);
-      });
-    } catch (_) {}
-  }
-
   /// Retrieve current FCM device token
   Future<String?> getFcmToken() async {
     if (!_isFirebaseInitialized) return null;
@@ -308,14 +291,5 @@ class NotificationService {
     } catch (_) {
       return null;
     }
-  }
-
-  /// NOTE: Backend device-token sync is now fully handled by DeviceService.
-  /// This method is kept for legacy call-site compatibility but is a no-op.
-  /// The DeviceService singleton is driven by AuthNotifier session lifecycle hooks.
-  void syncTokenWithBackend(String token) {
-    debugPrint(
-      '🔔 [NotificationService] FCM Token ready — DeviceService handles backend sync',
-    );
   }
 }
