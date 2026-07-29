@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -172,17 +173,7 @@ class NotificationService {
     await _localNotifications.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse details) {
-        if (details.payload != null && details.payload!.isNotEmpty) {
-          try {
-            final Map<String, dynamic> map = Map<String, dynamic>.from(
-              Map.castFrom(Map.from(details.payload as dynamic)),
-            );
-            final payload = AppNotificationPayload.fromMap(map);
-            NotificationNavigationService.instance.handleNotificationTap(
-              payload,
-            );
-          } catch (_) {}
-        }
+        handleLocalNotificationTap(details.payload);
       },
     );
 
@@ -199,6 +190,18 @@ class NotificationService {
           AndroidFlutterLocalNotificationsPlugin
         >()
         ?.createNotificationChannel(androidChannel);
+  }
+
+  /// Extracted for testing the exact payload parsing logic
+  @visibleForTesting
+  static void handleLocalNotificationTap(String? payloadString) {
+    if (payloadString == null || payloadString.isEmpty) return;
+    try {
+      final decoded = jsonDecode(payloadString);
+      if (decoded is! Map<String, dynamic>) return;
+      final payload = AppNotificationPayload.fromMap(decoded);
+      NotificationNavigationService.instance.handleNotificationTap(payload);
+    } catch (_) {}
   }
 
   /// Handle incoming foreground messages and show local notification banner
