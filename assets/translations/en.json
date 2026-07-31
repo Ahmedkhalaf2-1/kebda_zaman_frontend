@@ -109,8 +109,6 @@
     "often_ordered_with": "Often ordered with"
   },
   "checkout": {
-    "settings_loading": "Loading ordering information…",
-    "settings_error": "Could not load restaurant settings.",
     "title": "Checkout",
     "order_type": "Order Type",
     "delivery": "Delivery",

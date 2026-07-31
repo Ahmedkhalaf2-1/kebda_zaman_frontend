@@ -109,8 +109,6 @@
     "often_ordered_with": "غالباً ما يُطلب مع"
   },
   "checkout": {
-    "settings_loading": "جاري تحميل بيانات الطلب…",
-    "settings_error": "تعذر تحميل إعدادات المطعم.",
     "title": "إتمام الطلب",
     "order_type": "نوع الطلب",
     "delivery": "توصيل",
