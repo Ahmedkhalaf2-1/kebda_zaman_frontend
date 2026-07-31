@@ -1363,47 +1363,70 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     _orderType == 'delivery' && _selectedZoneId == null;
 
                 return settingsAsync.when(
-                  loading: () => const SizedBox.shrink(),
-                  error: (e, st) => const SizedBox.shrink(),
+                  loading: () => _CheckoutFooterShell(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'checkout.settings_loading'.tr(),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  error: (error, stackTrace) => _CheckoutFooterShell(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.error_outline_rounded,
+                              size: 18,
+                              color: CheckoutScreen.errorColor,
+                              semanticLabel: 'Error',
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'checkout.settings_error'.tr(),
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: CheckoutScreen.errorColor,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        KZButton(
+                          fullWidth: true,
+                          pill: false,
+                          variant: KZButtonVariant.secondary,
+                          label: 'common.retry'.tr(),
+                          loading: settingsAsync.isLoading,
+                          onPressed: () =>
+                              ref.invalidate(restaurantSettingsProvider),
+                        ),
+                      ],
+                    ),
+                  ),
                   data: (settings) {
                     final isBelowMinOrder =
                         cart.subtotal < settings.minOrderAmount;
                     final remaining = (settings.minOrderAmount - cart.subtotal)
                         .clamp(0.0, double.infinity);
 
-                    return Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(
-                          20,
-                          16,
-                          20,
-                          MediaQuery.of(context).padding.bottom + 16,
-                        ),
-                        decoration: BoxDecoration(
-                          color: CheckoutScreen.surfaceBg.withValues(
-                            alpha: 0.95,
-                          ),
-                          border: Border(
-                            top: BorderSide(
-                              color: CheckoutScreen.outlineVariantColor
-                                  .withValues(alpha: 0.2),
-                            ),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 24,
-                              offset: const Offset(0, -6),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (!settings.acceptingOrders)
+                    return _CheckoutFooterShell(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (!settings.acceptingOrders)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 10.0),
                                 child: Text(
@@ -1567,7 +1590,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             ),
                           ],
                         ),
-                      ),
                     );
                   },
                 );
@@ -1831,3 +1853,47 @@ class _DeliveryZoneCard extends StatelessWidget {
     );
   }
 }
+
+class _CheckoutFooterShell extends StatelessWidget {
+  final Widget child;
+
+  const _CheckoutFooterShell({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(
+          20,
+          16,
+          20,
+          MediaQuery.of(context).padding.bottom + 16,
+        ),
+        decoration: BoxDecoration(
+          color: CheckoutScreen.surfaceBg.withValues(
+            alpha: 0.95,
+          ),
+          border: Border(
+            top: BorderSide(
+              color: CheckoutScreen.outlineVariantColor
+                  .withValues(alpha: 0.2),
+            ),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 24,
+              offset: const Offset(0, -6),
+            ),
+          ],
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+

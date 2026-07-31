@@ -109,6 +109,8 @@
     "often_ordered_with": "غالباً ما يُطلب مع"
   },
   "checkout": {
+    "settings_loading": "جاري تحميل بيانات الطلب…",
+    "settings_error": "تعذر تحميل إعدادات المطعم.",
     "title": "إتمام الطلب",
     "order_type": "نوع الطلب",
     "delivery": "توصيل",
@@ -168,7 +170,9 @@
     "delivery_zone_unavailable_error": "منطقة التوصيل هذه لم تعد متاحة. من فضلك اختر منطقة أخرى.",
     "zone_minimum_order": "الحد الأدنى للمنطقة",
     "zone_minimum_order_error": "هذه المنطقة تتطلب حد أدنى للطلب قدره {min}.",
-    "below_min_order_error": "طلبك أقل من الحد الأدنى للطلب في المطعم."
+    "below_min_order_error": "طلبك أقل من الحد الأدنى للطلب في المطعم.",
+    "settings_loading": "جاري تحميل بيانات الطلب…",
+    "settings_error": "تعذر تحميل بيانات الطلب."
   },
   "order_success": {
     "title": "تم تأكيد الطلب!",

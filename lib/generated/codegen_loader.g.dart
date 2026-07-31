@@ -125,6 +125,8 @@ class CodegenLoader extends AssetLoader{
     "often_ordered_with": "غالباً ما يُطلب مع"
   },
   "checkout": {
+    "settings_loading": "جاري تحميل بيانات الطلب…",
+    "settings_error": "تعذر تحميل بيانات الطلب.",
     "title": "إتمام الطلب",
     "order_type": "نوع الطلب",
     "delivery": "توصيل",
@@ -854,6 +856,8 @@ static const Map<String,dynamic> _en = {
     "often_ordered_with": "Often ordered with"
   },
   "checkout": {
+    "settings_loading": "Loading ordering information…",
+    "settings_error": "Couldn't load ordering information.",
     "title": "Checkout",
     "order_type": "Order Type",
     "delivery": "Delivery",

@@ -109,6 +109,8 @@
     "often_ordered_with": "Often ordered with"
   },
   "checkout": {
+    "settings_loading": "Loading ordering information…",
+    "settings_error": "Could not load restaurant settings.",
     "title": "Checkout",
     "order_type": "Order Type",
     "delivery": "Delivery",
@@ -197,7 +199,9 @@
     "delivery_zone_unavailable_error": "That delivery zone is no longer available. Please pick another.",
     "zone_minimum_order": "Zone minimum",
     "zone_minimum_order_error": "This zone requires a minimum order of {min}.",
-    "below_min_order_error": "Your order is below the restaurant's minimum order amount."
+    "below_min_order_error": "Your order is below the restaurant's minimum order amount.",
+    "settings_loading": "Loading ordering information\u2026",
+    "settings_error": "Couldn't load ordering information."
   },
   "order_success": {
     "title": "Order Placed!",
