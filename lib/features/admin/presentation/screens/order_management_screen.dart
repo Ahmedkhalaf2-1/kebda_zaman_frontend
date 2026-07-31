@@ -309,17 +309,12 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
             (o) =>
                 o.status == OrderStatus.confirmed ||
                 o.status == OrderStatus.preparing ||
-                o.status == OrderStatus.outForDelivery,
+                o.status == OrderStatus.outForDelivery ||
+                o.status == OrderStatus.readyForPickup,
           )
           .toList();
     } else {
-      return orders
-          .where(
-            (o) =>
-                o.status == OrderStatus.delivered ||
-                o.status == OrderStatus.cancelled,
-          )
-          .toList();
+      return orders.where((o) => o.status.isTerminal).toList();
     }
   }
 
@@ -513,13 +508,17 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
           Wrap(
             spacing: 6,
             runSpacing: 6,
-            children: OrderStatus.values.where((s) => s != OrderStatus.unknown).map((
+            // Only statuses valid for this order's fulfillment type are ever
+            // shown — a Pickup order must never be offered
+            // outForDelivery/delivered, and a Delivery order must never be
+            // offered readyForPickup/pickedUp.
+            children: _selectableStatuses(order.fulfillmentType).map((
               status,
             ) {
               final isSelected = order.status == status;
-              final isLegal = _allowedNextStatuses(
-                order.status,
-              ).contains(status);
+              final isLegal = order.status
+                  .allowedNextStatuses(order.fulfillmentType)
+                  .contains(status);
               final statusName = status.name.toUpperCase();
 
               return Opacity(
@@ -575,24 +574,13 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
     );
   }
 
-  /// Mirrors the backend's `ALLOWED_TRANSITIONS` table (see 05_ORDER_LIFECYCLE.md) so illegal
-  /// status changes are never offered client-side instead of round-tripping a 422.
-  Set<OrderStatus> _allowedNextStatuses(OrderStatus current) {
-    switch (current) {
-      case OrderStatus.pending:
-        return {OrderStatus.confirmed, OrderStatus.cancelled};
-      case OrderStatus.confirmed:
-        return {OrderStatus.preparing, OrderStatus.cancelled};
-      case OrderStatus.preparing:
-        return {OrderStatus.outForDelivery, OrderStatus.cancelled};
-      case OrderStatus.outForDelivery:
-        return {OrderStatus.delivered, OrderStatus.cancelled};
-      case OrderStatus.delivered:
-      case OrderStatus.cancelled:
-      case OrderStatus.unknown:
-        return const {};
-    }
-  }
+  /// Every status the admin/cashier UI may ever present for an order of this
+  /// fulfillment type — the normal in-progress/terminal sequence plus
+  /// cancellation. Never includes the other fulfillment type's steps.
+  List<OrderStatus> _selectableStatuses(FulfillmentType type) => [
+    ...type.statusSequence,
+    OrderStatus.cancelled,
+  ];
 
   Color _getStatusDotColor(OrderStatus status) {
     switch (status) {
@@ -605,6 +593,10 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       case OrderStatus.outForDelivery:
         return Colors.blue;
       case OrderStatus.delivered:
+        return KZ.tertiary;
+      case OrderStatus.readyForPickup:
+        return Colors.deepPurple.shade400;
+      case OrderStatus.pickedUp:
         return KZ.tertiary;
       case OrderStatus.cancelled:
         return Colors.red.shade800;

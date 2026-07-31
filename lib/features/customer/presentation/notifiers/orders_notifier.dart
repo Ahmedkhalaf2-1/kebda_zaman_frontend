@@ -27,20 +27,8 @@ class OrdersNotifier extends AutoDisposeAsyncNotifier<OrdersData> {
     final result = await repo.getOrders();
     final allOrders = result.fold((f) => throw f, (data) => data);
 
-    final active = allOrders
-        .where(
-          (o) =>
-              o.status != OrderStatus.delivered &&
-              o.status != OrderStatus.cancelled,
-        )
-        .toList();
-    final previous = allOrders
-        .where(
-          (o) =>
-              o.status == OrderStatus.delivered ||
-              o.status == OrderStatus.cancelled,
-        )
-        .toList();
+    final active = allOrders.where((o) => !o.status.isTerminal).toList();
+    final previous = allOrders.where((o) => o.status.isTerminal).toList();
 
     active.sort((a, b) => b.placedAt.compareTo(a.placedAt));
     previous.sort((a, b) => b.placedAt.compareTo(a.placedAt));

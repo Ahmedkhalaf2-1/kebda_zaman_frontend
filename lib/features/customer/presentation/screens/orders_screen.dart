@@ -333,9 +333,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
   @override
   Widget build(BuildContext context) {
     final order = widget.order;
-    final isActive =
-        order.status != OrderStatus.delivered &&
-        order.status != OrderStatus.cancelled;
+    final isActive = !order.status.isTerminal;
 
     final dateStr =
         '${order.placedAt.day}/${order.placedAt.month}/${order.placedAt.year} ${order.placedAt.hour}:${order.placedAt.minute.toString().padLeft(2, '0')}';
@@ -413,8 +411,6 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                       child: _StatusPill(
                         key: ValueKey(order.status),
                         status: order.status,
-                        isPickup:
-                            order.fulfillmentType == FulfillmentType.pickup,
                       ),
                     ),
                   ],
@@ -541,9 +537,8 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
 
 class _StatusPill extends StatelessWidget {
   final OrderStatus status;
-  final bool isPickup;
 
-  const _StatusPill({super.key, required this.status, required this.isPickup});
+  const _StatusPill({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -574,23 +569,26 @@ class _StatusPill extends StatelessWidget {
       case OrderStatus.outForDelivery:
         bgColor = KZ.primaryFixed.withValues(alpha: 0.4);
         textColor = KZ.primary;
-        icon = isPickup
-            ? Icons.storefront_rounded
-            : Icons.delivery_dining_rounded;
-        // Backend has no dedicated "ready for pickup" status — pickup
-        // orders reuse outForDelivery, so only the label is translated,
-        // the actual status value is untouched.
-        labelText = isPickup
-            ? 'tracking.step_ready_pickup'.tr()
-            : 'orders.status.out_for_delivery'.tr();
+        icon = Icons.delivery_dining_rounded;
+        labelText = 'orders.status.out_for_delivery'.tr();
         break;
       case OrderStatus.delivered:
         bgColor = const Color(0xFFE8F5E9); // green-50/100 tint from HTML
         textColor = const Color(0xFF1B5E20); // green-700 from HTML
         icon = Icons.check_circle_rounded;
-        labelText = isPickup
-            ? 'tracking.step_picked_up'.tr()
-            : 'orders.status.delivered'.tr();
+        labelText = 'orders.status.delivered'.tr();
+        break;
+      case OrderStatus.readyForPickup:
+        bgColor = KZ.primaryFixed.withValues(alpha: 0.4);
+        textColor = KZ.primary;
+        icon = Icons.storefront_rounded;
+        labelText = 'tracking.step_ready_pickup'.tr();
+        break;
+      case OrderStatus.pickedUp:
+        bgColor = const Color(0xFFE8F5E9); // green-50/100 tint from HTML
+        textColor = const Color(0xFF1B5E20); // green-700 from HTML
+        icon = Icons.check_circle_rounded;
+        labelText = 'tracking.step_picked_up'.tr();
         break;
       case OrderStatus.cancelled:
         bgColor = const Color(0xFFFEE2E2);

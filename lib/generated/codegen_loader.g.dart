@@ -231,6 +231,8 @@ class CodegenLoader extends AssetLoader{
       "preparing": "جاري التحضير",
       "out_for_delivery": "في الطريق إليك",
       "delivered": "تم التسليم",
+      "ready_for_pickup": "جاهز للاستلام",
+      "picked_up": "تم الاستلام",
       "cancelled": "ملغي",
       "unknown": "غير معروف"
     }
@@ -258,8 +260,8 @@ class CodegenLoader extends AssetLoader{
     "status_desc_pending": "تم استلام طلبك! في انتظار تأكيد المطعم",
     "status_desc_preparing": "الشيف يحضّر وجبتك",
     "status_desc_out_for_delivery": "السائق في الطريق إليك",
-    "status_desc_ready_pickup": "طلبك جاهز للاستلام من المطعم",
-    "status_desc_picked_up": "تم استلام الطلب بنجاح!",
+    "status_desc_ready_pickup": "طلبك جاهز للاستلام.",
+    "status_desc_picked_up": "تم استلام طلبك، بالهنا والشفا.",
     "status_desc_delivered": "تم توصيل طلبك بنجاح. بالهناء والشفا!",
     "status_desc_cancelled": "تم إلغاء الطلب",
     "status_desc_unknown": "حالة الطلب غير متاحة — يرجى التواصل مع الدعم",
@@ -272,7 +274,8 @@ class CodegenLoader extends AssetLoader{
     "chat_with_us": "تحدث معنا",
     "opening_chat": "جاري فتح محادثة مباشرة مع الدعم...",
     "step_picked_up": "تم الاستلام",
-    "estimate_unavailable": "سيتم تحديث الوقت المتوقع قريبًا"
+    "estimate_unavailable": "سيتم تحديث الوقت المتوقع قريبًا",
+    "status_unavailable_title": "الحالة غير متاحة"
   },
   "profile": {
     "title": "ملفي الشخصي",
@@ -957,6 +960,8 @@ static const Map<String,dynamic> _en = {
       "preparing": "Preparing Order",
       "out_for_delivery": "Out for Delivery",
       "delivered": "Delivered",
+      "ready_for_pickup": "Ready for pickup",
+      "picked_up": "Picked up",
       "cancelled": "Cancelled",
       "unknown": "Unknown"
     }
@@ -984,8 +989,8 @@ static const Map<String,dynamic> _en = {
     "status_desc_pending": "Order placed! Waiting for restaurant confirmation",
     "status_desc_preparing": "Chef is preparing your meal",
     "status_desc_out_for_delivery": "Driver is on the way to your location",
-    "status_desc_ready_pickup": "Your order is ready for pickup at the restaurant",
-    "status_desc_picked_up": "Order picked up successfully!",
+    "status_desc_ready_pickup": "Your order is ready to be collected.",
+    "status_desc_picked_up": "Your order has been picked up. Enjoy!",
     "status_desc_delivered": "Order delivered successfully. Enjoy your meal!",
     "status_desc_cancelled": "Order has been cancelled",
     "status_desc_unknown": "Order status unavailable — please contact support",
@@ -998,7 +1003,8 @@ static const Map<String,dynamic> _en = {
     "chat_with_us": "Chat with us",
     "opening_chat": "Opening live chat with support...",
     "step_picked_up": "Picked Up",
-    "estimate_unavailable": "Estimated time will be updated soon"
+    "estimate_unavailable": "Estimated time will be updated soon",
+    "status_unavailable_title": "Status Unavailable"
   },
   "profile": {
     "title": "My Profile",

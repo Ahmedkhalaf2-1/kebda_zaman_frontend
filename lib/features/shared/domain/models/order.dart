@@ -9,6 +9,10 @@ enum OrderStatus {
   preparing,
   outForDelivery,
   delivered,
+  // Pickup-only lifecycle statuses (backend commit 51393d0). Never valid
+  // alongside FulfillmentType.delivery in a well-formed order.
+  readyForPickup,
+  pickedUp,
   cancelled,
   // Not a real backend status — used when the backend sends a status string
   // that doesn't match any known value above (e.g. a new status added
@@ -17,7 +21,41 @@ enum OrderStatus {
   unknown,
 }
 
+/// Whether this status represents a finished order (success or otherwise).
+/// [OrderStatus.readyForPickup] is deliberately NOT terminal — it's still an
+/// active, in-progress state (the customer hasn't collected the order yet).
+extension OrderStatusX on OrderStatus {
+  bool get isTerminal =>
+      this == OrderStatus.delivered ||
+      this == OrderStatus.pickedUp ||
+      this == OrderStatus.cancelled;
+}
+
 enum FulfillmentType { delivery, pickup }
+
+/// Single source of truth for the fulfillment-aware customer/admin status
+/// sequence — Delivery and Pickup orders never share the same in-progress
+/// steps beyond `preparing`. Cancellation is not part of either normal
+/// sequence; it's handled as a separate terminal state everywhere this is
+/// consumed.
+extension FulfillmentTypeStatusX on FulfillmentType {
+  List<OrderStatus> get statusSequence => switch (this) {
+    FulfillmentType.delivery => const [
+      OrderStatus.pending,
+      OrderStatus.confirmed,
+      OrderStatus.preparing,
+      OrderStatus.outForDelivery,
+      OrderStatus.delivered,
+    ],
+    FulfillmentType.pickup => const [
+      OrderStatus.pending,
+      OrderStatus.confirmed,
+      OrderStatus.preparing,
+      OrderStatus.readyForPickup,
+      OrderStatus.pickedUp,
+    ],
+  };
+}
 
 @freezed
 class Order with _$Order {
@@ -49,6 +87,37 @@ class Order with _$Order {
   }) = _Order;
 
   factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);
+}
+
+/// Fulfillment-aware next-status transitions, mirroring the backend's
+/// `ALLOWED_TRANSITIONS` table (05_ORDER_LIFECYCLE.md) so the admin/cashier
+/// UI never offers an illegal or cross-method transition (e.g. Pickup
+/// `preparing` -> `outForDelivery`, or Delivery `outForDelivery` ->
+/// `pickedUp`) instead of round-tripping a 422.
+extension OrderStatusTransitionX on OrderStatus {
+  Set<OrderStatus> allowedNextStatuses(FulfillmentType fulfillmentType) {
+    if (isTerminal) return const {};
+    final sequence = fulfillmentType.statusSequence;
+    final idx = sequence.indexOf(this);
+    if (idx == -1 || idx == sequence.length - 1) return const {};
+    return {sequence[idx + 1], OrderStatus.cancelled};
+  }
+}
+
+extension OrderCrossMethodX on Order {
+  /// True when [status] doesn't belong to this order's own fulfillment
+  /// type's normal sequence (`cancelled`/`unknown` are valid for either
+  /// type, so they're never a mismatch). The backend guarantees this never
+  /// happens for well-formed data — e.g. a Pickup order should never carry
+  /// `outForDelivery`/`delivered` — but UI consumers must not silently
+  /// render a normal timeline for that specific mismatched case if it ever
+  /// occurs; they should fall back to a safe generic presentation instead.
+  bool get hasCrossMethodStatusMismatch {
+    if (status == OrderStatus.cancelled || status == OrderStatus.unknown) {
+      return false;
+    }
+    return !fulfillmentType.statusSequence.contains(status);
+  }
 }
 
 @freezed

@@ -63,13 +63,22 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
   }
 
   @override
-  void dispose() {
-    _scrollController.dispose();
+  void deactivate() {
     // Leaving the tracking screen — the order list may now be showing a
     // stale status for this order (it only fetches once, this screen polls
     // live), so refresh it on the way out rather than leaving it stale
-    // until the next manual pull-to-refresh.
+    // until the next manual pull-to-refresh. Done in deactivate() rather
+    // than dispose(): `ref` is no longer safe to use for invalidate() once
+    // dispose() runs (the element is already tearing down by then, which
+    // asserts in debug/test builds), but deactivate() still runs while the
+    // widget is a valid part of the tree.
     ref.invalidate(ordersProvider);
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -185,6 +194,13 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                     data: (order) {
                       if (order.status == OrderStatus.cancelled) {
                         return _buildCancelledState(context);
+                      }
+                      if (order.hasCrossMethodStatusMismatch) {
+                        // Malformed cross-method data (should never happen
+                        // with a well-formed backend response) — show a
+                        // safe generic state rather than a misleading
+                        // Delivery/Pickup timeline.
+                        return _buildUnknownStatusState(context);
                       }
                       return _buildTrackingContent(context, order);
                     },
@@ -513,7 +529,13 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
   }
 
   String _getStatusDescription(Order order) {
-    final isPickup = order.fulfillmentType == FulfillmentType.pickup;
+    // Defense against malformed cross-method data (e.g. a Pickup order
+    // somehow carrying a Delivery-only status, or vice versa): show a safe
+    // generic status presentation instead of pretending the mismatched
+    // status fits this order's fulfillment type.
+    if (order.hasCrossMethodStatusMismatch) {
+      return 'tracking.status_desc_unknown'.tr();
+    }
     switch (order.status) {
       case OrderStatus.pending:
         return 'tracking.status_desc_pending'.tr();
@@ -522,13 +544,13 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
       case OrderStatus.preparing:
         return 'tracking.step_preparing_subtitle'.tr();
       case OrderStatus.outForDelivery:
-        return isPickup
-            ? 'tracking.status_desc_ready_pickup'.tr()
-            : 'tracking.status_desc_out_for_delivery'.tr();
+        return 'tracking.status_desc_out_for_delivery'.tr();
       case OrderStatus.delivered:
-        return isPickup
-            ? 'tracking.status_desc_picked_up'.tr()
-            : 'tracking.status_desc_delivered'.tr();
+        return 'tracking.status_desc_delivered'.tr();
+      case OrderStatus.readyForPickup:
+        return 'tracking.status_desc_ready_pickup'.tr();
+      case OrderStatus.pickedUp:
+        return 'tracking.status_desc_picked_up'.tr();
       case OrderStatus.cancelled:
         return 'tracking.status_desc_cancelled'.tr();
       case OrderStatus.unknown:
@@ -581,6 +603,57 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
     );
   }
 
+  Widget _buildUnknownStatusState(BuildContext context) {
+    return Center(
+      key: const ValueKey('status_unavailable'),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: OrderTrackingScreen.secondaryColor.withValues(
+                  alpha: 0.1,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.help_outline_rounded,
+                size: 64,
+                color: OrderTrackingScreen.secondaryColor,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'tracking.status_unavailable_title'.tr(),
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: OrderTrackingScreen.onSurfaceColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'tracking.status_desc_unknown'.tr(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                color: OrderTrackingScreen.secondaryColor,
+              ),
+            ),
+            const SizedBox(height: 24),
+            KZButton(
+              label: 'order_success.back_to_home'.tr(),
+              onPressed: () => context.go('/home'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildVerticalTimeline(BuildContext context, Order order) {
     final isPickup = order.fulfillmentType == FulfillmentType.pickup;
 
@@ -598,50 +671,79 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
       return '$hour12:$minute $period';
     }
 
-    final timelineSteps = [
-      _TrackingStepData(
-        status: OrderStatus.pending,
-        title: 'tracking.step_received'.tr(),
-        subtitleFallback: 'tracking.status_desc_pending'.tr(),
-        icon: Icons.check_rounded,
-      ),
-      _TrackingStepData(
-        status: OrderStatus.confirmed,
-        title: 'tracking.step_confirmed'.tr(),
-        subtitleFallback: 'tracking.confirmed_msg'.tr(),
-        icon: Icons.check_rounded,
-      ),
-      _TrackingStepData(
-        status: OrderStatus.preparing,
-        title: 'tracking.step_preparing'.tr(),
-        subtitleFallback: 'tracking.step_preparing_subtitle'.tr(),
-        icon: Icons.soup_kitchen_rounded,
-      ),
-      _TrackingStepData(
-        status: OrderStatus.outForDelivery,
-        title: isPickup
-            ? 'tracking.step_ready_pickup'.tr()
-            : 'tracking.step_delivery'.tr(),
-        subtitleFallback: isPickup
-            ? 'tracking.status_desc_ready_pickup'.tr()
-            : 'tracking.status_desc_out_for_delivery'.tr(),
-        icon: isPickup
-            ? Icons.storefront_rounded
-            : Icons.delivery_dining_rounded,
-      ),
-      _TrackingStepData(
-        status: OrderStatus.delivered,
-        title: isPickup
-            ? 'tracking.step_picked_up'.tr()
-            : 'tracking.step_delivered'.tr(),
-        subtitleFallback: isPickup
-            ? 'tracking.status_desc_picked_up'.tr()
-            : 'tracking.status_desc_delivered'.tr(),
-        icon: Icons.home_outlined,
-      ),
-    ];
+    // Fulfillment-aware timeline — derived from order.fulfillmentType, not
+    // from the current status value. A Pickup order's timeline never
+    // contains "Out for delivery"/"Delivered"; a Delivery order's timeline
+    // never contains "Ready for pickup"/"Picked up".
+    final timelineSteps = isPickup
+        ? [
+            _TrackingStepData(
+              status: OrderStatus.pending,
+              title: 'tracking.step_received'.tr(),
+              subtitleFallback: 'tracking.status_desc_pending'.tr(),
+              icon: Icons.check_rounded,
+            ),
+            _TrackingStepData(
+              status: OrderStatus.confirmed,
+              title: 'tracking.step_confirmed'.tr(),
+              subtitleFallback: 'tracking.confirmed_msg'.tr(),
+              icon: Icons.check_rounded,
+            ),
+            _TrackingStepData(
+              status: OrderStatus.preparing,
+              title: 'tracking.step_preparing'.tr(),
+              subtitleFallback: 'tracking.step_preparing_subtitle'.tr(),
+              icon: Icons.soup_kitchen_rounded,
+            ),
+            _TrackingStepData(
+              status: OrderStatus.readyForPickup,
+              title: 'tracking.step_ready_pickup'.tr(),
+              subtitleFallback: 'tracking.status_desc_ready_pickup'.tr(),
+              icon: Icons.storefront_rounded,
+            ),
+            _TrackingStepData(
+              status: OrderStatus.pickedUp,
+              title: 'tracking.step_picked_up'.tr(),
+              subtitleFallback: 'tracking.status_desc_picked_up'.tr(),
+              icon: Icons.home_outlined,
+            ),
+          ]
+        : [
+            _TrackingStepData(
+              status: OrderStatus.pending,
+              title: 'tracking.step_received'.tr(),
+              subtitleFallback: 'tracking.status_desc_pending'.tr(),
+              icon: Icons.check_rounded,
+            ),
+            _TrackingStepData(
+              status: OrderStatus.confirmed,
+              title: 'tracking.step_confirmed'.tr(),
+              subtitleFallback: 'tracking.confirmed_msg'.tr(),
+              icon: Icons.check_rounded,
+            ),
+            _TrackingStepData(
+              status: OrderStatus.preparing,
+              title: 'tracking.step_preparing'.tr(),
+              subtitleFallback: 'tracking.step_preparing_subtitle'.tr(),
+              icon: Icons.soup_kitchen_rounded,
+            ),
+            _TrackingStepData(
+              status: OrderStatus.outForDelivery,
+              title: 'tracking.step_delivery'.tr(),
+              subtitleFallback: 'tracking.status_desc_out_for_delivery'.tr(),
+              icon: Icons.delivery_dining_rounded,
+            ),
+            _TrackingStepData(
+              status: OrderStatus.delivered,
+              title: 'tracking.step_delivered'.tr(),
+              subtitleFallback: 'tracking.status_desc_delivered'.tr(),
+              icon: Icons.home_outlined,
+            ),
+          ];
 
-    final currentStepIndex = _getStepIndex(order.status);
+    final currentStepIndex = timelineSteps.indexWhere(
+      (s) => s.status == order.status,
+    );
 
     return Column(
       children: List.generate(timelineSteps.length, (index) {
@@ -794,24 +896,6 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
     );
   }
 
-  int _getStepIndex(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.pending:
-        return 0;
-      case OrderStatus.confirmed:
-        return 1;
-      case OrderStatus.preparing:
-        return 2;
-      case OrderStatus.outForDelivery:
-        return 3;
-      case OrderStatus.delivered:
-        return 4;
-      case OrderStatus.cancelled:
-        return 0;
-      case OrderStatus.unknown:
-        return -1;
-    }
-  }
 }
 
 class _TrackingStepData {
@@ -847,10 +931,12 @@ class _StatusBannerCard extends StatelessWidget {
       case OrderStatus.preparing:
         return Icons.soup_kitchen_rounded;
       case OrderStatus.outForDelivery:
-        return order.fulfillmentType == FulfillmentType.pickup
-            ? Icons.storefront_rounded
-            : Icons.delivery_dining_rounded;
+        return Icons.delivery_dining_rounded;
       case OrderStatus.delivered:
+        return Icons.check_circle_rounded;
+      case OrderStatus.readyForPickup:
+        return Icons.storefront_rounded;
+      case OrderStatus.pickedUp:
         return Icons.check_circle_rounded;
       case OrderStatus.cancelled:
         return Icons.cancel_rounded;

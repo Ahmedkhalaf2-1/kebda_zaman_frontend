@@ -111,6 +111,8 @@ class OrdersBreakdown {
       'PREPARING' => OrderStatus.preparing,
       'OUT_FOR_DELIVERY' => OrderStatus.outForDelivery,
       'DELIVERED' => OrderStatus.delivered,
+      'READY_FOR_PICKUP' => OrderStatus.readyForPickup,
+      'PICKED_UP' => OrderStatus.pickedUp,
       'CANCELLED' => OrderStatus.cancelled,
       _ => OrderStatus.unknown,
     };

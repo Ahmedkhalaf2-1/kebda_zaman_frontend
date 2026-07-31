@@ -215,6 +215,8 @@
       "preparing": "جاري التحضير",
       "out_for_delivery": "في الطريق إليك",
       "delivered": "تم التسليم",
+      "ready_for_pickup": "جاهز للاستلام",
+      "picked_up": "تم الاستلام",
       "cancelled": "ملغي",
       "unknown": "غير معروف"
     }
@@ -242,8 +244,8 @@
     "status_desc_pending": "تم استلام طلبك! في انتظار تأكيد المطعم",
     "status_desc_preparing": "الشيف يحضّر وجبتك",
     "status_desc_out_for_delivery": "السائق في الطريق إليك",
-    "status_desc_ready_pickup": "طلبك جاهز للاستلام من المطعم",
-    "status_desc_picked_up": "تم استلام الطلب بنجاح!",
+    "status_desc_ready_pickup": "طلبك جاهز للاستلام.",
+    "status_desc_picked_up": "تم استلام طلبك، بالهنا والشفا.",
     "status_desc_delivered": "تم توصيل طلبك بنجاح. بالهناء والشفا!",
     "status_desc_cancelled": "تم إلغاء الطلب",
     "status_desc_unknown": "حالة الطلب غير متاحة — يرجى التواصل مع الدعم",
@@ -256,7 +258,8 @@
     "chat_with_us": "تحدث معنا",
     "opening_chat": "جاري فتح محادثة مباشرة مع الدعم...",
     "step_picked_up": "تم الاستلام",
-    "estimate_unavailable": "سيتم تحديث الوقت المتوقع قريبًا"
+    "estimate_unavailable": "سيتم تحديث الوقت المتوقع قريبًا",
+    "status_unavailable_title": "الحالة غير متاحة"
   },
   "profile": {
     "title": "ملفي الشخصي",

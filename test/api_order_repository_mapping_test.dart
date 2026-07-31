@@ -143,4 +143,66 @@ void main() {
       expect(order.status, OrderStatus.unknown);
     },
   );
+
+  group('ApiOrderRepository pickup-specific status mapping (Fix 9D)', () {
+    test("'readyForPickup' maps to OrderStatus.readyForPickup", () {
+      final order = ApiOrderRepository.mapOrderForTesting(
+        baseOrderJson(deliveryMethod: 'PICKUP', status: 'readyForPickup'),
+      );
+      expect(order.status, OrderStatus.readyForPickup);
+    });
+
+    test("'pickedUp' maps to OrderStatus.pickedUp", () {
+      final order = ApiOrderRepository.mapOrderForTesting(
+        baseOrderJson(deliveryMethod: 'PICKUP', status: 'pickedUp'),
+      );
+      expect(order.status, OrderStatus.pickedUp);
+    });
+  });
+
+  group(
+    'ApiOrderRepository status-polling mapper '
+    '(GET /orders/:id/status via watchOrder)',
+    () {
+      test('maps current status readyForPickup', () {
+        final result = ApiOrderRepository.mapStatusPollResponseForTesting({
+          'status': 'readyForPickup',
+          'statusHistory': [],
+        });
+        expect(result.status, OrderStatus.readyForPickup);
+      });
+
+      test('maps current status pickedUp', () {
+        final result = ApiOrderRepository.mapStatusPollResponseForTesting({
+          'status': 'pickedUp',
+          'statusHistory': [],
+        });
+        expect(result.status, OrderStatus.pickedUp);
+      });
+
+      test('maps statusHistory entries containing pickedUp', () {
+        final result = ApiOrderRepository.mapStatusPollResponseForTesting({
+          'status': 'pickedUp',
+          'statusHistory': [
+            {'status': 'pending', 'changedAt': '2026-07-01T10:00:00.000Z'},
+            {'status': 'readyForPickup', 'changedAt': '2026-07-01T10:20:00.000Z'},
+            {'status': 'pickedUp', 'changedAt': '2026-07-01T10:30:00.000Z'},
+          ],
+        });
+        expect(result.statusHistory.map((e) => e.status).toList(), [
+          OrderStatus.pending,
+          OrderStatus.readyForPickup,
+          OrderStatus.pickedUp,
+        ]);
+      });
+
+      test('unknown status in the polling response falls back to unknown', () {
+        final result = ApiOrderRepository.mapStatusPollResponseForTesting({
+          'status': 'some_new_status_the_app_does_not_know',
+          'statusHistory': [],
+        });
+        expect(result.status, OrderStatus.unknown);
+      });
+    },
+  );
 }

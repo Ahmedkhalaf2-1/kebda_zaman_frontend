@@ -23,6 +23,10 @@ Color _statusColor(OrderStatus status) {
       return Colors.blue;
     case OrderStatus.delivered:
       return KZ.tertiary;
+    case OrderStatus.readyForPickup:
+      return Colors.deepPurple.shade400;
+    case OrderStatus.pickedUp:
+      return KZ.tertiary;
     case OrderStatus.cancelled:
       return Colors.red.shade800;
     case OrderStatus.unknown:

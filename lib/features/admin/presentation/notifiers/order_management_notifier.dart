@@ -63,10 +63,13 @@ class OrderManagementNotifier extends AutoDisposeAsyncNotifier<List<Order>> {
       latest.map((o) => o.id == orderId ? serverOrder : o).toList(),
     );
 
-    // Award loyalty points if this transition just became a terminal success state.
-    if (newStatus == OrderStatus.delivered &&
-        oldStatus != OrderStatus.delivered &&
-        order.loyaltyPointsEarned > 0) {
+    // Award loyalty points if this transition just became a terminal success
+    // state — Delivered for Delivery orders, PickedUp for Pickup orders.
+    final becameCompleted =
+        (newStatus == OrderStatus.delivered ||
+            newStatus == OrderStatus.pickedUp) &&
+        oldStatus != newStatus;
+    if (becameCompleted && order.loyaltyPointsEarned > 0) {
       final loyaltyRepo = ref.read(loyaltyRepositoryProvider);
       await loyaltyRepo.earnPoints(
         userId: order.userId,

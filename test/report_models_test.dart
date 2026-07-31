@@ -56,6 +56,32 @@ void main() {
       );
     });
 
+    test('maps READY_FOR_PICKUP to OrderStatus.readyForPickup', () {
+      final result = OrdersBreakdown.fromJson({
+        'byStatus': [
+          {'status': 'READY_FOR_PICKUP', 'count': 4},
+        ],
+        'byFulfillmentType': [],
+        'byPaymentMethod': [],
+      });
+
+      expect(result.byStatus.single.key, OrderStatus.readyForPickup);
+      expect(result.byStatus.single.count, 4);
+    });
+
+    test('maps PICKED_UP to OrderStatus.pickedUp', () {
+      final result = OrdersBreakdown.fromJson({
+        'byStatus': [
+          {'status': 'PICKED_UP', 'count': 6},
+        ],
+        'byFulfillmentType': [],
+        'byPaymentMethod': [],
+      });
+
+      expect(result.byStatus.single.key, OrderStatus.pickedUp);
+      expect(result.byStatus.single.count, 6);
+    });
+
     test('unknown lifecycle status still falls back to OrderStatus.unknown', () {
       final result = OrdersBreakdown.fromJson({
         'byStatus': [

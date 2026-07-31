@@ -156,40 +156,21 @@ class ApiOrderRepository implements OrderRepository {
     }
 
     while (currentOrder != null) {
-      if (currentOrder.status == OrderStatus.delivered ||
-          currentOrder.status == OrderStatus.cancelled) {
-        break; // Terminal state, stop polling
+      if (currentOrder.status.isTerminal) {
+        break; // Terminal state (delivered/pickedUp/cancelled), stop polling
       }
 
       await Future.delayed(const Duration(seconds: 10));
       try {
         final response = await _apiClient.dio.get('/orders/$id/status');
-        final data = response.data;
-
-        final statusStr = data['status'] as String? ?? 'pending';
-        final status = OrderStatus.values.firstWhere(
-          (e) => e.name == statusStr,
-          orElse: () => OrderStatus.unknown,
+        final polled = _mapStatusPollResponse(
+          response.data as Map<String, dynamic>,
         );
 
-        final statusHistoryList = (data['statusHistory'] as List?) ?? [];
-        final statusHistory = statusHistoryList.map((item) {
-          final itemStatus = OrderStatus.values.firstWhere(
-            (e) => e.name == item['status'],
-            orElse: () => OrderStatus.unknown,
-          );
-          return OrderStatusEntry(
-            status: itemStatus,
-            timestamp: item['changedAt'] != null
-                ? DateTime.parse(item['changedAt']).toLocal()
-                : DateTime.now(),
-          );
-        }).toList();
-
         currentOrder = currentOrder.copyWith(
-          status: status,
-          statusHistory: statusHistory,
-          estimatedTime: data['estimatedDeliveryTime']?.toString(),
+          status: polled.status,
+          statusHistory: polled.statusHistory,
+          estimatedTime: response.data['estimatedDeliveryTime']?.toString(),
         );
         yield currentOrder;
       } on DioException catch (e) {
@@ -297,12 +278,38 @@ class ApiOrderRepository implements OrderRepository {
     throw const FormatException('Unknown order payment status');
   }
 
+  /// Test-only seam onto the lighter-weight status-polling mapper used by
+  /// `GET /orders/:id/status` (via [watchOrder]) — separate from the full
+  /// [_mapOrder] used by every other endpoint, since the status endpoint
+  /// only ever returns a status + statusHistory, not a full order payload.
+  @visibleForTesting
+  static ({OrderStatus status, List<OrderStatusEntry> statusHistory})
+  mapStatusPollResponseForTesting(Map<String, dynamic> data) =>
+      _mapStatusPollResponse(data);
+
+  static OrderStatus _mapStatusName(Object? name) => OrderStatus.values
+      .firstWhere((e) => e.name == name, orElse: () => OrderStatus.unknown);
+
+  static ({OrderStatus status, List<OrderStatusEntry> statusHistory})
+  _mapStatusPollResponse(Map<String, dynamic> data) {
+    final status = _mapStatusName(data['status'] as String? ?? 'pending');
+
+    final statusHistoryList = (data['statusHistory'] as List?) ?? [];
+    final statusHistory = statusHistoryList.map((item) {
+      final itemStatus = _mapStatusName(item['status']);
+      return OrderStatusEntry(
+        status: itemStatus,
+        timestamp: item['changedAt'] != null
+            ? DateTime.parse(item['changedAt']).toLocal()
+            : DateTime.now(),
+      );
+    }).toList();
+
+    return (status: status, statusHistory: statusHistory);
+  }
+
   static Order _mapOrder(Map<String, dynamic> json) {
-    final statusStr = json['status'] as String? ?? 'pending';
-    final status = OrderStatus.values.firstWhere(
-      (e) => e.name == statusStr,
-      orElse: () => OrderStatus.unknown,
-    );
+    final status = _mapStatusName(json['status'] as String? ?? 'pending');
 
     final itemsList = (json['items'] as List?) ?? [];
 

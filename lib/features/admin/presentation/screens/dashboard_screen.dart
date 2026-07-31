@@ -638,6 +638,10 @@ IconData _statusIcon(OrderStatus status) {
       return Icons.local_shipping_rounded;
     case OrderStatus.delivered:
       return Icons.check_circle_rounded;
+    case OrderStatus.readyForPickup:
+      return Icons.storefront_rounded;
+    case OrderStatus.pickedUp:
+      return Icons.check_circle_rounded;
     case OrderStatus.cancelled:
       return Icons.cancel_rounded;
     case OrderStatus.unknown:
@@ -657,6 +661,10 @@ Color _statusColor(OrderStatus status) {
       return Colors.blue.shade700;
     case OrderStatus.delivered:
       return KZ.tertiary;
+    case OrderStatus.readyForPickup:
+      return Colors.deepPurple.shade400;
+    case OrderStatus.pickedUp:
+      return KZ.tertiary;
     case OrderStatus.cancelled:
       return Colors.grey.shade600;
     case OrderStatus.unknown:
@@ -671,6 +679,8 @@ String _statusLabel(OrderStatus status) {
     OrderStatus.preparing => 'preparing',
     OrderStatus.outForDelivery => 'out_for_delivery',
     OrderStatus.delivered => 'delivered',
+    OrderStatus.readyForPickup => 'ready_for_pickup',
+    OrderStatus.pickedUp => 'picked_up',
     OrderStatus.cancelled => 'cancelled',
     OrderStatus.unknown => 'unknown',
   };
