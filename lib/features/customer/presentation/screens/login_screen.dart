@@ -67,7 +67,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(
-        fontFamily: 'Plus Jakarta Sans',
         color: KZ.onSurfaceVariant.withValues(alpha: 0.55),
         fontSize: 15,
         fontWeight: FontWeight.w400,
@@ -106,7 +105,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Text(
         label,
         style: const TextStyle(
-          fontFamily: 'Plus Jakarta Sans',
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: KZ.onSurfaceVariant,
@@ -142,7 +140,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   label,
                   style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: KZ.onSurface,
@@ -229,7 +226,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 child: Text(
                                   authState.errorMessage!,
                                   style: const TextStyle(
-                                    fontFamily: 'Plus Jakarta Sans',
                                     fontSize: 13,
                                     color: KZ.error,
                                     fontWeight: FontWeight.w600,
@@ -254,7 +250,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               controller: _identifierCtrl,
                               keyboardType: TextInputType.emailAddress,
                               style: const TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
                                 fontSize: 15,
                                 color: KZ.onSurface,
                               ),
@@ -278,7 +273,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               controller: _passwordCtrl,
                               obscureText: _obscurePassword,
                               style: const TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
                                 fontSize: 15,
                                 color: KZ.onSurface,
                               ),
@@ -331,7 +325,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           ? 'auth.switch_to_customer_login'.tr()
                                           : 'auth.switch_to_admin_login'.tr(),
                                       style: const TextStyle(
-                                        fontFamily: 'Plus Jakarta Sans',
                                         color: KZ.onSurfaceVariant,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 13,
@@ -351,7 +344,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     child: Text(
                                       'auth.forgot_password'.tr(),
                                       style: const TextStyle(
-                                        fontFamily: 'Plus Jakarta Sans',
                                         color: KZ.primary,
                                         fontWeight: FontWeight.w700,
                                         fontSize: 13,
@@ -401,7 +393,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         : Text(
                                             'auth.login_btn'.tr(),
                                             style: const TextStyle(
-                                              fontFamily: 'Plus Jakarta Sans',
                                               fontSize: 16,
                                               color: Colors.white,
                                               fontWeight: FontWeight.w700,
@@ -431,7 +422,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             child: Text(
                               'auth.or_continue'.tr(),
                               style: const TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
                                 color: KZ.onSurfaceVariant,
                                 fontSize: 14,
                               ),
@@ -482,7 +472,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           Text(
                             'auth.no_account'.tr(),
                             style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
                               color: KZ.onSurfaceVariant,
                               fontSize: 14,
                             ),
@@ -494,7 +483,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             child: Text(
                               'auth.signup_link'.tr(),
                               style: const TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
                                 fontWeight: FontWeight.w700,
                                 color: KZ.primary,
                                 fontSize: 14,
@@ -546,7 +534,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           'auth.login_title'.tr(),
           textAlign: TextAlign.center,
           style: const TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
             fontSize: 24,
             fontWeight: FontWeight.w700,
             height: 1.3,
@@ -560,7 +547,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           'auth.login_subtitle'.tr(),
           textAlign: TextAlign.center,
           style: const TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
             fontSize: 14,
             color: KZ.onSurfaceVariant,
             height: 1.4,

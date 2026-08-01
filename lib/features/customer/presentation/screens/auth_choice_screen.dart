@@ -79,7 +79,6 @@ class AuthChoiceScreen extends ConsumerWidget {
                         'onboarding.welcome_title'.tr(),
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
                           fontSize: 32,
                           fontWeight: FontWeight.w900,
                           color: Color(0xFF1A1A1A),
@@ -97,7 +96,6 @@ class AuthChoiceScreen extends ConsumerWidget {
                           'onboarding.welcome_sub'.tr(),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
                             fontSize: 18,
                             color: KZ.secondary.withValues(alpha: 0.9),
                             height: 1.5,
@@ -172,7 +170,8 @@ class _KebdaLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = KZ.primary // #8c2b00
+      ..color = KZ
+          .primary // #8c2b00
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round

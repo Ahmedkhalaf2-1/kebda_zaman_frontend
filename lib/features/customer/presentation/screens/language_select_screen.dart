@@ -54,7 +54,6 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
                 'onboarding.select_language'.tr(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                   color: KZ.onSurface,
@@ -68,7 +67,6 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
                 'onboarding.select_language_sub'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
                   fontSize: 14,
                   color: KZ.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
@@ -186,7 +184,6 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
                   Text(
                     title,
                     style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       color: isSelected ? KZ.primary : KZ.onSurface,
@@ -196,7 +193,6 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
                       fontSize: 14,
                       color: KZ.onSurfaceVariant.withValues(alpha: 0.8),
                     ),

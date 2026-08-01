@@ -210,7 +210,6 @@ class KZ {
     // Was 'Montserrat', which was never bundled as an asset and silently
     // fell back to each platform's system font — fixed to the app's real
     // typeface. Size/weight/color intentionally left untouched.
-    fontFamily: 'Readex Pro',
     fontSize: 20,
     fontWeight: FontWeight.w800,
     color: primary,
@@ -225,9 +224,12 @@ class KZ {
   // ─── Semantic Type Scale (Sprint 2) ────────────────────────────────────
   // The one-and-only type scale for newly-adopted screens/components. Every
   // role is named for what it *means*, never for its numeric size, so a
-  // future scale adjustment never requires renaming call sites. All roles
-  // use the Readex Pro family (the app's single bilingual Arabic/Latin
-  // typeface — see Sprint 2 report) at weight >= 400: never light/thin.
+  // future scale adjustment never requires renaming call sites. None of
+  // these roles set fontFamily: the active family (Alexandria for Arabic,
+  // Plus Jakarta Sans otherwise) is resolved centrally by ThemeData in
+  // lib/app.dart based on locale — never hardcode fontFamily at a call site,
+  // or it will stop following the locale switch. All roles use weight >=
+  // 400: never light/thin.
   //
   // "Max usage" below is a guideline for reviewers, not an enforced limit.
 
@@ -235,7 +237,6 @@ class KZ {
   /// standout number or headline (e.g. a splash/onboarding statement).
   /// Never for ordinary page titles.
   static const TextStyle display = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 32,
     height: 1.2,
     fontWeight: FontWeight.w700,
@@ -245,7 +246,6 @@ class KZ {
   /// The screen's own title (AppBar title / top-of-screen heading). Max
   /// usage: exactly one per screen.
   static const TextStyle pageTitle = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 22,
     height: 1.25,
     fontWeight: FontWeight.w700,
@@ -255,7 +255,6 @@ class KZ {
   /// Header introducing a group of content within a screen (e.g. "Popular
   /// Now", "Your Cart"). Max usage: once per section.
   static const TextStyle sectionTitle = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 18,
     height: 1.3,
     fontWeight: FontWeight.w700,
@@ -266,7 +265,6 @@ class KZ {
   /// A menu item / product name in a list, grid, or card. Intended for 1-2
   /// lines; truncate beyond that rather than growing the row.
   static const TextStyle itemTitle = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 15,
     height: 1.3,
     fontWeight: FontWeight.w600,
@@ -277,7 +275,6 @@ class KZ {
   /// name). Slightly smaller/quieter than [itemTitle] since it usually sits
   /// alongside metadata (status, date) rather than a hero food image.
   static const TextStyle cardTitle = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 14,
     height: 1.3,
     fontWeight: FontWeight.w700,
@@ -286,7 +283,6 @@ class KZ {
 
   /// Prominent supporting paragraph — item descriptions, promo detail text.
   static const TextStyle bodyLarge = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 15,
     height: 1.45,
     fontWeight: FontWeight.w500,
@@ -295,7 +291,6 @@ class KZ {
 
   /// Default paragraph/body text for ordinary UI copy.
   static const TextStyle body = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 14,
     height: 1.4,
     fontWeight: FontWeight.w500,
@@ -305,7 +300,6 @@ class KZ {
   /// Secondary/supporting inline text — quieter than [body], still legible
   /// at normal reading distance. Not for anything load-bearing.
   static const TextStyle bodySmall = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 13,
     height: 1.4,
     fontWeight: FontWeight.w400,
@@ -314,25 +308,22 @@ class KZ {
 
   /// Prominent field/form label or a selected tab label.
   static const TextStyle labelLarge = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 14,
-    height: 1.2,
+    height: 1.35,
     fontWeight: FontWeight.w600,
     color: onSurface,
   );
 
   /// Standard label — chip text, filter text, compact control labels.
   static const TextStyle label = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 12,
-    height: 1.2,
+    height: 1.35,
     fontWeight: FontWeight.w600,
     color: onSurfaceVariant,
   );
 
   /// Least prominent helper/meta text — timestamps, fine print, disclaimers.
   static const TextStyle caption = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 11,
     height: 1.3,
     fontWeight: FontWeight.w500,
@@ -342,9 +333,8 @@ class KZ {
   /// A prominent, standalone price — item details price, cart grand total.
   /// Max usage: one per screen/card; use [price] for anything else.
   static const TextStyle priceLarge = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 22,
-    height: 1.2,
+    height: 1.35,
     fontWeight: FontWeight.w800,
     color: primary,
     fontFeatures: [FontFeature.tabularFigures()],
@@ -352,9 +342,8 @@ class KZ {
 
   /// A standard, inline price — menu list price, order line price.
   static const TextStyle price = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 15,
-    height: 1.2,
+    height: 1.35,
     fontWeight: FontWeight.w700,
     color: onSurface,
     fontFeatures: [FontFeature.tabularFigures()],
@@ -363,17 +352,15 @@ class KZ {
   /// Button label text. Color intentionally omitted — each button variant
   /// supplies its own foreground color.
   static const TextStyle buttonLabel = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 15,
-    height: 1.2,
+    height: 1.35,
     fontWeight: FontWeight.w700,
   );
 
   /// Bottom navigation / tab bar item label.
   static const TextStyle navigationLabel = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 11,
-    height: 1.2,
+    height: 1.35,
     fontWeight: FontWeight.w600,
     color: onSurfaceVariant,
   );
@@ -382,9 +369,8 @@ class KZ {
   /// a non-color signal (icon or explicit word) — never rely on color alone
   /// to communicate status.
   static const TextStyle statusLabel = TextStyle(
-    fontFamily: 'Readex Pro',
     fontSize: 11,
-    height: 1.2,
+    height: 1.35,
     fontWeight: FontWeight.w700,
     letterSpacing: 0.4,
   );

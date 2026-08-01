@@ -106,7 +106,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: Text(
                       'onboarding.skip'.tr(),
                       style: const TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -266,9 +265,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     color: KZ.primaryFixed, // #ffdbcf (peach pill background)
                     borderRadius: BorderRadius.circular(999),
                     border: Border.all(
-                      color: const Color(0xFFFFB59C).withValues(
-                        alpha: 0.6,
-                      ), // #ffb59c
+                      color: const Color(
+                        0xFFFFB59C,
+                      ).withValues(alpha: 0.6), // #ffb59c
                       width: 1.5,
                     ),
                     boxShadow: [
@@ -282,7 +281,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   child: Text(
                     badge,
                     style: const TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: KZ.primary, // #8c2b00
@@ -300,7 +298,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
               fontSize: 28,
               fontWeight: FontWeight.w800,
               color: KZ.onSurface,
@@ -318,7 +315,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               sub,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontFamily: 'Plus Jakarta Sans',
                 fontSize: 15,
                 color: KZ.onSurfaceVariant.withValues(alpha: 0.85),
                 height: 1.5,

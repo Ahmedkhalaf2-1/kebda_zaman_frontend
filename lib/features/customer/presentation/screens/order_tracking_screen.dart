@@ -855,7 +855,6 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                     Text(
                       step.title,
                       style: TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
                         fontSize: isActive ? 18 : 16,
                         fontWeight: isActive || isCompleted
                             ? FontWeight.w800
@@ -874,7 +873,6 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                     Text(
                       subtitle,
                       style: TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
                         fontSize: isActive ? 14 : 13,
                         fontWeight: isActive
                             ? FontWeight.w600
@@ -895,7 +893,6 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
       }),
     );
   }
-
 }
 
 class _TrackingStepData {

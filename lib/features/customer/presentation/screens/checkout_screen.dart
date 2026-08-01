@@ -491,7 +491,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   // Top Navigation Bar
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
+                      horizontal: 16,
                       vertical: 12,
                     ),
                     child: Row(
@@ -1367,9 +1367,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                        const Center(child: CircularProgressIndicator()),
                         const SizedBox(height: 10),
                         Text(
                           'checkout.settings_loading'.tr(),
@@ -1396,7 +1394,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             Expanded(
                               child: Text(
                                 'checkout.settings_error'.tr(),
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
                                       color: CheckoutScreen.errorColor,
                                     ),
                               ),
@@ -1427,169 +1426,166 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (!settings.acceptingOrders)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 10.0),
-                                child: Text(
-                                  (context.locale.languageCode == 'ar'
-                                          ? settings.closedMessageAr
-                                          : settings.closedMessageEn) ??
-                                      'checkout.restaurant_closed'.tr(),
-                                  style: KZ.body.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: CheckoutScreen.errorColor,
-                                  ),
-                                ),
-                              )
-                            else if (isBelowMinOrder)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 10.0),
-                                child: Text(
-                                  'checkout.min_order_notice'.tr(
-                                    namedArgs: {
-                                      'remaining': formatCurrency(
-                                        remaining,
-                                        locale: context.locale,
-                                      ),
-                                      'min': formatCurrency(
-                                        settings.minOrderAmount,
-                                        locale: context.locale,
-                                      ),
-                                    },
-                                  ),
-                                  style: KZ.body.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: CheckoutScreen.errorColor,
-                                  ),
-                                ),
-                              )
-                            else if (needsZoneSelection)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 10.0),
-                                child: Text(
-                                  'checkout.delivery_zone_required'.tr(),
-                                  style: KZ.body.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: CheckoutScreen.errorColor,
-                                  ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10.0),
+                              child: Text(
+                                (context.locale.languageCode == 'ar'
+                                        ? settings.closedMessageAr
+                                        : settings.closedMessageEn) ??
+                                    'checkout.restaurant_closed'.tr(),
+                                style: KZ.body.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: CheckoutScreen.errorColor,
                                 ),
                               ),
-                            KZButton(
-                              fullWidth: true,
-                              pill: false,
-                              loading: checkoutState.isLoading,
-                              icon: Icons.arrow_forward_rounded,
-                              label: 'checkout.place_order_total'.tr(
-                                namedArgs: {
-                                  'amount': formatCurrency(
-                                    grandTotal,
-                                    locale: context.locale,
-                                  ),
-                                },
+                            )
+                          else if (isBelowMinOrder)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10.0),
+                              child: Text(
+                                'checkout.min_order_notice'.tr(
+                                  namedArgs: {
+                                    'remaining': formatCurrency(
+                                      remaining,
+                                      locale: context.locale,
+                                    ),
+                                    'min': formatCurrency(
+                                      settings.minOrderAmount,
+                                      locale: context.locale,
+                                    ),
+                                  },
+                                ),
+                                style: KZ.body.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: CheckoutScreen.errorColor,
+                                ),
                               ),
-                              onPressed:
-                                  (checkoutState.isLoading ||
-                                      !settings.acceptingOrders ||
-                                      isBelowMinOrder ||
-                                      needsZoneSelection)
-                                  ? null
-                                  : () async {
-                                      final deliveryMethod =
-                                          _orderType == 'delivery'
-                                          ? FulfillmentType.delivery
-                                          : FulfillmentType.pickup;
-                                      final paymentMethod =
-                                          _selectedPaymentMethod == 0
-                                          ? 'CASH'
-                                          : 'CARD';
+                            )
+                          else if (needsZoneSelection)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10.0),
+                              child: Text(
+                                'checkout.delivery_zone_required'.tr(),
+                                style: KZ.body.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: CheckoutScreen.errorColor,
+                                ),
+                              ),
+                            ),
+                          KZButton(
+                            fullWidth: true,
+                            pill: false,
+                            loading: checkoutState.isLoading,
+                            icon: Icons.arrow_forward_rounded,
+                            label: 'checkout.place_order_total'.tr(
+                              namedArgs: {
+                                'amount': formatCurrency(
+                                  grandTotal,
+                                  locale: context.locale,
+                                ),
+                              },
+                            ),
+                            onPressed:
+                                (checkoutState.isLoading ||
+                                    !settings.acceptingOrders ||
+                                    isBelowMinOrder ||
+                                    needsZoneSelection)
+                                ? null
+                                : () async {
+                                    final deliveryMethod =
+                                        _orderType == 'delivery'
+                                        ? FulfillmentType.delivery
+                                        : FulfillmentType.pickup;
+                                    final paymentMethod =
+                                        _selectedPaymentMethod == 0
+                                        ? 'CASH'
+                                        : 'CARD';
 
-                                      Map<String, dynamic>? deliveryAddress;
-                                      if (deliveryMethod ==
-                                          FulfillmentType.delivery) {
-                                        if (effectiveAddress == null) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'checkout.address_required'
-                                                    .tr(),
-                                              ),
-                                              backgroundColor:
-                                                  CheckoutScreen.errorColor,
+                                    Map<String, dynamic>? deliveryAddress;
+                                    if (deliveryMethod ==
+                                        FulfillmentType.delivery) {
+                                      if (effectiveAddress == null) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'checkout.address_required'.tr(),
                                             ),
-                                          );
-                                          return;
-                                        }
-                                        if (_selectedZoneId == null) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'checkout.delivery_zone_required'
-                                                    .tr(),
-                                              ),
-                                              backgroundColor:
-                                                  CheckoutScreen.errorColor,
-                                            ),
-                                          );
-                                          return;
-                                        }
-                                        deliveryAddress = {
-                                          'title': effectiveAddress.label,
-                                          'street': effectiveAddress.street,
-                                          'building': effectiveAddress.building,
-                                          if (effectiveAddress.floor != null &&
-                                              effectiveAddress
-                                                  .floor!
-                                                  .isNotEmpty)
-                                            'floor': effectiveAddress.floor,
-                                          if (effectiveAddress.apartment !=
-                                                  null &&
-                                              effectiveAddress
-                                                  .apartment!
-                                                  .isNotEmpty)
-                                            'apartment':
-                                                effectiveAddress.apartment,
-                                          'city': effectiveAddress.city,
-                                        };
-                                      }
-
-                                      final order = await ref
-                                          .read(checkoutProvider.notifier)
-                                          .placeOrder(
-                                            deliveryMethod: deliveryMethod,
-                                            paymentMethod: paymentMethod,
-                                            deliveryAddress: deliveryAddress,
-                                            deliveryZoneId:
-                                                deliveryMethod ==
-                                                    FulfillmentType.delivery
-                                                ? _selectedZoneId
-                                                : null,
-                                            promoCode: effectiveRewardId == null
-                                                ? cart.promoCodeId
-                                                : null,
-                                            redeemRewardId: effectiveRewardId,
-                                          );
-                                      if (order != null) {
-                                        if (!context.mounted) return;
-                                        context.go(
-                                          '/checkout/success',
-                                          extra: order,
+                                            backgroundColor:
+                                                CheckoutScreen.errorColor,
+                                          ),
                                         );
+                                        return;
                                       }
-                                    },
+                                      if (_selectedZoneId == null) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'checkout.delivery_zone_required'
+                                                  .tr(),
+                                            ),
+                                            backgroundColor:
+                                                CheckoutScreen.errorColor,
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                      deliveryAddress = {
+                                        'title': effectiveAddress.label,
+                                        'street': effectiveAddress.street,
+                                        'building': effectiveAddress.building,
+                                        if (effectiveAddress.floor != null &&
+                                            effectiveAddress.floor!.isNotEmpty)
+                                          'floor': effectiveAddress.floor,
+                                        if (effectiveAddress.apartment !=
+                                                null &&
+                                            effectiveAddress
+                                                .apartment!
+                                                .isNotEmpty)
+                                          'apartment':
+                                              effectiveAddress.apartment,
+                                        'city': effectiveAddress.city,
+                                      };
+                                    }
+
+                                    final order = await ref
+                                        .read(checkoutProvider.notifier)
+                                        .placeOrder(
+                                          deliveryMethod: deliveryMethod,
+                                          paymentMethod: paymentMethod,
+                                          deliveryAddress: deliveryAddress,
+                                          deliveryZoneId:
+                                              deliveryMethod ==
+                                                  FulfillmentType.delivery
+                                              ? _selectedZoneId
+                                              : null,
+                                          promoCode: effectiveRewardId == null
+                                              ? cart.promoCodeId
+                                              : null,
+                                          redeemRewardId: effectiveRewardId,
+                                        );
+                                    if (order != null) {
+                                      if (!context.mounted) return;
+                                      context.go(
+                                        '/checkout/success',
+                                        extra: order,
+                                      );
+                                    }
+                                  },
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'checkout.terms_agree'.tr(),
+                            style: KZ.caption.copyWith(
+                              color: CheckoutScreen.onSurfaceVariantColor,
                             ),
-                            const SizedBox(height: 10),
-                            Text(
-                              'checkout.terms_agree'.tr(),
-                              style: KZ.caption.copyWith(
-                                color: CheckoutScreen.onSurfaceVariantColor,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     );
                   },
                 );
@@ -1631,7 +1627,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         'checkout.delivery_address'.tr(),
                         style: KZ.sectionTitle,
@@ -1640,7 +1636,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     const SizedBox(height: 12),
                     if (addressState.addresses.isEmpty)
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           'checkout.no_saved_addresses'.tr(),
                           style: KZ.body,
@@ -1687,7 +1683,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       ),
                     const SizedBox(height: 8),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: KZButton(
                         variant: KZButtonVariant.secondary,
                         fullWidth: true,
@@ -1873,13 +1869,10 @@ class _CheckoutFooterShell extends StatelessWidget {
           MediaQuery.of(context).padding.bottom + 16,
         ),
         decoration: BoxDecoration(
-          color: CheckoutScreen.surfaceBg.withValues(
-            alpha: 0.95,
-          ),
+          color: CheckoutScreen.surfaceBg.withValues(alpha: 0.95),
           border: Border(
             top: BorderSide(
-              color: CheckoutScreen.outlineVariantColor
-                  .withValues(alpha: 0.2),
+              color: CheckoutScreen.outlineVariantColor.withValues(alpha: 0.2),
             ),
           ),
           boxShadow: [
@@ -1895,5 +1888,3 @@ class _CheckoutFooterShell extends StatelessWidget {
     );
   }
 }
-
-

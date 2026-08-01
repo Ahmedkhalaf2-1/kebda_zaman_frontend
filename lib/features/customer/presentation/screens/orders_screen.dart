@@ -135,7 +135,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
                               Text(
                                 'orders.active'.tr(),
                                 style: const TextStyle(
-                                  fontFamily: 'Plus Jakarta Sans',
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
                                   color: KZ.onSurface,
@@ -154,7 +153,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
                               Text(
                                 'orders.previous'.tr(),
                                 style: const TextStyle(
-                                  fontFamily: 'Plus Jakarta Sans',
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
                                   color: KZ.onSurface,
@@ -384,7 +382,6 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                           Text(
                             orderNumDisplay,
                             style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: KZ.onSurface,
@@ -395,7 +392,6 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                           Text(
                             dateStr,
                             style: TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
                               fontSize: 12,
                               color: KZ.onSurfaceVariant.withValues(alpha: 0.7),
                             ),
@@ -435,7 +431,6 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                         Text(
                           'orders.total_label'.tr(),
                           style: const TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
                             fontSize: 12,
                             color: KZ.onSurfaceVariant,
                           ),
@@ -447,7 +442,6 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                             locale: context.locale,
                           ),
                           style: TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                             color: isActive ? KZ.primary : KZ.secondary,
@@ -475,7 +469,6 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                         child: Text(
                           'orders.track'.tr(),
                           style: const TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.3,
@@ -504,7 +497,6 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                         label: Text(
                           'orders.reorder'.tr(),
                           style: const TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: KZ.onSurface,
@@ -618,7 +610,6 @@ class _StatusPill extends StatelessWidget {
           Text(
             labelText,
             style: TextStyle(
-              fontFamily: 'Plus Jakarta Sans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: textColor,

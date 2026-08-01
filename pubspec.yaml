@@ -81,12 +81,31 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
 
-  # Unified bilingual (Arabic + Latin) UI typeface — see Sprint 2 design
-  # system report for the font-comparison rationale. Distributed upstream as
-  # a single variable font (OFL-licensed, assets/fonts/ReadexPro-OFL.txt);
-  # each weight below maps to the same file so Flutter selects the correct
-  # variation.
+  # Locale-based type system: Alexandria for Arabic, Plus Jakarta Sans for
+  # English (see lib/app.dart ThemeData). Both are OFL-licensed and
+  # distributed upstream as single variable fonts (see the -OFL.txt files
+  # next to each asset); each weight below maps to the same file so Flutter
+  # selects the correct variation. Readex Pro is kept registered but is no
+  # longer the active default — see lib/core/theme/kz_design_system.dart.
   fonts:
+    - family: Alexandria
+      fonts:
+        - asset: assets/fonts/Alexandria-Variable.ttf
+        - asset: assets/fonts/Alexandria-Variable.ttf
+          weight: 500
+        - asset: assets/fonts/Alexandria-Variable.ttf
+          weight: 600
+        - asset: assets/fonts/Alexandria-Variable.ttf
+          weight: 700
+    - family: Plus Jakarta Sans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf
+          weight: 700
     - family: Readex Pro
       fonts:
         - asset: assets/fonts/ReadexPro-Variable.ttf

@@ -154,7 +154,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       Text(
                                         'profile.gold_member'.tr(),
                                         style: const TextStyle(
-                                          fontFamily: 'Plus Jakarta Sans',
                                           fontSize: 10,
                                           fontWeight: FontWeight.w700,
                                           color: Colors.white,
@@ -172,7 +171,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             userName,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
                               color: KZ.onSurface,
@@ -183,7 +181,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             userEmail,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
                               fontSize: 14,
                               color: KZ.onSurfaceVariant,
                             ),
@@ -212,7 +209,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Text(
                       'profile.quick_actions'.tr(),
                       style: const TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: KZ.onSurface,
@@ -263,7 +259,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Text(
                       'profile.settings'.tr(),
                       style: const TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: KZ.onSurface,
@@ -463,7 +458,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             Text(
                               'profile.rewards_card'.tr(),
                               style: TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white.withValues(alpha: 0.8),
@@ -474,7 +468,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             Text(
                               '$points ${'common.pts'.tr()}',
                               style: const TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
                                 fontSize: 36,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white,
@@ -508,7 +501,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             },
                           ),
                           style: const TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -521,7 +513,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 )
                               : 'profile.redeem_available'.tr(),
                           style: TextStyle(
-                            fontFamily: 'Plus Jakarta Sans',
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: Colors.white.withValues(alpha: 0.95),
@@ -570,7 +561,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             )
                           : 'profile.place_order_notice'.tr(),
                       style: TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
                         fontSize: 11,
                         fontStyle: FontStyle.italic,
                         color: Colors.white.withValues(alpha: 0.9),
@@ -631,7 +621,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Text(
                 title,
                 style: const TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: KZ.onSurface,
@@ -652,35 +641,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: KZ.primaryFixed.withValues(
-                    alpha: 0.35,
-                  ), // orange-50 tint
-                  borderRadius: BorderRadius.circular(12),
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: KZ.primaryFixed.withValues(
+                      alpha: 0.35,
+                    ), // orange-50 tint
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.language_rounded,
+                    color: KZ.primary,
+                    size: 20,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.language_rounded,
-                  color: KZ.primary,
-                  size: 20,
+                const SizedBox(width: 14),
+                Flexible(
+                  child: Text(
+                    'settings.language'.tr(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: KZ.onSurface,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Text(
-                'settings.language'.tr(),
-                style: const TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: KZ.onSurface,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           // Inline Pill Switcher (matching HTML)
           Container(
             padding: const EdgeInsets.all(3),
@@ -727,7 +722,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     child: Text(
                       'العربية',
                       style: TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
+                        // Always Arabic script regardless of active app
+                        // locale, so pin the font instead of following the
+                        // locale-driven ThemeData default.
+                        fontFamily: 'Alexandria',
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: currentLang == 'ar'
@@ -797,32 +795,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: KZ.primaryFixed.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(12),
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: KZ.primaryFixed.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.dark_mode_rounded,
+                    color: KZ.primary,
+                    size: 20,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.dark_mode_rounded,
-                  color: KZ.primary,
-                  size: 20,
+                const SizedBox(width: 14),
+                Flexible(
+                  child: Text(
+                    'settings.dark_mode'.tr(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: KZ.onSurface,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Text(
-                'settings.dark_mode'.tr(),
-                style: const TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: KZ.onSurface,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
           Switch(
             value: _darkMode,
@@ -852,29 +855,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: KZ.primaryFixed.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(12),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: KZ.primaryFixed.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(icon, color: KZ.primary, size: 20),
                     ),
-                    child: Icon(icon, color: KZ.primary, size: 20),
-                  ),
-                  const SizedBox(width: 14),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: KZ.onSurface,
+                    const SizedBox(width: 14),
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: KZ.onSurface,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               const Icon(
                 Icons.chevron_right_rounded,
                 color: Color(0xFF94A3B8), // slate-400
@@ -929,15 +938,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
               const SizedBox(width: 14),
-              Text(
-                authState.isLoggedIn
-                    ? 'profile.logout'.tr()
-                    : 'auth.login_btn'.tr(),
-                style: const TextStyle(
-                  fontFamily: 'Plus Jakarta Sans',
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: KZ.primary,
+              Flexible(
+                child: Text(
+                  authState.isLoggedIn
+                      ? 'profile.logout'.tr()
+                      : 'auth.login_btn'.tr(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: KZ.primary,
+                  ),
                 ),
               ),
             ],

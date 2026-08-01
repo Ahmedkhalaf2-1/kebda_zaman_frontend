@@ -17,6 +17,12 @@ class KebdaZamanApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final goRouter = ref.watch(routerProvider);
+    // Locale-driven type system: Arabic renders in Alexandria, everything
+    // else in Plus Jakarta Sans. Applying it via ThemeData.fontFamily lets
+    // every TextTheme role (and any KZ.* style that leaves fontFamily unset)
+    // resolve the correct family automatically — no per-widget overrides.
+    final arabicLocale = context.locale.languageCode == 'ar';
+    final fontFamily = arabicLocale ? 'Alexandria' : 'Plus Jakarta Sans';
     // Eagerly initialize device repository so DeviceService is configured
     // before AuthNotifier restores the session and calls onSessionEstablished()
     ref.watch(deviceRepositoryProvider);
@@ -45,7 +51,7 @@ class KebdaZamanApp extends ConsumerWidget {
       },
       theme: ThemeData(
         useMaterial3: true,
-        fontFamily: 'Readex Pro',
+        fontFamily: fontFamily,
         colorScheme: ColorScheme.fromSeed(
           seedColor: KZ.primary,
           primary: KZ.primary,
