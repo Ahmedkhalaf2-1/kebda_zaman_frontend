@@ -6,10 +6,20 @@ import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/order_repository.dart';
 
+/// Injectable delay seam for [ApiOrderRepository]'s polling/retry loop, so
+/// tests can run the real retry/backoff control flow without waiting on
+/// real multi-second [Future.delayed] calls.
+typedef OrderPollDelayFn = Future<void> Function(Duration duration);
+
 class ApiOrderRepository implements OrderRepository {
   final ApiClient _apiClient;
+  final OrderPollDelayFn _delay;
 
-  ApiOrderRepository(this._apiClient);
+  /// The [delay] parameter is a test-only seam (Fix 14): production code
+  /// never passes it and always gets the default [Future.delayed]. It is
+  /// never wired to any UI/env configuration.
+  ApiOrderRepository(this._apiClient, {OrderPollDelayFn? delay})
+    : _delay = delay ?? Future.delayed;
 
   /// Test-only seam onto the private order-mapping logic used by every
   /// endpoint in this repository (customer list/detail, checkout, admin
@@ -17,6 +27,19 @@ class ApiOrderRepository implements OrderRepository {
   @visibleForTesting
   static Order mapOrderForTesting(Map<String, dynamic> json) =>
       _mapOrder(json);
+
+  /// Test-only seam onto the transient/permanent failure classification
+  /// used by [watchOrder]'s retry policy (Fix 14).
+  @visibleForTesting
+  static bool isTransientDioErrorForTesting(DioException e) =>
+      _isTransientDioError(e);
+
+  /// Test-only seam onto the bounded-backoff delay curve used between
+  /// consecutive transient failures within a single fetch/poll attempt
+  /// (Fix 14): 2s -> 4s -> 8s -> 8s -> 8s (capped).
+  @visibleForTesting
+  static Duration retryDelayForTesting(int consecutiveFailures) =>
+      _retryDelayFor(consecutiveFailures);
 
   @override
   Future<Result<List<Order>>> getOrders({
@@ -143,50 +166,205 @@ class ApiOrderRepository implements OrderRepository {
     throw UnimplementedError('Use checkout() for customer order creation.');
   }
 
-  @override
-  Stream<Order> watchOrder(String id) async* {
-    Order? currentOrder;
-    try {
-      final orderResult = await getOrderById(id);
-      currentOrder = orderResult.fold((f) => null, (o) => o);
-    } catch (_) {}
+  // ---------------------------------------------------------------------
+  // Fix 14: resilient order-tracking polling.
+  //
+  // Production timing (kept private/named per Fix 14 — never configurable
+  // through UI or environment files):
+  //   - normal poll interval:            10s
+  //   - retry after 1st transient fail:   2s
+  //   - retry after 2nd transient fail:   4s
+  //   - retry after 3rd+ transient fail:  8s (capped)
+  //   - max consecutive transient fails:  5 (then surface one failure)
+  // ---------------------------------------------------------------------
+  static const Duration _pollInterval = Duration(seconds: 10);
+  static const List<Duration> _retryDelays = [
+    Duration(seconds: 2),
+    Duration(seconds: 4),
+    Duration(seconds: 8),
+  ];
+  static const int _maxConsecutiveFailures = 5;
 
-    if (currentOrder != null) {
-      yield currentOrder;
+  static const Set<int> _transientStatusCodes = {500, 502, 503, 504};
+
+  /// Bounded exponential backoff curve, capped at the last entry of
+  /// [_retryDelays]: 2s -> 4s -> 8s -> 8s -> 8s -> ...
+  static Duration _retryDelayFor(int consecutiveFailures) {
+    final idx = (consecutiveFailures - 1).clamp(0, _retryDelays.length - 1);
+    return _retryDelays[idx];
+  }
+
+  /// Classifies a [DioException] as transient/retryable vs.
+  /// permanent/non-retryable, per Fix 14's failure classification.
+  ///
+  /// Transient: connection/send/receive timeouts, connection errors, and
+  /// temporary 5xx (500/502/503/504) — including when the auth/retry
+  /// interceptors have already wrapped the error in an [ApiException]
+  /// (e.g. the OFFLINE 503 produced by [RetryInterceptor]).
+  ///
+  /// Permanent (never retried): 400/401/403/404/409/422 and anything else
+  /// not explicitly recognized as transient — including malformed payloads,
+  /// which are never DioExceptions and so never reach this classifier.
+  static bool _isTransientDioError(DioException e) {
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.connectionError:
+        return true;
+      default:
+        break;
     }
 
-    while (currentOrder != null) {
-      if (currentOrder.status.isTerminal) {
-        break; // Terminal state (delivered/pickedUp/cancelled), stop polling
-      }
+    int? statusCode = e.response?.statusCode;
+    if (statusCode == null && e.error is ApiException) {
+      statusCode = (e.error as ApiException).statusCode;
+    }
+    return statusCode != null && _transientStatusCodes.contains(statusCode);
+  }
 
-      await Future.delayed(const Duration(seconds: 10));
+  static Failure _dioToFailure(DioException e, String fallbackMessage) {
+    if (e.error is ApiException) {
+      final apiEx = e.error as ApiException;
+      return NetworkFailure(apiEx.message, apiEx);
+    }
+    return NetworkFailure(fallbackMessage, e);
+  }
+
+  /// Raw (unwrapped) `GET /orders/:id` fetch used by [watchOrder]'s retry
+  /// loop — reuses the exact same strict [_mapOrder] logic as every other
+  /// endpoint, but lets the original [DioException]/mapping exception
+  /// propagate so the caller can classify and retry it, instead of folding
+  /// it into a [Result] (which would make transient/permanent
+  /// classification impossible).
+  Future<Order> _fetchOrderRaw(String id) async {
+    final response = await _apiClient.dio.get('/orders/$id');
+    return _mapOrder(response.data as Map<String, dynamic>);
+  }
+
+  /// Raw `GET /orders/:id/status` poll fetch, merged onto [base] using the
+  /// same strict status-poll mapper as before.
+  Future<Order> _fetchStatusPollRaw(String id, Order base) async {
+    final response = await _apiClient.dio.get('/orders/$id/status');
+    final data = response.data as Map<String, dynamic>;
+    final polled = _mapStatusPollResponse(data);
+    return base.copyWith(
+      status: polled.status,
+      statusHistory: polled.statusHistory,
+      estimatedTime: data['estimatedDeliveryTime']?.toString(),
+    );
+  }
+
+  /// Runs [fetch] with the Fix 14 bounded-backoff retry policy:
+  ///   - transient [DioException]s are retried with [_retryDelayFor]
+  ///     backoff, up to [_maxConsecutiveFailures] consecutive failures,
+  ///     after which one meaningful [NetworkFailure] is returned;
+  ///   - permanent [DioException]s (4xx, unrecognized) are returned
+  ///     immediately, never retried;
+  ///   - any other exception (malformed payload / mapping failure) is
+  ///     treated as a permanent failure immediately, never retried as if
+  ///     it were a network interruption.
+  ///
+  /// Never leaves overlapping requests in flight: each attempt is awaited
+  /// sequentially before the next one starts.
+  Future<({Order? order, Failure? failure})> _fetchWithRetry(
+    Future<Order> Function() fetch,
+  ) async {
+    int consecutiveFailures = 0;
+    while (true) {
       try {
-        final response = await _apiClient.dio.get('/orders/$id/status');
-        final polled = _mapStatusPollResponse(
-          response.data as Map<String, dynamic>,
-        );
-
-        currentOrder = currentOrder.copyWith(
-          status: polled.status,
-          statusHistory: polled.statusHistory,
-          estimatedTime: response.data['estimatedDeliveryTime']?.toString(),
-        );
-        yield currentOrder;
+        final order = await fetch();
+        return (order: order, failure: null);
       } on DioException catch (e) {
-        if (e.error is ApiException) {
-          yield* Stream.error(
-            NetworkFailure(
-              (e.error as ApiException).message,
-              e.error as ApiException,
+        if (!_isTransientDioError(e)) {
+          return (order: null, failure: _dioToFailure(e, 'Network error'));
+        }
+        consecutiveFailures++;
+        if (consecutiveFailures >= _maxConsecutiveFailures) {
+          return (
+            order: null,
+            failure: NetworkFailure(
+              'Unable to reach the server after multiple attempts.',
+              e.error is ApiException ? e.error as ApiException : e,
             ),
           );
-        } else {
-          yield* Stream.error(const NetworkFailure('Network error'));
         }
+        await _delay(_retryDelayFor(consecutiveFailures));
       } catch (e) {
-        yield* Stream.error(UnknownFailure(e.toString()));
-        break;
+        return (order: null, failure: UnknownFailure(e.toString()));
+      }
+    }
+  }
+
+  /// True when any tracking-relevant field changed, so [watchOrder] never
+  /// emits a duplicate/unchanged order to subscribers.
+  ///
+  /// [statusHistory] is deliberately compared element-by-element rather
+  /// than with plain `!=` — two freshly-mapped, logically-identical (e.g.
+  /// both empty) lists are always different object instances, so a plain
+  /// `List` `!=` would treat every unchanged poll as "changed".
+  static bool _hasTrackingChange(Order previous, Order updated) {
+    return previous.status != updated.status ||
+        previous.estimatedTime != updated.estimatedTime ||
+        !_statusHistoryEquals(previous.statusHistory, updated.statusHistory);
+  }
+
+  static bool _statusHistoryEquals(
+    List<OrderStatusEntry> a,
+    List<OrderStatusEntry> b,
+  ) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  @override
+  Stream<Order> watchOrder(String id) async* {
+    // ---- Initial load: retry transient failures, surface permanent ones ----
+    final initialOutcome = await _fetchWithRetry(() => _fetchOrderRaw(id));
+    if (initialOutcome.failure != null) {
+      // Exactly one stream error, then terminate — no silent empty stream.
+      throw initialOutcome.failure!;
+    }
+
+    Order currentOrder = initialOutcome.order!;
+    yield currentOrder;
+
+    if (currentOrder.status.isTerminal) {
+      // Already terminal (delivered/pickedUp/cancelled) — emit once, never
+      // call the status polling endpoint.
+      return;
+    }
+
+    // ---- Poll loop: sequential await, never overlapping requests ----
+    while (true) {
+      await _delay(_pollInterval);
+
+      final order = currentOrder;
+      final pollOutcome = await _fetchWithRetry(
+        () => _fetchStatusPollRaw(id, order),
+      );
+      if (pollOutcome.failure != null) {
+        // Permanent failure, or transient retries exhausted — exactly one
+        // stream error, then terminate. The last successfully-emitted
+        // order is never overwritten with an error state.
+        throw pollOutcome.failure!;
+      }
+
+      final updated = pollOutcome.order!;
+      final changed = _hasTrackingChange(currentOrder, updated);
+      currentOrder = updated;
+      if (changed) {
+        yield currentOrder;
+      }
+
+      if (currentOrder.status.isTerminal) {
+        // Transitioned to terminal — already emitted above (status always
+        // changes when becoming terminal), stop without another delay.
+        return;
       }
     }
   }
