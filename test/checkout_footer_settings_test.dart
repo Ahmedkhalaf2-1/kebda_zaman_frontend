@@ -233,25 +233,25 @@ void main() {
       overrides: _settingsOverrides(const AsyncLoading()),
       locale: const Locale('en'),
     );
-    expect(find.text('checkout.settings_loading'), findsOneWidget);
+    // The footer renders the *translated* string via 'checkout.settings_loading'.tr(),
+    // not the raw translation key.
+    expect(find.text('Loading ordering information…'), findsOneWidget);
   });
 
-  // ── 4. Loading state → Place Order button disabled ───────────────────────
+  // ── 4. Loading state → no actionable button rendered ─────────────────────
   testWidgets('4. Loading state: Place Order KZButton is disabled', (
     tester,
   ) async {
     await _pump(tester, overrides: _settingsOverrides(const AsyncLoading()));
 
-    // KZButton renders an ElevatedButton internally.
-    // All ElevatedButtons in the footer loading state must have onPressed == null.
-    // We identify the footer's ElevatedButton by finding it inside a KZButton
-    // ancestor that is inside our _CheckoutFooterShell (which is a Positioned).
+    // The loading branch of the footer renders only a progress indicator +
+    // text — no KZButton/ElevatedButton at all (there is nothing to disable
+    // because nothing tappable is rendered while settings are loading).
+    expect(find.byType(KZButton), findsNothing);
     final allElevatedButtons = tester.widgetList<ElevatedButton>(
       find.byType(ElevatedButton),
     );
-    // At minimum one button should exist (the disabled Place Order in loading).
-    expect(allElevatedButtons, isNotEmpty);
-    // None should be tappable during loading.
+    // If any ElevatedButton exists elsewhere on screen, none may be enabled.
     final anyEnabled = allElevatedButtons.any((b) => b.onPressed != null);
     expect(
       anyEnabled,
@@ -269,10 +269,9 @@ void main() {
         AsyncError(Exception('simulated'), StackTrace.empty),
       ),
     );
-    debugDumpApp();
-    final texts = tester.widgetList<Text>(find.byType(Text)).map((e) => e.data).toList();
-    print('DEBUG TEXTS in Test 5: $texts');
-    expect(find.text('checkout.settings_error'), findsOneWidget);
+    // The footer renders the *translated* string via 'checkout.settings_error'.tr(),
+    // not the raw translation key.
+    expect(find.text('Couldn\'t load ordering information.'), findsOneWidget);
   });
 
   // ── 6. Error state → error text ──────────────────────────────────────────
@@ -298,7 +297,18 @@ void main() {
     expect(find.text('Try again'), findsOneWidget);
   });
 
-  // ── 8. Tapping Retry → loading state shown ───────────────────────────────
+  // ── 8. Tapping Retry → invalidates the provider and re-requests it ───────
+  //
+  // The footer's `settingsAsync.when(...)` uses easy_localization/Riverpod's
+  // default AsyncValue.when() behavior: while a FutureProvider is refreshing
+  // (post-invalidate but before the new future resolves), `.when()` keeps
+  // rendering the *previous* branch (error) rather than flashing the raw
+  // `loading:` branch — this is intentional (see the "keep order action
+  // visible on settings failure" fix this test file documents). What DOES
+  // change immediately is `settingsAsync.isLoading`, which drives the Retry
+  // KZButton's own `loading: true` spinner. So the observable, real-behavior
+  // signal that a retry actually happened is: (a) the provider override is
+  // re-invoked, and (b) the Retry button itself shows its inline spinner.
   testWidgets(
     '8. Tapping Retry invalidates the settings provider, showing loading',
     (tester) async {
@@ -326,10 +336,9 @@ void main() {
                     StackTrace.empty,
                   );
                 }
-                // Subsequent builds: never resolve → loading state.
-                return Future<RestaurantSettings>.delayed(
-                  const Duration(hours: 1),
-                );
+                // Subsequent builds: never resolve, so the retry's loading
+                // state stays observable for the rest of the test.
+                return Completer<RestaurantSettings>().future;
               }),
             ],
             child: EasyLocalization(
@@ -358,10 +367,19 @@ void main() {
 
         // Tap Retry.
         await tester.tap(find.text('Try again'));
-        await tester.pump(); // trigger rebuild
+        await tester.pump(); // process the tap gesture
+        await tester.pump(); // rebuild with the invalidated provider
 
-        // After invalidation, provider rebuilds → loading state.
-        expect(find.byType(CircularProgressIndicator), findsAtLeastNWidgets(1));
+        // The provider was genuinely re-requested (not just re-rendered).
+        expect(buildCount, 2);
+
+        // The Retry button itself must show its inline loading spinner —
+        // the footer intentionally keeps the error text/action visible
+        // (rather than replacing it with a full-screen spinner) while a
+        // retry is in flight.
+        final retryButton = tester.widget<KZButton>(find.byType(KZButton));
+        expect(retryButton.loading, isTrue);
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
       } finally {
         FlutterError.onError = origOnError;
       }

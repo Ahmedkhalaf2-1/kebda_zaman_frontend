@@ -1139,10 +1139,14 @@ class _GreetingHeader extends ConsumerWidget {
                   color: HomeScreen.onSurfaceVariantColor,
                 ),
                 const SizedBox(width: KZ.sp6),
-                Text(
-                  _greetingTextKey(hour).tr(),
-                  style: KZ.label.copyWith(
-                    color: HomeScreen.onSurfaceVariantColor,
+                Flexible(
+                  child: Text(
+                    _greetingTextKey(hour).tr(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: KZ.label.copyWith(
+                      color: HomeScreen.onSurfaceVariantColor,
+                    ),
                   ),
                 ),
               ],
