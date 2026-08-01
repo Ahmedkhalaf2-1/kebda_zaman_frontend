@@ -338,6 +338,17 @@
     "save_changes": "Save Changes",
     "save_address": "Save Address"
   },
+  "map_picker": {
+    "title": "Choose Location",
+    "pick_on_map": "Pick Location on Map",
+    "location_set": "Location Set — Change on Map",
+    "locating": "Locating you...",
+    "confirm": "Confirm Location",
+    "retry": "Retry",
+    "service_disabled": "Location services are turned off. You can still move the map to set your location manually.",
+    "permission_denied": "Location permission denied. Move the map to set your location manually.",
+    "permission_denied_forever": "Location permission is permanently denied. Enable it from app settings, or move the map to set your location manually."
+  },
   "search": {
     "title": "Search",
     "hint": "Search menu, sandwiches, drinks...",

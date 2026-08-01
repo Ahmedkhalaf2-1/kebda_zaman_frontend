@@ -7,6 +7,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/features/shared/domain/models/address.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/address_notifier.dart';
+import 'package:kebda_zaman/features/customer/presentation/screens/map_address_picker_screen.dart';
 
 /// Add/Edit form for a single saved delivery address.
 /// Same `AddressDto` shape for both create and full-replace update
@@ -33,6 +34,9 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
 
   bool _isDefault = false;
   bool _isSaving = false;
+  String _area = '';
+  double? _lat;
+  double? _lng;
 
   bool get _isEditing => widget.existingAddress != null;
 
@@ -48,6 +52,27 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
     _cityCtrl = TextEditingController(text: a?.city ?? 'Cairo');
     _notesCtrl = TextEditingController(text: a?.notes ?? '');
     _isDefault = a?.isDefault ?? false;
+    _area = a?.area ?? '';
+    _lat = a?.lat;
+    _lng = a?.lng;
+  }
+
+  Future<void> _pickOnMap() async {
+    final result = await Navigator.of(context).push<MapAddressPickResult>(
+      MaterialPageRoute(
+        builder: (_) =>
+            MapAddressPickerScreen(initialLat: _lat, initialLng: _lng),
+      ),
+    );
+    if (result == null || !mounted) return;
+
+    setState(() {
+      _lat = result.lat;
+      _lng = result.lng;
+      if (result.street.isNotEmpty) _streetCtrl.text = result.street;
+      if (result.city.isNotEmpty) _cityCtrl.text = result.city;
+      if (result.area.isNotEmpty) _area = result.area;
+    });
   }
 
   @override
@@ -78,10 +103,10 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
           ? null
           : _apartmentCtrl.text.trim(),
       city: _cityCtrl.text.trim(),
-      area: widget.existingAddress?.area ?? '',
+      area: _area,
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
-      lat: widget.existingAddress?.lat,
-      lng: widget.existingAddress?.lng,
+      lat: _lat,
+      lng: _lng,
       isDefault: _isDefault,
     );
 
@@ -131,6 +156,16 @@ class _AddressFormScreenState extends ConsumerState<AddressFormScreen> {
               validator: (v) => (v == null || v.trim().isEmpty)
                   ? 'item_details.required_badge'.tr()
                   : null,
+            ),
+            const SizedBox(height: KZ.sp14),
+            KZButton(
+              label: _lat != null
+                  ? 'map_picker.location_set'.tr()
+                  : 'map_picker.pick_on_map'.tr(),
+              icon: Icons.map_outlined,
+              variant: KZButtonVariant.secondary,
+              fullWidth: true,
+              onPressed: _pickOnMap,
             ),
             const SizedBox(height: KZ.sp14),
             TextFormField(
