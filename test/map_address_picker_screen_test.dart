@@ -18,14 +18,14 @@ void main() {
     test('maps serviceDisabled to its translation key', () {
       expect(
         mapPickerStatusMessageKey(MapPickerLocationStatus.serviceDisabled),
-        'map_picker.service_disabled',
+        'map_picker.location_disabled',
       );
     });
 
     test('maps permissionDenied to its translation key', () {
       expect(
         mapPickerStatusMessageKey(MapPickerLocationStatus.permissionDenied),
-        'map_picker.permission_denied',
+        'map_picker.location_denied',
       );
     });
 
@@ -34,7 +34,14 @@ void main() {
         mapPickerStatusMessageKey(
           MapPickerLocationStatus.permissionDeniedForever,
         ),
-        'map_picker.permission_denied_forever',
+        'map_picker.location_denied_forever',
+      );
+    });
+
+    test('maps unavailable to its translation key', () {
+      expect(
+        mapPickerStatusMessageKey(MapPickerLocationStatus.unavailable),
+        'map_picker.location_unavailable',
       );
     });
   });

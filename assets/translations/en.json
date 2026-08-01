@@ -342,12 +342,16 @@
     "title": "Choose Location",
     "pick_on_map": "Pick Location on Map",
     "location_set": "Location Set — Change on Map",
-    "locating": "Locating you...",
+    "loading": "Locating you...",
     "confirm": "Confirm Location",
     "retry": "Retry",
-    "service_disabled": "Location services are turned off. You can still move the map to set your location manually.",
-    "permission_denied": "Location permission denied. Move the map to set your location manually.",
-    "permission_denied_forever": "Location permission is permanently denied. Enable it from app settings, or move the map to set your location manually."
+    "locate_me": "Use my current location",
+    "location_disabled": "Location services are turned off. You can still move the map to set your location manually.",
+    "location_denied": "Location permission denied. Move the map to set your location manually.",
+    "location_denied_forever": "Location permission is permanently denied. Enable it from app settings, or move the map to set your location manually.",
+    "location_unavailable": "Couldn't get your current location. You can still move the map to set it manually.",
+    "geocoding_failed": "Couldn't detect the address for this location. Please fill in the details manually.",
+    "manual_selection_hint": "Drag the map to move the pin, then confirm your delivery location."
   },
   "search": {
     "title": "Search",

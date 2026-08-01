@@ -31,6 +31,7 @@ enum MapPickerLocationStatus {
   serviceDisabled,
   permissionDenied,
   permissionDeniedForever,
+  unavailable,
 }
 
 /// Pure mapping from a location status to its translation key, kept
@@ -39,11 +40,13 @@ enum MapPickerLocationStatus {
 String? mapPickerStatusMessageKey(MapPickerLocationStatus status) {
   switch (status) {
     case MapPickerLocationStatus.serviceDisabled:
-      return 'map_picker.service_disabled';
+      return 'map_picker.location_disabled';
     case MapPickerLocationStatus.permissionDenied:
-      return 'map_picker.permission_denied';
+      return 'map_picker.location_denied';
     case MapPickerLocationStatus.permissionDeniedForever:
-      return 'map_picker.permission_denied_forever';
+      return 'map_picker.location_denied_forever';
+    case MapPickerLocationStatus.unavailable:
+      return 'map_picker.location_unavailable';
     case MapPickerLocationStatus.idle:
     case MapPickerLocationStatus.locating:
     case MapPickerLocationStatus.located:
@@ -129,10 +132,10 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       });
       _mapController?.animateCamera(CameraUpdate.newLatLng(newTarget));
     } catch (_) {
+      // GPS granted but unavailable (e.g. no fix, hardware error) — the
+      // pin/manual pan flow below remains fully usable.
       if (!mounted) return;
-      setState(
-        () => _locationStatus = MapPickerLocationStatus.permissionDenied,
-      );
+      setState(() => _locationStatus = MapPickerLocationStatus.unavailable);
     }
   }
 
@@ -142,6 +145,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     String street = '';
     String city = '';
     String area = '';
+    var geocodingFailed = false;
     try {
       final placemarks = await placemarkFromCoordinates(
         _target.latitude,
@@ -159,10 +163,17 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     } catch (_) {
       // Reverse geocoding unavailable — return coordinates only and let
       // the address form stay manually editable.
+      geocodingFailed = true;
     }
 
     if (!mounted) return;
     setState(() => _isGeocoding = false);
+
+    if (geocodingFailed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('map_picker.geocoding_failed'.tr())),
+      );
+    }
 
     Navigator.of(context).pop(
       MapAddressPickResult(
@@ -197,16 +208,28 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
         border: Border.all(color: KZ.outlineVariant),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: KZ.primary, size: KZ.iconControl),
           const SizedBox(width: KZ.sp10),
           Expanded(
-            child: Text(
-              message,
-              style: KZ.bodySmall.copyWith(color: KZ.onSurfaceVariant),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message,
+                  style: KZ.bodySmall.copyWith(color: KZ.onSurfaceVariant),
+                ),
+                const SizedBox(height: KZ.sp4),
+                Text(
+                  'map_picker.manual_selection_hint'.tr(),
+                  style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
+                ),
+              ],
             ),
           ),
-          if (_locationStatus == MapPickerLocationStatus.permissionDenied)
+          if (_locationStatus == MapPickerLocationStatus.permissionDenied ||
+              _locationStatus == MapPickerLocationStatus.unavailable)
             TextButton(
               onPressed: _locateCurrentPosition,
               child: Text('map_picker.retry'.tr()),
@@ -280,7 +303,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                             ),
                             const SizedBox(width: KZ.sp8),
                             Text(
-                              'map_picker.locating'.tr(),
+                              'map_picker.loading'.tr(),
                               style: KZ.bodySmall,
                             ),
                           ],
@@ -294,6 +317,7 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
                       heroTag: 'map_picker_locate',
                       backgroundColor: KZ.surface,
                       foregroundColor: KZ.primary,
+                      tooltip: 'map_picker.locate_me'.tr(),
                       onPressed: _locateCurrentPosition,
                       child: const Icon(Icons.my_location_rounded),
                     ),
