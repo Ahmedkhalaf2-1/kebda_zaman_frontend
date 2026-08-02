@@ -22,6 +22,21 @@ class OrderManagementScreen extends ConsumerStatefulWidget {
 class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
   String _selectedTab = 'all'; // 'all', 'new', 'active', 'history'
 
+  // Guards against pushing the details route twice from a rapid double tap
+  // on the same card (GoRouter has no built-in debounce for this).
+  String? _navigatingToOrderId;
+
+  void _openOrderDetails(BuildContext context, Order order) {
+    if (_navigatingToOrderId == order.id) return;
+    _navigatingToOrderId = order.id;
+    debugPrint(
+      '[OrderManagement] tapped orderId=${order.id} -> /admin/orders/${order.id}',
+    );
+    context.push('/admin/orders/${order.id}').whenComplete(() {
+      if (mounted) _navigatingToOrderId = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final stateAsync = ref.watch(orderManagementProvider);
@@ -345,150 +360,190 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Order number badge + status chip. The order number is the only
-          // unbounded-length field here, so it is the one that shrinks
-          // (Flexible + ellipsis) — the status chip must always stay fully
-          // visible per the design requirements.
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Flexible(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
+          // Everything from here down to the "View details" row is wrapped
+          // in a single InkWell that opens order details. It deliberately
+          // stops before the "Update Status" chips below so a status tap
+          // never also triggers navigation.
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => _openOrderDetails(context, order),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Order number badge + status chip. The order number is the only
+                // unbounded-length field here, so it is the one that shrinks
+                // (Flexible + ellipsis) — the status chip must always stay fully
+                // visible per the design requirements.
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: KZ.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '#${order.orderNumber}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: KZ.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Current status badge pill — never shrunk/truncated.
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getStatusDotColor(
+                          order.status,
+                        ).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        order.status.name.toLowerCase(),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: _getStatusDotColor(order.status),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  order.customerName?.isNotEmpty == true
+                      ? order.customerName!
+                      : order.userId,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: KZ.onSurface,
                   ),
-                  decoration: BoxDecoration(
-                    color: KZ.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
+                ),
+                const SizedBox(height: 6),
+                // Price / item count / timestamp / payment method — a Wrap so
+                // narrow phones fall onto a second line instead of overflowing.
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      formatCurrency(order.grandTotal, locale: context.locale),
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: KZ.onSurface,
+                      ),
+                    ),
+                    Text(
+                      '$itemCount items • $timeStr',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: KZ.secondary,
+                      ),
+                    ),
+                    if (order.paymentMethod != null)
+                      Text(
+                        paymentMethodLabel(order.paymentMethod),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: KZ.primary,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Items Row
+                const Text(
+                  'Items:',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: KZ.onSurface,
                   ),
-                  child: Text(
-                    '#${order.orderNumber}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        thumbUrl,
+                        width: 44,
+                        height: 44,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          width: 44,
+                          height: 44,
+                          color: KZ.surfaceContainerLow,
+                          child: const Icon(
+                            Icons.restaurant,
+                            color: KZ.secondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        itemsSummary,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: KZ.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // "View details" affordance — the visible cue for the InkWell
+                // wrapping this whole section.
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'admin.view_details'.tr(),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: KZ.primary,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      size: 18,
                       color: KZ.primary,
                     ),
-                  ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              // Current status badge pill — never shrunk/truncated.
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: _getStatusDotColor(order.status).withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  order.status.name.toLowerCase(),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: _getStatusDotColor(order.status),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            order.customerName?.isNotEmpty == true
-                ? order.customerName!
-                : order.userId,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: KZ.onSurface,
-            ),
-          ),
-          const SizedBox(height: 6),
-          // Price / item count / timestamp / payment method — a Wrap so
-          // narrow phones fall onto a second line instead of overflowing.
-          Wrap(
-            spacing: 12,
-            runSpacing: 4,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                formatCurrency(order.grandTotal, locale: context.locale),
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: KZ.onSurface,
-                ),
-              ),
-              Text(
-                '$itemCount items • $timeStr',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: KZ.secondary,
-                ),
-              ),
-              if (order.paymentMethod != null)
-                Text(
-                  paymentMethodLabel(order.paymentMethod),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: KZ.primary,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // Items Row
-          const Text(
-            'Items:',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: KZ.onSurface,
+              ],
             ),
           ),
           const SizedBox(height: 4),
-          Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  thumbUrl,
-                  width: 44,
-                  height: 44,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 44,
-                    height: 44,
-                    color: KZ.surfaceContainerLow,
-                    child: const Icon(Icons.restaurant, color: KZ.secondary),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  itemsSummary,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: KZ.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
 
           const Divider(height: 1, color: Color(0xFFE2DFE0)),
           const SizedBox(height: 12),

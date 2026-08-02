@@ -494,7 +494,8 @@ class ApiOrderRepository implements OrderRepository {
         json['loyaltyRedemption'] as Map<String, dynamic>?;
     final userJson = json['user'] as Map<String, dynamic>?;
     final deliveryAddressJson =
-        json['deliveryAddress'] as Map<String, dynamic>?;
+        (json['deliveryAddress'] ?? json['deliveryAddressJson'])
+            as Map<String, dynamic>?;
 
     return Order(
       id: json['id'] ?? '',

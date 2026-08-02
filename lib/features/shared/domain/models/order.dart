@@ -170,8 +170,16 @@ class OrderDeliveryAddress with _$OrderDeliveryAddress {
 /// never legitimately places an order at the (0, 0) "null island" sentinel,
 /// so that combination is treated as missing/invalid rather than launched.
 extension OrderDeliveryAddressCoordsX on OrderDeliveryAddress {
-  bool get hasValidCoordinates =>
-      lat != null && lng != null && (lat != 0.0 || lng != 0.0);
+  bool get hasValidCoordinates {
+    final latitude = lat;
+    final longitude = lng;
+    if (latitude == null || longitude == null) return false;
+    if (!latitude.isFinite || !longitude.isFinite) return false;
+    if (latitude < -90 || latitude > 90) return false;
+    if (longitude < -180 || longitude > 180) return false;
+    if (latitude == 0.0 && longitude == 0.0) return false;
+    return true;
+  }
 }
 
 @freezed

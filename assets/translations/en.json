@@ -403,6 +403,7 @@
     "address_notes": "Additional Directions",
     "open_in_maps": "Open in Google Maps",
     "location_unavailable": "Location coordinates are unavailable for this order",
+    "view_details": "View details",
     "dashboard": "Dashboard",
     "orders": "Orders Management",
     "menu": "Menu Management",
