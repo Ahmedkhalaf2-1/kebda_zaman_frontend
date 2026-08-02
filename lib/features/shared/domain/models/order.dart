@@ -68,6 +68,10 @@ class Order with _$Order {
     required FulfillmentType fulfillmentType,
     String? addressId,
     String? pickupLocation,
+    // Immutable delivery-address snapshot taken at order placement time
+    // (backend VO2.3) — null for pickup orders and for older orders placed
+    // before the backend started returning this snapshot.
+    OrderDeliveryAddress? deliveryAddress,
     required OrderStatus status,
     required double subtotal,
     @Default(0.0) double deliveryFee,
@@ -118,6 +122,56 @@ extension OrderCrossMethodX on Order {
     }
     return !fulfillmentType.statusSequence.contains(status);
   }
+}
+
+@freezed
+class OrderDeliveryAddress with _$OrderDeliveryAddress {
+  const factory OrderDeliveryAddress({
+    String? label,
+    String? street,
+    String? building,
+    String? floor,
+    String? apartment,
+    String? city,
+    String? area,
+    String? notes,
+    double? lat,
+    double? lng,
+  }) = _OrderDeliveryAddress;
+
+  factory OrderDeliveryAddress.fromJson(Map<String, dynamic> json) =>
+      _$OrderDeliveryAddressFromJson(json);
+
+  /// Tolerant of the backend's mixed key naming (`latitude`/`lat`,
+  /// `longitude`/`lng`, `title`/`label`) and of any field being absent —
+  /// every field here is optional so older order snapshots (taken before a
+  /// field existed) still parse cleanly instead of throwing.
+  factory OrderDeliveryAddress.fromBackendJson(Map<String, dynamic> json) {
+    return OrderDeliveryAddress(
+      label: (json['title'] ?? json['label'])?.toString(),
+      street: json['street']?.toString(),
+      building: json['building']?.toString(),
+      floor: json['floor']?.toString(),
+      apartment: json['apartment']?.toString(),
+      city: json['city']?.toString(),
+      area: json['area']?.toString(),
+      notes: (json['notes'] ?? json['landmark'])?.toString(),
+      lat: (json['latitude'] ?? json['lat']) != null
+          ? double.tryParse((json['latitude'] ?? json['lat']).toString())
+          : null,
+      lng: (json['longitude'] ?? json['lng']) != null
+          ? double.tryParse((json['longitude'] ?? json['lng']).toString())
+          : null,
+    );
+  }
+}
+
+/// True only when both coordinates are present and non-zero — the backend
+/// never legitimately places an order at the (0, 0) "null island" sentinel,
+/// so that combination is treated as missing/invalid rather than launched.
+extension OrderDeliveryAddressCoordsX on OrderDeliveryAddress {
+  bool get hasValidCoordinates =>
+      lat != null && lng != null && (lat != 0.0 || lng != 0.0);
 }
 
 @freezed

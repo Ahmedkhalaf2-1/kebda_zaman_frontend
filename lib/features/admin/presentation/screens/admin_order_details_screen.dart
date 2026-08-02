@@ -6,6 +6,7 @@ import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_details_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/utils/maps_launcher.dart';
 
 /// Maps the backend's raw payment method string ('CASH'/'CARD'/'WALLET',
 /// case-insensitive) to a localized display label, falling back to the raw
@@ -149,6 +150,11 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
 
+        if (order.fulfillmentType == FulfillmentType.delivery) ...[
+          _buildDeliveryAddressCard(context, order.deliveryAddress),
+          const SizedBox(height: 12),
+        ],
+
         _buildSectionCard(
           title: 'Items',
           child: Column(
@@ -219,6 +225,96 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDeliveryAddressCard(
+    BuildContext context,
+    OrderDeliveryAddress? address,
+  ) {
+    final rows = <Widget?>[
+      _buildAddressRow('admin.address_street'.tr(), address?.street),
+      _buildAddressRow('admin.address_area'.tr(), address?.area),
+      _buildAddressRow('admin.address_city'.tr(), address?.city),
+      _buildAddressRow('admin.address_building'.tr(), address?.building),
+      _buildAddressRow('admin.address_floor'.tr(), address?.floor),
+      _buildAddressRow('admin.address_apartment'.tr(), address?.apartment),
+      _buildAddressRow('admin.address_notes'.tr(), address?.notes),
+    ].whereType<Widget>().toList();
+
+    final canNavigate = address?.hasValidCoordinates ?? false;
+
+    return _buildSectionCard(
+      title: 'admin.delivery_address'.tr(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (rows.isNotEmpty)
+            ...rows
+          else
+            const Text(
+              '—',
+              style: TextStyle(fontSize: 14, color: onSurfaceColor),
+            ),
+          const SizedBox(height: 12),
+          if (canNavigate)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primaryColor,
+                  side: const BorderSide(color: primaryColor),
+                  shape: const StadiumBorder(),
+                ),
+                onPressed: () async {
+                  final launched = await launchGoogleMapsDirections(
+                    address!.lat!,
+                    address.lng!,
+                  );
+                  if (!launched && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('admin.location_unavailable'.tr()),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.directions_rounded),
+                label: Text('admin.open_in_maps'.tr()),
+              ),
+            )
+          else
+            Text(
+              'admin.location_unavailable'.tr(),
+              style: const TextStyle(fontSize: 13, color: KZ.secondary),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget? _buildAddressRow(String label, String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 13, color: KZ.secondary),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 14, color: onSurfaceColor),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

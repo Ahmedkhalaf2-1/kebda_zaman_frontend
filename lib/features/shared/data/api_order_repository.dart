@@ -25,8 +25,7 @@ class ApiOrderRepository implements OrderRepository {
   /// endpoint in this repository (customer list/detail, checkout, admin
   /// list/status-update). Avoids duplicating the mapping rules in tests.
   @visibleForTesting
-  static Order mapOrderForTesting(Map<String, dynamic> json) =>
-      _mapOrder(json);
+  static Order mapOrderForTesting(Map<String, dynamic> json) => _mapOrder(json);
 
   /// Test-only seam onto the transient/permanent failure classification
   /// used by [watchOrder]'s retry policy (Fix 14).
@@ -494,6 +493,8 @@ class ApiOrderRepository implements OrderRepository {
     final loyaltyRedemptionJson =
         json['loyaltyRedemption'] as Map<String, dynamic>?;
     final userJson = json['user'] as Map<String, dynamic>?;
+    final deliveryAddressJson =
+        json['deliveryAddress'] as Map<String, dynamic>?;
 
     return Order(
       id: json['id'] ?? '',
@@ -502,6 +503,9 @@ class ApiOrderRepository implements OrderRepository {
       customerName: userJson?['name'] as String?,
       items: itemsList.map((i) => _mapOrderItem(i)).toList(),
       fulfillmentType: _mapFulfillmentType(json['deliveryMethod']),
+      deliveryAddress: deliveryAddressJson != null
+          ? OrderDeliveryAddress.fromBackendJson(deliveryAddressJson)
+          : null,
       status: status,
       subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
       deliveryFee: (json['deliveryFee'] as num?)?.toDouble() ?? 0.0,

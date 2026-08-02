@@ -20,6 +20,11 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
   ),
   addressId: json['addressId'] as String?,
   pickupLocation: json['pickupLocation'] as String?,
+  deliveryAddress: json['deliveryAddress'] == null
+      ? null
+      : OrderDeliveryAddress.fromJson(
+          json['deliveryAddress'] as Map<String, dynamic>,
+        ),
   status: $enumDecode(_$OrderStatusEnumMap, json['status']),
   subtotal: (json['subtotal'] as num).toDouble(),
   deliveryFee: (json['deliveryFee'] as num?)?.toDouble() ?? 0.0,
@@ -54,6 +59,7 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'fulfillmentType': _$FulfillmentTypeEnumMap[instance.fulfillmentType]!,
       'addressId': instance.addressId,
       'pickupLocation': instance.pickupLocation,
+      'deliveryAddress': instance.deliveryAddress,
       'status': _$OrderStatusEnumMap[instance.status]!,
       'subtotal': instance.subtotal,
       'deliveryFee': instance.deliveryFee,
@@ -85,6 +91,36 @@ const _$OrderStatusEnumMap = {
   OrderStatus.pickedUp: 'pickedUp',
   OrderStatus.cancelled: 'cancelled',
   OrderStatus.unknown: 'unknown',
+};
+
+_$OrderDeliveryAddressImpl _$$OrderDeliveryAddressImplFromJson(
+  Map<String, dynamic> json,
+) => _$OrderDeliveryAddressImpl(
+  label: json['label'] as String?,
+  street: json['street'] as String?,
+  building: json['building'] as String?,
+  floor: json['floor'] as String?,
+  apartment: json['apartment'] as String?,
+  city: json['city'] as String?,
+  area: json['area'] as String?,
+  notes: json['notes'] as String?,
+  lat: (json['lat'] as num?)?.toDouble(),
+  lng: (json['lng'] as num?)?.toDouble(),
+);
+
+Map<String, dynamic> _$$OrderDeliveryAddressImplToJson(
+  _$OrderDeliveryAddressImpl instance,
+) => <String, dynamic>{
+  'label': instance.label,
+  'street': instance.street,
+  'building': instance.building,
+  'floor': instance.floor,
+  'apartment': instance.apartment,
+  'city': instance.city,
+  'area': instance.area,
+  'notes': instance.notes,
+  'lat': instance.lat,
+  'lng': instance.lng,
 };
 
 _$LoyaltyRedemptionInfoImpl _$$LoyaltyRedemptionInfoImplFromJson(

@@ -28,7 +28,12 @@ mixin _$Order {
   List<OrderItem> get items => throw _privateConstructorUsedError;
   FulfillmentType get fulfillmentType => throw _privateConstructorUsedError;
   String? get addressId => throw _privateConstructorUsedError;
-  String? get pickupLocation => throw _privateConstructorUsedError;
+  String? get pickupLocation =>
+      throw _privateConstructorUsedError; // Immutable delivery-address snapshot taken at order placement time
+  // (backend VO2.3) — null for pickup orders and for older orders placed
+  // before the backend started returning this snapshot.
+  OrderDeliveryAddress? get deliveryAddress =>
+      throw _privateConstructorUsedError;
   OrderStatus get status => throw _privateConstructorUsedError;
   double get subtotal => throw _privateConstructorUsedError;
   double get deliveryFee => throw _privateConstructorUsedError;
@@ -71,6 +76,7 @@ abstract class $OrderCopyWith<$Res> {
     FulfillmentType fulfillmentType,
     String? addressId,
     String? pickupLocation,
+    OrderDeliveryAddress? deliveryAddress,
     OrderStatus status,
     double subtotal,
     double deliveryFee,
@@ -87,6 +93,7 @@ abstract class $OrderCopyWith<$Res> {
     LoyaltyRedemptionInfo? loyaltyRedemption,
   });
 
+  $OrderDeliveryAddressCopyWith<$Res>? get deliveryAddress;
   $LoyaltyRedemptionInfoCopyWith<$Res>? get loyaltyRedemption;
 }
 
@@ -113,6 +120,7 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? fulfillmentType = null,
     Object? addressId = freezed,
     Object? pickupLocation = freezed,
+    Object? deliveryAddress = freezed,
     Object? status = null,
     Object? subtotal = null,
     Object? deliveryFee = null,
@@ -162,6 +170,10 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.pickupLocation
                 : pickupLocation // ignore: cast_nullable_to_non_nullable
                       as String?,
+            deliveryAddress: freezed == deliveryAddress
+                ? _value.deliveryAddress
+                : deliveryAddress // ignore: cast_nullable_to_non_nullable
+                      as OrderDeliveryAddress?,
             status: null == status
                 ? _value.status
                 : status // ignore: cast_nullable_to_non_nullable
@@ -227,6 +239,22 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
+  $OrderDeliveryAddressCopyWith<$Res>? get deliveryAddress {
+    if (_value.deliveryAddress == null) {
+      return null;
+    }
+
+    return $OrderDeliveryAddressCopyWith<$Res>(_value.deliveryAddress!, (
+      value,
+    ) {
+      return _then(_value.copyWith(deliveryAddress: value) as $Val);
+    });
+  }
+
+  /// Create a copy of Order
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
   $LoyaltyRedemptionInfoCopyWith<$Res>? get loyaltyRedemption {
     if (_value.loyaltyRedemption == null) {
       return null;
@@ -257,6 +285,7 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     FulfillmentType fulfillmentType,
     String? addressId,
     String? pickupLocation,
+    OrderDeliveryAddress? deliveryAddress,
     OrderStatus status,
     double subtotal,
     double deliveryFee,
@@ -273,6 +302,8 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     LoyaltyRedemptionInfo? loyaltyRedemption,
   });
 
+  @override
+  $OrderDeliveryAddressCopyWith<$Res>? get deliveryAddress;
   @override
   $LoyaltyRedemptionInfoCopyWith<$Res>? get loyaltyRedemption;
 }
@@ -299,6 +330,7 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? fulfillmentType = null,
     Object? addressId = freezed,
     Object? pickupLocation = freezed,
+    Object? deliveryAddress = freezed,
     Object? status = null,
     Object? subtotal = null,
     Object? deliveryFee = null,
@@ -348,6 +380,10 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.pickupLocation
             : pickupLocation // ignore: cast_nullable_to_non_nullable
                   as String?,
+        deliveryAddress: freezed == deliveryAddress
+            ? _value.deliveryAddress
+            : deliveryAddress // ignore: cast_nullable_to_non_nullable
+                  as OrderDeliveryAddress?,
         status: null == status
             ? _value.status
             : status // ignore: cast_nullable_to_non_nullable
@@ -421,6 +457,7 @@ class _$OrderImpl implements _Order {
     required this.fulfillmentType,
     this.addressId,
     this.pickupLocation,
+    this.deliveryAddress,
     required this.status,
     required this.subtotal,
     this.deliveryFee = 0.0,
@@ -463,6 +500,11 @@ class _$OrderImpl implements _Order {
   final String? addressId;
   @override
   final String? pickupLocation;
+  // Immutable delivery-address snapshot taken at order placement time
+  // (backend VO2.3) — null for pickup orders and for older orders placed
+  // before the backend started returning this snapshot.
+  @override
+  final OrderDeliveryAddress? deliveryAddress;
   @override
   final OrderStatus status;
   @override
@@ -507,7 +549,7 @@ class _$OrderImpl implements _Order {
 
   @override
   String toString() {
-    return 'Order(id: $id, orderNumber: $orderNumber, userId: $userId, customerName: $customerName, items: $items, fulfillmentType: $fulfillmentType, addressId: $addressId, pickupLocation: $pickupLocation, status: $status, subtotal: $subtotal, deliveryFee: $deliveryFee, discountTotal: $discountTotal, loyaltyPointsUsed: $loyaltyPointsUsed, loyaltyPointsEarned: $loyaltyPointsEarned, grandTotal: $grandTotal, paymentId: $paymentId, paymentStatus: $paymentStatus, paymentMethod: $paymentMethod, placedAt: $placedAt, statusHistory: $statusHistory, estimatedTime: $estimatedTime, loyaltyRedemption: $loyaltyRedemption)';
+    return 'Order(id: $id, orderNumber: $orderNumber, userId: $userId, customerName: $customerName, items: $items, fulfillmentType: $fulfillmentType, addressId: $addressId, pickupLocation: $pickupLocation, deliveryAddress: $deliveryAddress, status: $status, subtotal: $subtotal, deliveryFee: $deliveryFee, discountTotal: $discountTotal, loyaltyPointsUsed: $loyaltyPointsUsed, loyaltyPointsEarned: $loyaltyPointsEarned, grandTotal: $grandTotal, paymentId: $paymentId, paymentStatus: $paymentStatus, paymentMethod: $paymentMethod, placedAt: $placedAt, statusHistory: $statusHistory, estimatedTime: $estimatedTime, loyaltyRedemption: $loyaltyRedemption)';
   }
 
   @override
@@ -528,6 +570,8 @@ class _$OrderImpl implements _Order {
                 other.addressId == addressId) &&
             (identical(other.pickupLocation, pickupLocation) ||
                 other.pickupLocation == pickupLocation) &&
+            (identical(other.deliveryAddress, deliveryAddress) ||
+                other.deliveryAddress == deliveryAddress) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.subtotal, subtotal) ||
                 other.subtotal == subtotal) &&
@@ -571,6 +615,7 @@ class _$OrderImpl implements _Order {
     fulfillmentType,
     addressId,
     pickupLocation,
+    deliveryAddress,
     status,
     subtotal,
     deliveryFee,
@@ -611,6 +656,7 @@ abstract class _Order implements Order {
     required final FulfillmentType fulfillmentType,
     final String? addressId,
     final String? pickupLocation,
+    final OrderDeliveryAddress? deliveryAddress,
     required final OrderStatus status,
     required final double subtotal,
     final double deliveryFee,
@@ -644,7 +690,11 @@ abstract class _Order implements Order {
   @override
   String? get addressId;
   @override
-  String? get pickupLocation;
+  String? get pickupLocation; // Immutable delivery-address snapshot taken at order placement time
+  // (backend VO2.3) — null for pickup orders and for older orders placed
+  // before the backend started returning this snapshot.
+  @override
+  OrderDeliveryAddress? get deliveryAddress;
   @override
   OrderStatus get status;
   @override
@@ -681,6 +731,370 @@ abstract class _Order implements Order {
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$OrderImplCopyWith<_$OrderImpl> get copyWith =>
       throw _privateConstructorUsedError;
+}
+
+OrderDeliveryAddress _$OrderDeliveryAddressFromJson(Map<String, dynamic> json) {
+  return _OrderDeliveryAddress.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderDeliveryAddress {
+  String? get label => throw _privateConstructorUsedError;
+  String? get street => throw _privateConstructorUsedError;
+  String? get building => throw _privateConstructorUsedError;
+  String? get floor => throw _privateConstructorUsedError;
+  String? get apartment => throw _privateConstructorUsedError;
+  String? get city => throw _privateConstructorUsedError;
+  String? get area => throw _privateConstructorUsedError;
+  String? get notes => throw _privateConstructorUsedError;
+  double? get lat => throw _privateConstructorUsedError;
+  double? get lng => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderDeliveryAddress to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderDeliveryAddress
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderDeliveryAddressCopyWith<OrderDeliveryAddress> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderDeliveryAddressCopyWith<$Res> {
+  factory $OrderDeliveryAddressCopyWith(
+    OrderDeliveryAddress value,
+    $Res Function(OrderDeliveryAddress) then,
+  ) = _$OrderDeliveryAddressCopyWithImpl<$Res, OrderDeliveryAddress>;
+  @useResult
+  $Res call({
+    String? label,
+    String? street,
+    String? building,
+    String? floor,
+    String? apartment,
+    String? city,
+    String? area,
+    String? notes,
+    double? lat,
+    double? lng,
+  });
+}
+
+/// @nodoc
+class _$OrderDeliveryAddressCopyWithImpl<
+  $Res,
+  $Val extends OrderDeliveryAddress
+>
+    implements $OrderDeliveryAddressCopyWith<$Res> {
+  _$OrderDeliveryAddressCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderDeliveryAddress
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? label = freezed,
+    Object? street = freezed,
+    Object? building = freezed,
+    Object? floor = freezed,
+    Object? apartment = freezed,
+    Object? city = freezed,
+    Object? area = freezed,
+    Object? notes = freezed,
+    Object? lat = freezed,
+    Object? lng = freezed,
+  }) {
+    return _then(
+      _value.copyWith(
+            label: freezed == label
+                ? _value.label
+                : label // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            street: freezed == street
+                ? _value.street
+                : street // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            building: freezed == building
+                ? _value.building
+                : building // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            floor: freezed == floor
+                ? _value.floor
+                : floor // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            apartment: freezed == apartment
+                ? _value.apartment
+                : apartment // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            city: freezed == city
+                ? _value.city
+                : city // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            area: freezed == area
+                ? _value.area
+                : area // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            notes: freezed == notes
+                ? _value.notes
+                : notes // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            lat: freezed == lat
+                ? _value.lat
+                : lat // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            lng: freezed == lng
+                ? _value.lng
+                : lng // ignore: cast_nullable_to_non_nullable
+                      as double?,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderDeliveryAddressImplCopyWith<$Res>
+    implements $OrderDeliveryAddressCopyWith<$Res> {
+  factory _$$OrderDeliveryAddressImplCopyWith(
+    _$OrderDeliveryAddressImpl value,
+    $Res Function(_$OrderDeliveryAddressImpl) then,
+  ) = __$$OrderDeliveryAddressImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    String? label,
+    String? street,
+    String? building,
+    String? floor,
+    String? apartment,
+    String? city,
+    String? area,
+    String? notes,
+    double? lat,
+    double? lng,
+  });
+}
+
+/// @nodoc
+class __$$OrderDeliveryAddressImplCopyWithImpl<$Res>
+    extends _$OrderDeliveryAddressCopyWithImpl<$Res, _$OrderDeliveryAddressImpl>
+    implements _$$OrderDeliveryAddressImplCopyWith<$Res> {
+  __$$OrderDeliveryAddressImplCopyWithImpl(
+    _$OrderDeliveryAddressImpl _value,
+    $Res Function(_$OrderDeliveryAddressImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of OrderDeliveryAddress
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? label = freezed,
+    Object? street = freezed,
+    Object? building = freezed,
+    Object? floor = freezed,
+    Object? apartment = freezed,
+    Object? city = freezed,
+    Object? area = freezed,
+    Object? notes = freezed,
+    Object? lat = freezed,
+    Object? lng = freezed,
+  }) {
+    return _then(
+      _$OrderDeliveryAddressImpl(
+        label: freezed == label
+            ? _value.label
+            : label // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        street: freezed == street
+            ? _value.street
+            : street // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        building: freezed == building
+            ? _value.building
+            : building // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        floor: freezed == floor
+            ? _value.floor
+            : floor // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        apartment: freezed == apartment
+            ? _value.apartment
+            : apartment // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        city: freezed == city
+            ? _value.city
+            : city // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        area: freezed == area
+            ? _value.area
+            : area // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        notes: freezed == notes
+            ? _value.notes
+            : notes // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        lat: freezed == lat
+            ? _value.lat
+            : lat // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        lng: freezed == lng
+            ? _value.lng
+            : lng // ignore: cast_nullable_to_non_nullable
+                  as double?,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OrderDeliveryAddressImpl implements _OrderDeliveryAddress {
+  const _$OrderDeliveryAddressImpl({
+    this.label,
+    this.street,
+    this.building,
+    this.floor,
+    this.apartment,
+    this.city,
+    this.area,
+    this.notes,
+    this.lat,
+    this.lng,
+  });
+
+  factory _$OrderDeliveryAddressImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderDeliveryAddressImplFromJson(json);
+
+  @override
+  final String? label;
+  @override
+  final String? street;
+  @override
+  final String? building;
+  @override
+  final String? floor;
+  @override
+  final String? apartment;
+  @override
+  final String? city;
+  @override
+  final String? area;
+  @override
+  final String? notes;
+  @override
+  final double? lat;
+  @override
+  final double? lng;
+
+  @override
+  String toString() {
+    return 'OrderDeliveryAddress(label: $label, street: $street, building: $building, floor: $floor, apartment: $apartment, city: $city, area: $area, notes: $notes, lat: $lat, lng: $lng)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderDeliveryAddressImpl &&
+            (identical(other.label, label) || other.label == label) &&
+            (identical(other.street, street) || other.street == street) &&
+            (identical(other.building, building) ||
+                other.building == building) &&
+            (identical(other.floor, floor) || other.floor == floor) &&
+            (identical(other.apartment, apartment) ||
+                other.apartment == apartment) &&
+            (identical(other.city, city) || other.city == city) &&
+            (identical(other.area, area) || other.area == area) &&
+            (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.lat, lat) || other.lat == lat) &&
+            (identical(other.lng, lng) || other.lng == lng));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    label,
+    street,
+    building,
+    floor,
+    apartment,
+    city,
+    area,
+    notes,
+    lat,
+    lng,
+  );
+
+  /// Create a copy of OrderDeliveryAddress
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderDeliveryAddressImplCopyWith<_$OrderDeliveryAddressImpl>
+  get copyWith =>
+      __$$OrderDeliveryAddressImplCopyWithImpl<_$OrderDeliveryAddressImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderDeliveryAddressImplToJson(this);
+  }
+}
+
+abstract class _OrderDeliveryAddress implements OrderDeliveryAddress {
+  const factory _OrderDeliveryAddress({
+    final String? label,
+    final String? street,
+    final String? building,
+    final String? floor,
+    final String? apartment,
+    final String? city,
+    final String? area,
+    final String? notes,
+    final double? lat,
+    final double? lng,
+  }) = _$OrderDeliveryAddressImpl;
+
+  factory _OrderDeliveryAddress.fromJson(Map<String, dynamic> json) =
+      _$OrderDeliveryAddressImpl.fromJson;
+
+  @override
+  String? get label;
+  @override
+  String? get street;
+  @override
+  String? get building;
+  @override
+  String? get floor;
+  @override
+  String? get apartment;
+  @override
+  String? get city;
+  @override
+  String? get area;
+  @override
+  String? get notes;
+  @override
+  double? get lat;
+  @override
+  double? get lng;
+
+  /// Create a copy of OrderDeliveryAddress
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderDeliveryAddressImplCopyWith<_$OrderDeliveryAddressImpl>
+  get copyWith => throw _privateConstructorUsedError;
 }
 
 LoyaltyRedemptionInfo _$LoyaltyRedemptionInfoFromJson(
