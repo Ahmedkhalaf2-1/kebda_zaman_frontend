@@ -1533,6 +1533,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         );
                                         return;
                                       }
+                                      // Only forward coordinates the address
+                                      // picker actually resolved via reverse
+                                      // geocoding — never derive them from the
+                                      // text address, and never fall back to
+                                      // (0, 0).
+                                      final lat = effectiveAddress.lat;
+                                      final lng = effectiveAddress.lng;
+                                      final hasValidCoordinates =
+                                          lat != null &&
+                                          lng != null &&
+                                          lat.isFinite &&
+                                          lng.isFinite &&
+                                          lat >= -90 &&
+                                          lat <= 90 &&
+                                          lng >= -180 &&
+                                          lng <= 180;
+
                                       deliveryAddress = {
                                         'title': effectiveAddress.label,
                                         'street': effectiveAddress.street,
@@ -1548,6 +1565,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                           'apartment':
                                               effectiveAddress.apartment,
                                         'city': effectiveAddress.city,
+                                        if (hasValidCoordinates) ...{
+                                          'latitude': lat,
+                                          'longitude': lng,
+                                        },
                                       };
                                     }
 
