@@ -34,6 +34,10 @@ mixin _$MenuItem {
   int get prepTimeMinutes => throw _privateConstructorUsedError;
   List<ModifierGroup> get modifierGroups => throw _privateConstructorUsedError;
   int get sortOrder => throw _privateConstructorUsedError;
+  int? get calories => throw _privateConstructorUsedError;
+  double? get compareAtPrice => throw _privateConstructorUsedError;
+  MenuItemBadge? get badge => throw _privateConstructorUsedError;
+  List<MenuItem> get oftenOrderedWith => throw _privateConstructorUsedError;
 
   /// Serializes this MenuItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -64,6 +68,10 @@ abstract class $MenuItemCopyWith<$Res> {
     int prepTimeMinutes,
     List<ModifierGroup> modifierGroups,
     int sortOrder,
+    int? calories,
+    double? compareAtPrice,
+    MenuItemBadge? badge,
+    List<MenuItem> oftenOrderedWith,
   });
 }
 
@@ -95,6 +103,10 @@ class _$MenuItemCopyWithImpl<$Res, $Val extends MenuItem>
     Object? prepTimeMinutes = null,
     Object? modifierGroups = null,
     Object? sortOrder = null,
+    Object? calories = freezed,
+    Object? compareAtPrice = freezed,
+    Object? badge = freezed,
+    Object? oftenOrderedWith = null,
   }) {
     return _then(
       _value.copyWith(
@@ -150,6 +162,22 @@ class _$MenuItemCopyWithImpl<$Res, $Val extends MenuItem>
                 ? _value.sortOrder
                 : sortOrder // ignore: cast_nullable_to_non_nullable
                       as int,
+            calories: freezed == calories
+                ? _value.calories
+                : calories // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            compareAtPrice: freezed == compareAtPrice
+                ? _value.compareAtPrice
+                : compareAtPrice // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            badge: freezed == badge
+                ? _value.badge
+                : badge // ignore: cast_nullable_to_non_nullable
+                      as MenuItemBadge?,
+            oftenOrderedWith: null == oftenOrderedWith
+                ? _value.oftenOrderedWith
+                : oftenOrderedWith // ignore: cast_nullable_to_non_nullable
+                      as List<MenuItem>,
           )
           as $Val,
     );
@@ -179,6 +207,10 @@ abstract class _$$MenuItemImplCopyWith<$Res>
     int prepTimeMinutes,
     List<ModifierGroup> modifierGroups,
     int sortOrder,
+    int? calories,
+    double? compareAtPrice,
+    MenuItemBadge? badge,
+    List<MenuItem> oftenOrderedWith,
   });
 }
 
@@ -209,6 +241,10 @@ class __$$MenuItemImplCopyWithImpl<$Res>
     Object? prepTimeMinutes = null,
     Object? modifierGroups = null,
     Object? sortOrder = null,
+    Object? calories = freezed,
+    Object? compareAtPrice = freezed,
+    Object? badge = freezed,
+    Object? oftenOrderedWith = null,
   }) {
     return _then(
       _$MenuItemImpl(
@@ -264,6 +300,22 @@ class __$$MenuItemImplCopyWithImpl<$Res>
             ? _value.sortOrder
             : sortOrder // ignore: cast_nullable_to_non_nullable
                   as int,
+        calories: freezed == calories
+            ? _value.calories
+            : calories // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        compareAtPrice: freezed == compareAtPrice
+            ? _value.compareAtPrice
+            : compareAtPrice // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        badge: freezed == badge
+            ? _value.badge
+            : badge // ignore: cast_nullable_to_non_nullable
+                  as MenuItemBadge?,
+        oftenOrderedWith: null == oftenOrderedWith
+            ? _value._oftenOrderedWith
+            : oftenOrderedWith // ignore: cast_nullable_to_non_nullable
+                  as List<MenuItem>,
       ),
     );
   }
@@ -286,7 +338,12 @@ class _$MenuItemImpl implements _MenuItem {
     this.prepTimeMinutes = 15,
     final List<ModifierGroup> modifierGroups = const [],
     this.sortOrder = 0,
-  }) : _modifierGroups = modifierGroups;
+    this.calories,
+    this.compareAtPrice,
+    this.badge,
+    final List<MenuItem> oftenOrderedWith = const [],
+  }) : _modifierGroups = modifierGroups,
+       _oftenOrderedWith = oftenOrderedWith;
 
   factory _$MenuItemImpl.fromJson(Map<String, dynamic> json) =>
       _$$MenuItemImplFromJson(json);
@@ -329,10 +386,25 @@ class _$MenuItemImpl implements _MenuItem {
   @override
   @JsonKey()
   final int sortOrder;
+  @override
+  final int? calories;
+  @override
+  final double? compareAtPrice;
+  @override
+  final MenuItemBadge? badge;
+  final List<MenuItem> _oftenOrderedWith;
+  @override
+  @JsonKey()
+  List<MenuItem> get oftenOrderedWith {
+    if (_oftenOrderedWith is EqualUnmodifiableListView)
+      return _oftenOrderedWith;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_oftenOrderedWith);
+  }
 
   @override
   String toString() {
-    return 'MenuItem(id: $id, categoryId: $categoryId, name: $name, description: $description, imageUrl: $imageUrl, basePrice: $basePrice, discountPrice: $discountPrice, isAvailable: $isAvailable, isFeatured: $isFeatured, isBestSeller: $isBestSeller, prepTimeMinutes: $prepTimeMinutes, modifierGroups: $modifierGroups, sortOrder: $sortOrder)';
+    return 'MenuItem(id: $id, categoryId: $categoryId, name: $name, description: $description, imageUrl: $imageUrl, basePrice: $basePrice, discountPrice: $discountPrice, isAvailable: $isAvailable, isFeatured: $isFeatured, isBestSeller: $isBestSeller, prepTimeMinutes: $prepTimeMinutes, modifierGroups: $modifierGroups, sortOrder: $sortOrder, calories: $calories, compareAtPrice: $compareAtPrice, badge: $badge, oftenOrderedWith: $oftenOrderedWith)';
   }
 
   @override
@@ -365,7 +437,16 @@ class _$MenuItemImpl implements _MenuItem {
               _modifierGroups,
             ) &&
             (identical(other.sortOrder, sortOrder) ||
-                other.sortOrder == sortOrder));
+                other.sortOrder == sortOrder) &&
+            (identical(other.calories, calories) ||
+                other.calories == calories) &&
+            (identical(other.compareAtPrice, compareAtPrice) ||
+                other.compareAtPrice == compareAtPrice) &&
+            (identical(other.badge, badge) || other.badge == badge) &&
+            const DeepCollectionEquality().equals(
+              other._oftenOrderedWith,
+              _oftenOrderedWith,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -385,6 +466,10 @@ class _$MenuItemImpl implements _MenuItem {
     prepTimeMinutes,
     const DeepCollectionEquality().hash(_modifierGroups),
     sortOrder,
+    calories,
+    compareAtPrice,
+    badge,
+    const DeepCollectionEquality().hash(_oftenOrderedWith),
   );
 
   /// Create a copy of MenuItem
@@ -416,6 +501,10 @@ abstract class _MenuItem implements MenuItem {
     final int prepTimeMinutes,
     final List<ModifierGroup> modifierGroups,
     final int sortOrder,
+    final int? calories,
+    final double? compareAtPrice,
+    final MenuItemBadge? badge,
+    final List<MenuItem> oftenOrderedWith,
   }) = _$MenuItemImpl;
 
   factory _MenuItem.fromJson(Map<String, dynamic> json) =
@@ -447,6 +536,14 @@ abstract class _MenuItem implements MenuItem {
   List<ModifierGroup> get modifierGroups;
   @override
   int get sortOrder;
+  @override
+  int? get calories;
+  @override
+  double? get compareAtPrice;
+  @override
+  MenuItemBadge? get badge;
+  @override
+  List<MenuItem> get oftenOrderedWith;
 
   /// Create a copy of MenuItem
   /// with the given fields replaced by the non-null parameter values.

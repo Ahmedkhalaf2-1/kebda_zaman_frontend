@@ -25,6 +25,14 @@ _$MenuItemImpl _$$MenuItemImplFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
+      calories: (json['calories'] as num?)?.toInt(),
+      compareAtPrice: (json['compareAtPrice'] as num?)?.toDouble(),
+      badge: $enumDecodeNullable(_$MenuItemBadgeEnumMap, json['badge']),
+      oftenOrderedWith:
+          (json['oftenOrderedWith'] as List<dynamic>?)
+              ?.map((e) => MenuItem.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$$MenuItemImplToJson(_$MenuItemImpl instance) =>
@@ -42,7 +50,16 @@ Map<String, dynamic> _$$MenuItemImplToJson(_$MenuItemImpl instance) =>
       'prepTimeMinutes': instance.prepTimeMinutes,
       'modifierGroups': instance.modifierGroups,
       'sortOrder': instance.sortOrder,
+      'calories': instance.calories,
+      'compareAtPrice': instance.compareAtPrice,
+      'badge': _$MenuItemBadgeEnumMap[instance.badge],
+      'oftenOrderedWith': instance.oftenOrderedWith,
     };
+
+const _$MenuItemBadgeEnumMap = {
+  MenuItemBadge.bestseller: 'bestseller',
+  MenuItemBadge.topRated: 'topRated',
+};
 
 _$ModifierGroupImpl _$$ModifierGroupImplFromJson(Map<String, dynamic> json) =>
     _$ModifierGroupImpl(

@@ -3,6 +3,66 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'menu_item.freezed.dart';
 part 'menu_item.g.dart';
 
+/// Promotional badge shown on a menu item, per the VO3 catalog contract.
+/// Backend sends the raw string ('BESTSELLER' / 'TOP_RATED' / null); unknown
+/// values must parse to null rather than throw (see [menuItemBadgeFromApi]).
+enum MenuItemBadge { bestseller, topRated }
+
+/// Parses the backend's `badge` string into [MenuItemBadge]. Unknown or
+/// missing values return null rather than throwing, since badge is
+/// decorative and must never break menu parsing.
+MenuItemBadge? menuItemBadgeFromApi(String? value) {
+  switch (value) {
+    case 'BESTSELLER':
+      return MenuItemBadge.bestseller;
+    case 'TOP_RATED':
+      return MenuItemBadge.topRated;
+    default:
+      return null;
+  }
+}
+
+/// Parses the backend's `calories` field, which may be an int, a
+/// whole-number double, a numeric string, or null. Fractional and negative
+/// values are rejected (return null) rather than silently truncated.
+int? menuItemCaloriesFromApi(dynamic value) {
+  if (value is int) {
+    return value >= 0 ? value : null;
+  }
+  if (value is double) {
+    return (value >= 0 && value == value.roundToDouble())
+        ? value.toInt()
+        : null;
+  }
+  if (value is String) {
+    final asInt = int.tryParse(value);
+    if (asInt != null) return asInt >= 0 ? asInt : null;
+    final asDouble = double.tryParse(value);
+    if (asDouble != null &&
+        asDouble >= 0 &&
+        asDouble == asDouble.roundToDouble()) {
+      return asDouble.toInt();
+    }
+    return null;
+  }
+  return null;
+}
+
+/// Parses the backend's `compareAtPrice` field, which may be an int, a
+/// double, a numeric string, or null. Negative and invalid values return
+/// null rather than being coerced.
+double? menuItemCompareAtPriceFromApi(dynamic value) {
+  if (value is num) {
+    return value >= 0 ? value.toDouble() : null;
+  }
+  if (value is String) {
+    final parsed = double.tryParse(value);
+    if (parsed != null && parsed >= 0) return parsed;
+    return null;
+  }
+  return null;
+}
+
 @freezed
 class MenuItem with _$MenuItem {
   const factory MenuItem({
@@ -19,6 +79,10 @@ class MenuItem with _$MenuItem {
     @Default(15) int prepTimeMinutes,
     @Default([]) List<ModifierGroup> modifierGroups,
     @Default(0) int sortOrder,
+    int? calories,
+    double? compareAtPrice,
+    MenuItemBadge? badge,
+    @Default([]) List<MenuItem> oftenOrderedWith,
   }) = _MenuItem;
 
   factory MenuItem.fromJson(Map<String, dynamic> json) =>

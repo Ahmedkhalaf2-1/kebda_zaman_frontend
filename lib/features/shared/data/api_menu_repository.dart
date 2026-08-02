@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:kebda_zaman/core/api/api_client.dart';
 import 'package:kebda_zaman/core/api/api_exceptions.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
@@ -10,6 +11,14 @@ class ApiMenuRepository implements MenuRepository {
   final ApiClient _apiClient;
 
   ApiMenuRepository(this._apiClient);
+
+  @visibleForTesting
+  static MenuItem mapMenuItemForTesting(Map<String, dynamic> json) =>
+      _mapMenuItem(json);
+
+  @visibleForTesting
+  static Category mapCategoryForTesting(Map<String, dynamic> json) =>
+      _mapCategory(json);
 
   @override
   Future<Result<List<Category>>> getCategories() async {
@@ -303,7 +312,7 @@ class ApiMenuRepository implements MenuRepository {
 
   // --- Mappers ---
 
-  Category _mapCategory(Map<String, dynamic> json) {
+  static Category _mapCategory(Map<String, dynamic> json) {
     return Category(
       id: json['id'],
       name: json['nameEn'] ?? json['nameAr'] ?? 'Unknown',
@@ -338,7 +347,10 @@ class ApiMenuRepository implements MenuRepository {
     }
   }
 
-  MenuItem _mapMenuItem(Map<String, dynamic> json) {
+  static MenuItem _mapMenuItem(
+    Map<String, dynamic> json, {
+    bool includeRecommendations = true,
+  }) {
     List<ModifierGroup> modifierGroups = [];
 
     // Map Variants into a mandatory ModifierGroup
@@ -398,6 +410,27 @@ class ApiMenuRepository implements MenuRepository {
       }
     }
 
+    // oftenOrderedWith is only present on the /menu/items/:id details
+    // response; list/search/featured responses omit it entirely, so this
+    // defaults to empty. Recommendation summaries are mapped with the same
+    // mapper (they share the same field shape minus variants/addonGroups),
+    // but recursion is disabled for them: nested oftenOrderedWith inside a
+    // recommendation is intentionally ignored per the backend contract.
+    List<MenuItem> oftenOrderedWith = const [];
+    if (includeRecommendations) {
+      final raw = json['oftenOrderedWith'];
+      if (raw is List) {
+        oftenOrderedWith = raw
+            .map(
+              (r) => _mapMenuItem(
+                r as Map<String, dynamic>,
+                includeRecommendations: false,
+              ),
+            )
+            .toList();
+      }
+    }
+
     return MenuItem(
       id: json['id'],
       categoryId: json['categoryId'],
@@ -409,6 +442,10 @@ class ApiMenuRepository implements MenuRepository {
       isFeatured: json['isPopular'] ?? false,
       isBestSeller: json['isPopular'] ?? false,
       modifierGroups: modifierGroups,
+      calories: menuItemCaloriesFromApi(json['calories']),
+      compareAtPrice: menuItemCompareAtPriceFromApi(json['compareAtPrice']),
+      badge: menuItemBadgeFromApi(json['badge'] as String?),
+      oftenOrderedWith: oftenOrderedWith,
     );
   }
 }
