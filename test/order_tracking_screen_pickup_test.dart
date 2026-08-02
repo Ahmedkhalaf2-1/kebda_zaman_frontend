@@ -28,6 +28,9 @@ class _FakeOrderRepository implements OrderRepository {
   Future<Result<Order>> getOrderById(String id) async => Success(order);
 
   @override
+  Future<Result<Order>> getAdminOrderById(String id) async => Success(order);
+
+  @override
   Future<Result<List<Order>>> getOrders({
     String? userId,
     int? page,
@@ -84,9 +87,7 @@ Future<void> _pump(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        orderRepositoryProvider.overrideWithValue(
-          _FakeOrderRepository(order),
-        ),
+        orderRepositoryProvider.overrideWithValue(_FakeOrderRepository(order)),
       ],
       child: EasyLocalization(
         supportedLocales: const [Locale('en'), Locale('ar')],
@@ -208,19 +209,18 @@ void main() {
     },
   );
 
-  testWidgets(
-    'pickedUp order renders the completed-Pickup wording in Arabic',
-    (tester) async {
-      final order = _order(
-        fulfillmentType: FulfillmentType.pickup,
-        status: OrderStatus.pickedUp,
-      );
-      await _pump(tester, order, locale: const Locale('ar'));
+  testWidgets('pickedUp order renders the completed-Pickup wording in Arabic', (
+    tester,
+  ) async {
+    final order = _order(
+      fulfillmentType: FulfillmentType.pickup,
+      status: OrderStatus.pickedUp,
+    );
+    await _pump(tester, order, locale: const Locale('ar'));
 
-      expect(
-        find.text('تم استلام طلبك، بالهنا والشفا.'),
-        findsAtLeastNWidgets(1),
-      );
-    },
-  );
+    expect(
+      find.text('تم استلام طلبك، بالهنا والشفا.'),
+      findsAtLeastNWidgets(1),
+    );
+  });
 }

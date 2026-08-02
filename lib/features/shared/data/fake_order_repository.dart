@@ -118,4 +118,13 @@ class FakeOrderRepository implements OrderRepository {
     await _init();
     return Success(_orders);
   }
+
+  @override
+  Future<Result<Order>> getAdminOrderById(String id) async {
+    await _init();
+    for (final order in _orders) {
+      if (order.id == id) return Success(order);
+    }
+    return const Err(NetworkFailure('Order not found'));
+  }
 }

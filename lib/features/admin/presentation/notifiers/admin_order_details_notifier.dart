@@ -7,6 +7,6 @@ final adminOrderDetailsProvider = FutureProvider.family<Order, String>((
   id,
 ) async {
   final repo = ref.watch(orderRepositoryProvider);
-  final result = await repo.getOrderById(id);
+  final result = await repo.getAdminOrderById(id);
   return result.fold((f) => throw f, (data) => data);
 });

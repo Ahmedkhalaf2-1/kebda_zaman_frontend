@@ -103,6 +103,9 @@ class _FakeOrderRepository implements OrderRepository {
   Future<Result<Order>> getOrderById(String id) async =>
       throw UnimplementedError();
   @override
+  Future<Result<Order>> getAdminOrderById(String id) async =>
+      throw UnimplementedError();
+  @override
   Future<Result<Order>> checkout({
     required FulfillmentType deliveryMethod,
     required String paymentMethod,

@@ -392,6 +392,32 @@ class ApiOrderRepository implements OrderRepository {
   }
 
   @override
+  Future<Result<Order>> getAdminOrderById(String id) async {
+    try {
+      final response = await _apiClient.dio.get('/admin/orders/$id');
+      final order = _mapOrder(response.data as Map<String, dynamic>);
+      debugPrint(
+        '[AdminOrderRepository] source=/admin/orders/$id '
+        'deliveryAddress=${order.deliveryAddress != null} '
+        'validCoords=${order.deliveryAddress?.hasValidCoordinates ?? false}',
+      );
+      return Success(order);
+    } on DioException catch (e) {
+      if (e.error is ApiException) {
+        return Err(
+          NetworkFailure(
+            (e.error as ApiException).message,
+            e.error as ApiException,
+          ),
+        );
+      }
+      return const Err(NetworkFailure('Failed to load order'));
+    } catch (e) {
+      return const Err(UnknownFailure('Unknown error loading order'));
+    }
+  }
+
+  @override
   Future<Result<Order>> updateOrderStatus(
     String orderId,
     OrderStatus status,

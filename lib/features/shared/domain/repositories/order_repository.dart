@@ -26,4 +26,9 @@ abstract class OrderRepository {
 
   // Admin
   Future<Result<List<Order>>> getAllOrders();
+
+  /// Admin/Cashier single-order lookup via `GET /admin/orders/:id` — distinct
+  /// from [getOrderById], which hits the customer-owned `GET /orders/:id`
+  /// and 404s for orders the caller doesn't own (every order, for staff).
+  Future<Result<Order>> getAdminOrderById(String id);
 }
