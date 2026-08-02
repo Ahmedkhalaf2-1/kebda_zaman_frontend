@@ -139,6 +139,19 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     }
   }
 
+  /// First non-null, non-empty, trimmed candidate; skips values already
+  /// used by an earlier (more specific) field so the UI doesn't show the
+  /// same string twice across street/area/city.
+  static String _firstUnique(List<String?> candidates, Set<String> used) {
+    for (final candidate in candidates) {
+      final value = candidate?.trim() ?? '';
+      if (value.isEmpty || used.contains(value)) continue;
+      used.add(value);
+      return value;
+    }
+    return '';
+  }
+
   Future<void> _confirm() async {
     setState(() => _isGeocoding = true);
 
@@ -147,18 +160,37 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     String area = '';
     var geocodingFailed = false;
     try {
+      await setLocaleIdentifier('ar_EG');
       final placemarks = await placemarkFromCoordinates(
         _target.latitude,
         _target.longitude,
       );
+      debugPrint('map_picker: placemarks=${placemarks.length}');
       if (placemarks.isNotEmpty) {
         final p = placemarks.first;
-        street = [
-          p.street,
-          p.thoroughfare,
-        ].firstWhere((v) => v != null && v.isNotEmpty, orElse: () => '')!;
-        city = p.locality ?? p.administrativeArea ?? '';
-        area = p.subLocality ?? p.subAdministrativeArea ?? '';
+        debugPrint(
+          'map_picker: street=${p.street} subLocality=${p.subLocality} '
+          'locality=${p.locality} subAdministrativeArea=${p.subAdministrativeArea} '
+          'administrativeArea=${p.administrativeArea}',
+        );
+
+        final used = <String>{};
+        street = _firstUnique([p.street, p.name, p.thoroughfare], used);
+        area = _firstUnique([
+          p.subLocality,
+          p.locality,
+          p.subAdministrativeArea,
+        ], used);
+        city = _firstUnique([
+          p.locality,
+          p.subAdministrativeArea,
+          p.administrativeArea,
+        ], used);
+      }
+      if (street.isEmpty && city.isEmpty && area.isEmpty) {
+        // No usable placemark fields — treat as a full geocoding failure so
+        // the coordinates are never surfaced as the visible address.
+        geocodingFailed = true;
       }
     } catch (_) {
       // Reverse geocoding unavailable — return coordinates only and let
