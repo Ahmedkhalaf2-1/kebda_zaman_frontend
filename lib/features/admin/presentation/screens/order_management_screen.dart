@@ -345,104 +345,103 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top Info Row (Order ID badge, Name, Price, Items/Time)
+          // Order number badge + status chip. The order number is the only
+          // unbounded-length field here, so it is the one that shrinks
+          // (Flexible + ellipsis) — the status chip must always stay fully
+          // visible per the design requirements.
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: KZ.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '#${order.orderNumber}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: KZ.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Current status badge pill
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getStatusDotColor(
-                            order.status,
-                          ).withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          order.status.name.toLowerCase(),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: _getStatusDotColor(order.status),
-                          ),
-                        ),
-                      ),
-                    ],
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    order.customerName?.isNotEmpty == true
-                        ? order.customerName!
-                        : order.userId,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: KZ.onSurface,
-                    ),
+                  decoration: BoxDecoration(
+                    color: KZ.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    formatCurrency(order.grandTotal, locale: context.locale),
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: KZ.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '$itemCount items • $timeStr',
+                  child: Text(
+                    '#${order.orderNumber}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: KZ.secondary,
+                      fontWeight: FontWeight.w700,
+                      color: KZ.primary,
                     ),
                   ),
-                  if (order.paymentMethod != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      paymentMethodLabel(order.paymentMethod),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: KZ.primary,
-                      ),
-                    ),
-                  ],
-                ],
+                ),
               ),
+              const SizedBox(width: 8),
+              // Current status badge pill — never shrunk/truncated.
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: _getStatusDotColor(order.status).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  order.status.name.toLowerCase(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: _getStatusDotColor(order.status),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            order.customerName?.isNotEmpty == true
+                ? order.customerName!
+                : order.userId,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: KZ.onSurface,
+            ),
+          ),
+          const SizedBox(height: 6),
+          // Price / item count / timestamp / payment method — a Wrap so
+          // narrow phones fall onto a second line instead of overflowing.
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                formatCurrency(order.grandTotal, locale: context.locale),
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: KZ.onSurface,
+                ),
+              ),
+              Text(
+                '$itemCount items • $timeStr',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: KZ.secondary,
+                ),
+              ),
+              if (order.paymentMethod != null)
+                Text(
+                  paymentMethodLabel(order.paymentMethod),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: KZ.primary,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -512,9 +511,7 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
             // shown — a Pickup order must never be offered
             // outForDelivery/delivered, and a Delivery order must never be
             // offered readyForPickup/pickedUp.
-            children: _selectableStatuses(order.fulfillmentType).map((
-              status,
-            ) {
+            children: _selectableStatuses(order.fulfillmentType).map((status) {
               final isSelected = order.status == status;
               final isLegal = order.status
                   .allowedNextStatuses(order.fulfillmentType)

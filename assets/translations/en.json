@@ -162,6 +162,7 @@
     "promo_remove_failed": "Could not remove promo code",
     "address_required": "Please add a delivery address before placing this order.",
     "delivery_zone": "Delivery Zone",
+    "delivery_fee": "Delivery Fee",
     "delivery_zone_required": "Please select a delivery zone before placing this order.",
     "delivery_zone_load_error": "Couldn't load delivery zones. Please try again.",
     "delivery_zone_none_available": "No delivery zones are available right now.",

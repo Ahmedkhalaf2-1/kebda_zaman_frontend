@@ -162,6 +162,7 @@
     "reward_discount_25": "خصم 25 ر.س",
     "loyalty_points_suffix": "{points} نقطة",
     "delivery_zone": "منطقة التوصيل",
+    "delivery_fee": "رسوم التوصيل",
     "delivery_zone_required": "من فضلك اختر منطقة توصيل قبل إتمام هذا الطلب.",
     "delivery_zone_load_error": "تعذر تحميل مناطق التوصيل. حاول مرة أخرى.",
     "delivery_zone_none_available": "لا توجد مناطق توصيل متاحة حالياً.",

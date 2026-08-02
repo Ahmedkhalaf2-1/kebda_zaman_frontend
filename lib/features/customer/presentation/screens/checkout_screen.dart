@@ -99,6 +99,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // Required for DELIVERY checkout (Phase 8) — the backend resolves the fee
   // fresh from this id, never from a client-supplied number.
   String? _selectedZoneId;
+  // Guards the address picker sheet + its follow-up navigation against
+  // rapid double-taps opening/pushing more than once concurrently.
+  bool _isAddressPickerBusy = false;
 
   /// Client-side preview of a reward's flat subtotal discount — mirrors the
   /// backend's exact rule (02_API_REFERENCE.md): capped at the subtotal.
@@ -1618,9 +1621,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  /// Lets the user pick from their saved addresses, or add a new one if they
-  /// have none — the picked address becomes the one actually sent at checkout.
+  /// Lets the user pick from their saved addresses, or add/edit one if they
+  /// need to — the picked address becomes the one actually sent at checkout.
   void _showAddressPicker(BuildContext context) async {
+    // Guard against rapid double-taps opening a second sheet (or pushing a
+    // second follow-up route) while the first one is still in flight.
+    if (_isAddressPickerBusy) return;
+    _isAddressPickerBusy = true;
+
     // Don't pop the sheet AND push the new route from inside the same tap
     // callback — Navigator.pop() only *starts* the sheet's closing transition,
     // it doesn't wait for the route to actually be removed. Pushing a new
@@ -1628,108 +1636,168 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     // route is still mid-removal, so GoRouter ends up briefly reconciling two
     // page entries in the same Navigator with colliding keys, which trips the
     // `!keyReservation.contains(key)` assertion. Instead, let the sheet pop
-    // itself with a result and only push once that pop has fully completed
-    // (i.e. after `showModalBottomSheet`'s own Future resolves).
-    final result = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Consumer(
-              builder: (context, ref, child) {
-                final addressState = ref.watch(addressNotifierProvider);
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'checkout.delivery_address'.tr(),
-                        style: KZ.sectionTitle,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    if (addressState.addresses.isEmpty)
+    // itself with a typed result and only navigate once that pop has fully
+    // completed (i.e. after `showModalBottomSheet`'s own Future resolves),
+    // using the parent Checkout context — never the sheet's own context,
+    // which is gone by then.
+    try {
+      final result = await showModalBottomSheet<_AddressSheetResult>(
+        context: context,
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (sheetContext) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final addressState = ref.watch(addressNotifierProvider);
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
-                          'checkout.no_saved_addresses'.tr(),
-                          style: KZ.body,
-                        ),
-                      )
-                    else
-                      Flexible(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: addressState.addresses.length,
-                          itemBuilder: (context, index) {
-                            final address = addressState.addresses[index];
-                            final effectiveSelectedId =
-                                _selectedAddressId ??
-                                addressState.defaultAddress?.id;
-                            final isSelected =
-                                address.id == effectiveSelectedId;
-                            return ListTile(
-                              leading: Icon(
-                                isSelected
-                                    ? Icons.radio_button_checked_rounded
-                                    : Icons.radio_button_off_rounded,
-                                color: isSelected
-                                    ? CheckoutScreen.primaryColor
-                                    : CheckoutScreen.outlineVariantColor,
-                              ),
-                              title: Text(
-                                address.label.isNotEmpty
-                                    ? address.label
-                                    : 'checkout.address_fallback_label'.tr(),
-                                style: KZ.itemTitle,
-                              ),
-                              subtitle: Text(
-                                _formatAddress(address),
-                                style: KZ.bodySmall,
-                              ),
-                              onTap: () {
-                                setState(() => _selectedAddressId = address.id);
-                                Navigator.pop(sheetContext);
-                              },
-                            );
-                          },
+                          'checkout.delivery_address'.tr(),
+                          style: KZ.sectionTitle,
                         ),
                       ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: KZButton(
-                        variant: KZButtonVariant.secondary,
-                        fullWidth: true,
-                        icon: Icons.add_location_alt_rounded,
-                        label: 'checkout.add_new_address'.tr(),
-                        onPressed: () => Navigator.pop(sheetContext, 'add'),
+                      const SizedBox(height: 12),
+                      if (addressState.addresses.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'checkout.no_saved_addresses'.tr(),
+                            style: KZ.body,
+                          ),
+                        )
+                      else
+                        Flexible(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: addressState.addresses.length,
+                            itemBuilder: (context, index) {
+                              final address = addressState.addresses[index];
+                              final effectiveSelectedId =
+                                  _selectedAddressId ??
+                                  addressState.defaultAddress?.id;
+                              final isSelected =
+                                  address.id == effectiveSelectedId;
+                              return ListTile(
+                                leading: Icon(
+                                  isSelected
+                                      ? Icons.radio_button_checked_rounded
+                                      : Icons.radio_button_off_rounded,
+                                  color: isSelected
+                                      ? CheckoutScreen.primaryColor
+                                      : CheckoutScreen.outlineVariantColor,
+                                ),
+                                title: Text(
+                                  address.label.isNotEmpty
+                                      ? address.label
+                                      : 'checkout.address_fallback_label'.tr(),
+                                  style: KZ.itemTitle,
+                                ),
+                                subtitle: Text(
+                                  _formatAddress(address),
+                                  style: KZ.bodySmall,
+                                ),
+                                trailing: IconButton(
+                                  onPressed: () => Navigator.pop(
+                                    sheetContext,
+                                    _AddressSheetResult.edit(address),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    color: CheckoutScreen.secondaryColor,
+                                    size: KZ.iconControl,
+                                  ),
+                                ),
+                                onTap: () => Navigator.pop(
+                                  sheetContext,
+                                  _AddressSheetResult.select(address.id),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: KZButton(
+                          variant: KZButtonVariant.secondary,
+                          fullWidth: true,
+                          icon: Icons.add_location_alt_rounded,
+                          label: 'checkout.add_new_address'.tr(),
+                          onPressed: () => Navigator.pop(
+                            sheetContext,
+                            const _AddressSheetResult.add(),
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
 
-    // Only navigate once the sheet's route has actually finished closing.
-    if (result == 'add' && mounted) {
-      await context.push('/profile/addresses/add');
-      // A new address invalidates any explicit prior pick — fall back to
-      // whichever address the backend now reports as default.
-      if (mounted) setState(() => _selectedAddressId = null);
+      // Only navigate once the sheet's route has actually finished closing,
+      // and always via the parent Checkout `context` — the sheet's own
+      // `sheetContext` is no longer valid once the sheet has popped.
+      if (result == null || !mounted) return;
+      switch (result.action) {
+        case _AddressSheetAction.select:
+          setState(() => _selectedAddressId = result.selectedId);
+          break;
+        case _AddressSheetAction.add:
+          await context.push('/profile/addresses/add');
+          // A new address invalidates any explicit prior pick — fall back to
+          // whichever address the backend now reports as default.
+          if (mounted) setState(() => _selectedAddressId = null);
+          break;
+        case _AddressSheetAction.edit:
+          await context.push(
+            '/profile/addresses/edit',
+            extra: result.editAddress,
+          );
+          if (mounted) setState(() => _selectedAddressId = null);
+          break;
+      }
+    } finally {
+      _isAddressPickerBusy = false;
     }
   }
+}
+
+enum _AddressSheetAction { select, add, edit }
+
+/// Typed result the address-picker bottom sheet pops with — replaces the old
+/// bare `String?` so add/edit/select are unambiguous and carry their payload
+/// without the caller needing to touch the (by-then-invalid) sheet context.
+class _AddressSheetResult {
+  final _AddressSheetAction action;
+  final String? selectedId;
+  final Address? editAddress;
+
+  const _AddressSheetResult.select(this.selectedId)
+    : action = _AddressSheetAction.select,
+      editAddress = null;
+
+  const _AddressSheetResult.add()
+    : action = _AddressSheetAction.add,
+      selectedId = null,
+      editAddress = null;
+
+  const _AddressSheetResult.edit(Address address)
+    : action = _AddressSheetAction.edit,
+      selectedId = null,
+      editAddress = address;
 }
 
 /// DELIVERY-only zone picker (PHASE_8_RESTAURANT_SETTINGS_API_CONTRACT.md §6):
