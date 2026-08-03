@@ -446,6 +446,10 @@ class ApiMenuRepository implements MenuRepository {
       compareAtPrice: menuItemCompareAtPriceFromApi(json['compareAtPrice']),
       badge: menuItemBadgeFromApi(json['badge'] as String?),
       oftenOrderedWith: oftenOrderedWith,
+      nameAr: json['nameAr'] as String?,
+      nameEn: json['nameEn'] as String?,
+      descriptionAr: json['descriptionAr'] as String?,
+      descriptionEn: json['descriptionEn'] as String?,
     );
   }
 }

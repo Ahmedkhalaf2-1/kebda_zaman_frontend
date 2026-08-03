@@ -83,10 +83,34 @@ class MenuItem with _$MenuItem {
     double? compareAtPrice,
     MenuItemBadge? badge,
     @Default([]) List<MenuItem> oftenOrderedWith,
+    String? nameAr,
+    String? nameEn,
+    String? descriptionAr,
+    String? descriptionEn,
   }) = _MenuItem;
 
   factory MenuItem.fromJson(Map<String, dynamic> json) =>
       _$MenuItemFromJson(json);
+}
+
+/// Locale-aware accessors for [MenuItem] product content. Falls back to the
+/// other language when the preferred one is null, empty, or whitespace-only,
+/// so the UI never shows a blank product name/description. Computed at
+/// read-time (not cached) so switching locale rebuilds with the right text.
+extension MenuItemLocalization on MenuItem {
+  static String _pick(String? preferred, String? other, String fallback) {
+    if (preferred != null && preferred.trim().isNotEmpty) return preferred;
+    if (other != null && other.trim().isNotEmpty) return other;
+    return fallback;
+  }
+
+  String localizedName(String languageCode) => languageCode == 'ar'
+      ? _pick(nameAr, nameEn, name)
+      : _pick(nameEn, nameAr, name);
+
+  String localizedDescription(String languageCode) => languageCode == 'ar'
+      ? _pick(descriptionAr, descriptionEn, description)
+      : _pick(descriptionEn, descriptionAr, description);
 }
 
 @freezed

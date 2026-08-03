@@ -8,6 +8,7 @@ import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
+import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import '../notifiers/search_notifier.dart';
 
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
@@ -179,14 +180,16 @@ class SearchScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item.name,
+                          item.localizedName(context.locale.languageCode),
                           style: KZ.itemTitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: KZ.sp4),
                         Text(
-                          item.description,
+                          item.localizedDescription(
+                            context.locale.languageCode,
+                          ),
                           style: KZ.bodySmall,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

@@ -38,6 +38,10 @@ mixin _$MenuItem {
   double? get compareAtPrice => throw _privateConstructorUsedError;
   MenuItemBadge? get badge => throw _privateConstructorUsedError;
   List<MenuItem> get oftenOrderedWith => throw _privateConstructorUsedError;
+  String? get nameAr => throw _privateConstructorUsedError;
+  String? get nameEn => throw _privateConstructorUsedError;
+  String? get descriptionAr => throw _privateConstructorUsedError;
+  String? get descriptionEn => throw _privateConstructorUsedError;
 
   /// Serializes this MenuItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -72,6 +76,10 @@ abstract class $MenuItemCopyWith<$Res> {
     double? compareAtPrice,
     MenuItemBadge? badge,
     List<MenuItem> oftenOrderedWith,
+    String? nameAr,
+    String? nameEn,
+    String? descriptionAr,
+    String? descriptionEn,
   });
 }
 
@@ -107,6 +115,10 @@ class _$MenuItemCopyWithImpl<$Res, $Val extends MenuItem>
     Object? compareAtPrice = freezed,
     Object? badge = freezed,
     Object? oftenOrderedWith = null,
+    Object? nameAr = freezed,
+    Object? nameEn = freezed,
+    Object? descriptionAr = freezed,
+    Object? descriptionEn = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -178,6 +190,22 @@ class _$MenuItemCopyWithImpl<$Res, $Val extends MenuItem>
                 ? _value.oftenOrderedWith
                 : oftenOrderedWith // ignore: cast_nullable_to_non_nullable
                       as List<MenuItem>,
+            nameAr: freezed == nameAr
+                ? _value.nameAr
+                : nameAr // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            nameEn: freezed == nameEn
+                ? _value.nameEn
+                : nameEn // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            descriptionAr: freezed == descriptionAr
+                ? _value.descriptionAr
+                : descriptionAr // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            descriptionEn: freezed == descriptionEn
+                ? _value.descriptionEn
+                : descriptionEn // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -211,6 +239,10 @@ abstract class _$$MenuItemImplCopyWith<$Res>
     double? compareAtPrice,
     MenuItemBadge? badge,
     List<MenuItem> oftenOrderedWith,
+    String? nameAr,
+    String? nameEn,
+    String? descriptionAr,
+    String? descriptionEn,
   });
 }
 
@@ -245,6 +277,10 @@ class __$$MenuItemImplCopyWithImpl<$Res>
     Object? compareAtPrice = freezed,
     Object? badge = freezed,
     Object? oftenOrderedWith = null,
+    Object? nameAr = freezed,
+    Object? nameEn = freezed,
+    Object? descriptionAr = freezed,
+    Object? descriptionEn = freezed,
   }) {
     return _then(
       _$MenuItemImpl(
@@ -316,6 +352,22 @@ class __$$MenuItemImplCopyWithImpl<$Res>
             ? _value._oftenOrderedWith
             : oftenOrderedWith // ignore: cast_nullable_to_non_nullable
                   as List<MenuItem>,
+        nameAr: freezed == nameAr
+            ? _value.nameAr
+            : nameAr // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        nameEn: freezed == nameEn
+            ? _value.nameEn
+            : nameEn // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        descriptionAr: freezed == descriptionAr
+            ? _value.descriptionAr
+            : descriptionAr // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        descriptionEn: freezed == descriptionEn
+            ? _value.descriptionEn
+            : descriptionEn // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -342,6 +394,10 @@ class _$MenuItemImpl implements _MenuItem {
     this.compareAtPrice,
     this.badge,
     final List<MenuItem> oftenOrderedWith = const [],
+    this.nameAr,
+    this.nameEn,
+    this.descriptionAr,
+    this.descriptionEn,
   }) : _modifierGroups = modifierGroups,
        _oftenOrderedWith = oftenOrderedWith;
 
@@ -403,8 +459,17 @@ class _$MenuItemImpl implements _MenuItem {
   }
 
   @override
+  final String? nameAr;
+  @override
+  final String? nameEn;
+  @override
+  final String? descriptionAr;
+  @override
+  final String? descriptionEn;
+
+  @override
   String toString() {
-    return 'MenuItem(id: $id, categoryId: $categoryId, name: $name, description: $description, imageUrl: $imageUrl, basePrice: $basePrice, discountPrice: $discountPrice, isAvailable: $isAvailable, isFeatured: $isFeatured, isBestSeller: $isBestSeller, prepTimeMinutes: $prepTimeMinutes, modifierGroups: $modifierGroups, sortOrder: $sortOrder, calories: $calories, compareAtPrice: $compareAtPrice, badge: $badge, oftenOrderedWith: $oftenOrderedWith)';
+    return 'MenuItem(id: $id, categoryId: $categoryId, name: $name, description: $description, imageUrl: $imageUrl, basePrice: $basePrice, discountPrice: $discountPrice, isAvailable: $isAvailable, isFeatured: $isFeatured, isBestSeller: $isBestSeller, prepTimeMinutes: $prepTimeMinutes, modifierGroups: $modifierGroups, sortOrder: $sortOrder, calories: $calories, compareAtPrice: $compareAtPrice, badge: $badge, oftenOrderedWith: $oftenOrderedWith, nameAr: $nameAr, nameEn: $nameEn, descriptionAr: $descriptionAr, descriptionEn: $descriptionEn)';
   }
 
   @override
@@ -446,12 +511,18 @@ class _$MenuItemImpl implements _MenuItem {
             const DeepCollectionEquality().equals(
               other._oftenOrderedWith,
               _oftenOrderedWith,
-            ));
+            ) &&
+            (identical(other.nameAr, nameAr) || other.nameAr == nameAr) &&
+            (identical(other.nameEn, nameEn) || other.nameEn == nameEn) &&
+            (identical(other.descriptionAr, descriptionAr) ||
+                other.descriptionAr == descriptionAr) &&
+            (identical(other.descriptionEn, descriptionEn) ||
+                other.descriptionEn == descriptionEn));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     categoryId,
@@ -470,7 +541,11 @@ class _$MenuItemImpl implements _MenuItem {
     compareAtPrice,
     badge,
     const DeepCollectionEquality().hash(_oftenOrderedWith),
-  );
+    nameAr,
+    nameEn,
+    descriptionAr,
+    descriptionEn,
+  ]);
 
   /// Create a copy of MenuItem
   /// with the given fields replaced by the non-null parameter values.
@@ -505,6 +580,10 @@ abstract class _MenuItem implements MenuItem {
     final double? compareAtPrice,
     final MenuItemBadge? badge,
     final List<MenuItem> oftenOrderedWith,
+    final String? nameAr,
+    final String? nameEn,
+    final String? descriptionAr,
+    final String? descriptionEn,
   }) = _$MenuItemImpl;
 
   factory _MenuItem.fromJson(Map<String, dynamic> json) =
@@ -544,6 +623,14 @@ abstract class _MenuItem implements MenuItem {
   MenuItemBadge? get badge;
   @override
   List<MenuItem> get oftenOrderedWith;
+  @override
+  String? get nameAr;
+  @override
+  String? get nameEn;
+  @override
+  String? get descriptionAr;
+  @override
+  String? get descriptionEn;
 
   /// Create a copy of MenuItem
   /// with the given fields replaced by the non-null parameter values.

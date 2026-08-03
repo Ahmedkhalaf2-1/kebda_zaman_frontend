@@ -748,14 +748,14 @@ class _BestSellerCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.name,
+                    item.localizedName(context.locale.languageCode),
                     style: KZ.itemTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    item.description,
+                    item.localizedDescription(context.locale.languageCode),
                     style: KZ.bodySmall,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -902,7 +902,7 @@ class _ShowcaseTile extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        item.name,
+                        item.localizedName(context.locale.languageCode),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: KZ.sectionTitle.copyWith(color: Colors.white),
@@ -1036,14 +1036,14 @@ class _RecommendedTile extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.name,
+                    item.localizedName(context.locale.languageCode),
                     style: KZ.itemTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    item.description,
+                    item.localizedDescription(context.locale.languageCode),
                     style: KZ.bodySmall,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1385,7 +1385,7 @@ class _PromoHero extends StatelessWidget {
                       SizedBox(
                         width: 220,
                         child: Text(
-                          item.name,
+                          item.localizedName(context.locale.languageCode),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: KZ.sectionTitle.copyWith(

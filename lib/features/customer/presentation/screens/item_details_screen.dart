@@ -616,7 +616,9 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                   color: ItemDetailsScreen.primaryColor,
                                   child: Center(
                                     child: Text(
-                                      item.name,
+                                      item.localizedName(
+                                        context.locale.languageCode,
+                                      ),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 32,
@@ -630,7 +632,9 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                 color: ItemDetailsScreen.primaryColor,
                                 child: Center(
                                   child: Text(
-                                    item.name,
+                                    item.localizedName(
+                                      context.locale.languageCode,
+                                    ),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 32,
@@ -699,14 +703,18 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
 
                                     // Title
                                     Text(
-                                      item.name,
+                                      item.localizedName(
+                                        context.locale.languageCode,
+                                      ),
                                       style: KZ.display.copyWith(fontSize: 28),
                                     ),
                                     const SizedBox(height: 6),
 
                                     // Description
                                     Text(
-                                      item.description,
+                                      item.localizedDescription(
+                                        context.locale.languageCode,
+                                      ),
                                       style: KZ.bodyLarge.copyWith(height: 1.4),
                                     ),
 
@@ -1325,7 +1333,7 @@ class _OftenOrderedWithCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              item.name,
+              item.localizedName(context.locale.languageCode),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: KZ.labelLarge.copyWith(fontWeight: FontWeight.w700),

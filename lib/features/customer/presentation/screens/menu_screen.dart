@@ -538,14 +538,14 @@ class _MenuProductCard extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        item.name,
+                        item.localizedName(context.locale.languageCode),
                         style: KZ.itemTitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        item.description,
+                        item.localizedDescription(context.locale.languageCode),
                         style: KZ.bodySmall,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

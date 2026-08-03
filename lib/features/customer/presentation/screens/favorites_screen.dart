@@ -146,7 +146,7 @@ class _FavoriteItemCard extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      item.name,
+                      item.localizedName(context.locale.languageCode),
                       style: KZ.cardTitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

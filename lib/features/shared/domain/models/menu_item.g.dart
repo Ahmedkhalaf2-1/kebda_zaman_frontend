@@ -33,6 +33,10 @@ _$MenuItemImpl _$$MenuItemImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => MenuItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      nameAr: json['nameAr'] as String?,
+      nameEn: json['nameEn'] as String?,
+      descriptionAr: json['descriptionAr'] as String?,
+      descriptionEn: json['descriptionEn'] as String?,
     );
 
 Map<String, dynamic> _$$MenuItemImplToJson(_$MenuItemImpl instance) =>
@@ -54,6 +58,10 @@ Map<String, dynamic> _$$MenuItemImplToJson(_$MenuItemImpl instance) =>
       'compareAtPrice': instance.compareAtPrice,
       'badge': _$MenuItemBadgeEnumMap[instance.badge],
       'oftenOrderedWith': instance.oftenOrderedWith,
+      'nameAr': instance.nameAr,
+      'nameEn': instance.nameEn,
+      'descriptionAr': instance.descriptionAr,
+      'descriptionEn': instance.descriptionEn,
     };
 
 const _$MenuItemBadgeEnumMap = {
