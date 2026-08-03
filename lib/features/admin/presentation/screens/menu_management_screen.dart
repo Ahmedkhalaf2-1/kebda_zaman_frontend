@@ -7,6 +7,7 @@ import 'package:kebda_zaman/features/admin/presentation/notifiers/menu_admin_not
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 
 class MenuManagementScreen extends ConsumerStatefulWidget {
   const MenuManagementScreen({super.key});
@@ -467,6 +468,38 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> {
                     fontWeight: FontWeight.w800,
                     color: KZ.primary,
                   ),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    if (item.badge != null)
+                      MenuItemBadgeChip(badge: item.badge!),
+                    if (item.compareAtPrice != null &&
+                        item.compareAtPrice! > item.basePrice)
+                      MenuItemComparePriceText(
+                        compareAtPrice: item.compareAtPrice!,
+                      ),
+                    Text(
+                      item.oftenOrderedWith.isEmpty
+                          ? 'admin_catalog.recommendation_count_zero'.tr()
+                          : item.oftenOrderedWith.length == 1
+                          ? 'admin_catalog.recommendation_count_one'.tr()
+                          : 'admin_catalog.recommendation_count_many'.tr(
+                              namedArgs: {
+                                'count': '${item.oftenOrderedWith.length}',
+                              },
+                            ),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: KZ.onSurfaceVariant,
+                      ),
+                    ),
+                    if (item.calories != null)
+                      MenuItemCaloriesText(calories: item.calories!),
+                  ],
                 ),
               ],
             ),

@@ -22,6 +22,19 @@ MenuItemBadge? menuItemBadgeFromApi(String? value) {
   }
 }
 
+/// Serializes [MenuItemBadge] back into the backend's raw string for admin
+/// create/update requests. Inverse of [menuItemBadgeFromApi].
+String? menuItemBadgeToApi(MenuItemBadge? badge) {
+  switch (badge) {
+    case MenuItemBadge.bestseller:
+      return 'BESTSELLER';
+    case MenuItemBadge.topRated:
+      return 'TOP_RATED';
+    case null:
+      return null;
+  }
+}
+
 /// Parses the backend's `calories` field, which may be an int, a
 /// whole-number double, a numeric string, or null. Fractional and negative
 /// values are rejected (return null) rather than silently truncated.

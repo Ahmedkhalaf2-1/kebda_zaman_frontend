@@ -646,6 +646,46 @@ abstract class LocaleKeys {
   static const form_create_promo = 'form.create_promo';
   static const form_save_promo_success = 'form.save_promo_success';
   static const form = 'form';
+  static const admin_catalog_metadata_section =
+      'admin_catalog.metadata_section';
+  static const admin_catalog_calories = 'admin_catalog.calories';
+  static const admin_catalog_calories_hint = 'admin_catalog.calories_hint';
+  static const admin_catalog_calories_unit = 'admin_catalog.calories_unit';
+  static const admin_catalog_calories_invalid =
+      'admin_catalog.calories_invalid';
+  static const admin_catalog_compare_at_price =
+      'admin_catalog.compare_at_price';
+  static const admin_catalog_compare_at_price_hint =
+      'admin_catalog.compare_at_price_hint';
+  static const admin_catalog_compare_at_price_invalid =
+      'admin_catalog.compare_at_price_invalid';
+  static const admin_catalog_badge = 'admin_catalog.badge';
+  static const admin_catalog_no_badge = 'admin_catalog.no_badge';
+  static const admin_catalog_badge_bestseller =
+      'admin_catalog.badge_bestseller';
+  static const admin_catalog_badge_top_rated = 'admin_catalog.badge_top_rated';
+  static const admin_catalog_recommendations = 'admin_catalog.recommendations';
+  static const admin_catalog_search_recommendations =
+      'admin_catalog.search_recommendations';
+  static const admin_catalog_no_recommendations =
+      'admin_catalog.no_recommendations';
+  static const admin_catalog_max_recommendations =
+      'admin_catalog.max_recommendations';
+  static const admin_catalog_self_recommendation_error =
+      'admin_catalog.self_recommendation_error';
+  static const admin_catalog_duplicate_recommendation_error =
+      'admin_catalog.duplicate_recommendation_error';
+  static const admin_catalog_recommendation_count_zero =
+      'admin_catalog.recommendation_count_zero';
+  static const admin_catalog_recommendation_count_one =
+      'admin_catalog.recommendation_count_one';
+  static const admin_catalog_recommendation_count_many =
+      'admin_catalog.recommendation_count_many';
+  static const admin_catalog_move_up = 'admin_catalog.move_up';
+  static const admin_catalog_move_down = 'admin_catalog.move_down';
+  static const admin_catalog_remove_recommendation =
+      'admin_catalog.remove_recommendation';
+  static const admin_catalog = 'admin_catalog';
   static const auth_login_title = 'auth.login_title';
   static const auth_login_subtitle = 'auth.login_subtitle';
   static const auth_signup_title = 'auth.signup_title';

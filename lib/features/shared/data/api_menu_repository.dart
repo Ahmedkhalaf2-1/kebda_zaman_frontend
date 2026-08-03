@@ -20,6 +20,28 @@ class ApiMenuRepository implements MenuRepository {
   static Category mapCategoryForTesting(Map<String, dynamic> json) =>
       _mapCategory(json);
 
+  @visibleForTesting
+  static Map<String, dynamic> buildMenuItemPayloadForTesting(MenuItem item) =>
+      _buildMenuItemPayload(item);
+
+  static Map<String, dynamic> _buildMenuItemPayload(MenuItem item) {
+    return <String, dynamic>{
+      'categoryId': item.categoryId,
+      'nameAr': item.name,
+      'nameEn': item.name,
+      'descriptionAr': item.description,
+      'descriptionEn': item.description,
+      'basePrice': item.basePrice,
+      'imageUrl': item.imageUrl,
+      'isAvailable': item.isAvailable,
+      'isPopular': item.isFeatured,
+      'calories': item.calories,
+      'compareAtPrice': item.compareAtPrice,
+      'badge': menuItemBadgeToApi(item.badge),
+      'recommendationItemIds': item.oftenOrderedWith.map((r) => r.id).toList(),
+    };
+  }
+
   @override
   Future<Result<List<Category>>> getCategories() async {
     try {
@@ -186,17 +208,7 @@ class ApiMenuRepository implements MenuRepository {
   @override
   Future<Result<void>> createMenuItem(MenuItem item) async {
     try {
-      final payload = <String, dynamic>{
-        'categoryId': item.categoryId,
-        'nameAr': item.name,
-        'nameEn': item.name,
-        'descriptionAr': item.description,
-        'descriptionEn': item.description,
-        'basePrice': item.basePrice,
-        'imageUrl': item.imageUrl,
-        'isAvailable': item.isAvailable,
-        'isPopular': item.isFeatured,
-      };
+      final payload = _buildMenuItemPayload(item);
       await _apiClient.dio.post('/admin/menu/items', data: payload);
       return const Success(null);
     } on DioException catch (e) {
@@ -212,17 +224,7 @@ class ApiMenuRepository implements MenuRepository {
   @override
   Future<Result<void>> updateMenuItem(MenuItem item) async {
     try {
-      final payload = <String, dynamic>{
-        'categoryId': item.categoryId,
-        'nameAr': item.name,
-        'nameEn': item.name,
-        'descriptionAr': item.description,
-        'descriptionEn': item.description,
-        'basePrice': item.basePrice,
-        'imageUrl': item.imageUrl,
-        'isAvailable': item.isAvailable,
-        'isPopular': item.isFeatured,
-      };
+      final payload = _buildMenuItemPayload(item);
       await _apiClient.dio.put('/admin/menu/items/${item.id}', data: payload);
       return const Success(null);
     } on DioException catch (e) {
