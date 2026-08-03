@@ -203,8 +203,6 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             _buildPromoSection(cart),
                             const SizedBox(height: _blockGap),
                             _buildOrderSummarySection(context, cart),
-                            const SizedBox(height: _blockGap),
-                            _buildRecommendationsSection(),
                           ],
                         );
                       },
@@ -552,93 +550,10 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     );
   }
 
-  // ── Recommendations Section matching Stitch HTML ──
-  Widget _buildRecommendationsSection() {
-    final recommendations = [
-      {'name': 'Mint Lemonade', 'price': 45.0},
-      {'name': 'Lava Cake', 'price': 85.0},
-      {'name': 'Crispy Fries', 'price': 35.0},
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Text(
-                'cart.often_ordered_with'.tr(),
-                style: KZ.sectionTitle.copyWith(
-                  fontSize: 18,
-                  color: CartScreen.onSurfaceColor,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            TextButton(
-              onPressed: () => context.go('/menu'),
-              style: TextButton.styleFrom(
-                minimumSize: const Size(0, KZ.iconTapTargetMin),
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-              ),
-              child: Text(
-                'home.view_all'.tr(),
-                style: KZ.labelLarge.copyWith(
-                  color: CartScreen.secondaryColor,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 220,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: recommendations.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
-            itemBuilder: (context, index) {
-              final rec = recommendations[index];
-              return _RecommendationCard(
-                name: rec['name'] as String,
-                price: rec['price'] as double,
-                onAdd: () {
-                  final cartItem = CartItem(
-                    id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
-                    menuItemId: 'rec_$index',
-                    productName: rec['name'] as String,
-                    productImage: '',
-                    basePrice: rec['price'] as double,
-                    quantity: 1,
-                    selectedOptions: const {},
-                    extraQuantities: const {},
-                    specialInstructions: '',
-                    unitPrice: rec['price'] as double,
-                    lineTotal: rec['price'] as double,
-                  );
-                  ref.read(cartProvider.notifier).addItem(cartItem);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'home.added_to_cart'.tr(
-                          namedArgs: {'name': rec['name'] as String},
-                        ),
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+  // No real recommendation source exists for the Cart screen (CartRepository
+  // exposes no recommendation data, unlike item details' oftenOrderedWith).
+  // Per project rules, the section is hidden entirely rather than backed by
+  // fake/random/featured/popular fallback data.
 }
 
 // ── Cart item card matching Stitch HTML ──
@@ -905,116 +820,6 @@ class _CartItemCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ── Recommendation card matching Stitch HTML ──
-class _RecommendationCard extends StatelessWidget {
-  final String name;
-  final double price;
-  final VoidCallback onAdd;
-
-  const _RecommendationCard({
-    required this.name,
-    required this.price,
-    required this.onAdd,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: CartScreen.outlineVariantColor.withValues(alpha: 0.2),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 112,
-              width: double.infinity,
-              child: KZFoodImage(
-                imageUrl: '',
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: KZ.labelLarge.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: CartScreen.onSurfaceColor,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Text(
-                    formatCurrency(price, locale: context.locale),
-                    style: KZ.priceLarge.copyWith(
-                      fontSize: 14,
-                      color: CartScreen.primaryColor,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Semantics(
-                  button: true,
-                  label: 'menu.add'.tr(),
-                  child: InkWell(
-                    onTap: onAdd,
-                    customBorder: const CircleBorder(),
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: CartScreen.primaryColor,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: CartScreen.primaryColor.withValues(
-                              alpha: 0.25,
-                            ),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.add_rounded,
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }

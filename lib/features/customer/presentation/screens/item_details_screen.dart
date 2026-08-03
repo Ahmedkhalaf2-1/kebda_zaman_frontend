@@ -493,6 +493,39 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
     );
   }
 
+  // Quick-add for an "Often Ordered With" recommendation: mirrors the
+  // existing simple-item add-to-cart path used on menu/home cards. Recs with
+  // required variants/modifiers route to Product Details instead, since a
+  // valid selection can't be inferred here.
+  void _handleQuickAdd(BuildContext context, MenuItem rec) {
+    final hasRequired = rec.modifierGroups.any((g) => g.isRequired);
+    if (hasRequired) {
+      context.push('/menu/item/${rec.id}');
+      return;
+    }
+
+    final name = rec.localizedName(context.locale.languageCode);
+    final cartItem = CartItem(
+      id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
+      menuItemId: rec.id,
+      productName: name,
+      productImage: rec.imageUrl,
+      basePrice: rec.discountPrice ?? rec.basePrice,
+      quantity: 1,
+      selectedOptions: const {},
+      extraQuantities: const {},
+      unitPrice: rec.discountPrice ?? rec.basePrice,
+      lineTotal: rec.discountPrice ?? rec.basePrice,
+    );
+    ref.read(cartProvider.notifier).addItem(cartItem);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('home.added_to_cart'.tr(namedArgs: {'name': name})),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   // "Often Ordered With" — recommendation summaries embedded on the item
   // details response only. Each summary is a plain MenuItem (no variants/
   // addonGroups/nested oftenOrderedWith), so tapping one just opens a fresh
@@ -520,6 +553,7 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                 return _OftenOrderedWithCard(
                   item: rec,
                   onTap: () => context.push('/menu/item/${rec.id}'),
+                  onAdd: () => _handleQuickAdd(context, rec),
                 );
               },
             ),
@@ -1299,8 +1333,13 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
 class _OftenOrderedWithCard extends StatelessWidget {
   final MenuItem item;
   final VoidCallback onTap;
+  final VoidCallback onAdd;
 
-  const _OftenOrderedWithCard({required this.item, required this.onTap});
+  const _OftenOrderedWithCard({
+    required this.item,
+    required this.onTap,
+    required this.onAdd,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1339,11 +1378,40 @@ class _OftenOrderedWithCard extends StatelessWidget {
               style: KZ.labelLarge.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 4),
-            Text(
-              formatCurrency(item.basePrice, locale: context.locale),
-              style: KZ.price,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    formatCurrency(item.basePrice, locale: context.locale),
+                    style: KZ.price,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Semantics(
+                  button: true,
+                  label: 'home.add_to_cart'.tr(),
+                  child: InkWell(
+                    onTap: onAdd,
+                    customBorder: const CircleBorder(),
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        color: KZ.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.add_rounded,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             if (item.calories != null) ...[
               const SizedBox(height: 2),
