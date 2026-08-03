@@ -111,8 +111,6 @@ abstract class LocaleKeys {
   static const cart_load_error = 'cart.load_error';
   static const cart_often_ordered_with = 'cart.often_ordered_with';
   static const cart = 'cart';
-  static const checkout_settings_loading = 'checkout.settings_loading';
-  static const checkout_settings_error = 'checkout.settings_error';
   static const checkout_title = 'checkout.title';
   static const checkout_order_type = 'checkout.order_type';
   static const checkout_delivery = 'checkout.delivery';
@@ -176,6 +174,7 @@ abstract class LocaleKeys {
   static const checkout_loyalty_points_suffix =
       'checkout.loyalty_points_suffix';
   static const checkout_delivery_zone = 'checkout.delivery_zone';
+  static const checkout_delivery_fee = 'checkout.delivery_fee';
   static const checkout_delivery_zone_required =
       'checkout.delivery_zone_required';
   static const checkout_delivery_zone_load_error =
@@ -189,6 +188,8 @@ abstract class LocaleKeys {
       'checkout.zone_minimum_order_error';
   static const checkout_below_min_order_error =
       'checkout.below_min_order_error';
+  static const checkout_settings_loading = 'checkout.settings_loading';
+  static const checkout_settings_error = 'checkout.settings_error';
   static const checkout = 'checkout';
   static const order_success_title = 'order_success.title';
   static const order_success_subtitle = 'order_success.subtitle';
@@ -342,6 +343,23 @@ abstract class LocaleKeys {
   static const favorites_empty_sub = 'favorites.empty_sub';
   static const favorites_browse_menu = 'favorites.browse_menu';
   static const favorites = 'favorites';
+  static const map_picker_title = 'map_picker.title';
+  static const map_picker_pick_on_map = 'map_picker.pick_on_map';
+  static const map_picker_location_set = 'map_picker.location_set';
+  static const map_picker_loading = 'map_picker.loading';
+  static const map_picker_confirm = 'map_picker.confirm';
+  static const map_picker_retry = 'map_picker.retry';
+  static const map_picker_locate_me = 'map_picker.locate_me';
+  static const map_picker_location_disabled = 'map_picker.location_disabled';
+  static const map_picker_location_denied = 'map_picker.location_denied';
+  static const map_picker_location_denied_forever =
+      'map_picker.location_denied_forever';
+  static const map_picker_location_unavailable =
+      'map_picker.location_unavailable';
+  static const map_picker_geocoding_failed = 'map_picker.geocoding_failed';
+  static const map_picker_manual_selection_hint =
+      'map_picker.manual_selection_hint';
+  static const map_picker = 'map_picker';
   static const search_title = 'search.title';
   static const search_hint = 'search.hint';
   static const search_recent = 'search.recent';
@@ -378,11 +396,22 @@ abstract class LocaleKeys {
   static const admin_payment_cash = 'admin.payment_cash';
   static const admin_payment_card = 'admin.payment_card';
   static const admin_payment_wallet = 'admin.payment_wallet';
+  static const admin_delivery_address = 'admin.delivery_address';
+  static const admin_address_street = 'admin.address_street';
+  static const admin_address_area = 'admin.address_area';
+  static const admin_address_city = 'admin.address_city';
+  static const admin_address_building = 'admin.address_building';
+  static const admin_address_floor = 'admin.address_floor';
+  static const admin_address_apartment = 'admin.address_apartment';
+  static const admin_address_notes = 'admin.address_notes';
+  static const admin_open_in_maps = 'admin.open_in_maps';
+  static const admin_location_unavailable = 'admin.location_unavailable';
+  static const admin_view_details = 'admin.view_details';
   static const admin_dashboard = 'admin.dashboard';
   static const admin_orders = 'admin.orders';
   static const admin_menu = 'admin.menu';
-  static const admin_offers = 'admin.offers';
-  static const admin_settings = 'admin.settings';
+  static const admin_offers_label = 'admin.offers_label';
+  static const admin_settings_label = 'admin.settings_label';
   static const admin_add_item = 'admin.add_item';
   static const admin_edit_item = 'admin.edit_item';
   static const admin_add_category = 'admin.add_category';
@@ -420,7 +449,7 @@ abstract class LocaleKeys {
   static const admin_item_saved = 'admin.item_saved';
   static const admin_category_saved = 'admin.category_saved';
   static const admin_error_loading = 'admin.error_loading';
-  static const admin_notifications = 'admin.notifications';
+  static const admin_notifications_label = 'admin.notifications_label';
   static const admin_items_label = 'admin.items_label';
   static const admin_update_status_label = 'admin.update_status_label';
   static const admin_update_status_failed = 'admin.update_status_failed';
