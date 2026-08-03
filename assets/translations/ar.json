@@ -87,6 +87,9 @@
     "best_seller": "الأكثر مبيعاً",
     "remove_ingredient": "بدون {name}"
   },
+  "product_details": {
+    "often_ordered_with": "غالبًا يُطلب مع"
+  },
   "cart": {
     "title": "سلة المشتريات",
     "empty": "سلتك فارغة",

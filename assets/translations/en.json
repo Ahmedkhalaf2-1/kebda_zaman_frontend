@@ -87,6 +87,9 @@
     "best_seller": "Best seller",
     "remove_ingredient": "Remove {name}"
   },
+  "product_details": {
+    "often_ordered_with": "Often Ordered With"
+  },
   "cart": {
     "title": "Your Cart",
     "empty": "Your cart is empty",

@@ -103,6 +103,7 @@ class CodegenLoader extends AssetLoader {
       "best_seller": "الأكثر مبيعاً",
       "remove_ingredient": "بدون {name}",
     },
+    "product_details": {"often_ordered_with": "غالبًا يُطلب مع"},
     "cart": {
       "title": "سلة المشتريات",
       "empty": "سلتك فارغة",
@@ -892,6 +893,7 @@ class CodegenLoader extends AssetLoader {
       "best_seller": "Best seller",
       "remove_ingredient": "Remove {name}",
     },
+    "product_details": {"often_ordered_with": "Often Ordered With"},
     "cart": {
       "title": "Your Cart",
       "empty": "Your cart is empty",

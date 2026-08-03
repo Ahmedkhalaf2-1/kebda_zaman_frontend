@@ -14,6 +14,8 @@ import '../notifiers/item_details_notifier.dart';
 import '../notifiers/favorites_notifier.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
+import 'package:kebda_zaman/core/widgets/kz_card.dart';
+import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import 'package:kebda_zaman/core/widgets/kz_quantity_stepper.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
@@ -491,6 +493,42 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
     );
   }
 
+  // "Often Ordered With" — recommendation summaries embedded on the item
+  // details response only. Each summary is a plain MenuItem (no variants/
+  // addonGroups/nested oftenOrderedWith), so tapping one just opens a fresh
+  // ItemDetailsScreen for that item's own id via the existing route — no
+  // duplicate screen, no recursive fetch here.
+  Widget _buildOftenOrderedWithSection(
+    BuildContext context,
+    List<MenuItem> recommendations,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 32.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(title: 'product_details.often_ordered_with'.tr()),
+          SizedBox(
+            height: 190,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: recommendations.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final rec = recommendations[index];
+                return _OftenOrderedWithCard(
+                  item: rec,
+                  onTap: () => context.push('/menu/item/${rec.id}'),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final itemAsync = ref.watch(itemDetailsProvider(widget.itemId));
@@ -652,29 +690,12 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Best Seller Tag
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: ItemDetailsScreen
-                                            .tertiaryContainerColor,
-                                        borderRadius: BorderRadius.circular(
-                                          999,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        'item_details.best_seller'
-                                            .tr()
-                                            .toUpperCase(),
-                                        style: KZ.statusLabel.copyWith(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
+                                    // Badge (manually assigned; independent
+                                    // of isFeatured/isBestSeller)
+                                    if (item.badge != null) ...[
+                                      MenuItemBadgeChip(badge: item.badge!),
+                                      const SizedBox(height: 12),
+                                    ],
 
                                     // Title
                                     Text(
@@ -688,6 +709,39 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                       item.description,
                                       style: KZ.bodyLarge.copyWith(height: 1.4),
                                     ),
+
+                                    // Calories (secondary, absent when null)
+                                    if (item.calories != null) ...[
+                                      const SizedBox(height: 8),
+                                      MenuItemCaloriesText(
+                                        calories: item.calories!,
+                                      ),
+                                    ],
+
+                                    // Current price + optional compare-at
+                                    const SizedBox(height: 12),
+                                    Wrap(
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      children: [
+                                        Text(
+                                          formatCurrency(
+                                            item.basePrice,
+                                            locale: context.locale,
+                                          ),
+                                          style: KZ.priceLarge,
+                                        ),
+                                        if (item.compareAtPrice != null &&
+                                            item.compareAtPrice! >
+                                                item.basePrice) ...[
+                                          const SizedBox(width: 8),
+                                          MenuItemComparePriceText(
+                                            compareAtPrice:
+                                                item.compareAtPrice!,
+                                          ),
+                                        ],
+                                      ],
+                                    ),
                                   ],
                                 ),
                               ),
@@ -695,6 +749,14 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                               // Modifier Groups (Size, Extras, etc.)
                               for (final group in item.modifierGroups)
                                 _buildModifierGroupSection(context, group),
+
+                              // Often Ordered With (recommendations; details
+                              // response only — hidden entirely when empty)
+                              if (item.oftenOrderedWith.isNotEmpty)
+                                _buildOftenOrderedWithSection(
+                                  context,
+                                  item.oftenOrderedWith,
+                                ),
 
                               // Customize Ingredients Section
                               Padding(
@@ -1217,6 +1279,71 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Small "Often Ordered With" card — mirrors the existing compact product
+/// card proportions used elsewhere in the app (fixed width, image-over-text,
+/// one-line title), but intentionally excludes compare-at price per the
+/// recommendation-summary contract (no variants/addonGroups either, so no
+/// discount context is available to show).
+class _OftenOrderedWithCard extends StatelessWidget {
+  final MenuItem item;
+  final VoidCallback onTap;
+
+  const _OftenOrderedWithCard({required this.item, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 140,
+      child: KZCard(
+        padding: const EdgeInsets.all(10),
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              children: [
+                SizedBox(
+                  height: 90,
+                  width: double.infinity,
+                  child: KZFoodImage(
+                    imageUrl: item.imageUrl,
+                    borderRadius: BorderRadius.circular(KZ.radiusSm),
+                  ),
+                ),
+                if (item.badge != null)
+                  Positioned(
+                    bottom: 6,
+                    left: 6,
+                    child: MenuItemBadgeChip(badge: item.badge!),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              item.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: KZ.labelLarge.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              formatCurrency(item.basePrice, locale: context.locale),
+              style: KZ.price,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (item.calories != null) ...[
+              const SizedBox(height: 2),
+              MenuItemCaloriesText(calories: item.calories!),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

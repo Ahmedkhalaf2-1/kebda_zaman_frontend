@@ -88,6 +88,9 @@ abstract class LocaleKeys {
   static const item_details_remove_ingredient =
       'item_details.remove_ingredient';
   static const item_details = 'item_details';
+  static const product_details_often_ordered_with =
+      'product_details.often_ordered_with';
+  static const product_details = 'product_details';
   static const cart_title = 'cart.title';
   static const cart_empty = 'cart.empty';
   static const cart_empty_sub = 'cart.empty_sub';
