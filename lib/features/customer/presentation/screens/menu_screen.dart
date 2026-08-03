@@ -15,6 +15,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
+import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
 // Whether the compact weekly-special strip has been dismissed this session.
@@ -517,6 +518,12 @@ class _MenuProductCard extends ConsumerWidget {
                     ),
                   ),
                 ),
+              if (item.badge != null)
+                Positioned(
+                  bottom: 8,
+                  left: 8,
+                  child: MenuItemBadgeChip(badge: item.badge!),
+                ),
             ],
           ),
           Expanded(
@@ -543,6 +550,10 @@ class _MenuProductCard extends ConsumerWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      if (item.calories != null) ...[
+                        const SizedBox(height: 3),
+                        MenuItemCaloriesText(calories: item.calories!),
+                      ],
                     ],
                   ),
                   Row(
@@ -565,6 +576,11 @@ class _MenuProductCard extends ConsumerWidget {
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
+                              ),
+                            if (item.compareAtPrice != null &&
+                                item.compareAtPrice! > item.basePrice)
+                              MenuItemComparePriceText(
+                                compareAtPrice: item.compareAtPrice!,
                               ),
                             Text(
                               formatCurrency(

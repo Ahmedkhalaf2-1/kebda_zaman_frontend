@@ -80,6 +80,9 @@ class CodegenLoader extends AssetLoader {
       "customizable": "قابل للتخصيص",
       "add": "أضف +",
       "item_unavailable": "هذا الصنف غير متاح حالياً.",
+      "badge_bestseller": "الأكثر مبيعًا",
+      "badge_top_rated": "الأعلى تقييمًا",
+      "calories": "{count} سعرة حرارية",
     },
     "item_details": {
       "title": "تفاصيل الصنف",
@@ -866,6 +869,9 @@ class CodegenLoader extends AssetLoader {
       "customizable": "Customizable",
       "add": "Add +",
       "item_unavailable": "This item isn't available right now.",
+      "badge_bestseller": "Bestseller",
+      "badge_top_rated": "Top Rated",
+      "calories": "{count} kcal",
     },
     "item_details": {
       "title": "Item Details",

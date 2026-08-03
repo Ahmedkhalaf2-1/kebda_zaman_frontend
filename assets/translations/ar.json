@@ -63,7 +63,10 @@
     "prep_time": "{min} دقيقة",
     "customizable": "قابل للتخصيص",
     "add": "أضف +",
-    "item_unavailable": "هذا الصنف غير متاح حالياً."
+    "item_unavailable": "هذا الصنف غير متاح حالياً.",
+    "badge_bestseller": "الأكثر مبيعًا",
+    "badge_top_rated": "الأعلى تقييمًا",
+    "calories": "{count} سعرة حرارية"
   },
   "item_details": {
     "title": "تفاصيل الصنف",

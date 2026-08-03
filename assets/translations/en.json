@@ -63,7 +63,10 @@
     "prep_time": "{min} mins",
     "customizable": "Customizable",
     "add": "Add +",
-    "item_unavailable": "This item isn't available right now."
+    "item_unavailable": "This item isn't available right now.",
+    "badge_bestseller": "Bestseller",
+    "badge_top_rated": "Top Rated",
+    "calories": "{count} kcal"
   },
   "item_details": {
     "title": "Item Details",

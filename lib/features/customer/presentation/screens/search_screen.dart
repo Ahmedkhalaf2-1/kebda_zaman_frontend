@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
+import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
+import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import '../notifiers/search_notifier.dart';
 
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
@@ -166,18 +167,10 @@ class SearchScreen extends ConsumerWidget {
             onTap: () => context.push('/home/item/${item.id}'),
             child: Row(
               children: [
-                Container(
+                SizedBox(
                   width: 90,
                   height: 90,
-                  color: KZ.surfaceContainer,
-                  child: item.imageUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: item.imageUrl,
-                          fit: BoxFit.cover,
-                          errorWidget: (ctx, url, err) =>
-                              const Icon(Icons.fastfood, color: KZ.outline),
-                        )
-                      : const Icon(Icons.fastfood, color: KZ.outline),
+                  child: KZFoodImage(imageUrl: item.imageUrl),
                 ),
                 Expanded(
                   child: Padding(
@@ -198,8 +191,22 @@ class SearchScreen extends ConsumerWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        if (item.badge != null || item.calories != null) ...[
+                          const SizedBox(height: KZ.sp4),
+                          Wrap(
+                            spacing: 6,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              if (item.badge != null)
+                                MenuItemBadgeChip(badge: item.badge!),
+                              if (item.calories != null)
+                                MenuItemCaloriesText(calories: item.calories!),
+                            ],
+                          ),
+                        ],
                         const SizedBox(height: KZ.sp6),
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Text(
                               formatCurrency(
@@ -220,6 +227,13 @@ class SearchScreen extends ConsumerWidget {
                                 style: KZ.bodySmall.copyWith(
                                   decoration: TextDecoration.lineThrough,
                                 ),
+                              ),
+                            ],
+                            if (item.compareAtPrice != null &&
+                                item.compareAtPrice! > item.basePrice) ...[
+                              const SizedBox(width: KZ.sp8),
+                              MenuItemComparePriceText(
+                                compareAtPrice: item.compareAtPrice!,
                               ),
                             ],
                           ],

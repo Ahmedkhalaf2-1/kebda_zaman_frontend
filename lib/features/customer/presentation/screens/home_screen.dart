@@ -22,6 +22,7 @@ import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
+import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
 /// Shared elevation tier for the page's two full-bleed promotional
@@ -731,6 +732,12 @@ class _BestSellerCard extends ConsumerWidget {
                       ),
                     ),
                   ),
+                if (item.badge != null)
+                  Positioned(
+                    bottom: 10,
+                    left: 12,
+                    child: MenuItemBadgeChip(badge: item.badge!),
+                  ),
               ],
             ),
 
@@ -753,6 +760,10 @@ class _BestSellerCard extends ConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (item.calories != null) ...[
+                    const SizedBox(height: 4),
+                    MenuItemCaloriesText(calories: item.calories!),
+                  ],
                   const SizedBox(height: 14),
 
                   // Price & Add Button Row
@@ -772,6 +783,11 @@ class _BestSellerCard extends ConsumerWidget {
                                 decoration: TextDecoration.lineThrough,
                                 fontSize: 11,
                               ),
+                            ),
+                          if (item.compareAtPrice != null &&
+                              item.compareAtPrice! > item.basePrice)
+                            MenuItemComparePriceText(
+                              compareAtPrice: item.compareAtPrice!,
                             ),
                           Text(
                             formatCurrency(
@@ -871,6 +887,12 @@ class _ShowcaseTile extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (item.badge != null)
+                  Positioned(
+                    top: KZ.sp12,
+                    left: KZ.sp12,
+                    child: MenuItemBadgeChip(badge: item.badge!),
+                  ),
                 Positioned(
                   left: KZ.sp16,
                   right: KZ.sp16,
@@ -886,7 +908,8 @@ class _ShowcaseTile extends StatelessWidget {
                         style: KZ.sectionTitle.copyWith(color: Colors.white),
                       ),
                       const SizedBox(height: KZ.sp4),
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
                             formatCurrency(
@@ -907,6 +930,16 @@ class _ShowcaseTile extends StatelessWidget {
                               style: KZ.bodySmall.copyWith(
                                 color: Colors.white.withValues(alpha: 0.75),
                                 decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                          ],
+                          if (item.compareAtPrice != null &&
+                              item.compareAtPrice! > item.basePrice) ...[
+                            const SizedBox(width: KZ.sp8),
+                            MenuItemComparePriceText(
+                              compareAtPrice: item.compareAtPrice!,
+                              style: KZ.bodySmall.copyWith(
+                                color: Colors.white.withValues(alpha: 0.75),
                               ),
                             ),
                           ],
@@ -1015,6 +1048,19 @@ class _RecommendedTile extends ConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (item.badge != null || item.calories != null) ...[
+                    const SizedBox(height: 2),
+                    Wrap(
+                      spacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (item.badge != null)
+                          MenuItemBadgeChip(badge: item.badge!),
+                        if (item.calories != null)
+                          MenuItemCaloriesText(calories: item.calories!),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   Flexible(
                     child: FittedBox(
@@ -1041,6 +1087,13 @@ class _RecommendedTile extends ConsumerWidget {
                               style: KZ.bodySmall.copyWith(
                                 decoration: TextDecoration.lineThrough,
                               ),
+                            ),
+                          ],
+                          if (item.compareAtPrice != null &&
+                              item.compareAtPrice! > item.basePrice) ...[
+                            const SizedBox(width: 6),
+                            MenuItemComparePriceText(
+                              compareAtPrice: item.compareAtPrice!,
                             ),
                           ],
                         ],
