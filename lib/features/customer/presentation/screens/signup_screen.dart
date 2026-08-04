@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
+import 'package:kebda_zaman/core/widgets/kz_google_signin_button.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -64,6 +65,28 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         ),
       );
       context.go('/profile');
+    }
+  }
+
+  void _handleGoogleSignIn() async {
+    final success = await ref
+        .read(authNotifierProvider.notifier)
+        .googleSignIn();
+
+    // `false` covers both cancellation and failure — the error banner (if
+    // any) is already reflected in authState, and either way we must not
+    // navigate. The backend may resolve an existing account rather than
+    // create one, so this intentionally skips the "signup success" copy
+    // and just enters the app like Login's Google button does.
+    if (success && mounted) {
+      final user = ref.read(authNotifierProvider).user;
+      if (user?.role == 'ADMIN') {
+        context.go('/admin/dashboard');
+      } else if (user?.role == 'CASHIER') {
+        context.go('/admin/orders');
+      } else {
+        context.go('/home');
+      }
     }
   }
 
@@ -501,14 +524,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       // Social Logins (Google & Apple) - White with outline border
                       Row(
                         children: [
-                          _buildSocialButton(
-                            label: 'auth.google'.tr(),
-                            icon: const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CustomPaint(painter: _GoogleLogoPainter()),
-                            ),
-                            onTap: () {},
+                          KZGoogleSignInButton(
+                            isLoading: authState.isLoading,
+                            onTap: _handleGoogleSignIn,
                           ),
                           const SizedBox(width: 16),
                           _buildSocialButton(
@@ -621,48 +639,4 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       ],
     );
   }
-}
-
-class _GoogleLogoPainter extends CustomPainter {
-  const _GoogleLogoPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(2, 2, size.width - 4, size.height - 4);
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0
-      ..strokeCap = StrokeCap.round;
-
-    // Red arc
-    paint.color = const Color(0xFFEA4335);
-    canvas.drawArc(rect, -3.14159 * 0.8, 3.14159 * 0.6, false, paint);
-
-    // Yellow arc
-    paint.color = const Color(0xFFFBBC05);
-    canvas.drawArc(rect, 3.14159 * 0.7, 3.14159 * 0.5, false, paint);
-
-    // Green arc
-    paint.color = const Color(0xFF34A853);
-    canvas.drawArc(rect, 3.14159 * 0.1, 3.14159 * 0.6, false, paint);
-
-    // Blue arc
-    paint.color = const Color(0xFF4285F4);
-    canvas.drawArc(rect, -3.14159 * 0.2, 3.14159 * 0.3, false, paint);
-
-    // Blue horizontal bar
-    paint.style = PaintingStyle.fill;
-    canvas.drawRect(
-      Rect.fromLTRB(
-        size.width * 0.45,
-        size.height * 0.42,
-        size.width * 0.9,
-        size.height * 0.58,
-      ),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

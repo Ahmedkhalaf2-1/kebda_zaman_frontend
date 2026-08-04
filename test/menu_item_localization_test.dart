@@ -36,6 +36,9 @@ class _FakeAuthRepository implements AuthRepository {
   Future<Result<User>> adminLogin(String email, String password) async =>
       throw UnimplementedError();
   @override
+  Future<Result<User>> googleLogin(String firebaseIdToken) async =>
+      throw UnimplementedError();
+  @override
   Future<Result<User>> register({
     required String name,
     required String email,

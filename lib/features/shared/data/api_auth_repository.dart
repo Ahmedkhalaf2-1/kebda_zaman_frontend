@@ -78,9 +78,9 @@ class ApiAuthRepository implements AuthRepository {
         // with "the session is invalid" (see auth_notifier._loadSavedUser, which logs the
         // user out on AuthFailure but preserves the session on NetworkFailure).
         if (statusCode == 401 || statusCode == 403) {
-          return AuthFailure(apiException.message);
+          return AuthFailure(apiException.message, apiException);
         }
-        return NetworkFailure(apiException.message);
+        return NetworkFailure(apiException.message, apiException);
       }
       return NetworkFailure(e.message ?? 'Network error');
     }
@@ -93,6 +93,21 @@ class ApiAuthRepository implements AuthRepository {
       final response = await apiClient.dio.post(
         '/auth/login',
         data: {'email': email, 'password': password},
+      );
+      return await _handleAuthResult(response);
+    } catch (e) {
+      return Err(_handleError(e));
+    }
+  }
+
+  @override
+  Future<Result<User>> googleLogin(String firebaseIdToken) async {
+    try {
+      final response = await apiClient.dio.post(
+        '/auth/google',
+        // Only the verified Firebase ID token is sent — the backend derives
+        // every identity value (email, name, uid) from it server-side.
+        data: {'firebaseIdToken': firebaseIdToken},
       );
       return await _handleAuthResult(response);
     } catch (e) {

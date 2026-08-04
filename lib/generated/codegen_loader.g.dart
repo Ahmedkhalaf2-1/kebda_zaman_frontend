@@ -671,6 +671,11 @@ class CodegenLoader extends AssetLoader {
       "signup_btn": "إنشاء حساب جديد",
       "or_continue": "أو تابع باستخدام",
       "google": "جوجل",
+      "continue_with_google": "المتابعة باستخدام Google",
+      "google_signin_failed":
+          "تعذر تسجيل الدخول باستخدام Google. يرجى المحاولة مرة أخرى.",
+      "google_token_invalid":
+          "تعذر التحقق من جلسة Google الخاصة بك. يرجى المحاولة مرة أخرى.",
       "apple": "أبل",
       "no_account": "ليس لديك حساب؟",
       "already_account": "لديك حساب بالفعل؟",
@@ -1538,6 +1543,11 @@ class CodegenLoader extends AssetLoader {
       "signup_btn": "Create My Account",
       "or_continue": "Or continue with",
       "google": "Google",
+      "continue_with_google": "Continue with Google",
+      "google_signin_failed":
+          "Unable to sign in with Google. Please try again.",
+      "google_token_invalid":
+          "Your Google session could not be verified. Please try again.",
       "apple": "Apple",
       "no_account": "Don't have an account?",
       "already_account": "Already part of the family?",

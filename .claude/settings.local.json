@@ -99,7 +99,17 @@
       "Bash(wmic process *)",
       "Bash(ipconfig)",
       "Bash(grep -E \"\\\\[E\\\\]$|All tests passed|tests failed\")",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(awk '/^  firebase_core:/,/^  [a-z_]+:$/' pubspec.lock)",
+      "Bash(awk '/^  firebase_core:/{f=1} f{print; if\\(/version:/\\){f=0}}' pubspec.lock)",
+      "Bash(awk '/^  firebase_messaging:/{f=1} f{print; if\\(/version:/\\){f=0}}' pubspec.lock)",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('latest:',j.latest.version\\); console.log\\('recent:', j.versions.slice\\(-8\\).map\\(v=>v.version\\).join\\(', '\\)\\);}\\)\")",
+      "Bash(grep -o '\"pubspec\":{[^}]*\"firebase_core[^,}]*')",
+      "Bash(xargs grep -l \"class GoogleSignIn \")",
+      "Bash(xargs grep -ln \"class GoogleAuthProvider\\\\|signInWithCredential\\\\|getIdToken\")",
+      "Bash(flutter install *)"
     ]
   }
 }

@@ -6,9 +6,9 @@ class KZ {
   KZ._();
 
   // ─── Colors ───────────────────────────────────────────
-  static const Color primary = Color(0xFFFE724C);
-  static const Color primaryContainer = Color(0xFFFF6B35);
-  static const Color primaryFixed = Color(0xFFFFDBD0);
+  static const Color primary = Color(0xFFE53935);
+  static const Color primaryContainer = Color(0xFFEF5350);
+  static const Color primaryFixed = Color(0xFFFFCDD2);
   static const Color onPrimary = Colors.white;
 
   static const Color surface = Colors.white;

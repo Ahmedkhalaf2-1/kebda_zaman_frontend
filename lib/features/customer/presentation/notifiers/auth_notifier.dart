@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/features/shared/domain/models/user.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/auth_repository.dart';
+import 'package:kebda_zaman/features/shared/data/google_auth_service.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/notifications/device_service.dart';
+import 'package:kebda_zaman/core/api/api_exceptions.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 
 class AuthState {
@@ -40,9 +43,34 @@ class AuthNotifier extends StateNotifier<AuthState> {
   static const String isLoggedInKey = 'kz_is_logged_in';
   final AuthRepository _authRepository;
 
-  AuthNotifier(this._authRepository) : super(const AuthState(isLoading: true)) {
+  /// Obtains a fresh Firebase ID token via Google Sign-In, or `null` if the
+  /// user cancelled account selection. Injected as a plain function (rather
+  /// than the concrete [GoogleAuthService]) so tests can substitute it
+  /// without touching real Google/Firebase platform channels.
+  final Future<String?> Function() _googleSignIn;
+
+  /// Best-effort Firebase/Google sign-out, called during [logout]. Same
+  /// injection pattern as [_googleSignIn] — a plain function so tests never
+  /// touch real platform channels.
+  final Future<void> Function() _googleSignOut;
+
+  AuthNotifier(
+    this._authRepository, {
+    Future<String?> Function()? googleSignIn,
+    Future<void> Function()? googleSignOut,
+  }) : _googleSignIn = googleSignIn ?? _lazyGoogleSignIn,
+       _googleSignOut = googleSignOut ?? _lazyGoogleSignOut,
+       super(const AuthState(isLoading: true)) {
     _loadCachedUserForDisplay();
   }
+
+  // Tear-offs rather than a shared instance field: constructing
+  // GoogleAuthService() touches FirebaseAuth.instance immediately, which
+  // throws if Firebase hasn't been initialized (e.g. in tests that inject
+  // only one of the two callbacks and never invoke the other). Deferring
+  // construction to actual invocation keeps the untouched default lazy.
+  static Future<String?> _lazyGoogleSignIn() => GoogleAuthService().signIn();
+  static Future<void> _lazyGoogleSignOut() => GoogleAuthService().signOut();
 
   /// Loads the cached user (if any) purely for presentation — e.g. so the
   /// UI can show a name while SessionBootstrapNotifier's cold-start token
@@ -186,6 +214,68 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Google Sign-In, integrated into the same session flow as email/password
+  /// login: obtain a Firebase ID token client-side, exchange it for the
+  /// normal backend session, persist tokens through the existing path, and
+  /// register the FCM device exactly as every other auth method does.
+  Future<bool> googleSignIn() async {
+    // Guards both a double-tap racing ahead of the disabled-button rebuild
+    // and any other auth mutation already in flight.
+    if (state.isLoading) return false;
+
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    String? idToken;
+    try {
+      idToken = await _googleSignIn();
+    } catch (_) {
+      // Never surface raw Google/Firebase exception text to the user.
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'auth.google_signin_failed'.tr(),
+      );
+      return false;
+    }
+
+    if (idToken == null) {
+      // User cancelled account selection — reset quietly. No error message,
+      // no navigation (callers only navigate when this returns true).
+      state = state.copyWith(isLoading: false);
+      return false;
+    }
+
+    final result = await _authRepository.googleLogin(idToken);
+
+    if (result.isSuccess) {
+      final user = result.value;
+      await _saveUserSession(user);
+      state = AuthState(user: user, isLoggedIn: true, isLoading: false);
+      DeviceService.instance.onSessionEstablished();
+      return true;
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _mapGoogleLoginErrorMessage(result.failure),
+      );
+      return false;
+    }
+  }
+
+  /// Backend `INVALID_GOOGLE_TOKEN` maps to a friendly localized message;
+  /// network failures reuse the app's existing generic network-error copy;
+  /// anything else falls back to the same generic Google failure message
+  /// used for pre-backend failures — never the raw backend/Dio text.
+  String _mapGoogleLoginErrorMessage(Failure failure) {
+    final cause = failure.cause;
+    if (cause is ApiException && cause.code == 'INVALID_GOOGLE_TOKEN') {
+      return 'auth.google_token_invalid'.tr();
+    }
+    if (failure is NetworkFailure) {
+      return 'common.something_wrong'.tr();
+    }
+    return 'auth.google_signin_failed'.tr();
+  }
+
   Future<bool> signUp({
     required String name,
     required String email,
@@ -292,8 +382,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
     //    (must happen while the access token is still valid)
     await DeviceService.instance.onBeforeLogout();
 
-    // 2. Call the backend to invalidate the refresh token
+    // 2. Call the backend to invalidate the refresh token. This always
+    //    clears the locally stored backend accessToken/refreshToken in its
+    //    own `finally` block (see ApiAuthRepository.logout), even if the
+    //    backend call itself fails.
     await _authRepository.logout();
+
+    // 3. Best-effort Firebase/Google sign-out. Backend tokens are already
+    //    cleared by step 2 regardless of outcome here — a Google/Firebase
+    //    sign-out failure must never leave the app in a locally
+    //    authenticated state, and this never assumes the user actually
+    //    signed in via Google (safe no-op if they didn't).
+    try {
+      await _googleSignOut();
+    } catch (_) {}
 
     try {
       final prefs = await SharedPreferences.getInstance();

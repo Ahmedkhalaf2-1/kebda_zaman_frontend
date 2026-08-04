@@ -60,6 +60,21 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<Result<User>> googleLogin(String firebaseIdToken) async {
+    await _simulateDelay();
+    if (firebaseIdToken.trim().isEmpty) {
+      return const Err(AuthFailure('Invalid Google authentication token'));
+    }
+    _currentUser = User(
+      id: const Uuid().v4(),
+      name: 'Google User',
+      email: 'google.user@example.com',
+      createdAt: DateTime.now(),
+    );
+    return Success(_currentUser!);
+  }
+
+  @override
   Future<Result<User>> register({
     required String name,
     required String email,
