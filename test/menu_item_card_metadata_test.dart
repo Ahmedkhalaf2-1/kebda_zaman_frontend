@@ -100,15 +100,17 @@ Widget _wrap(Widget child, {Locale locale = const Locale('en')}) {
   );
 }
 
-/// The `MenuScreen` search bar (a plain `Row` in `_MenuHeaderDelegate`, at
-/// `menu_screen.dart:249`) has a pre-existing overflow at narrow widths once
-/// `home.search_hint` is fully resolved — unrelated to the item-card
+/// The `MenuScreen` search bar (a plain `Row` in `_StickyMenuHeaderDelegate`,
+/// at `menu_screen.dart:416`) has a pre-existing overflow at narrow widths
+/// once `home.search_hint` is fully resolved — unrelated to the item-card
 /// metadata this phase adds, and out of scope to fix here (see project VO3
 /// UI rules: touch only the active menu-card surfaces). We isolate it so
-/// card-specific overflow regressions aren't masked by it.
+/// card-specific overflow regressions aren't masked by it. (Line number has
+/// shifted twice — 249 originally, then 412, now 416 — as the screen was
+/// refactored/reformatted; same underlying pre-existing bug, unmoved.)
 bool _isKnownPreExistingSearchBarOverflow(FlutterErrorDetails details) =>
     details.exceptionAsString().contains('overflowed') &&
-    details.toString().contains('menu_screen.dart:249');
+    details.toString().contains('menu_screen.dart:416');
 
 /// Pumps [MenuScreen], capturing any overflow errors. Overflow errors from
 /// the pre-existing, out-of-scope search-bar bug are swallowed; anything

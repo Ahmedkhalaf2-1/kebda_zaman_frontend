@@ -27,6 +27,8 @@ mixin _$Category {
   int get sortOrder => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
   String? get parentCategoryId => throw _privateConstructorUsedError;
+  String? get nameAr => throw _privateConstructorUsedError;
+  String? get nameEn => throw _privateConstructorUsedError;
 
   /// Serializes this Category to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -50,6 +52,8 @@ abstract class $CategoryCopyWith<$Res> {
     int sortOrder,
     bool isActive,
     String? parentCategoryId,
+    String? nameAr,
+    String? nameEn,
   });
 }
 
@@ -74,6 +78,8 @@ class _$CategoryCopyWithImpl<$Res, $Val extends Category>
     Object? sortOrder = null,
     Object? isActive = null,
     Object? parentCategoryId = freezed,
+    Object? nameAr = freezed,
+    Object? nameEn = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -101,6 +107,14 @@ class _$CategoryCopyWithImpl<$Res, $Val extends Category>
                 ? _value.parentCategoryId
                 : parentCategoryId // ignore: cast_nullable_to_non_nullable
                       as String?,
+            nameAr: freezed == nameAr
+                ? _value.nameAr
+                : nameAr // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            nameEn: freezed == nameEn
+                ? _value.nameEn
+                : nameEn // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -123,6 +137,8 @@ abstract class _$$CategoryImplCopyWith<$Res>
     int sortOrder,
     bool isActive,
     String? parentCategoryId,
+    String? nameAr,
+    String? nameEn,
   });
 }
 
@@ -146,6 +162,8 @@ class __$$CategoryImplCopyWithImpl<$Res>
     Object? sortOrder = null,
     Object? isActive = null,
     Object? parentCategoryId = freezed,
+    Object? nameAr = freezed,
+    Object? nameEn = freezed,
   }) {
     return _then(
       _$CategoryImpl(
@@ -173,6 +191,14 @@ class __$$CategoryImplCopyWithImpl<$Res>
             ? _value.parentCategoryId
             : parentCategoryId // ignore: cast_nullable_to_non_nullable
                   as String?,
+        nameAr: freezed == nameAr
+            ? _value.nameAr
+            : nameAr // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        nameEn: freezed == nameEn
+            ? _value.nameEn
+            : nameEn // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -188,6 +214,8 @@ class _$CategoryImpl implements _Category {
     this.sortOrder = 0,
     this.isActive = true,
     this.parentCategoryId,
+    this.nameAr,
+    this.nameEn,
   });
 
   factory _$CategoryImpl.fromJson(Map<String, dynamic> json) =>
@@ -207,10 +235,14 @@ class _$CategoryImpl implements _Category {
   final bool isActive;
   @override
   final String? parentCategoryId;
+  @override
+  final String? nameAr;
+  @override
+  final String? nameEn;
 
   @override
   String toString() {
-    return 'Category(id: $id, name: $name, imageUrl: $imageUrl, sortOrder: $sortOrder, isActive: $isActive, parentCategoryId: $parentCategoryId)';
+    return 'Category(id: $id, name: $name, imageUrl: $imageUrl, sortOrder: $sortOrder, isActive: $isActive, parentCategoryId: $parentCategoryId, nameAr: $nameAr, nameEn: $nameEn)';
   }
 
   @override
@@ -227,7 +259,9 @@ class _$CategoryImpl implements _Category {
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             (identical(other.parentCategoryId, parentCategoryId) ||
-                other.parentCategoryId == parentCategoryId));
+                other.parentCategoryId == parentCategoryId) &&
+            (identical(other.nameAr, nameAr) || other.nameAr == nameAr) &&
+            (identical(other.nameEn, nameEn) || other.nameEn == nameEn));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -240,6 +274,8 @@ class _$CategoryImpl implements _Category {
     sortOrder,
     isActive,
     parentCategoryId,
+    nameAr,
+    nameEn,
   );
 
   /// Create a copy of Category
@@ -264,6 +300,8 @@ abstract class _Category implements Category {
     final int sortOrder,
     final bool isActive,
     final String? parentCategoryId,
+    final String? nameAr,
+    final String? nameEn,
   }) = _$CategoryImpl;
 
   factory _Category.fromJson(Map<String, dynamic> json) =
@@ -281,6 +319,10 @@ abstract class _Category implements Category {
   bool get isActive;
   @override
   String? get parentCategoryId;
+  @override
+  String? get nameAr;
+  @override
+  String? get nameEn;
 
   /// Create a copy of Category
   /// with the given fields replaced by the non-null parameter values.

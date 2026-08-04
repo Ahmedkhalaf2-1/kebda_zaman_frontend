@@ -323,6 +323,8 @@ class ApiMenuRepository implements MenuRepository {
       isActive:
           json['isActive'] ??
           true, // public shape has no isActive field; admin shape does
+      nameAr: json['nameAr'] as String?,
+      nameEn: json['nameEn'] as String?,
     );
   }
 

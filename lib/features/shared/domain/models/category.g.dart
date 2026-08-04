@@ -14,6 +14,8 @@ _$CategoryImpl _$$CategoryImplFromJson(Map<String, dynamic> json) =>
       sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
       isActive: json['isActive'] as bool? ?? true,
       parentCategoryId: json['parentCategoryId'] as String?,
+      nameAr: json['nameAr'] as String?,
+      nameEn: json['nameEn'] as String?,
     );
 
 Map<String, dynamic> _$$CategoryImplToJson(_$CategoryImpl instance) =>
@@ -24,4 +26,6 @@ Map<String, dynamic> _$$CategoryImplToJson(_$CategoryImpl instance) =>
       'sortOrder': instance.sortOrder,
       'isActive': instance.isActive,
       'parentCategoryId': instance.parentCategoryId,
+      'nameAr': instance.nameAr,
+      'nameEn': instance.nameEn,
     };

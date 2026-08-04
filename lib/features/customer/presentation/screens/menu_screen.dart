@@ -27,7 +27,34 @@ int _menuColumnCount(BuildContext context) {
   return 2;
 }
 
-class MenuScreen extends ConsumerWidget {
+/// A category and the (already-loaded) items that belong to it, built
+/// locally from `MenuData` — no extra fetch, no repository mutation.
+/// Categories with zero available items are dropped by [buildMenuSections]
+/// rather than rendered as an empty section.
+class MenuSection {
+  final Category category;
+  final List<MenuItem> items;
+
+  const MenuSection({required this.category, required this.items});
+}
+
+/// Groups [data]'s flat item list under each category, preserving both the
+/// backend's category order (`data.categories` order) and each item's
+/// original order within its category (a stable filter over `data.items`,
+/// never re-sorted). Categories with no items are omitted.
+List<MenuSection> buildMenuSections(MenuData data) {
+  final sections = <MenuSection>[];
+  for (final category in data.categories) {
+    final items = data.items
+        .where((item) => item.categoryId == category.id)
+        .toList();
+    if (items.isEmpty) continue;
+    sections.add(MenuSection(category: category, items: items));
+  }
+  return sections;
+}
+
+class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
 
   // Design Tokens matching the KZ design system
@@ -38,18 +65,113 @@ class MenuScreen extends ConsumerWidget {
   static const Color surfaceContainerHighestColor = Color(0xFFE3E2DF);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends ConsumerState<MenuScreen> {
+  // Measures where the pinned search+category bar ends, so section-active
+  // detection and tap-to-scroll both target the same visual boundary.
+  final GlobalKey _stickyHeaderKey = GlobalKey();
+
+  // One stable GlobalKey per category id for its section header (scroll
+  // target) and its tab chip (kept visible in the horizontal bar) — created
+  // once per id and reused across rebuilds so measurements stay valid.
+  final Map<String, GlobalKey> _sectionKeys = {};
+  final Map<String, GlobalKey> _tabKeys = {};
+
+  String? _selectedCategoryId;
+
+  // Set for the duration of a tap-triggered (or tab-follow) scroll
+  // animation so the manual-scroll listener doesn't fight it — without
+  // this, an animateTo/ensureVisible-driven scroll would immediately
+  // reassign the "active" section mid-flight and oscillate.
+  bool _isProgrammaticScroll = false;
+
+  GlobalKey _sectionKeyFor(String categoryId) =>
+      _sectionKeys.putIfAbsent(categoryId, () => GlobalKey());
+
+  GlobalKey _tabKeyFor(String categoryId) =>
+      _tabKeys.putIfAbsent(categoryId, () => GlobalKey());
+
+  void _ensureTabVisible(String categoryId) {
+    final ctx = _tabKeys[categoryId]?.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      alignment: 0.5,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  Future<void> _scrollToCategory(String categoryId) async {
+    setState(() => _selectedCategoryId = categoryId);
+    _ensureTabVisible(categoryId);
+
+    final ctx = _sectionKeys[categoryId]?.currentContext;
+    if (ctx == null) return;
+
+    _isProgrammaticScroll = true;
+    try {
+      await Scrollable.ensureVisible(
+        ctx,
+        alignment: 0.0,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+      );
+    } finally {
+      if (mounted) _isProgrammaticScroll = false;
+    }
+  }
+
+  // Walks sections top-to-bottom and picks the last one whose header has
+  // scrolled past the sticky bar — i.e. the section currently occupying the
+  // primary visible area, not a guess from product index/count. Sections
+  // beyond the current viewport (or not yet laid out) simply have no
+  // resolvable RenderBox yet and are skipped.
+  void _updateActiveSectionFromScroll(List<MenuSection> sections) {
+    if (_isProgrammaticScroll || sections.isEmpty || !mounted) return;
+
+    final headerBox =
+        _stickyHeaderKey.currentContext?.findRenderObject() as RenderBox?;
+    if (headerBox == null || !headerBox.attached) return;
+    final thresholdY = headerBox
+        .localToGlobal(Offset(0, headerBox.size.height))
+        .dy;
+
+    String? activeId;
+    for (final section in sections) {
+      final box =
+          _sectionKeys[section.category.id]?.currentContext?.findRenderObject()
+              as RenderBox?;
+      if (box == null || !box.attached) continue;
+      final topY = box.localToGlobal(Offset.zero).dy;
+      if (topY <= thresholdY + 1) {
+        activeId = section.category.id;
+      } else {
+        break;
+      }
+    }
+
+    if (activeId != null && activeId != _selectedCategoryId) {
+      setState(() => _selectedCategoryId = activeId);
+      _ensureTabVisible(activeId);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final menuAsync = ref.watch(menuNotifierProvider);
     final favoritesState = ref.watch(customerFavoritesProvider);
     final favorites = favoritesState.favoriteIds;
     final heroDismissed = ref.watch(menuHeroDismissedProvider);
 
     return Scaffold(
-      backgroundColor: surfaceBg,
+      backgroundColor: MenuScreen.surfaceBg,
       body: menuAsync.when(
         loading: () => const Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+            valueColor: AlwaysStoppedAnimation<Color>(MenuScreen.primaryColor),
           ),
         ),
         error: (e, st) => KZErrorState(
@@ -59,148 +181,186 @@ class MenuScreen extends ConsumerWidget {
         ),
         data: (data) {
           final columnCount = _menuColumnCount(context);
+          final sections = buildMenuSections(data);
 
-          return CustomScrollView(
-            slivers: [
-              // ── 1. Compact Branded Header ──
-              SliverAppBar(
-                floating: true,
-                pinned: true,
-                backgroundColor: surfaceBg.withValues(alpha: 0.9),
-                elevation: 0,
-                shadowColor: Colors.black.withValues(alpha: 0.05),
-                toolbarHeight: 64,
-                titleSpacing: 16,
-                title: Text(
-                  'menu.title'.tr(),
-                  style: KZ.pageTitle.copyWith(color: primaryColor),
-                ),
-                centerTitle: false,
-                actions: [
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final authState = ref.watch(authNotifierProvider);
-                      final user = authState.user;
-                      final hasName =
-                          user != null && user.name.trim().isNotEmpty;
-                      final initial = hasName
-                          ? user.name.trim()[0].toUpperCase()
-                          : '';
+          if (_selectedCategoryId == null && sections.isNotEmpty) {
+            _selectedCategoryId = sections.first.category.id;
+          }
 
-                      return Semantics(
-                        button: true,
-                        label: 'nav.profile'.tr(),
-                        child: InkWell(
-                          onTap: () => context.go('/profile'),
-                          customBorder: const CircleBorder(),
-                          child: Container(
-                            width: KZ.iconTapTargetMin,
-                            height: KZ.iconTapTargetMin,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: surfaceContainerColor,
-                              border: Border.all(
-                                color: primaryColor.withValues(alpha: 0.5),
-                                width: 2,
+          return NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification is ScrollUpdateNotification) {
+                _updateActiveSectionFromScroll(sections);
+              }
+              return false;
+            },
+            child: CustomScrollView(
+              // Realistic single-restaurant menus (a handful of categories,
+              // tens of items) comfortably fit within this cache extent, so
+              // every section's GlobalKey resolves for tap-to-scroll without
+              // needing an offset-estimation fallback.
+              cacheExtent: 3000,
+              slivers: [
+                // ── 1. Compact Branded Header ──
+                SliverAppBar(
+                  floating: true,
+                  pinned: true,
+                  backgroundColor: MenuScreen.surfaceBg.withValues(alpha: 0.9),
+                  elevation: 0,
+                  shadowColor: Colors.black.withValues(alpha: 0.05),
+                  toolbarHeight: 64,
+                  titleSpacing: 16,
+                  title: Text(
+                    'menu.title'.tr(),
+                    style: KZ.pageTitle.copyWith(
+                      color: MenuScreen.primaryColor,
+                    ),
+                  ),
+                  centerTitle: false,
+                  actions: [
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final authState = ref.watch(authNotifierProvider);
+                        final user = authState.user;
+                        final hasName =
+                            user != null && user.name.trim().isNotEmpty;
+                        final initial = hasName
+                            ? user.name.trim()[0].toUpperCase()
+                            : '';
+
+                        return Semantics(
+                          button: true,
+                          label: 'nav.profile'.tr(),
+                          child: InkWell(
+                            onTap: () => context.go('/profile'),
+                            customBorder: const CircleBorder(),
+                            child: Container(
+                              width: KZ.iconTapTargetMin,
+                              height: KZ.iconTapTargetMin,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: MenuScreen.surfaceContainerColor,
+                                border: Border.all(
+                                  color: MenuScreen.primaryColor.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Center(
+                                child: hasName
+                                    ? Text(
+                                        initial,
+                                        style: KZ.labelLarge.copyWith(
+                                          color: MenuScreen.primaryColor,
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.person_outline_rounded,
+                                        color: MenuScreen.primaryColor,
+                                        size: KZ.iconAction,
+                                      ),
                               ),
                             ),
-                            child: Center(
-                              child: hasName
-                                  ? Text(
-                                      initial,
-                                      style: KZ.labelLarge.copyWith(
-                                        color: primaryColor,
-                                      ),
-                                    )
-                                  : Icon(
-                                      Icons.person_outline_rounded,
-                                      color: primaryColor,
-                                      size: KZ.iconAction,
-                                    ),
-                            ),
                           ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                ),
+
+                // ── 2. Sticky Search + Category Selector ──
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _StickyMenuHeaderDelegate(
+                    headerKey: _stickyHeaderKey,
+                    categories: sections.map((s) => s.category).toList(),
+                    selectedCategoryId: _selectedCategoryId,
+                    onSelectCategory: _scrollToCategory,
+                    tabKeyFor: _tabKeyFor,
+                  ),
+                ),
+
+                // ── 3. Compact Dismissible Weekly-Special Strip ──
+                if (!heroDismissed)
+                  SliverToBoxAdapter(
+                    child: _WeeklySpecialStrip(
+                      onDismiss: () =>
+                          ref.read(menuHeroDismissedProvider.notifier).state =
+                              true,
+                    ),
+                  ),
+
+                // ── 4. Sectioned Product Grid ──
+                if (sections.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: KZEmptyState(
+                        icon: Icons.restaurant_menu_rounded,
+                        title: 'menu.no_items'.tr(),
+                      ),
+                    ),
+                  )
+                else
+                  for (final section in sections) ...[
+                    SliverToBoxAdapter(
+                      child: Container(
+                        key: _sectionKeyFor(section.category.id),
+                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+                        child: Text(
+                          section.category.localizedName(
+                            context.locale.languageCode,
+                          ),
+                          style: KZ.sectionTitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 16),
-                ],
-              ),
-
-              // ── 2. Sticky Search + Category Selector ──
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _StickyMenuHeaderDelegate(
-                  categories: data.categories,
-                  selectedCategoryId: data.selectedCategoryId,
-                  onSelectCategory: (id) => ref
-                      .read(menuNotifierProvider.notifier)
-                      .selectCategory(id),
-                ),
-              ),
-
-              // ── 3. Compact Dismissible Weekly-Special Strip ──
-              if (!heroDismissed)
-                SliverToBoxAdapter(
-                  child: _WeeklySpecialStrip(
-                    onDismiss: () =>
-                        ref.read(menuHeroDismissedProvider.notifier).state =
-                            true,
-                  ),
-                ),
-
-              // ── 4. Product Grid ──
-              if (data.items.isEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
-                    child: KZEmptyState(
-                      icon: Icons.restaurant_menu_rounded,
-                      title: 'menu.no_items'.tr(),
+                      ),
                     ),
-                  ),
-                )
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: columnCount,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      mainAxisExtent: 312,
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      sliver: SliverGrid(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: columnCount,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          mainAxisExtent: 312,
+                        ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final item = section.items[index];
+                          final isFav = favorites.contains(item.id);
+                          return _MenuProductCard(
+                            item: item,
+                            isFavorite: isFav,
+                            onToggleFavorite: () async {
+                              final success = await ref
+                                  .read(customerFavoritesProvider.notifier)
+                                  .toggleFavorite(item.id);
+                              if (!success && context.mounted) {
+                                final err = ref
+                                    .read(customerFavoritesProvider)
+                                    .errorMessage;
+                                if (err != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(err),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                          );
+                        }, childCount: section.items.length),
+                      ),
                     ),
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final item = data.items[index];
-                      final isFav = favorites.contains(item.id);
-                      return _MenuProductCard(
-                        item: item,
-                        isFavorite: isFav,
-                        onToggleFavorite: () async {
-                          final success = await ref
-                              .read(customerFavoritesProvider.notifier)
-                              .toggleFavorite(item.id);
-                          if (!success && context.mounted) {
-                            final err = ref
-                                .read(customerFavoritesProvider)
-                                .errorMessage;
-                            if (err != null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(err),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            }
-                          }
-                        },
-                      );
-                    }, childCount: data.items.length),
-                  ),
-                ),
+                  ],
 
-              const SliverToBoxAdapter(child: SizedBox(height: 100)),
-            ],
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+              ],
+            ),
           );
         },
       ),
@@ -208,17 +368,21 @@ class MenuScreen extends ConsumerWidget {
   }
 }
 
-// ── Sticky header: search bar + category chips, pinned together ──
+// ── Sticky header: search bar + category tabs, pinned together ──
 
 class _StickyMenuHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final GlobalKey headerKey;
   final List<Category> categories;
   final String? selectedCategoryId;
-  final ValueChanged<String?> onSelectCategory;
+  final ValueChanged<String> onSelectCategory;
+  final GlobalKey Function(String categoryId) tabKeyFor;
 
   _StickyMenuHeaderDelegate({
+    required this.headerKey,
     required this.categories,
     required this.selectedCategoryId,
     required this.onSelectCategory,
+    required this.tabKeyFor,
   });
 
   @override
@@ -227,7 +391,10 @@ class _StickyMenuHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
+    final languageCode = context.locale.languageCode;
+
     return Container(
+      key: headerKey,
       color: MenuScreen.surfaceBg.withValues(alpha: 0.97),
       child: Column(
         children: [
@@ -267,23 +434,16 @@ class _StickyMenuHeaderDelegate extends SliverPersistentHeaderDelegate {
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
-              itemCount: categories.length + 1,
+              itemCount: categories.length,
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
-                if (index == 0) {
-                  final isSelected = selectedCategoryId == null;
-                  return KZChip(
-                    label: 'menu.all'.tr(),
-                    selected: isSelected,
-                    onTap: () => onSelectCategory(null),
-                  );
-                }
-                final cat = categories[index - 1];
+                final cat = categories[index];
                 final isSelected = selectedCategoryId == cat.id;
                 return KZChip(
-                  label: cat.name,
+                  key: tabKeyFor(cat.id),
+                  label: cat.localizedName(languageCode),
                   selected: isSelected,
-                  onTap: () => onSelectCategory(isSelected ? null : cat.id),
+                  onTap: () => onSelectCategory(cat.id),
                 );
               },
             ),
