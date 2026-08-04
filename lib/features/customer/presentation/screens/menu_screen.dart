@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +13,7 @@ import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import 'package:kebda_zaman/core/responsive/responsive_breakpoints.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
@@ -25,6 +27,20 @@ int _menuColumnCount(BuildContext context) {
   if (context.isDesktop) return 4;
   if (context.isTablet) return 3;
   return 2;
+}
+
+/// Responsive card extent, chosen so that a 70 % image block, a 2-line
+/// KZ.itemTitle name (15 px × 1.3 leading = 39 dp for two lines), and the
+/// price row all fit comfortably with 8 dp top / 6 dp bottom insets.
+///
+/// Verified at 360 dp (compact phone):
+///   extent = 260 dp  →  imageH = 182 dp  →  info = 78 dp
+///   content (78 − 14) = 64 dp  →  Expanded(name) = 64 − 4 − 20 = 40 dp ≥ 39 dp ✓
+double _cardExtent(BuildContext context) {
+  final w = MediaQuery.of(context).size.width;
+  if (w >= 600) return 272.0; // tablet
+  if (w >= 390) return 265.0; // large phone (390–599 dp)
+  return 260.0; //              compact phone (360–389 dp)
 }
 
 /// A category and the (already-loaded) items that belong to it, built
@@ -57,7 +73,7 @@ List<MenuSection> buildMenuSections(MenuData data) {
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
 
-  // Design Tokens matching the KZ design system
+  // Design tokens matching the KZ design system
   static const Color surfaceBg = KZ.surface;
   static const Color primaryColor = KZ.primary;
   static const Color onSurfaceVariantColor = KZ.onSurfaceVariant;
@@ -81,10 +97,14 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 
   String? _selectedCategoryId;
 
-  // Set for the duration of a tap-triggered (or tab-follow) scroll
-  // animation so the manual-scroll listener doesn't fight it — without
-  // this, an animateTo/ensureVisible-driven scroll would immediately
-  // reassign the "active" section mid-flight and oscillate.
+  /// True while a programmatic (tap-triggered) scroll animation is in flight.
+  /// Prevents the manual-scroll listener from fighting the animation by
+  /// reassigning the active category mid-flight.
+  ///
+  /// Released only in the [_scrollToCategory] `finally` block — after the
+  /// 350 ms [Scrollable.ensureVisible] Future resolves — so the guard lasts
+  /// the full animation, not just one frame. A single [Scrollable.ensureVisible]
+  /// call handles the vertical section scroll; no secondary animateTo is run.
   bool _isProgrammaticScroll = false;
 
   GlobalKey _sectionKeyFor(String categoryId) =>
@@ -93,17 +113,29 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   GlobalKey _tabKeyFor(String categoryId) =>
       _tabKeys.putIfAbsent(categoryId, () => GlobalKey());
 
+  /// Scrolls the horizontal category chip bar so [categoryId] is centred.
+  /// Uses the same curve/duration as the vertical section scroll for a
+  /// coherent feel. Does NOT set [_isProgrammaticScroll] — this is a
+  /// separate horizontal Scrollable and cannot fight the vertical listener.
   void _ensureTabVisible(String categoryId) {
     final ctx = _tabKeys[categoryId]?.currentContext;
     if (ctx == null) return;
     Scrollable.ensureVisible(
       ctx,
       alignment: 0.5,
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOut,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
     );
   }
 
+  /// Programmatically scrolls the main list to the section for [categoryId].
+  ///
+  /// Only [Scrollable.ensureVisible] is used for the vertical scroll —
+  /// there is no secondary animateTo call for the same target.
+  ///
+  /// [_isProgrammaticScroll] is set before the animation and released in
+  /// `finally` so the scroll listener is suppressed for the entire 350 ms
+  /// animation regardless of how fast the Future actually resolves.
   Future<void> _scrollToCategory(String categoryId) async {
     setState(() => _selectedCategoryId = categoryId);
     _ensureTabVisible(categoryId);
@@ -117,27 +149,29 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
         ctx,
         alignment: 0.0,
         duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
+        curve: Curves.easeOutCubic,
       );
     } finally {
       if (mounted) _isProgrammaticScroll = false;
     }
   }
 
-  // Walks sections top-to-bottom and picks the last one whose header has
-  // scrolled past the sticky bar — i.e. the section currently occupying the
-  // primary visible area, not a guess from product index/count. Sections
-  // beyond the current viewport (or not yet laid out) simply have no
-  // resolvable RenderBox yet and are skipped.
+  /// Scans rendered sections top-to-bottom and sets the active category to
+  /// the last one whose header has scrolled past the sticky bar's bottom
+  /// edge.
+  ///
+  /// A 16 dp dead-zone at each section boundary prevents rapid category
+  /// flicker when the user scrolls exactly on a boundary — small scroll
+  /// jitter near the threshold no longer bounces the selection back and
+  /// forth.
   void _updateActiveSectionFromScroll(List<MenuSection> sections) {
     if (_isProgrammaticScroll || sections.isEmpty || !mounted) return;
 
     final headerBox =
         _stickyHeaderKey.currentContext?.findRenderObject() as RenderBox?;
     if (headerBox == null || !headerBox.attached) return;
-    final thresholdY = headerBox
-        .localToGlobal(Offset(0, headerBox.size.height))
-        .dy;
+    final thresholdY =
+        headerBox.localToGlobal(Offset(0, headerBox.size.height)).dy;
 
     String? activeId;
     for (final section in sections) {
@@ -146,7 +180,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               as RenderBox?;
       if (box == null || !box.attached) continue;
       final topY = box.localToGlobal(Offset.zero).dy;
-      if (topY <= thresholdY + 1) {
+      // 16 dp dead-zone prevents flicker near section boundaries.
+      if (topY <= thresholdY + 16) {
         activeId = section.category.id;
       } else {
         break;
@@ -154,8 +189,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     }
 
     if (activeId != null && activeId != _selectedCategoryId) {
-      setState(() => _selectedCategoryId = activeId);
-      _ensureTabVisible(activeId);
+      final id = activeId;
+      setState(() => _selectedCategoryId = id);
+      _ensureTabVisible(id);
     }
   }
 
@@ -182,6 +218,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
         data: (data) {
           final columnCount = _menuColumnCount(context);
           final sections = buildMenuSections(data);
+          final extent = _cardExtent(context);
 
           if (_selectedCategoryId == null && sections.isNotEmpty) {
             _selectedCategoryId = sections.first.category.id;
@@ -205,7 +242,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 SliverAppBar(
                   floating: true,
                   pinned: true,
-                  backgroundColor: MenuScreen.surfaceBg.withValues(alpha: 0.9),
+                  backgroundColor:
+                      MenuScreen.surfaceBg.withValues(alpha: 0.9),
                   elevation: 0,
                   shadowColor: Colors.black.withValues(alpha: 0.05),
                   toolbarHeight: 64,
@@ -241,9 +279,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                                 shape: BoxShape.circle,
                                 color: MenuScreen.surfaceContainerColor,
                                 border: Border.all(
-                                  color: MenuScreen.primaryColor.withValues(
-                                    alpha: 0.5,
-                                  ),
+                                  color: MenuScreen.primaryColor
+                                      .withValues(alpha: 0.5),
                                   width: 2,
                                 ),
                               ),
@@ -255,7 +292,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                                           color: MenuScreen.primaryColor,
                                         ),
                                       )
-                                    : Icon(
+                                    : const Icon(
                                         Icons.person_outline_rounded,
                                         color: MenuScreen.primaryColor,
                                         size: KZ.iconAction,
@@ -287,8 +324,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                   SliverToBoxAdapter(
                     child: _WeeklySpecialStrip(
                       onDismiss: () =>
-                          ref.read(menuHeroDismissedProvider.notifier).state =
-                              true,
+                          ref
+                              .read(menuHeroDismissedProvider.notifier)
+                              .state = true,
                     ),
                   ),
 
@@ -320,40 +358,49 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                       ),
                     ),
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      // 14 dp outer padding gives cards more breathing room
+                      // than the previous 16 dp, while the 14 dp cross/main
+                      // spacing keeps the two-column grid from feeling cramped.
+                      padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
                       sliver: SliverGrid(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: columnCount,
-                          mainAxisSpacing: 16,
-                          crossAxisSpacing: 16,
-                          mainAxisExtent: 312,
+                          mainAxisSpacing: 14,
+                          crossAxisSpacing: 14,
+                          mainAxisExtent: extent,
                         ),
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final item = section.items[index];
-                          final isFav = favorites.contains(item.id);
-                          return _MenuProductCard(
-                            item: item,
-                            isFavorite: isFav,
-                            onToggleFavorite: () async {
-                              final success = await ref
-                                  .read(customerFavoritesProvider.notifier)
-                                  .toggleFavorite(item.id);
-                              if (!success && context.mounted) {
-                                final err = ref
-                                    .read(customerFavoritesProvider)
-                                    .errorMessage;
-                                if (err != null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(err),
-                                      behavior: SnackBarBehavior.floating,
-                                    ),
-                                  );
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final item = section.items[index];
+                            final isFav = favorites.contains(item.id);
+                            return _MenuProductCard(
+                              item: item,
+                              isFavorite: isFav,
+                              onToggleFavorite: () async {
+                                final success = await ref
+                                    .read(customerFavoritesProvider.notifier)
+                                    .toggleFavorite(item.id);
+                                if (!success && context.mounted) {
+                                  final err = ref
+                                      .read(customerFavoritesProvider)
+                                      .errorMessage;
+                                  if (err != null) {
+                                    ScaffoldMessenger.of(
+                                      context,
+                                    ).showSnackBar(
+                                      SnackBar(
+                                        content: Text(err),
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                  }
                                 }
-                              }
-                            },
-                          );
-                        }, childCount: section.items.length),
+                              },
+                            );
+                          },
+                          childCount: section.items.length,
+                        ),
                       ),
                     ),
                   ],
@@ -421,7 +468,10 @@ class _StickyMenuHeaderDelegate extends SliverPersistentHeaderDelegate {
                           size: KZ.iconControl,
                         ),
                         const SizedBox(width: 12),
-                        Text('home.search_hint'.tr(), style: KZ.bodyLarge),
+                        Text(
+                          'home.search_hint'.tr(),
+                          style: KZ.bodyLarge,
+                        ),
                       ],
                     ),
                   ),
@@ -542,7 +592,27 @@ class _WeeklySpecialStrip extends StatelessWidget {
   }
 }
 
-// ── Product card: image-top, built for fast scanning ──
+// ── Premium minimal product card ────────────────────────────────────────────
+//
+// Layout (all proportions computed from the exact card height via LayoutBuilder
+// so they are correct at every responsive breakpoint):
+//
+//   ┌─────────────────────────────────────┐
+//   │  [badge start-top]   [fav end-top]  │
+//   │                                     │  70% image
+//   │                     [+ end-bottom]  │
+//   ├─────────────────────────────────────┤
+//   │  Product name (≤ 2 lines)           │  30% info
+//   │  Price                              │
+//   └─────────────────────────────────────┘
+//
+// The "+" button is centred on the image/info boundary (top = imageH − 22,
+// so its midpoint aligns with the dividing line). It is positioned inside
+// the full-card Stack so its hit-test area is always within the card bounds.
+//
+// Only the admin-managed badge (BESTSELLER / TOP_RATED) is shown.
+// Discount price, compare-at price, calories, description, restaurant name,
+// category name, and rating are intentionally absent from the card.
 
 class _MenuProductCard extends ConsumerWidget {
   final MenuItem item;
@@ -599,24 +669,112 @@ class _MenuProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasDiscount = item.discountPrice != null;
+    final lang = context.locale.languageCode;
+    // Show effective price (discounted when available); no price crossing or
+    // compare-at display on the card — that belongs in item details only.
+    final effectivePrice = item.discountPrice ?? item.basePrice;
 
     return KZCard(
       padding: EdgeInsets.zero,
       onTap: () => context.push('/menu/item/${item.id}'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
+      child: LayoutBuilder(
+        builder: (_, constraints) {
+          // Exact card height from the SliverGrid's mainAxisExtent — always
+          // finite and bounded, so division is safe.
+          final cardH = constraints.maxHeight;
+          final imageH = cardH * 0.70;
+
+          return Stack(
+            // Stack stays within card bounds — no overflow needed because the
+            // "+" button (top = imageH − 22) stays well inside the card.
             children: [
-              SizedBox(
-                height: 140,
-                width: double.infinity,
-                child: KZFoodImage(imageUrl: item.imageUrl, aspectRatio: 1),
+              // ── Base: image column + info area ──────────────────────────
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Image — exactly 70 % of card height; top corners rounded
+                  // to match the card's own border radius.
+                  SizedBox(
+                    height: imageH,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(KZ.radiusLg),
+                      ),
+                      child: item.imageUrl.isEmpty
+                          ? const _FoodPlaceholder()
+                          : CachedNetworkImage(
+                              imageUrl: item.imageUrl,
+                              fit: BoxFit.cover,
+                              fadeInDuration: KZMotion.standard,
+                              fadeInCurve: KZMotion.enterExit,
+                              placeholder: (_, __) =>
+                                  const _FoodPlaceholder(),
+                              errorWidget: (_, __, ___) =>
+                                  const _FoodPlaceholder(),
+                            ),
+                    ),
+                  ),
+
+                  // Info — remaining 30 %; right inset of 58 dp reserves
+                  // space for the floating "+" button (44 wide + 10 end + 4
+                  // breathing gap = 58 dp).
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        12,
+                        8,
+                        58,
+                        6,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Name — Expanded fills all space above the price;
+                          // Align.bottomStart keeps single-line names visually
+                          // close to the price row rather than floating at top.
+                          Expanded(
+                            child: Align(
+                              alignment: AlignmentDirectional.bottomStart,
+                              child: Text(
+                                item.localizedName(lang),
+                                style: KZ.itemTitle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Price — anchored at the bottom of the info slot.
+                          Text(
+                            formatCurrency(
+                              effectivePrice,
+                              locale: context.locale,
+                            ),
+                            style: KZ.price,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Positioned(
-                top: 8,
-                right: 8,
+
+              // ── Admin badge — top-start (BESTSELLER / TOP_RATED only) ──
+              // Discount badges, compare-at price, and any other computed
+              // metadata are intentionally excluded from the card.
+              if (item.badge != null)
+                PositionedDirectional(
+                  top: 8,
+                  start: 8,
+                  child: MenuItemBadgeChip(badge: item.badge!),
+                ),
+
+              // ── Favourite — top-end, 36 × 36 frosted circle ─────────────
+              PositionedDirectional(
+                top: 6,
+                end: 6,
                 child: Semantics(
                   button: true,
                   label: 'profile.my_favorites'.tr(),
@@ -624,14 +782,14 @@ class _MenuProductCard extends ConsumerWidget {
                     onTap: onToggleFavorite,
                     customBorder: const CircleBorder(),
                     child: Container(
-                      width: KZ.iconTapTargetMin,
-                      height: KZ.iconTapTargetMin,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: Colors.white.withValues(alpha: 0.92),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
+                            color: Colors.black.withValues(alpha: 0.14),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -639,8 +797,8 @@ class _MenuProductCard extends ConsumerWidget {
                       ),
                       child: Center(
                         child: AnimatedScale(
-                          scale: isFavorite ? 1.1 : 1.0,
-                          duration: const Duration(milliseconds: 180),
+                          scale: isFavorite ? 1.15 : 1.0,
+                          duration: KZMotion.fast,
                           curve: Curves.easeOut,
                           child: Icon(
                             isFavorite
@@ -655,153 +813,65 @@ class _MenuProductCard extends ConsumerWidget {
                   ),
                 ),
               ),
-              if (hasDiscount)
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: KZ.error,
-                      borderRadius: BorderRadius.circular(KZ.radiusSm),
-                    ),
-                    child: Text(
-                      'home.sale'.tr(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-              if (item.badge != null)
-                Positioned(
-                  bottom: 8,
-                  left: 8,
-                  child: MenuItemBadgeChip(badge: item.badge!),
-                ),
-            ],
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        item.localizedName(context.locale.languageCode),
-                        style: KZ.itemTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        item.localizedDescription(context.locale.languageCode),
-                        style: KZ.bodySmall,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (item.calories != null) ...[
-                        const SizedBox(height: 3),
-                        MenuItemCaloriesText(calories: item.calories!),
-                      ],
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (hasDiscount)
-                              Text(
-                                formatCurrency(
-                                  item.basePrice,
-                                  locale: context.locale,
-                                ),
-                                style: KZ.bodySmall.copyWith(
-                                  decoration: TextDecoration.lineThrough,
-                                  fontSize: 11,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            if (item.compareAtPrice != null &&
-                                item.compareAtPrice! > item.basePrice)
-                              MenuItemComparePriceText(
-                                compareAtPrice: item.compareAtPrice!,
-                              ),
-                            Text(
-                              formatCurrency(
-                                hasDiscount
-                                    ? item.discountPrice!
-                                    : item.basePrice,
-                                locale: context.locale,
-                              ),
-                              style: KZ.price,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      // Flexible + FittedBox: if the translated label or a
-                      // long price ever leaves less room than expected, the
-                      // button scales down instead of overflowing the row —
-                      // same defensive pattern as the price row above.
-                      Flexible(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerRight,
-                          child: Semantics(
-                            button: true,
-                            label: 'home.add_to_cart'.tr(),
-                            child: InkWell(
-                              onTap: () => _handleAdd(context, ref),
-                              customBorder: const CircleBorder(),
-                              child: Container(
-                                width: KZ.iconTapTargetMin,
-                                height: KZ.iconTapTargetMin,
-                                decoration: BoxDecoration(
-                                  color: KZ.primary,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: KZ.primary.withValues(alpha: 0.3),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.add_rounded,
-                                  color: Colors.white,
-                                  size: KZ.iconControl,
-                                ),
-                              ),
-                            ),
+
+              // ── Circular add (+) — floating at image/info boundary ───────
+              // top = imageH − 22 places the button's vertical centre exactly
+              // on the image/info dividing line (half of 44 dp = 22 dp).
+              // The hit-test area is 44 × 44 dp, satisfying the minimum
+              // interactive target requirement.
+              PositionedDirectional(
+                top: imageH - 22,
+                end: 10,
+                child: Semantics(
+                  button: true,
+                  label: 'home.add_to_cart'.tr(),
+                  child: InkWell(
+                    onTap: () => _handleAdd(context, ref),
+                    customBorder: const CircleBorder(),
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: KZ.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: KZ.primary.withValues(alpha: 0.35),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                      child: const Icon(
+                        Icons.add_rounded,
+                        color: Colors.white,
+                        size: KZ.iconControl,
+                      ),
+                    ),
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Stable, const placeholder rendered while a food image is loading or
+/// unavailable. Extracted as a named widget so the same instance can be
+/// reused as both the `placeholder` and `errorWidget` callback return values
+/// without allocating a new closure + widget per frame.
+class _FoodPlaceholder extends StatelessWidget {
+  const _FoodPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: KZ.surfaceContainerLow,
+      child: const Center(
+        child: Icon(Icons.restaurant_rounded, color: KZ.outline),
       ),
     );
   }
