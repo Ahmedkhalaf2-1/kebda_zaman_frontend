@@ -37,9 +37,6 @@ List<BoxShadow> get _kzElevatedShadow => [
   ),
 ];
 
-// State provider for selected category filter on Home Screen
-final selectedHomeCategoryProvider = StateProvider<String?>((ref) => null);
-
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -57,7 +54,6 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final homeAsync = ref.watch(homeDataProvider);
-    final selectedCategory = ref.watch(selectedHomeCategoryProvider);
     final favorites = ref.watch(customerFavoritesProvider).favoriteIds;
 
     return Scaffold(
@@ -74,13 +70,7 @@ class HomeScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(homeDataProvider),
         ),
         data: (data) {
-          // Filter items if a category chip is selected
-          List<MenuItem> bestSellers = data.bestSellers;
-          if (selectedCategory != null) {
-            bestSellers = bestSellers
-                .where((item) => item.categoryId == selectedCategory)
-                .toList();
-          }
+          final bestSellers = data.bestSellers;
 
           // Recently ordered: most recent distinct items from past orders.
           final ordersAsync = ref.watch(ordersProvider);
@@ -116,10 +106,7 @@ class HomeScreen extends ConsumerWidget {
                     shadowColor: Colors.black.withValues(alpha: 0.05),
                     toolbarHeight: 64,
                     titleSpacing: 16,
-                    title: Text(
-                      'app_name'.tr(),
-                      style: KZ.pageTitle.copyWith(color: primaryColor),
-                    ),
+                    title: const _AppBarAddressSelector(),
                     centerTitle: false,
                     actions: [
                       // Dynamic Profile Avatar Button
@@ -176,9 +163,6 @@ class HomeScreen extends ConsumerWidget {
                   // ── 2. Greeting ──
                   const SliverToBoxAdapter(child: _GreetingHeader()),
 
-                  // ── 3. Delivery Address Card ──
-                  const SliverToBoxAdapter(child: _DeliveryAddressCard()),
-
                   // Closed Notice Banner (if applicable)
                   if (!data.acceptingOrders)
                     SliverToBoxAdapter(
@@ -227,36 +211,44 @@ class HomeScreen extends ConsumerWidget {
                       child: Semantics(
                         button: true,
                         label: 'home.search_hint'.tr(),
-                        child: Material(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(KZ.radiusLg),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(KZ.radiusLg),
-                            onTap: () => context.go('/search'),
-                            child: Container(
-                              height: 54,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              decoration: KZ.cardDecoration(),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.search_rounded,
-                                    color: onSurfaceVariantColor,
-                                    size: KZ.iconControl,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Flexible(
-                                    child: Text(
-                                      'home.search_hint'.tr(),
-                                      style: KZ.bodyLarge,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                        child: GestureDetector(
+                          onTap: () => context.go('/search'),
+                          child: Container(
+                            height: 56,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(100),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.search_rounded,
+                                  color: onSurfaceVariantColor,
+                                  size: 26,
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Text(
+                                    'home.search_hint'.tr(),
+                                    style: KZ.bodyLarge.copyWith(
+                                      color: onSurfaceVariantColor,
+                                      fontWeight: FontWeight.w500,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -279,58 +271,6 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-
-                  // ── 6. Category Section ──
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 10),
-                      child: Text(
-                        'home.categories'.tr(),
-                        style: KZ.sectionTitle,
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 48,
-                      child: ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: data.categories.length + 1,
-                        separatorBuilder: (_, __) => const SizedBox(width: 10),
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            final isAllSelected = selectedCategory == null;
-                            return _AnimatedCategoryChip(
-                              label: 'menu.all'.tr(),
-                              selected: isAllSelected,
-                              onTap: () {
-                                ref
-                                        .read(
-                                          selectedHomeCategoryProvider.notifier,
-                                        )
-                                        .state =
-                                    null;
-                              },
-                            );
-                          }
-                          final cat = data.categories[index - 1];
-                          final isSelected = selectedCategory == cat.id;
-                          return _AnimatedCategoryChip(
-                            label: cat.name,
-                            selected: isSelected,
-                            onTap: () {
-                              ref
-                                  .read(selectedHomeCategoryProvider.notifier)
-                                  .state = isSelected
-                                  ? null
-                                  : cat.id;
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ),
 
                   // ── 7. Featured Meals — large showcase cards ──
                   if (data.featuredItems.isNotEmpty) ...[
@@ -392,7 +332,7 @@ class HomeScreen extends ConsumerWidget {
                   if (context.isMobile)
                     SliverToBoxAdapter(
                       child: SizedBox(
-                        height: 315,
+                        height: 325,
                         child: bestSellers.isEmpty
                             ? KZEmptyState(
                                 icon: Icons.restaurant_menu_rounded,
@@ -448,7 +388,7 @@ class HomeScreen extends ConsumerWidget {
                           crossAxisCount: context.isDesktop ? 4 : 3,
                           mainAxisSpacing: 16,
                           crossAxisSpacing: 16,
-                          mainAxisExtent: 315,
+                          mainAxisExtent: 325,
                         ),
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final item = bestSellers[index];
@@ -1180,7 +1120,7 @@ class _GreetingHeader extends ConsumerWidget {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1188,31 +1128,23 @@ class _GreetingHeader extends ConsumerWidget {
               children: [
                 Icon(
                   _greetingIcon(hour),
-                  size: KZ.iconInline,
-                  color: HomeScreen.onSurfaceVariantColor,
+                  size: 18,
+                  color: HomeScreen.primaryColor,
                 ),
-                const SizedBox(width: KZ.sp6),
-                Flexible(
-                  child: Text(
-                    _greetingTextKey(hour).tr(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: KZ.label.copyWith(
-                      color: HomeScreen.onSurfaceVariantColor,
-                    ),
-                  ),
+                const SizedBox(width: 6),
+                Text(
+                  _greetingTextKey(hour).tr(),
+                  style: KZ.labelLarge.copyWith(color: HomeScreen.primaryColor),
                 ),
               ],
             ),
-            const SizedBox(height: KZ.sp4),
+            const SizedBox(height: 2),
             Text(
               hasName
                   ? user.name.trim().split(' ').first
                   : 'home.guest_greeting'.tr(),
-              style: KZ.display.copyWith(fontSize: 28),
+              style: KZ.display.copyWith(fontSize: 32, height: 1.2, color: HomeScreen.onSurfaceColor),
             ),
-            const SizedBox(height: KZ.sp6),
-            Text('home.search_hint'.tr(), style: KZ.bodyLarge),
           ],
         ),
       ),
@@ -1223,8 +1155,8 @@ class _GreetingHeader extends ConsumerWidget {
 /// Delivery destination, promoted to a proper KZ card — the second beat of
 /// the story, immediately grounding "what happens when I order" before the
 /// catalog begins. Reuses [KZCard] rather than a bespoke container.
-class _DeliveryAddressCard extends ConsumerWidget {
-  const _DeliveryAddressCard();
+class _AppBarAddressSelector extends ConsumerWidget {
+  const _AppBarAddressSelector();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1232,62 +1164,42 @@ class _DeliveryAddressCard extends ConsumerWidget {
     final address = addressState.defaultAddress;
 
     final subtitle = address != null
-        ? '${address.label.isNotEmpty ? address.label : address.street} • ${address.area}'
+        ? '${address.label.isNotEmpty ? address.label : address.street}'
         : 'home.add_address'.tr();
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Semantics(
-        button: true,
-        label: '${'home.delivery_to'.tr()}: $subtitle',
-        child: KZCard(
-          padding: const EdgeInsets.symmetric(
-            horizontal: KZ.sp16,
-            vertical: KZ.sp14,
-          ),
-          onTap: () => context.push('/profile/addresses'),
-          child: Row(
+    return GestureDetector(
+      onTap: () => context.push('/profile/addresses'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: HomeScreen.primaryContainerColor.withValues(
-                    alpha: 0.14,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.location_on_rounded,
-                  color: HomeScreen.primaryColor,
-                  size: KZ.iconControl,
-                ),
-              ),
-              const SizedBox(width: KZ.sp12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('home.delivery_to'.tr(), style: KZ.caption),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: KZ.cardTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+              Text(
+                'home.delivery_to'.tr(),
+                style: KZ.label.copyWith(
+                  color: HomeScreen.onSurfaceVariantColor,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Icon(
-                Icons.keyboard_arrow_right_rounded,
-                color: HomeScreen.onSurfaceVariantColor,
-                size: KZ.iconControl,
+                Icons.keyboard_arrow_down_rounded,
+                size: 16,
+                color: HomeScreen.primaryColor,
               ),
             ],
           ),
-        ),
+          Text(
+            subtitle,
+            style: KZ.cardTitle.copyWith(
+              color: HomeScreen.onSurfaceColor,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
@@ -1408,31 +1320,6 @@ class _PromoHero extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// A [KZChip] wrapped in a subtle selection-scale animation — the chip
-/// widget itself is untouched, so every other KZChip call site is
-/// unaffected.
-class _AnimatedCategoryChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _AnimatedCategoryChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedScale(
-      scale: selected ? 1.04 : 1.0,
-      duration: const Duration(milliseconds: 160),
-      curve: Curves.easeOut,
-      child: KZChip(label: label, selected: selected, onTap: onTap),
     );
   }
 }

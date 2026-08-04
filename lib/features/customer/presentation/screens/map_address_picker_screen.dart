@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'package:kebda_zaman/core/di/providers.dart';
+import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 
@@ -58,17 +61,19 @@ String? mapPickerStatusMessageKey(MapPickerLocationStatus status) {
 /// optionally center on the device's current location first, then confirm
 /// to reverse-geocode the chosen coordinates into street/city/area
 /// suggestions. Delivery zone is never auto-selected here (VO2.1 scope).
-class MapAddressPickerScreen extends StatefulWidget {
+class MapAddressPickerScreen extends ConsumerStatefulWidget {
   final double? initialLat;
   final double? initialLng;
 
   const MapAddressPickerScreen({super.key, this.initialLat, this.initialLng});
 
   @override
-  State<MapAddressPickerScreen> createState() => _MapAddressPickerScreenState();
+  ConsumerState<MapAddressPickerScreen> createState() =>
+      _MapAddressPickerScreenState();
 }
 
-class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
+class _MapAddressPickerScreenState
+    extends ConsumerState<MapAddressPickerScreen> {
   static const LatLng _fallbackCenter = LatLng(30.0444, 31.2357); // Cairo
 
   GoogleMapController? _mapController;
@@ -152,30 +157,38 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
     return '';
   }
 
-  Future<void> _confirm() async {
-    setState(() => _isGeocoding = true);
+  // Open Location Code ("Plus Code") pattern, e.g. "7JCQ+2P" — the native
+  // geocoding plugin sometimes returns this in Placemark.name instead of a
+  // street name, and it must never be surfaced as an address field.
+  static final RegExp _plusCodePattern = RegExp(
+    r'^[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3}',
+  );
 
+  static String? _dropPlusCode(String? candidate) {
+    final value = candidate?.trim();
+    if (value == null || value.isEmpty) return candidate;
+    return _plusCodePattern.hasMatch(value.toUpperCase()) ? null : candidate;
+  }
+
+  /// Fallback used only when the backend reverse-geocode call is
+  /// unavailable, times out, or returns a controlled provider error.
+  Future<({String street, String area, String city, bool failed})>
+  _nativeReverseGeocode(double lat, double lng) async {
     String street = '';
     String city = '';
     String area = '';
-    var geocodingFailed = false;
+    var failed = false;
     try {
       await setLocaleIdentifier('ar_EG');
-      final placemarks = await placemarkFromCoordinates(
-        _target.latitude,
-        _target.longitude,
-      );
-      debugPrint('map_picker: placemarks=${placemarks.length}');
+      final placemarks = await placemarkFromCoordinates(lat, lng);
       if (placemarks.isNotEmpty) {
         final p = placemarks.first;
-        debugPrint(
-          'map_picker: street=${p.street} subLocality=${p.subLocality} '
-          'locality=${p.locality} subAdministrativeArea=${p.subAdministrativeArea} '
-          'administrativeArea=${p.administrativeArea}',
-        );
-
         final used = <String>{};
-        street = _firstUnique([p.street, p.name, p.thoroughfare], used);
+        street = _firstUnique([
+          p.street,
+          _dropPlusCode(p.name),
+          p.thoroughfare,
+        ], used);
         area = _firstUnique([
           p.subLocality,
           p.locality,
@@ -190,12 +203,56 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
       if (street.isEmpty && city.isEmpty && area.isEmpty) {
         // No usable placemark fields — treat as a full geocoding failure so
         // the coordinates are never surfaced as the visible address.
-        geocodingFailed = true;
+        failed = true;
       }
     } catch (_) {
       // Reverse geocoding unavailable — return coordinates only and let
       // the address form stay manually editable.
-      geocodingFailed = true;
+      failed = true;
+    }
+    debugPrint(
+      'map_picker: native fallback geocoding ${failed ? 'failed' : 'succeeded'}',
+    );
+    return (street: street, area: area, city: city, failed: failed);
+  }
+
+  Future<void> _confirm() async {
+    if (_isGeocoding) return; // guard against duplicate confirm taps
+    setState(() => _isGeocoding = true);
+
+    final lat = _target.latitude;
+    final lng = _target.longitude;
+    String street = '';
+    String city = '';
+    String area = '';
+    var geocodingFailed = false;
+
+    final repo = ref.read(reverseGeocodeRepositoryProvider);
+    final result = await repo.reverseGeocode(lat, lng);
+
+    switch (result) {
+      case Success(data: final data):
+        debugPrint('map_picker: backend reverse geocode success');
+        street = data.street.trim();
+        area = data.area.trim();
+        city = data.city.trim();
+        if (street.isEmpty && area.isEmpty && city.isEmpty) {
+          final fallback = await _nativeReverseGeocode(lat, lng);
+          street = fallback.street;
+          area = fallback.area;
+          city = fallback.city;
+          geocodingFailed = fallback.failed;
+        }
+      case Err(error: final failure):
+        debugPrint(
+          'map_picker: backend reverse geocode failed '
+          '(${failure.runtimeType}), using native fallback',
+        );
+        final fallback = await _nativeReverseGeocode(lat, lng);
+        street = fallback.street;
+        area = fallback.area;
+        city = fallback.city;
+        geocodingFailed = fallback.failed;
     }
 
     if (!mounted) return;
@@ -209,8 +266,8 @@ class _MapAddressPickerScreenState extends State<MapAddressPickerScreen> {
 
     Navigator.of(context).pop(
       MapAddressPickResult(
-        lat: _target.latitude,
-        lng: _target.longitude,
+        lat: lat,
+        lng: lng,
         street: street,
         city: city,
         area: area,

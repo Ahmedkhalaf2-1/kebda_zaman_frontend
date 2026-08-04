@@ -41,6 +41,8 @@ import 'package:kebda_zaman/features/shared/data/api_device_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/device_repository.dart';
 import 'package:kebda_zaman/features/shared/data/api_address_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/address_repository.dart';
+import 'package:kebda_zaman/features/shared/data/api_reverse_geocode_repository.dart';
+import 'package:kebda_zaman/features/shared/domain/repositories/reverse_geocode_repository.dart';
 import 'package:kebda_zaman/features/shared/data/api_favorites_repository.dart';
 import 'package:kebda_zaman/features/shared/data/api_loyalty_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/favorites_repository.dart';
@@ -105,6 +107,12 @@ final deviceRepositoryProvider = Provider<DeviceRepository>((ref) {
 
 final addressRepositoryProvider = Provider<AddressRepository>((ref) {
   return ApiAddressRepository(ref.watch(apiClientProvider));
+});
+
+final reverseGeocodeRepositoryProvider = Provider<ReverseGeocodeRepository>((
+  ref,
+) {
+  return ApiReverseGeocodeRepository(ref.watch(apiClientProvider));
 });
 
 final favoritesRepositoryProvider = Provider<FavoritesRepository>((ref) {

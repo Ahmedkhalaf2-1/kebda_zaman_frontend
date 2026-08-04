@@ -113,19 +113,22 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   GlobalKey _tabKeyFor(String categoryId) =>
       _tabKeys.putIfAbsent(categoryId, () => GlobalKey());
 
-  /// Scrolls the horizontal category chip bar so [categoryId] is centred.
-  /// Uses the same curve/duration as the vertical section scroll for a
-  /// coherent feel. Does NOT set [_isProgrammaticScroll] — this is a
-  /// separate horizontal Scrollable and cannot fight the vertical listener.
   void _ensureTabVisible(String categoryId) {
     final ctx = _tabKeys[categoryId]?.currentContext;
     if (ctx == null) return;
-    Scrollable.ensureVisible(
-      ctx,
-      alignment: 0.5,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
-    );
+    
+    // Use Scrollable.maybeOf to get ONLY the horizontal scrollable and call ensureVisible on its position.
+    // Calling the static Scrollable.ensureVisible(ctx) bubbles up and incorrectly scrolls the vertical CustomScrollView!
+    final scrollable = Scrollable.maybeOf(ctx);
+    final renderObject = ctx.findRenderObject();
+    if (scrollable != null && renderObject != null) {
+      scrollable.position.ensureVisible(
+        renderObject,
+        alignment: 0.5,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+      );
+    }
   }
 
   /// Programmatically scrolls the main list to the section for [categoryId].
@@ -174,16 +177,28 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
         headerBox.localToGlobal(Offset(0, headerBox.size.height)).dy;
 
     String? activeId;
-    for (final section in sections) {
+    for (int i = 0; i < sections.length; i++) {
+      final section = sections[i];
       final box =
           _sectionKeys[section.category.id]?.currentContext?.findRenderObject()
               as RenderBox?;
-      if (box == null || !box.attached) continue;
+              
+      if (box == null || !box.attached) {
+        // Unmounted sections are typically above the viewport when scrolling down.
+        // We tentatively set them as active. If the next visible section is below
+        // the threshold, it will break and leave this as the active section.
+        activeId = section.category.id;
+        continue;
+      }
+
       final topY = box.localToGlobal(Offset.zero).dy;
       // 16 dp dead-zone prevents flicker near section boundaries.
       if (topY <= thresholdY + 16) {
         activeId = section.category.id;
       } else {
+        // This section is below the threshold. If activeId is still null, 
+        // it means we are at the very top of the list, so default to this first section.
+        activeId ??= section.category.id;
         break;
       }
     }
@@ -729,12 +744,12 @@ class _MenuProductCard extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Name — Expanded fills all space above the price;
-                          // Align.bottomStart keeps single-line names visually
-                          // close to the price row rather than floating at top.
+                          // Name — top-aligned so every card in the same row
+                          // starts its text at the same vertical position.
+                          // Price stays anchored at the bottom of the info slot.
                           Expanded(
                             child: Align(
-                              alignment: AlignmentDirectional.bottomStart,
+                              alignment: AlignmentDirectional.topStart,
                               child: Text(
                                 item.localizedName(lang),
                                 style: KZ.itemTitle,
@@ -831,16 +846,9 @@ class _MenuProductCard extends ConsumerWidget {
                     child: Container(
                       width: 44,
                       height: 44,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: KZ.primary,
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: KZ.primary.withValues(alpha: 0.35),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
                       ),
                       child: const Icon(
                         Icons.add_rounded,

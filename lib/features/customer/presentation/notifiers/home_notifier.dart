@@ -34,7 +34,6 @@ final homeDataProvider = FutureProvider<HomeData>((ref) async {
 
   final categoriesResult = await menuRepo.getCategories();
   final featuredResult = await menuRepo.getFeaturedItems();
-  final bestSellersResult = await menuRepo.getBestSellers();
   final allItemsResult = await menuRepo.getMenuItems();
 
   final categories = categoriesResult.fold(
@@ -45,14 +44,17 @@ final homeDataProvider = FutureProvider<HomeData>((ref) async {
     (f) => throw Exception(f.message),
     (data) => data,
   );
-  final bestSellers = bestSellersResult.fold(
-    (f) => throw Exception(f.message),
-    (data) => data,
-  );
   final allItems = allItemsResult.fold(
     (f) => <MenuItem>[], // default to empty if fails
     (data) => data,
   );
+
+  // Best sellers = items the admin explicitly badged as BESTSELLER in the menu.
+  // This is the same source of truth as the menu screen badges — no separate
+  // /best-sellers endpoint is needed and the list stays perfectly in sync.
+  final bestSellers = allItems
+      .where((item) => item.badge == MenuItemBadge.bestseller)
+      .toList();
 
   // Derived sections
   final offers = allItems.where((item) => item.discountPrice != null).toList();

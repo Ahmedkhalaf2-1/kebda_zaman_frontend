@@ -6,12 +6,12 @@ class KZ {
   KZ._();
 
   // ─── Colors ───────────────────────────────────────────
-  static const Color primary = Color(0xFFAB3500);
+  static const Color primary = Color(0xFFFE724C);
   static const Color primaryContainer = Color(0xFFFF6B35);
   static const Color primaryFixed = Color(0xFFFFDBD0);
   static const Color onPrimary = Colors.white;
 
-  static const Color surface = Color(0xFFFCF9F5);
+  static const Color surface = Colors.white;
   static const Color surfaceContainer = Color(0xFFEFEEEA);
   static const Color surfaceContainerLow = Color(0xFFF4F4F0);
   static const Color surfaceContainerHigh = Color(0xFFE9E8E4);
@@ -181,7 +181,7 @@ class KZ {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(radiusFull),
-        borderSide: const BorderSide(color: primaryContainer, width: 2),
+        borderSide: BorderSide.none,
       ),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: sp16,

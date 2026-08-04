@@ -494,12 +494,37 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   // Top Navigation Bar
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                      horizontal: 20,
                       vertical: 12,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: CheckoutScreen.primaryColor.withValues(alpha: 0.1),
+                            border: Border.all(
+                              color: CheckoutScreen.primaryColor.withValues(alpha: 0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.person_rounded,
+                            color: CheckoutScreen.onSurfaceVariantColor,
+                            size: 22,
+                          ),
+                        ),
+                        Text(
+                          'checkout.title'.tr(),
+                          style: KZ.pageTitle.copyWith(
+                            color: CheckoutScreen.primaryColor,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 20,
+                          ),
+                        ),
                         Semantics(
                           button: true,
                           label: 'common.back'.tr(),
@@ -507,37 +532,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             onTap: () => context.pop(),
                             customBorder: const CircleBorder(),
                             child: const SizedBox(
-                              width: KZ.iconTapTargetMin,
-                              height: KZ.iconTapTargetMin,
+                              width: 44,
+                              height: 44,
                               child: Icon(
-                                Icons.arrow_back_rounded,
+                                Icons.arrow_forward_rounded,
                                 color: CheckoutScreen.onSurfaceColor,
-                                size: KZ.iconAction,
+                                size: 24,
                               ),
                             ),
-                          ),
-                        ),
-                        Text(
-                          'checkout.title'.tr(),
-                          style: KZ.pageTitle.copyWith(
-                            color: CheckoutScreen.primaryColor,
-                          ),
-                        ),
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: CheckoutScreen.surfaceContainerColor,
-                            border: Border.all(
-                              color: CheckoutScreen.outlineVariantColor,
-                              width: 1,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.person_rounded,
-                            color: CheckoutScreen.secondaryColor,
-                            size: KZ.iconControl,
                           ),
                         ),
                       ],
@@ -588,11 +590,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           children: [
                             // 1. Order Type Toggle (Delivery vs Pickup)
                             Container(
-                              height: 52,
-                              padding: const EdgeInsets.all(4),
+                              height: 58,
+                              padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: CheckoutScreen.surfaceContainerColor,
-                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: CheckoutScreen.primaryColor.withValues(alpha: 0.1),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
                               child: Row(
                                 children: [
@@ -725,119 +737,137 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
                             // 2. Address & Time Group Cards
                             if (_orderType == 'delivery') ...[
-                              KZCard(
+                              Container(
                                 padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: CheckoutScreen.primaryColor.withValues(alpha: 0.1),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.03),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Row(
                                           children: [
                                             const Icon(
                                               Icons.home_rounded,
-                                              color:
-                                                  CheckoutScreen.primaryColor,
-                                              size: KZ.iconControl,
+                                              color: CheckoutScreen.primaryColor,
+                                              size: 20,
                                             ),
                                             const SizedBox(width: 8),
                                             Text(
                                               'checkout.delivery_address'.tr(),
                                               style: KZ.itemTitle.copyWith(
-                                                color:
-                                                    CheckoutScreen.primaryColor,
-                                                fontWeight: FontWeight.w700,
+                                                color: CheckoutScreen.primaryColor,
+                                                fontWeight: FontWeight.w800,
                                                 fontSize: 16,
                                               ),
                                             ),
                                           ],
                                         ),
                                         TextButton(
-                                          onPressed: () =>
-                                              _showAddressPicker(context),
+                                          onPressed: () => _showAddressPicker(context),
                                           style: TextButton.styleFrom(
-                                            minimumSize: const Size(
-                                              0,
-                                              KZ.iconTapTargetMin,
-                                            ),
+                                            minimumSize: Size.zero,
+                                            padding: EdgeInsets.zero,
+                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                           ),
                                           child: Text(
                                             'checkout.change_address'.tr(),
                                             style: KZ.labelLarge.copyWith(
-                                              color:
-                                                  CheckoutScreen.primaryColor,
+                                              color: CheckoutScreen.primaryColor,
+                                              fontWeight: FontWeight.w700,
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 12),
                                     Text(
                                       displayAddress,
                                       style: KZ.body.copyWith(
-                                        color: CheckoutScreen
-                                            .onSurfaceVariantColor,
+                                        color: CheckoutScreen.onSurfaceVariantColor,
+                                        fontSize: 14,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 16),
                               _DeliveryZoneCard(
                                 zonesAsync: zonesAsync,
                                 selectedZoneId: _selectedZoneId,
-                                onSelect: (zoneId) =>
-                                    setState(() => _selectedZoneId = zoneId),
+                                onSelect: (zoneId) => setState(() => _selectedZoneId = zoneId),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 16),
                             ],
 
                             // Estimated Arrival Card
-                            KZCard(
+                            Container(
                               padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: CheckoutScreen.primaryColor.withValues(alpha: 0.1),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
                               child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'checkout.estimated_arrival'.tr(),
+                                        style: KZ.label.copyWith(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: CheckoutScreen.onSurfaceColor,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        _orderType == 'delivery' ? '25-35 دقيقة' : '15-20 دقيقة',
+                                        style: KZ.priceLarge.copyWith(
+                                          fontSize: 26,
+                                          fontWeight: FontWeight.w800,
+                                          color: CheckoutScreen.primaryColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                   Container(
-                                    width: 48,
-                                    height: 48,
+                                    width: 52,
+                                    height: 52,
                                     decoration: BoxDecoration(
-                                      color: CheckoutScreen.primaryColor
-                                          .withValues(alpha: 0.08),
+                                      color: CheckoutScreen.primaryColor.withValues(alpha: 0.1),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
                                       Icons.schedule_rounded,
                                       color: CheckoutScreen.primaryColor,
-                                      size: KZ.iconAction,
+                                      size: 26,
                                     ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'checkout.estimated_arrival'.tr(),
-                                        style: KZ.label.copyWith(
-                                          fontSize: 12,
-                                          letterSpacing: 0.5,
-                                          color: CheckoutScreen
-                                              .onSurfaceVariantColor,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        _orderType == 'delivery'
-                                            ? 'checkout.delivery_eta'.tr()
-                                            : 'checkout.pickup_eta'.tr(),
-                                        style: KZ.priceLarge.copyWith(
-                                          fontSize: 24,
-                                          color: CheckoutScreen.primaryColor,
-                                        ),
-                                      ),
-                                    ],
                                   ),
                                 ],
                               ),
@@ -881,22 +911,20 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               borderRadius: BorderRadius.circular(16),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 180),
-                                padding: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
                                     color: _selectedPaymentMethod == 0
                                         ? CheckoutScreen.primaryColor
-                                        : CheckoutScreen.surfaceContainerColor,
+                                        : CheckoutScreen.primaryColor.withValues(alpha: 0.1),
                                     width: _selectedPaymentMethod == 0 ? 2 : 1,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.04,
-                                      ),
-                                      blurRadius: 16,
+                                      color: Colors.black.withValues(alpha: 0.03),
+                                      blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
                                   ],
@@ -911,16 +939,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                           width: 48,
                                           height: 48,
                                           decoration: BoxDecoration(
-                                            color:
-                                                CheckoutScreen.onSurfaceColor,
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
+                                            color: CheckoutScreen.onSurfaceColor,
+                                            borderRadius: BorderRadius.circular(12),
                                           ),
                                           child: const Icon(
                                             Icons.payments_rounded,
                                             color: Colors.white,
-                                            size: KZ.iconAction,
+                                            size: 24,
                                           ),
                                         ),
                                         const SizedBox(width: 14),
@@ -935,6 +960,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                                 fontWeight: FontWeight.w700,
                                               ),
                                             ),
+                                            const SizedBox(height: 2),
                                             Text(
                                               'checkout.pay_upon_receipt'
                                                   .tr()
@@ -943,7 +969,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                                 fontSize: 12,
                                                 color: CheckoutScreen
                                                     .onSurfaceVariantColor,
-                                                letterSpacing: -0.2,
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
@@ -1477,9 +1502,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             ),
                           KZButton(
                             fullWidth: true,
-                            pill: false,
+                            pill: true,
                             loading: checkoutState.isLoading,
-                            icon: Icons.arrow_forward_rounded,
                             label: 'checkout.place_order_total'.tr(
                               namedArgs: {
                                 'amount': formatCurrency(
@@ -1593,10 +1617,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         );
                                     if (order != null) {
                                       if (!context.mounted) return;
-                                      context.go(
-                                        '/checkout/success',
-                                        extra: order,
-                                      );
+                                      context.go('/orders/tracking/${order.id}');
                                     }
                                   },
                           ),

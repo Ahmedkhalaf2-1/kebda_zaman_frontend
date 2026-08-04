@@ -35,10 +35,10 @@ class KZChip extends StatelessWidget {
           child: AnimatedContainer(
             duration: KZMotion.durationFor(context, KZMotion.fast),
             curve: KZMotion.stateChange,
-            constraints: const BoxConstraints(minHeight: 40),
+            constraints: const BoxConstraints(minHeight: 34),
             padding: const EdgeInsets.symmetric(
-              horizontal: KZ.sp16,
-              vertical: KZ.sp8,
+              horizontal: 16,
+              vertical: 6,
             ),
             decoration: BoxDecoration(
               color: selected ? KZ.primary : KZ.surfaceContainerLow,
@@ -53,7 +53,11 @@ class KZChip extends StatelessWidget {
                 ],
                 Text(
                   label,
-                  style: KZ.label.copyWith(color: foreground, fontSize: 13),
+                  style: KZ.label.copyWith(
+                    color: foreground,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),

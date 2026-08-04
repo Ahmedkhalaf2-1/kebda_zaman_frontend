@@ -75,6 +75,16 @@ class SearchNotifier extends AutoDisposeNotifier<SearchState> {
     if (recents.length > 5) recents.removeLast();
     state = state.copyWith(recentSearches: recents);
   }
+
+  void removeRecentSearch(String search) {
+    final recents = List<String>.from(state.recentSearches);
+    recents.remove(search);
+    state = state.copyWith(recentSearches: recents);
+  }
+
+  void clearRecentSearches() {
+    state = state.copyWith(recentSearches: []);
+  }
 }
 
 final searchProvider = AutoDisposeNotifierProvider<SearchNotifier, SearchState>(

@@ -221,54 +221,66 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
       key: const ValueKey('content'),
       controller: _scrollController,
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       children: [
-        // 1. Status Highlight Header
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'orders.order_num'.tr(namedArgs: {'id': _orderDisplayId(order)}),
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: OrderTrackingScreen.onSurfaceColor,
-                letterSpacing: -0.5,
-              ),
+        // 1. Sleek Status Header
+        Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: OrderTrackingScreen.primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(30),
             ),
-            const SizedBox(height: 6),
-            Row(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
                     color: OrderTrackingScreen.primaryColor,
                     shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: OrderTrackingScreen.primaryColor.withValues(alpha: 0.4),
+                        blurRadius: 6,
+                        spreadRadius: 1,
+                      )
+                    ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: KZMotion.durationFor(context, KZMotion.standard),
-                    transitionBuilder: (child, animation) =>
-                        FadeTransition(opacity: animation, child: child),
-                    child: Text(
-                      statusDescription,
-                      key: ValueKey(order.status),
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: OrderTrackingScreen.onSurfaceVariantColor,
-                      ),
+                const SizedBox(width: 10),
+                AnimatedSwitcher(
+                  duration: KZMotion.durationFor(context, KZMotion.standard),
+                  transitionBuilder: (child, animation) =>
+                      FadeTransition(opacity: animation, child: child),
+                  child: Text(
+                    statusDescription,
+                    key: ValueKey(order.status),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: OrderTrackingScreen.primaryColor,
                     ),
                   ),
                 ),
               ],
             ),
-          ],
+          ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+        Center(
+          child: Text(
+            'orders.order_num'.tr(namedArgs: {'id': _orderDisplayId(order)}),
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: OrderTrackingScreen.onSurfaceColor,
+              letterSpacing: -1,
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
 
         // 2. Branded Status Card (no external image — offline-safe)
         _StatusBannerCard(order: order, onViewDetails: _scrollToSummary),
@@ -671,10 +683,6 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
       return '$hour12:$minute $period';
     }
 
-    // Fulfillment-aware timeline — derived from order.fulfillmentType, not
-    // from the current status value. A Pickup order's timeline never
-    // contains "Out for delivery"/"Delivered"; a Delivery order's timeline
-    // never contains "Ready for pickup"/"Picked up".
     final timelineSteps = isPickup
         ? [
             _TrackingStepData(
@@ -698,14 +706,14 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
             _TrackingStepData(
               status: OrderStatus.readyForPickup,
               title: 'tracking.step_ready_pickup'.tr(),
-              subtitleFallback: 'tracking.status_desc_ready_pickup'.tr(),
+              subtitleFallback: 'tracking.ready_pickup_subtitle'.tr(),
               icon: Icons.storefront_rounded,
             ),
             _TrackingStepData(
               status: OrderStatus.pickedUp,
               title: 'tracking.step_picked_up'.tr(),
-              subtitleFallback: 'tracking.status_desc_picked_up'.tr(),
-              icon: Icons.home_outlined,
+              subtitleFallback: 'tracking.picked_up_subtitle'.tr(),
+              icon: Icons.check_circle_rounded,
             ),
           ]
         : [
@@ -765,122 +773,99 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                   _ActiveStepEmphasis(
                     statusKey: order.status,
                     child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(
+                      width: 48,
+                      height: 48,
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
                           color: OrderTrackingScreen.primaryColor,
-                          width: 2.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: OrderTrackingScreen.primaryColor.withValues(
-                              alpha: 0.25,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: OrderTrackingScreen.primaryColor.withValues(
+                                alpha: 0.3,
+                              ),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        step.icon,
-                        color: OrderTrackingScreen.primaryColor,
-                        size: 22,
-                      ),
-                    ),
-                  )
-                else if (isCompleted)
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: OrderTrackingScreen.primaryColor,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: OrderTrackingScreen.primaryColor.withValues(
-                            alpha: 0.3,
-                          ),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.check_rounded,
-                      color: Colors.white,
-                      size: 22,
+                        child: Icon(step.icon, color: Colors.white, size: 16),
+                      ),
                     ),
                   )
                 else
                   Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: OrderTrackingScreen.surfaceContainerHighestColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: OrderTrackingScreen.outlineVariantColor
-                            .withValues(alpha: 0.5),
-                        width: 1.5,
+                    width: 48,
+                    height: 48,
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? OrderTrackingScreen.primaryColor
+                            : OrderTrackingScreen.surfaceContainerHighestColor,
+                        shape: BoxShape.circle,
                       ),
-                    ),
-                    child: Icon(
-                      step.icon,
-                      color: OrderTrackingScreen.secondaryColor.withValues(
-                        alpha: 0.7,
+                      child: Icon(
+                        step.icon,
+                        color: isCompleted
+                            ? Colors.white
+                            : OrderTrackingScreen.secondaryColor.withValues(
+                                alpha: 0.6,
+                              ),
+                        size: 16,
                       ),
-                      size: 20,
                     ),
                   ),
                 if (!isLast)
                   Container(
-                    width: 2.5,
-                    height: 44,
+                    width: 2,
+                    height: 50,
                     color: isCompleted
                         ? OrderTrackingScreen.primaryColor
-                        : OrderTrackingScreen.outlineVariantColor,
+                        : OrderTrackingScreen.outlineVariantColor.withValues(
+                            alpha: 0.4,
+                          ),
                   ),
               ],
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 20),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(top: 6, bottom: isLast ? 0 : 28),
+                padding: EdgeInsets.only(top: 12, bottom: isLast ? 0 : 38),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       step.title,
                       style: TextStyle(
-                        fontSize: isActive ? 18 : 16,
+                        fontSize: 17,
                         fontWeight: isActive || isCompleted
                             ? FontWeight.w800
-                            : FontWeight.w700,
-                        color: isActive
+                            : FontWeight.w600,
+                        color: isActive || isCompleted
                             ? OrderTrackingScreen.onSurfaceColor
-                            : (isCompleted
-                                  ? OrderTrackingScreen.primaryColor
-                                  : OrderTrackingScreen.secondaryColor
-                                        .withValues(alpha: 0.7)),
+                            : OrderTrackingScreen.secondaryColor.withValues(
+                                alpha: 0.7,
+                              ),
                         letterSpacing: -0.3,
-                        height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
                       subtitle,
                       style: TextStyle(
-                        fontSize: isActive ? 14 : 13,
-                        fontWeight: isActive
-                            ? FontWeight.w600
-                            : FontWeight.w500,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        height: 1.4,
                         color: isActive
                             ? OrderTrackingScreen.onSurfaceVariantColor
                             : OrderTrackingScreen.secondaryColor.withValues(
-                                alpha: 0.7,
+                                alpha: 0.6,
                               ),
                       ),
                     ),
@@ -949,91 +934,128 @@ class _StatusBannerCard extends StatelessWidget {
         : null;
 
     return Container(
-      height: 190,
-      padding: const EdgeInsets.all(20),
+      height: 220,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(28),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             OrderTrackingScreen.primaryColor,
-            OrderTrackingScreen.primaryContainerColor,
+            Color(0xFFB54310), // Richer, darker orange
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+            color: OrderTrackingScreen.primaryColor.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
         children: [
-          Icon(_statusIcon(), color: Colors.white, size: 36),
-          const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Column(
+          // Background abstract elements
+          Positioned(
+            right: -30,
+            top: -30,
+            child: Transform.rotate(
+              angle: -0.2,
+              child: Icon(
+                _statusIcon(),
+                size: 180,
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Positioned(
+            left: -50,
+            bottom: -50,
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.05),
+              ),
+            ),
+          ),
+          // Foreground Content
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'tracking.estimated_arrival'.tr(),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white.withValues(alpha: 0.8),
-                        letterSpacing: 1.0,
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                        ),
                       ),
+                      child: Icon(_statusIcon(), color: Colors.white, size: 34),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      estimatedArrival ?? 'tracking.estimate_unavailable'.tr(),
-                      style: TextStyle(
-                        fontSize: estimatedArrival != null ? 26 : 16,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        height: 1.1,
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: onViewDetails,
+                        borderRadius: BorderRadius.circular(999),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.35),
+                            ),
+                          ),
+                          child: Text(
+                            'tracking.view_details'.tr(),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 12),
-              KZPressableScale(
-                child: InkWell(
-                  onTap: onViewDetails,
-                  borderRadius: BorderRadius.circular(999),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.4),
-                      ),
-                    ),
-                    child: Text(
-                      'tracking.view_details'.tr(),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
+                const Spacer(),
+                Text(
+                  'tracking.estimated_arrival'.tr(),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    letterSpacing: 0.5,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                Text(
+                  estimatedArrival ?? 'tracking.estimate_unavailable'.tr(),
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                    height: 1.1,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

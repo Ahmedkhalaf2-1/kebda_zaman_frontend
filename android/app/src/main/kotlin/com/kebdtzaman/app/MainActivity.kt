@@ -1,4 +1,4 @@
-package com.example.kebda_zaman
+package com.kebdtzaman.app
 
 import io.flutter.embedding.android.FlutterActivity
 

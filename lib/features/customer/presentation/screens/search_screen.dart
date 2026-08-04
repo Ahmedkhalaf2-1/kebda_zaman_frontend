@@ -9,6 +9,9 @@ import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
+import 'package:kebda_zaman/features/shared/domain/models/category.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/menu_notifier.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../notifiers/search_notifier.dart';
 
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
@@ -47,7 +50,7 @@ class SearchScreen extends ConsumerWidget {
       ),
       body: ResponsiveContainer(
         child: searchState.query.isEmpty
-            ? _buildIdleState(context, searchState, searchNotifier)
+            ? _buildIdleState(context, searchState, searchNotifier, ref)
             : _buildResultsState(context, searchState),
       ),
     );
@@ -57,7 +60,11 @@ class SearchScreen extends ConsumerWidget {
     BuildContext context,
     SearchState state,
     SearchNotifier notifier,
+    WidgetRef ref,
   ) {
+    final menuState = ref.watch(menuNotifierProvider);
+    final lang = context.locale.languageCode;
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: KZ.screenPadding,
@@ -67,38 +74,124 @@ class SearchScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (state.recentSearches.isNotEmpty) ...[
-            Text('search.recent'.tr(), style: KZ.labelLarge),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('search.recent'.tr(), style: KZ.labelLarge),
+                TextButton(
+                  onPressed: () => notifier.clearRecentSearches(),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(50, 30),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    'Clear All',
+                    style: KZ.bodySmall.copyWith(color: KZ.onSurfaceVariant),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: KZ.sp8),
             Wrap(
               spacing: KZ.sp8,
               runSpacing: KZ.sp8,
-              children: state.recentSearches
-                  .map(
-                    (s) => KZChip(
-                      label: s,
-                      selected: false,
-                      onTap: () => notifier.updateQuery(s),
+              children: state.recentSearches.map((s) {
+                return InkWell(
+                  onTap: () => notifier.updateQuery(s),
+                  borderRadius: BorderRadius.circular(KZ.radiusFull),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
                     ),
-                  )
-                  .toList(),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(KZ.radiusFull),
+                      border: Border.all(
+                        color: KZ.outlineVariant.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          s,
+                          style: KZ.label.copyWith(
+                            color: KZ.onSurface,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        InkWell(
+                          onTap: () => notifier.removeRecentSearch(s),
+                          child: const Icon(
+                            Icons.close_rounded,
+                            size: 16,
+                            color: KZ.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
             const SizedBox(height: KZ.sp24),
           ],
-          if (state.popularSearches.isNotEmpty) ...[
+
+          if (menuState.value != null && menuState.value!.categories.isNotEmpty) ...[
             Text('search.popular'.tr(), style: KZ.labelLarge),
-            const SizedBox(height: KZ.sp8),
+            const SizedBox(height: KZ.sp16),
             Wrap(
-              spacing: KZ.sp8,
-              runSpacing: KZ.sp8,
-              children: state.popularSearches
-                  .map(
-                    (s) => KZChip(
-                      label: s,
-                      selected: true,
-                      onTap: () => notifier.updateQuery(s),
+              spacing: 12,
+              runSpacing: 12,
+              children: menuState.value!.categories.take(8).map((cat) {
+                return InkWell(
+                  onTap: () => notifier.updateQuery(cat.localizedName(lang)),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: 80,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: KZ.outlineVariant.withOpacity(0.3),
+                      ),
                     ),
-                  )
-                  .toList(),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CachedNetworkImage(
+                          imageUrl: cat.imageUrl ?? '',
+                          width: 44,
+                          height: 44,
+                          fit: BoxFit.cover,
+                          errorWidget:
+                              (c, u, e) =>
+                                  const Icon(Icons.fastfood, color: KZ.outlineVariant),
+                        ),
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Text(
+                            cat.localizedName(lang),
+                            style: KZ.caption.copyWith(
+                              color: KZ.onSurface,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ],

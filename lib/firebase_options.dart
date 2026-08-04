@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDit0ZuQAPZiPvgbtSqdMp-QVltOmGRktc',
-    appId: '1:168591231387:android:6b974a472375be7942793e',
+    appId: '1:168591231387:android:c997be1364dc28de42793e',
     messagingSenderId: '168591231387',
     projectId: 'keebda-zaman',
     storageBucket: 'keebda-zaman.firebasestorage.app',

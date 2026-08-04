@@ -257,74 +257,64 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     );
   }
 
-  // ── Promo Code Section matching Stitch HTML ──
+  // ── Promo Code Section ──
   Widget _buildPromoSection(Cart cart) {
     final hasPromo = cart.promoCodeId != null && cart.promoCodeId!.isNotEmpty;
 
     if (hasPromo) {
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: CartScreen.primaryColor.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: CartScreen.outlineVariantColor.withValues(alpha: 0.6),
-            width: 1.5,
+            color: CartScreen.primaryColor.withValues(alpha: 0.2),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Row(
           children: [
             const Icon(
-              Icons.sell_rounded,
+              Icons.local_offer_rounded,
               color: CartScreen.primaryColor,
-              size: KZ.iconControl,
+              size: 22,
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                '${'cart.applied'.tr()} ${cart.promoCodeId}',
-                style: KZ.itemTitle.copyWith(fontWeight: FontWeight.w700),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'cart.applied'.tr(),
+                    style: KZ.caption.copyWith(color: CartScreen.onSurfaceVariantColor),
+                  ),
+                  Text(
+                    cart.promoCodeId!,
+                    style: KZ.itemTitle.copyWith(fontWeight: FontWeight.w800, color: CartScreen.primaryColor),
+                  ),
+                ],
               ),
             ),
-            Semantics(
-              button: true,
-              label: 'cart.remove'.tr(),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(6),
-                onTap: () async {
-                  try {
-                    await ref.read(cartProvider.notifier).removePromoCode();
-                  } catch (e) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('common.something_wrong'.tr()),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  child: Text(
-                    'cart.remove'.tr().toUpperCase(),
-                    style: KZ.labelLarge.copyWith(
-                      color: CartScreen.errorColor,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+            InkWell(
+              onTap: () async {
+                try {
+                  await ref.read(cartProvider.notifier).removePromoCode();
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('common.something_wrong'.tr()), behavior: SnackBarBehavior.floating),
+                  );
+                }
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: CartScreen.errorColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'cart.remove'.tr(),
+                  style: KZ.labelLarge.copyWith(color: CartScreen.errorColor, fontWeight: FontWeight.w700),
                 ),
               ),
             ),
@@ -334,91 +324,65 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: CartScreen.outlineVariantColor.withValues(alpha: 0.6),
-          width: 1.5,
-        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: CartScreen.outlineVariantColor.withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Row(
         children: [
+          const SizedBox(width: 16),
           const Icon(
-            Icons.sell_rounded,
-            color: CartScreen.primaryColor,
-            size: KZ.iconControl,
+            Icons.local_offer_outlined,
+            color: CartScreen.onSurfaceVariantColor,
+            size: 20,
           ),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
               controller: _promoController,
-              style: KZ.bodyLarge,
+              textAlign: TextAlign.start,
+              style: KZ.bodyLarge.copyWith(fontWeight: FontWeight.w600),
               textCapitalization: TextCapitalization.characters,
               decoration: InputDecoration(
                 hintText: 'cart.promo_hint'.tr(),
-                hintStyle: KZ.bodyLarge.copyWith(
-                  color: CartScreen.onSurfaceVariantColor.withValues(
-                    alpha: 0.5,
-                  ),
-                ),
+                hintStyle: KZ.bodyLarge.copyWith(color: CartScreen.onSurfaceVariantColor.withValues(alpha: 0.5)),
                 border: InputBorder.none,
                 isCollapsed: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          Semantics(
-            button: true,
-            label: 'cart.apply'.tr(),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(6),
-              onTap: () async {
-                final code = _promoController.text.trim();
-                if (code.isEmpty) return;
-                try {
-                  await ref.read(cartProvider.notifier).applyPromoCode(code);
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${'cart.applied'.tr()} "$code"'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                } catch (e) {
-                  if (!context.mounted) return;
-                  final errorMsg = e.toString().replaceAll('Exception: ', '');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(errorMsg),
-                      behavior: SnackBarBehavior.floating,
-                      backgroundColor: KZ.error,
-                    ),
-                  );
-                }
-              },
-              child: Container(
-                constraints: const BoxConstraints(
-                  minHeight: KZ.iconTapTargetMin,
-                ),
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  'cart.apply'.tr().toUpperCase(),
-                  style: KZ.labelLarge.copyWith(
-                    color: CartScreen.primaryColor,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+          InkWell(
+            onTap: () async {
+              final code = _promoController.text.trim();
+              if (code.isEmpty) return;
+              try {
+                await ref.read(cartProvider.notifier).applyPromoCode(code);
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${'cart.applied'.tr()} "$code"'), behavior: SnackBarBehavior.floating),
+                );
+              } catch (e) {
+                if (!context.mounted) return;
+                final errorMsg = e.toString().replaceAll('Exception: ', '');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(errorMsg), behavior: SnackBarBehavior.floating, backgroundColor: KZ.error),
+                );
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                'cart.apply'.tr(),
+                style: KZ.labelLarge.copyWith(color: CartScreen.primaryColor, fontWeight: FontWeight.w800),
               ),
             ),
           ),
@@ -556,7 +520,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
   // fake/random/featured/popular fallback data.
 }
 
-// ── Cart item card matching Stitch HTML ──
+// ── Cart item card ──
 class _CartItemCard extends StatelessWidget {
   final CartItem item;
   final bool isPending;
@@ -580,13 +544,13 @@ class _CartItemCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: CartScreen.outlineVariantColor.withValues(alpha: 0.3),
+          color: CartScreen.outlineVariantColor.withValues(alpha: 0.4),
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF8C2B00).withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -594,11 +558,11 @@ class _CartItemCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 96,
-            height: 96,
+            width: 88,
+            height: 88,
             child: KZFoodImage(
               imageUrl: item.productImage,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
           const SizedBox(width: 14),
@@ -607,7 +571,6 @@ class _CartItemCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Title and Price Row
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -615,7 +578,7 @@ class _CartItemCard extends StatelessWidget {
                       child: Text(
                         item.productName,
                         style: KZ.itemTitle.copyWith(
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: CartScreen.onSurfaceColor,
                         ),
@@ -624,197 +587,115 @@ class _CartItemCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Flexible(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: Text(
-                          formatCurrency(
-                            item.lineTotal,
-                            locale: context.locale,
-                          ),
-                          style: KZ.priceLarge.copyWith(
-                            fontSize: 18,
-                            color: CartScreen.primaryColor,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          maxLines: 1,
+                    InkWell(
+                      onTap: onRemove,
+                      customBorder: const CircleBorder(),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 20,
+                          color: CartScreen.onSurfaceVariantColor,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-
-                // Edit and Remove Actions
+                const SizedBox(height: 4),
+                Text(
+                  formatCurrency(item.lineTotal, locale: context.locale),
+                  style: KZ.priceLarge.copyWith(
+                    fontSize: 16,
+                    color: CartScreen.primaryColor,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Flexible(
-                      child: InkWell(
-                        onTap: onEdit,
-                        borderRadius: BorderRadius.circular(4),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 2,
-                            horizontal: 4,
-                          ),
-                          child: Text(
-                            'common.edit'.tr(),
-                            style: KZ.labelLarge.copyWith(
-                              color: CartScreen.secondaryColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
+                    InkWell(
+                      onTap: onEdit,
+                      borderRadius: BorderRadius.circular(6),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.edit_rounded, size: 16, color: CartScreen.secondaryColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              'common.edit'.tr(),
+                              style: KZ.labelLarge.copyWith(
+                                color: CartScreen.secondaryColor,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Flexible(
-                      child: InkWell(
-                        onTap: onRemove,
-                        borderRadius: BorderRadius.circular(4),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 2,
-                            horizontal: 4,
-                          ),
-                          child: Text(
-                            'cart.remove'.tr(),
-                            style: KZ.labelLarge.copyWith(
-                              color: CartScreen.errorColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                    
+                    // Quantity Stepper
+                    Container(
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: CartScreen.surfaceContainerColor,
+                        borderRadius: BorderRadius.circular(100),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-
-                // Quantity Stepper matching Stitch HTML
-                Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: CartScreen.surfaceContainerColor,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Semantics(
-                          button: true,
-                          label: 'Decrease quantity',
-                          child: KZPressableScale(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          KZPressableScale(
                             enabled: !isPending,
                             child: InkWell(
-                              onTap: isPending
-                                  ? null
-                                  : () => onQuantityChanged(item.quantity - 1),
-                              customBorder: const CircleBorder(),
+                              onTap: isPending ? null : () => onQuantityChanged(item.quantity - 1),
+                              borderRadius: BorderRadius.circular(100),
                               child: Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.06,
-                                      ),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
+                                width: 36,
+                                alignment: Alignment.center,
                                 child: Icon(
                                   Icons.remove_rounded,
                                   size: 18,
-                                  color: isPending
-                                      ? CartScreen.outlineVariantColor
-                                      : CartScreen.secondaryColor,
+                                  color: isPending ? CartScreen.outlineVariantColor : CartScreen.onSurfaceColor,
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        Container(
-                          constraints: const BoxConstraints(minWidth: 36),
-                          alignment: Alignment.center,
-                          child: AnimatedSwitcher(
-                            duration: KZMotion.durationFor(
-                              context,
-                              KZMotion.fast,
-                            ),
-                            transitionBuilder: (child, animation) =>
-                                FadeTransition(
-                                  opacity: animation,
-                                  child: child,
+                          Container(
+                            constraints: const BoxConstraints(minWidth: 32),
+                            alignment: Alignment.center,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              child: Text(
+                                '${item.quantity}',
+                                key: ValueKey<int>(item.quantity),
+                                style: KZ.cardTitle.copyWith(
+                                  fontWeight: FontWeight.w700,
                                 ),
-                            child: Text(
-                              '${item.quantity}',
-                              key: ValueKey<int>(item.quantity),
-                              style: KZ.priceLarge.copyWith(
-                                fontSize: 18,
-                                color: CartScreen.onSurfaceColor,
                               ),
                             ),
                           ),
-                        ),
-                        Semantics(
-                          button: true,
-                          label: 'Increase quantity',
-                          child: KZPressableScale(
+                          KZPressableScale(
                             enabled: !isPending,
                             child: InkWell(
-                              onTap: isPending
-                                  ? null
-                                  : () => onQuantityChanged(item.quantity + 1),
-                              customBorder: const CircleBorder(),
+                              onTap: isPending ? null : () => onQuantityChanged(item.quantity + 1),
+                              borderRadius: BorderRadius.circular(100),
                               child: Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: isPending
-                                      ? CartScreen.primaryColor.withValues(
-                                          alpha: 0.5,
-                                        )
-                                      : CartScreen.primaryColor,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: CartScreen.primaryColor.withValues(
-                                        alpha: 0.25,
-                                      ),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
+                                width: 36,
+                                alignment: Alignment.center,
+                                child: Icon(
                                   Icons.add_rounded,
                                   size: 18,
-                                  color: Colors.white,
+                                  color: isPending ? CartScreen.outlineVariantColor : CartScreen.primaryColor,
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -825,7 +706,7 @@ class _CartItemCard extends StatelessWidget {
   }
 }
 
-// ── Sticky checkout CTA matching Stitch HTML ──
+// ── Sticky checkout CTA ──
 class _CheckoutButton extends StatefulWidget {
   final double total;
   final VoidCallback onTap;
@@ -850,66 +731,52 @@ class _CheckoutButtonState extends State<_CheckoutButton> {
         scale: _pressed ? 0.97 : 1.0,
         duration: const Duration(milliseconds: 120),
         curve: Curves.easeOut,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(KZ.radiusFull),
-            child: Container(
-              height: 56,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: CartScreen.primaryColor,
-                borderRadius: BorderRadius.circular(999),
-                boxShadow: [
-                  BoxShadow(
-                    color: CartScreen.primaryColor.withValues(alpha: 0.35),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
+        child: Container(
+          height: 56,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: CartScreen.primaryColor,
+            borderRadius: BorderRadius.circular(999),
+            boxShadow: [
+              BoxShadow(
+                color: CartScreen.primaryColor.withValues(alpha: 0.35),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'cart.checkout'.tr(),
+                  style: KZ.buttonLabel.copyWith(
+                    fontSize: 17,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
-              ),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'cart.checkout'.tr(),
-                      style: KZ.buttonLabel.copyWith(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        '•',
-                        style: KZ.buttonLabel.copyWith(
-                          fontSize: 18,
-                          color: Colors.white.withValues(alpha: 0.4),
-                        ),
-                      ),
-                    ),
-                    Text(
-                      formatCurrency(widget.total, locale: context.locale),
-                      style: KZ.buttonLabel.copyWith(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(
-                      Icons.arrow_forward_rounded,
-                      color: Colors.white,
-                      size: KZ.iconInline,
-                    ),
-                  ],
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    '•',
+                    style: KZ.buttonLabel.copyWith(
+                      fontSize: 17,
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ),
+                Text(
+                  formatCurrency(widget.total, locale: context.locale),
+                  style: KZ.buttonLabel.copyWith(
+                    fontSize: 17,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

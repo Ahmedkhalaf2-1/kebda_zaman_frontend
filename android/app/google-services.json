@@ -12,7 +12,12 @@
           "package_name": "com.example.kebda_zaman"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "168591231387-qj961ds1c8n7shrvbnpaudivov0bc1ig.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDit0ZuQAPZiPvgbtSqdMp-QVltOmGRktc"
@@ -20,7 +25,63 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "168591231387-qj961ds1c8n7shrvbnpaudivov0bc1ig.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "168591231387-ljkisv2knf0a1cmgv1v5l75o7lgae1br.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kebdaZaman"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168591231387:android:c997be1364dc28de42793e",
+        "android_client_info": {
+          "package_name": "com.kebdtzaman.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "168591231387-vm7jpemmmtg9tpgumijisqkr932ve4go.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kebdtzaman.app",
+            "certificate_hash": "df316ebe6c2ffa05a92351642b8b55dbad938521"
+          }
+        },
+        {
+          "client_id": "168591231387-qj961ds1c8n7shrvbnpaudivov0bc1ig.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDit0ZuQAPZiPvgbtSqdMp-QVltOmGRktc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "168591231387-qj961ds1c8n7shrvbnpaudivov0bc1ig.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "168591231387-ljkisv2knf0a1cmgv1v5l75o7lgae1br.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kebdaZaman"
+              }
+            }
+          ]
         }
       }
     }

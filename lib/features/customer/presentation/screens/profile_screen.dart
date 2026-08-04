@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +10,31 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifi
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
+
+final localAvatarProvider = StateNotifierProvider<LocalAvatarNotifier, String?>((ref) {
+  return LocalAvatarNotifier();
+});
+
+class LocalAvatarNotifier extends StateNotifier<String?> {
+  LocalAvatarNotifier() : super(null) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    state = prefs.getString('local_avatar_path');
+  }
+
+  Future<void> pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('local_avatar_path', picked.path);
+      state = picked.path;
+    }
+  }
+}
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -21,6 +49,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
+    final localAvatarPath = ref.watch(localAvatarProvider);
     final user = authState.user;
     final userName = user != null && user.name.isNotEmpty
         ? user.name
@@ -62,18 +91,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         color: KZ.primary, // #8c2b00
                       ),
                     ),
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: KZ.primaryFixed.withValues(alpha: 0.3),
-                        border: Border.all(color: KZ.primary, width: 2),
-                      ),
-                      child: const Icon(
-                        Icons.person_rounded,
-                        color: KZ.primary,
-                        size: 22,
+                    GestureDetector(
+                      onTap: () => ref.read(localAvatarProvider.notifier).pickImage(),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: KZ.primaryFixed.withValues(alpha: 0.3),
+                          border: Border.all(color: KZ.primary, width: 2),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: localAvatarPath != null
+                            ? Image.file(File(localAvatarPath), fit: BoxFit.cover)
+                            : const Icon(
+                                Icons.person_rounded,
+                                color: KZ.primary,
+                                size: 22,
+                              ),
                       ),
                     ),
                   ],
@@ -95,72 +130,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             alignment: Alignment.center,
                             children: [
                               // 96x96 Avatar circle with primary border
-                              Container(
-                                width: 96,
-                                height: 96,
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: KZ.surface,
-                                  border: Border.all(
-                                    color: KZ.primary,
-                                    width: 4,
-                                  ),
-                                ),
+                              GestureDetector(
+                                onTap: () => ref.read(localAvatarProvider.notifier).pickImage(),
                                 child: Container(
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Color(0xFFE2E8F0), // slate-200
-                                  ),
-                                  child: const Icon(
-                                    Icons.person_rounded,
-                                    size: 56,
-                                    color: Color(0xFF94A3B8), // slate-400
-                                  ),
-                                ),
-                              ),
-                              // Gold Member Badge at -bottom-2
-                              Positioned(
-                                bottom: -8,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 4,
-                                  ),
+                                  width: 96,
+                                  height: 96,
+                                  padding: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
-                                    color: const Color(
-                                      0xFF1B5E20,
-                                    ), // brand-green
-                                    borderRadius: BorderRadius.circular(999),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
+                                    shape: BoxShape.circle,
+                                    color: KZ.surface,
+                                    border: Border.all(
+                                      color: KZ.primary,
+                                      width: 4,
+                                    ),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.stars_rounded,
-                                        color: Colors.white,
-                                        size: 14,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'profile.gold_member'.tr(),
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                          letterSpacing: 0.8,
-                                        ),
-                                      ),
-                                    ],
+                                  child: Container(
+                                    clipBehavior: Clip.antiAlias,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Color(0xFFE2E8F0), // slate-200
+                                    ),
+                                    child: localAvatarPath != null
+                                        ? Image.file(File(localAvatarPath), fit: BoxFit.cover)
+                                        : const Icon(
+                                            Icons.person_rounded,
+                                            size: 56,
+                                            color: Color(0xFF94A3B8), // slate-400
+                                          ),
                                   ),
                                 ),
                               ),
