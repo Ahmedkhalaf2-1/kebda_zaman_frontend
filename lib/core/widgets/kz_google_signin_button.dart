@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 
-/// Reusable "Continue with Google" button shared by Login and Register —
-/// matches the existing social-button visual (56dp height, white fill,
-/// outline border, 12dp radius) those screens already used for a previously
-/// no-op Google button. Swaps its content for a spinner while [isLoading],
-/// keeping the same footprint so nothing shifts, and disables tapping while
-/// loading so a second tap can't start a second Google flow.
+/// Reusable Google sign-in button (logo only, no label) shared by Login and
+/// Register — matches the existing social-button visual (56dp height, white
+/// fill, outline border, 12dp radius) those screens already used for a
+/// previously no-op Google button. Swaps its content for a spinner while
+/// [isLoading], keeping the same footprint so nothing shifts, and disables
+/// tapping while loading so a second tap can't start a second Google flow.
 class KZGoogleSignInButton extends StatelessWidget {
   final VoidCallback? onTap;
   final bool isLoading;
@@ -43,28 +42,10 @@ class KZGoogleSignInButton extends StatelessWidget {
                         color: KZ.primary,
                       ),
                     )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CustomPaint(painter: KZGoogleLogoPainter()),
-                        ),
-                        const SizedBox(width: 10),
-                        Flexible(
-                          child: Text(
-                            'auth.continue_with_google'.tr(),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: KZ.onSurface,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                  : const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CustomPaint(painter: KZGoogleLogoPainter()),
                     ),
             ),
           ),
