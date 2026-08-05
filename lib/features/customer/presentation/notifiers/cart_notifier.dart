@@ -81,8 +81,13 @@ class CartNotifier extends AutoDisposeAsyncNotifier<Cart?> {
     final repo = ref.read(cartRepositoryProvider);
     final result = await repo.applyPromoCode(code);
     return result.fold((failure) {
+      // Refetch the real server cart so a rejected promo never leaves the
+      // UI showing a discount that was never actually applied.
       AsyncValue.guard(_fetchCart).then((s) => state = s);
-      throw Exception(failure.message);
+      // Thrown as the Failure itself (not a generic Exception) so the UI can
+      // inspect failure.cause for the backend's error code — e.g.
+      // PROMO_ALREADY_USED — and pick a specific localized message.
+      throw failure;
     }, (data) async => state = await AsyncValue.guard(_fetchCart));
   }
 

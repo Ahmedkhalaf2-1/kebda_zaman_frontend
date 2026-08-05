@@ -455,6 +455,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               case 'BELOW_MIN_ORDER':
                 message = 'checkout.below_min_order_error'.tr();
                 break;
+              case 'PROMO_ALREADY_USED':
+                message = 'cart.promo_already_used'.tr();
+                break;
               default:
                 message = cause.message;
             }
@@ -505,9 +508,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           height: 44,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: CheckoutScreen.primaryColor.withValues(alpha: 0.1),
+                            color: CheckoutScreen.primaryColor.withValues(
+                              alpha: 0.1,
+                            ),
                             border: Border.all(
-                              color: CheckoutScreen.primaryColor.withValues(alpha: 0.2),
+                              color: CheckoutScreen.primaryColor.withValues(
+                                alpha: 0.2,
+                              ),
                               width: 1,
                             ),
                           ),
@@ -596,7 +603,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: CheckoutScreen.primaryColor.withValues(alpha: 0.1),
+                                  color: CheckoutScreen.primaryColor.withValues(
+                                    alpha: 0.1,
+                                  ),
                                 ),
                                 boxShadow: [
                                   BoxShadow(
@@ -743,11 +752,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: CheckoutScreen.primaryColor.withValues(alpha: 0.1),
+                                    color: CheckoutScreen.primaryColor
+                                        .withValues(alpha: 0.1),
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.03),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.03,
+                                      ),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -757,20 +769,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Row(
                                           children: [
                                             const Icon(
                                               Icons.home_rounded,
-                                              color: CheckoutScreen.primaryColor,
+                                              color:
+                                                  CheckoutScreen.primaryColor,
                                               size: 20,
                                             ),
                                             const SizedBox(width: 8),
                                             Text(
                                               'checkout.delivery_address'.tr(),
                                               style: KZ.itemTitle.copyWith(
-                                                color: CheckoutScreen.primaryColor,
+                                                color:
+                                                    CheckoutScreen.primaryColor,
                                                 fontWeight: FontWeight.w800,
                                                 fontSize: 16,
                                               ),
@@ -778,16 +793,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                           ],
                                         ),
                                         TextButton(
-                                          onPressed: () => _showAddressPicker(context),
+                                          onPressed: () =>
+                                              _showAddressPicker(context),
                                           style: TextButton.styleFrom(
                                             minimumSize: Size.zero,
                                             padding: EdgeInsets.zero,
-                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                            tapTargetSize: MaterialTapTargetSize
+                                                .shrinkWrap,
                                           ),
                                           child: Text(
                                             'checkout.change_address'.tr(),
                                             style: KZ.labelLarge.copyWith(
-                                              color: CheckoutScreen.primaryColor,
+                                              color:
+                                                  CheckoutScreen.primaryColor,
                                               fontWeight: FontWeight.w700,
                                             ),
                                           ),
@@ -798,7 +816,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                     Text(
                                       displayAddress,
                                       style: KZ.body.copyWith(
-                                        color: CheckoutScreen.onSurfaceVariantColor,
+                                        color: CheckoutScreen
+                                            .onSurfaceVariantColor,
                                         fontSize: 14,
                                       ),
                                     ),
@@ -809,7 +828,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               _DeliveryZoneCard(
                                 zonesAsync: zonesAsync,
                                 selectedZoneId: _selectedZoneId,
-                                onSelect: (zoneId) => setState(() => _selectedZoneId = zoneId),
+                                onSelect: (zoneId) =>
+                                    setState(() => _selectedZoneId = zoneId),
                               ),
                               const SizedBox(height: 16),
                             ],
@@ -821,7 +841,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: CheckoutScreen.primaryColor.withValues(alpha: 0.1),
+                                  color: CheckoutScreen.primaryColor.withValues(
+                                    alpha: 0.1,
+                                  ),
                                 ),
                                 boxShadow: [
                                   BoxShadow(
@@ -832,10 +854,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 ],
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'checkout.estimated_arrival'.tr(),
@@ -847,7 +871,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        _orderType == 'delivery' ? '25-35 دقيقة' : '15-20 دقيقة',
+                                        _orderType == 'delivery'
+                                            ? '25-35 دقيقة'
+                                            : '15-20 دقيقة',
                                         style: KZ.priceLarge.copyWith(
                                           fontSize: 26,
                                           fontWeight: FontWeight.w800,
@@ -860,7 +886,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                     width: 52,
                                     height: 52,
                                     decoration: BoxDecoration(
-                                      color: CheckoutScreen.primaryColor.withValues(alpha: 0.1),
+                                      color: CheckoutScreen.primaryColor
+                                          .withValues(alpha: 0.1),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -918,12 +945,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                   border: Border.all(
                                     color: _selectedPaymentMethod == 0
                                         ? CheckoutScreen.primaryColor
-                                        : CheckoutScreen.primaryColor.withValues(alpha: 0.1),
+                                        : CheckoutScreen.primaryColor
+                                              .withValues(alpha: 0.1),
                                     width: _selectedPaymentMethod == 0 ? 2 : 1,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.03),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.03,
+                                      ),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -939,8 +969,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                           width: 48,
                                           height: 48,
                                           decoration: BoxDecoration(
-                                            color: CheckoutScreen.onSurfaceColor,
-                                            borderRadius: BorderRadius.circular(12),
+                                            color:
+                                                CheckoutScreen.onSurfaceColor,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: const Icon(
                                             Icons.payments_rounded,
@@ -1617,7 +1650,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         );
                                     if (order != null) {
                                       if (!context.mounted) return;
-                                      context.go('/orders/tracking/${order.id}');
+                                      context.go(
+                                        '/orders/tracking/${order.id}',
+                                      );
                                     }
                                   },
                           ),

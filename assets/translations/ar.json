@@ -102,6 +102,7 @@
     "apply": "تطبيق",
     "applied": "تم التطبيق!",
     "invalid_promo": "كود الخصم غير صحيح",
+    "promo_already_used": "لقد استخدمت هذا الكود من قبل",
     "order_summary": "ملخص الطلب",
     "subtotal": "المجموع الفرعي",
     "delivery_fee": "رسوم التوصيل",

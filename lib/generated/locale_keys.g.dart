@@ -102,6 +102,7 @@ abstract class LocaleKeys {
   static const cart_apply = 'cart.apply';
   static const cart_applied = 'cart.applied';
   static const cart_invalid_promo = 'cart.invalid_promo';
+  static const cart_promo_already_used = 'cart.promo_already_used';
   static const cart_order_summary = 'cart.order_summary';
   static const cart_subtotal = 'cart.subtotal';
   static const cart_delivery_fee = 'cart.delivery_fee';

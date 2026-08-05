@@ -5,6 +5,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
+import 'package:kebda_zaman/core/api/api_exceptions.dart';
+import 'package:kebda_zaman/core/errors/errors.dart';
 
 import '../notifiers/cart_notifier.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
@@ -285,11 +287,16 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                 children: [
                   Text(
                     'cart.applied'.tr(),
-                    style: KZ.caption.copyWith(color: CartScreen.onSurfaceVariantColor),
+                    style: KZ.caption.copyWith(
+                      color: CartScreen.onSurfaceVariantColor,
+                    ),
                   ),
                   Text(
                     cart.promoCodeId!,
-                    style: KZ.itemTitle.copyWith(fontWeight: FontWeight.w800, color: CartScreen.primaryColor),
+                    style: KZ.itemTitle.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: CartScreen.primaryColor,
+                    ),
                   ),
                 ],
               ),
@@ -301,20 +308,29 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                 } catch (e) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('common.something_wrong'.tr()), behavior: SnackBarBehavior.floating),
+                    SnackBar(
+                      content: Text('common.something_wrong'.tr()),
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
                 }
               },
               borderRadius: BorderRadius.circular(8),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: CartScreen.errorColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   'cart.remove'.tr(),
-                  style: KZ.labelLarge.copyWith(color: CartScreen.errorColor, fontWeight: FontWeight.w700),
+                  style: KZ.labelLarge.copyWith(
+                    color: CartScreen.errorColor,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -327,7 +343,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: CartScreen.outlineVariantColor.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: CartScreen.outlineVariantColor.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -353,7 +371,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               textCapitalization: TextCapitalization.characters,
               decoration: InputDecoration(
                 hintText: 'cart.promo_hint'.tr(),
-                hintStyle: KZ.bodyLarge.copyWith(color: CartScreen.onSurfaceVariantColor.withValues(alpha: 0.5)),
+                hintStyle: KZ.bodyLarge.copyWith(
+                  color: CartScreen.onSurfaceVariantColor.withValues(
+                    alpha: 0.5,
+                  ),
+                ),
                 border: InputBorder.none,
                 isCollapsed: true,
                 contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -368,13 +390,29 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                 await ref.read(cartProvider.notifier).applyPromoCode(code);
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${'cart.applied'.tr()} "$code"'), behavior: SnackBarBehavior.floating),
+                  SnackBar(
+                    content: Text('${'cart.applied'.tr()} "$code"'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
                 );
               } catch (e) {
                 if (!context.mounted) return;
-                final errorMsg = e.toString().replaceAll('Exception: ', '');
+                String errorMsg;
+                final cause = e is Failure ? e.cause : null;
+                if (cause is ApiException &&
+                    cause.code == 'PROMO_ALREADY_USED') {
+                  errorMsg = 'cart.promo_already_used'.tr();
+                } else if (e is Failure) {
+                  errorMsg = e.message;
+                } else {
+                  errorMsg = e.toString().replaceAll('Exception: ', '');
+                }
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(errorMsg), behavior: SnackBarBehavior.floating, backgroundColor: KZ.error),
+                  SnackBar(
+                    content: Text(errorMsg),
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: KZ.error,
+                  ),
                 );
               }
             },
@@ -382,7 +420,10 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               padding: const EdgeInsets.all(12.0),
               child: Text(
                 'cart.apply'.tr(),
-                style: KZ.labelLarge.copyWith(color: CartScreen.primaryColor, fontWeight: FontWeight.w800),
+                style: KZ.labelLarge.copyWith(
+                  color: CartScreen.primaryColor,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),
@@ -618,11 +659,18 @@ class _CartItemCard extends StatelessWidget {
                       onTap: onEdit,
                       borderRadius: BorderRadius.circular(6),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 4,
+                          horizontal: 4,
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.edit_rounded, size: 16, color: CartScreen.secondaryColor),
+                            const Icon(
+                              Icons.edit_rounded,
+                              size: 16,
+                              color: CartScreen.secondaryColor,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               'common.edit'.tr(),
@@ -635,7 +683,7 @@ class _CartItemCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    
+
                     // Quantity Stepper
                     Container(
                       height: 36,
@@ -649,7 +697,9 @@ class _CartItemCard extends StatelessWidget {
                           KZPressableScale(
                             enabled: !isPending,
                             child: InkWell(
-                              onTap: isPending ? null : () => onQuantityChanged(item.quantity - 1),
+                              onTap: isPending
+                                  ? null
+                                  : () => onQuantityChanged(item.quantity - 1),
                               borderRadius: BorderRadius.circular(100),
                               child: Container(
                                 width: 36,
@@ -657,7 +707,9 @@ class _CartItemCard extends StatelessWidget {
                                 child: Icon(
                                   Icons.remove_rounded,
                                   size: 18,
-                                  color: isPending ? CartScreen.outlineVariantColor : CartScreen.onSurfaceColor,
+                                  color: isPending
+                                      ? CartScreen.outlineVariantColor
+                                      : CartScreen.onSurfaceColor,
                                 ),
                               ),
                             ),
@@ -679,7 +731,9 @@ class _CartItemCard extends StatelessWidget {
                           KZPressableScale(
                             enabled: !isPending,
                             child: InkWell(
-                              onTap: isPending ? null : () => onQuantityChanged(item.quantity + 1),
+                              onTap: isPending
+                                  ? null
+                                  : () => onQuantityChanged(item.quantity + 1),
                               borderRadius: BorderRadius.circular(100),
                               child: Container(
                                 width: 36,
@@ -687,7 +741,9 @@ class _CartItemCard extends StatelessWidget {
                                 child: Icon(
                                   Icons.add_rounded,
                                   size: 18,
-                                  color: isPending ? CartScreen.outlineVariantColor : CartScreen.primaryColor,
+                                  color: isPending
+                                      ? CartScreen.outlineVariantColor
+                                      : CartScreen.primaryColor,
                                 ),
                               ),
                             ),

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kebda_zaman/core/api/api_exceptions.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/cart_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/orders_notifier.dart';
@@ -46,6 +47,15 @@ class CheckoutNotifier extends AutoDisposeAsyncNotifier<void> {
       return result.fold(
         (f) {
           state = AsyncError(f, StackTrace.current);
+          // The promo was valid when the cart displayed it, but the backend
+          // re-validates at checkout and may reject it there (e.g. the
+          // per-user limit was hit by another concurrent request/device) —
+          // refetch the server cart so the now-stale applied-promo/discount
+          // shown on cart/checkout is cleared rather than left dangling.
+          final cause = f.cause;
+          if (cause is ApiException && cause.code == 'PROMO_ALREADY_USED') {
+            ref.invalidate(cartProvider);
+          }
           return null;
         },
         (order) async {

@@ -102,6 +102,7 @@
     "apply": "Apply",
     "applied": "Applied!",
     "invalid_promo": "Invalid promo code",
+    "promo_already_used": "You have already used this promo code",
     "order_summary": "Order Summary",
     "subtotal": "Subtotal",
     "delivery_fee": "Delivery Fee",
