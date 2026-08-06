@@ -34,10 +34,8 @@ import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/cart_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/checkout_notifier.dart';
-import 'package:kebda_zaman/features/customer/presentation/notifiers/delivery_zone_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/screens/checkout_screen.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
-import 'package:kebda_zaman/features/shared/domain/models/delivery_zone.dart';
 import 'package:kebda_zaman/features/shared/domain/models/restaurant_settings.dart';
 import 'package:kebda_zaman/generated/codegen_loader.g.dart';
 
@@ -54,6 +52,8 @@ RestaurantSettings _openSettings({
   phone: '+966-000',
   addressAr: 'العنوان',
   addressEn: 'Address',
+  restaurantLatitude: 21.5705641,
+  restaurantLongitude: 39.1681808,
   taxRatePercent: 0,
   deliveryFee: 0,
   minOrderAmount: minOrderAmount,
@@ -153,18 +153,22 @@ Future<List<FlutterErrorDetails>> _pump(
           useOnlyLangCode: true,
           saveLocale: false,
           assetLoader: const CodegenLoader(),
-          child: Builder(builder: (context) {
-            return MaterialApp(
-              localizationsDelegates: context.localizationDelegates,
-              supportedLocales: context.supportedLocales,
-              locale: context.locale,
-              home: const CheckoutScreen(),
-            );
-          }),
+          child: Builder(
+            builder: (context) {
+              return MaterialApp(
+                localizationsDelegates: context.localizationDelegates,
+                supportedLocales: context.supportedLocales,
+                locale: context.locale,
+                home: const CheckoutScreen(),
+              );
+            },
+          ),
         ),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 100)); // allow EasyLocalization to resolve
+    await tester.pump(
+      const Duration(milliseconds: 100),
+    ); // allow EasyLocalization to resolve
     await tester.pump();
     await tester.pump();
     await tester.pump();
@@ -176,7 +180,6 @@ Future<List<FlutterErrorDetails>> _pump(
 
 List<Override> _settingsOverrides(AsyncValue<RestaurantSettings> value) => [
   cartProvider.overrideWith(() => _FixedCartNotifier(_nonEmptyCart())),
-  deliveryZonesProvider.overrideWith((ref) => Future.value(<DeliveryZone>[])),
   restaurantSettingsProvider.overrideWith((ref) {
     print('Provider override executed with value: $value');
     return value.when(
@@ -261,8 +264,9 @@ void main() {
   });
 
   // ── 5. Error state → footer visible ──────────────────────────────────────
-  testWidgets('5. Error state: footer is present (error text visible)',
-      (tester) async {
+  testWidgets('5. Error state: footer is present (error text visible)', (
+    tester,
+  ) async {
     await _pump(
       tester,
       overrides: _settingsOverrides(
@@ -325,9 +329,6 @@ void main() {
               cartProvider.overrideWith(
                 () => _FixedCartNotifier(_nonEmptyCart()),
               ),
-              deliveryZonesProvider.overrideWith(
-                (ref) => Future.value(<DeliveryZone>[]),
-              ),
               restaurantSettingsProvider.overrideWith((ref) {
                 buildCount++;
                 if (buildCount == 1) {
@@ -348,14 +349,16 @@ void main() {
               useOnlyLangCode: true,
               saveLocale: false,
               assetLoader: const CodegenLoader(),
-              child: Builder(builder: (context) {
-                return MaterialApp(
-                  localizationsDelegates: context.localizationDelegates,
-                  supportedLocales: context.supportedLocales,
-                  locale: context.locale,
-                  home: const CheckoutScreen(),
-                );
-              }),
+              child: Builder(
+                builder: (context) {
+                  return MaterialApp(
+                    localizationsDelegates: context.localizationDelegates,
+                    supportedLocales: context.supportedLocales,
+                    locale: context.locale,
+                    home: const CheckoutScreen(),
+                  );
+                },
+              ),
             ),
           ),
         );
@@ -449,9 +452,6 @@ void main() {
         cartProvider.overrideWith(
           () => _FixedCartNotifier(_nonEmptyCart(subtotal: 10)),
         ),
-        deliveryZonesProvider.overrideWith(
-          (ref) => Future.value(<DeliveryZone>[]),
-        ),
         restaurantSettingsProvider.overrideWith(
           (ref) => Future.value(_openSettings(minOrderAmount: 100)),
         ),
@@ -468,9 +468,6 @@ void main() {
       tester,
       overrides: [
         cartProvider.overrideWith(() => _FixedCartNotifier(_nonEmptyCart())),
-        deliveryZonesProvider.overrideWith(
-          (ref) => Future.value(<DeliveryZone>[]),
-        ),
         restaurantSettingsProvider.overrideWith(
           (ref) => Future.value(_openSettings()),
         ),

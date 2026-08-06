@@ -36,7 +36,20 @@ mixin _$Order {
       throw _privateConstructorUsedError;
   OrderStatus get status => throw _privateConstructorUsedError;
   double get subtotal => throw _privateConstructorUsedError;
-  double get deliveryFee => throw _privateConstructorUsedError;
+  double get deliveryFee =>
+      throw _privateConstructorUsedError; // Distance-based delivery pricing snapshot (backend distance-pricing
+  // migration) — `null` for PICKUP orders and for any order placed before
+  // the migration. Never required together; each is independently
+  // nullable and never crashes when absent.
+  int? get deliveryDistanceMeters => throw _privateConstructorUsedError;
+  double? get deliveryDistanceKm => throw _privateConstructorUsedError;
+  int? get deliveryDurationSeconds => throw _privateConstructorUsedError;
+  OrderDeliveryTier? get deliveryTier =>
+      throw _privateConstructorUsedError; // DEPRECATED zone-based pricing snapshot — historical orders only.
+  // Always `null` for orders placed after the distance-pricing migration;
+  // kept purely for display on older orders that still carry it.
+  OrderDeliveryZoneSnapshot? get deliveryZone =>
+      throw _privateConstructorUsedError;
   double get discountTotal => throw _privateConstructorUsedError;
   int get loyaltyPointsUsed => throw _privateConstructorUsedError;
   int get loyaltyPointsEarned => throw _privateConstructorUsedError;
@@ -80,6 +93,11 @@ abstract class $OrderCopyWith<$Res> {
     OrderStatus status,
     double subtotal,
     double deliveryFee,
+    int? deliveryDistanceMeters,
+    double? deliveryDistanceKm,
+    int? deliveryDurationSeconds,
+    OrderDeliveryTier? deliveryTier,
+    OrderDeliveryZoneSnapshot? deliveryZone,
     double discountTotal,
     int loyaltyPointsUsed,
     int loyaltyPointsEarned,
@@ -94,6 +112,8 @@ abstract class $OrderCopyWith<$Res> {
   });
 
   $OrderDeliveryAddressCopyWith<$Res>? get deliveryAddress;
+  $OrderDeliveryTierCopyWith<$Res>? get deliveryTier;
+  $OrderDeliveryZoneSnapshotCopyWith<$Res>? get deliveryZone;
   $LoyaltyRedemptionInfoCopyWith<$Res>? get loyaltyRedemption;
 }
 
@@ -124,6 +144,11 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? status = null,
     Object? subtotal = null,
     Object? deliveryFee = null,
+    Object? deliveryDistanceMeters = freezed,
+    Object? deliveryDistanceKm = freezed,
+    Object? deliveryDurationSeconds = freezed,
+    Object? deliveryTier = freezed,
+    Object? deliveryZone = freezed,
     Object? discountTotal = null,
     Object? loyaltyPointsUsed = null,
     Object? loyaltyPointsEarned = null,
@@ -186,6 +211,26 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.deliveryFee
                 : deliveryFee // ignore: cast_nullable_to_non_nullable
                       as double,
+            deliveryDistanceMeters: freezed == deliveryDistanceMeters
+                ? _value.deliveryDistanceMeters
+                : deliveryDistanceMeters // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            deliveryDistanceKm: freezed == deliveryDistanceKm
+                ? _value.deliveryDistanceKm
+                : deliveryDistanceKm // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            deliveryDurationSeconds: freezed == deliveryDurationSeconds
+                ? _value.deliveryDurationSeconds
+                : deliveryDurationSeconds // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            deliveryTier: freezed == deliveryTier
+                ? _value.deliveryTier
+                : deliveryTier // ignore: cast_nullable_to_non_nullable
+                      as OrderDeliveryTier?,
+            deliveryZone: freezed == deliveryZone
+                ? _value.deliveryZone
+                : deliveryZone // ignore: cast_nullable_to_non_nullable
+                      as OrderDeliveryZoneSnapshot?,
             discountTotal: null == discountTotal
                 ? _value.discountTotal
                 : discountTotal // ignore: cast_nullable_to_non_nullable
@@ -255,6 +300,36 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
+  $OrderDeliveryTierCopyWith<$Res>? get deliveryTier {
+    if (_value.deliveryTier == null) {
+      return null;
+    }
+
+    return $OrderDeliveryTierCopyWith<$Res>(_value.deliveryTier!, (value) {
+      return _then(_value.copyWith(deliveryTier: value) as $Val);
+    });
+  }
+
+  /// Create a copy of Order
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $OrderDeliveryZoneSnapshotCopyWith<$Res>? get deliveryZone {
+    if (_value.deliveryZone == null) {
+      return null;
+    }
+
+    return $OrderDeliveryZoneSnapshotCopyWith<$Res>(_value.deliveryZone!, (
+      value,
+    ) {
+      return _then(_value.copyWith(deliveryZone: value) as $Val);
+    });
+  }
+
+  /// Create a copy of Order
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
   $LoyaltyRedemptionInfoCopyWith<$Res>? get loyaltyRedemption {
     if (_value.loyaltyRedemption == null) {
       return null;
@@ -289,6 +364,11 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     OrderStatus status,
     double subtotal,
     double deliveryFee,
+    int? deliveryDistanceMeters,
+    double? deliveryDistanceKm,
+    int? deliveryDurationSeconds,
+    OrderDeliveryTier? deliveryTier,
+    OrderDeliveryZoneSnapshot? deliveryZone,
     double discountTotal,
     int loyaltyPointsUsed,
     int loyaltyPointsEarned,
@@ -304,6 +384,10 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
 
   @override
   $OrderDeliveryAddressCopyWith<$Res>? get deliveryAddress;
+  @override
+  $OrderDeliveryTierCopyWith<$Res>? get deliveryTier;
+  @override
+  $OrderDeliveryZoneSnapshotCopyWith<$Res>? get deliveryZone;
   @override
   $LoyaltyRedemptionInfoCopyWith<$Res>? get loyaltyRedemption;
 }
@@ -334,6 +418,11 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? status = null,
     Object? subtotal = null,
     Object? deliveryFee = null,
+    Object? deliveryDistanceMeters = freezed,
+    Object? deliveryDistanceKm = freezed,
+    Object? deliveryDurationSeconds = freezed,
+    Object? deliveryTier = freezed,
+    Object? deliveryZone = freezed,
     Object? discountTotal = null,
     Object? loyaltyPointsUsed = null,
     Object? loyaltyPointsEarned = null,
@@ -396,6 +485,26 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.deliveryFee
             : deliveryFee // ignore: cast_nullable_to_non_nullable
                   as double,
+        deliveryDistanceMeters: freezed == deliveryDistanceMeters
+            ? _value.deliveryDistanceMeters
+            : deliveryDistanceMeters // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        deliveryDistanceKm: freezed == deliveryDistanceKm
+            ? _value.deliveryDistanceKm
+            : deliveryDistanceKm // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        deliveryDurationSeconds: freezed == deliveryDurationSeconds
+            ? _value.deliveryDurationSeconds
+            : deliveryDurationSeconds // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        deliveryTier: freezed == deliveryTier
+            ? _value.deliveryTier
+            : deliveryTier // ignore: cast_nullable_to_non_nullable
+                  as OrderDeliveryTier?,
+        deliveryZone: freezed == deliveryZone
+            ? _value.deliveryZone
+            : deliveryZone // ignore: cast_nullable_to_non_nullable
+                  as OrderDeliveryZoneSnapshot?,
         discountTotal: null == discountTotal
             ? _value.discountTotal
             : discountTotal // ignore: cast_nullable_to_non_nullable
@@ -461,6 +570,11 @@ class _$OrderImpl implements _Order {
     required this.status,
     required this.subtotal,
     this.deliveryFee = 0.0,
+    this.deliveryDistanceMeters,
+    this.deliveryDistanceKm,
+    this.deliveryDurationSeconds,
+    this.deliveryTier,
+    this.deliveryZone,
     this.discountTotal = 0.0,
     this.loyaltyPointsUsed = 0,
     this.loyaltyPointsEarned = 0,
@@ -512,6 +626,23 @@ class _$OrderImpl implements _Order {
   @override
   @JsonKey()
   final double deliveryFee;
+  // Distance-based delivery pricing snapshot (backend distance-pricing
+  // migration) — `null` for PICKUP orders and for any order placed before
+  // the migration. Never required together; each is independently
+  // nullable and never crashes when absent.
+  @override
+  final int? deliveryDistanceMeters;
+  @override
+  final double? deliveryDistanceKm;
+  @override
+  final int? deliveryDurationSeconds;
+  @override
+  final OrderDeliveryTier? deliveryTier;
+  // DEPRECATED zone-based pricing snapshot — historical orders only.
+  // Always `null` for orders placed after the distance-pricing migration;
+  // kept purely for display on older orders that still carry it.
+  @override
+  final OrderDeliveryZoneSnapshot? deliveryZone;
   @override
   @JsonKey()
   final double discountTotal;
@@ -549,7 +680,7 @@ class _$OrderImpl implements _Order {
 
   @override
   String toString() {
-    return 'Order(id: $id, orderNumber: $orderNumber, userId: $userId, customerName: $customerName, items: $items, fulfillmentType: $fulfillmentType, addressId: $addressId, pickupLocation: $pickupLocation, deliveryAddress: $deliveryAddress, status: $status, subtotal: $subtotal, deliveryFee: $deliveryFee, discountTotal: $discountTotal, loyaltyPointsUsed: $loyaltyPointsUsed, loyaltyPointsEarned: $loyaltyPointsEarned, grandTotal: $grandTotal, paymentId: $paymentId, paymentStatus: $paymentStatus, paymentMethod: $paymentMethod, placedAt: $placedAt, statusHistory: $statusHistory, estimatedTime: $estimatedTime, loyaltyRedemption: $loyaltyRedemption)';
+    return 'Order(id: $id, orderNumber: $orderNumber, userId: $userId, customerName: $customerName, items: $items, fulfillmentType: $fulfillmentType, addressId: $addressId, pickupLocation: $pickupLocation, deliveryAddress: $deliveryAddress, status: $status, subtotal: $subtotal, deliveryFee: $deliveryFee, deliveryDistanceMeters: $deliveryDistanceMeters, deliveryDistanceKm: $deliveryDistanceKm, deliveryDurationSeconds: $deliveryDurationSeconds, deliveryTier: $deliveryTier, deliveryZone: $deliveryZone, discountTotal: $discountTotal, loyaltyPointsUsed: $loyaltyPointsUsed, loyaltyPointsEarned: $loyaltyPointsEarned, grandTotal: $grandTotal, paymentId: $paymentId, paymentStatus: $paymentStatus, paymentMethod: $paymentMethod, placedAt: $placedAt, statusHistory: $statusHistory, estimatedTime: $estimatedTime, loyaltyRedemption: $loyaltyRedemption)';
   }
 
   @override
@@ -577,6 +708,19 @@ class _$OrderImpl implements _Order {
                 other.subtotal == subtotal) &&
             (identical(other.deliveryFee, deliveryFee) ||
                 other.deliveryFee == deliveryFee) &&
+            (identical(other.deliveryDistanceMeters, deliveryDistanceMeters) ||
+                other.deliveryDistanceMeters == deliveryDistanceMeters) &&
+            (identical(other.deliveryDistanceKm, deliveryDistanceKm) ||
+                other.deliveryDistanceKm == deliveryDistanceKm) &&
+            (identical(
+                  other.deliveryDurationSeconds,
+                  deliveryDurationSeconds,
+                ) ||
+                other.deliveryDurationSeconds == deliveryDurationSeconds) &&
+            (identical(other.deliveryTier, deliveryTier) ||
+                other.deliveryTier == deliveryTier) &&
+            (identical(other.deliveryZone, deliveryZone) ||
+                other.deliveryZone == deliveryZone) &&
             (identical(other.discountTotal, discountTotal) ||
                 other.discountTotal == discountTotal) &&
             (identical(other.loyaltyPointsUsed, loyaltyPointsUsed) ||
@@ -619,6 +763,11 @@ class _$OrderImpl implements _Order {
     status,
     subtotal,
     deliveryFee,
+    deliveryDistanceMeters,
+    deliveryDistanceKm,
+    deliveryDurationSeconds,
+    deliveryTier,
+    deliveryZone,
     discountTotal,
     loyaltyPointsUsed,
     loyaltyPointsEarned,
@@ -660,6 +809,11 @@ abstract class _Order implements Order {
     required final OrderStatus status,
     required final double subtotal,
     final double deliveryFee,
+    final int? deliveryDistanceMeters,
+    final double? deliveryDistanceKm,
+    final int? deliveryDurationSeconds,
+    final OrderDeliveryTier? deliveryTier,
+    final OrderDeliveryZoneSnapshot? deliveryZone,
     final double discountTotal,
     final int loyaltyPointsUsed,
     final int loyaltyPointsEarned,
@@ -700,7 +854,22 @@ abstract class _Order implements Order {
   @override
   double get subtotal;
   @override
-  double get deliveryFee;
+  double get deliveryFee; // Distance-based delivery pricing snapshot (backend distance-pricing
+  // migration) — `null` for PICKUP orders and for any order placed before
+  // the migration. Never required together; each is independently
+  // nullable and never crashes when absent.
+  @override
+  int? get deliveryDistanceMeters;
+  @override
+  double? get deliveryDistanceKm;
+  @override
+  int? get deliveryDurationSeconds;
+  @override
+  OrderDeliveryTier? get deliveryTier; // DEPRECATED zone-based pricing snapshot — historical orders only.
+  // Always `null` for orders placed after the distance-pricing migration;
+  // kept purely for display on older orders that still carry it.
+  @override
+  OrderDeliveryZoneSnapshot? get deliveryZone;
   @override
   double get discountTotal;
   @override
@@ -1094,6 +1263,406 @@ abstract class _OrderDeliveryAddress implements OrderDeliveryAddress {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$OrderDeliveryAddressImplCopyWith<_$OrderDeliveryAddressImpl>
+  get copyWith => throw _privateConstructorUsedError;
+}
+
+OrderDeliveryTier _$OrderDeliveryTierFromJson(Map<String, dynamic> json) {
+  return _OrderDeliveryTier.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderDeliveryTier {
+  String get id => throw _privateConstructorUsedError;
+  double get minDistanceKm => throw _privateConstructorUsedError;
+  double get maxDistanceKm => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderDeliveryTier to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderDeliveryTier
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderDeliveryTierCopyWith<OrderDeliveryTier> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderDeliveryTierCopyWith<$Res> {
+  factory $OrderDeliveryTierCopyWith(
+    OrderDeliveryTier value,
+    $Res Function(OrderDeliveryTier) then,
+  ) = _$OrderDeliveryTierCopyWithImpl<$Res, OrderDeliveryTier>;
+  @useResult
+  $Res call({String id, double minDistanceKm, double maxDistanceKm});
+}
+
+/// @nodoc
+class _$OrderDeliveryTierCopyWithImpl<$Res, $Val extends OrderDeliveryTier>
+    implements $OrderDeliveryTierCopyWith<$Res> {
+  _$OrderDeliveryTierCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderDeliveryTier
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? minDistanceKm = null,
+    Object? maxDistanceKm = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            minDistanceKm: null == minDistanceKm
+                ? _value.minDistanceKm
+                : minDistanceKm // ignore: cast_nullable_to_non_nullable
+                      as double,
+            maxDistanceKm: null == maxDistanceKm
+                ? _value.maxDistanceKm
+                : maxDistanceKm // ignore: cast_nullable_to_non_nullable
+                      as double,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderDeliveryTierImplCopyWith<$Res>
+    implements $OrderDeliveryTierCopyWith<$Res> {
+  factory _$$OrderDeliveryTierImplCopyWith(
+    _$OrderDeliveryTierImpl value,
+    $Res Function(_$OrderDeliveryTierImpl) then,
+  ) = __$$OrderDeliveryTierImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String id, double minDistanceKm, double maxDistanceKm});
+}
+
+/// @nodoc
+class __$$OrderDeliveryTierImplCopyWithImpl<$Res>
+    extends _$OrderDeliveryTierCopyWithImpl<$Res, _$OrderDeliveryTierImpl>
+    implements _$$OrderDeliveryTierImplCopyWith<$Res> {
+  __$$OrderDeliveryTierImplCopyWithImpl(
+    _$OrderDeliveryTierImpl _value,
+    $Res Function(_$OrderDeliveryTierImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of OrderDeliveryTier
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? minDistanceKm = null,
+    Object? maxDistanceKm = null,
+  }) {
+    return _then(
+      _$OrderDeliveryTierImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        minDistanceKm: null == minDistanceKm
+            ? _value.minDistanceKm
+            : minDistanceKm // ignore: cast_nullable_to_non_nullable
+                  as double,
+        maxDistanceKm: null == maxDistanceKm
+            ? _value.maxDistanceKm
+            : maxDistanceKm // ignore: cast_nullable_to_non_nullable
+                  as double,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OrderDeliveryTierImpl implements _OrderDeliveryTier {
+  const _$OrderDeliveryTierImpl({
+    required this.id,
+    required this.minDistanceKm,
+    required this.maxDistanceKm,
+  });
+
+  factory _$OrderDeliveryTierImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderDeliveryTierImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final double minDistanceKm;
+  @override
+  final double maxDistanceKm;
+
+  @override
+  String toString() {
+    return 'OrderDeliveryTier(id: $id, minDistanceKm: $minDistanceKm, maxDistanceKm: $maxDistanceKm)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderDeliveryTierImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.minDistanceKm, minDistanceKm) ||
+                other.minDistanceKm == minDistanceKm) &&
+            (identical(other.maxDistanceKm, maxDistanceKm) ||
+                other.maxDistanceKm == maxDistanceKm));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, id, minDistanceKm, maxDistanceKm);
+
+  /// Create a copy of OrderDeliveryTier
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderDeliveryTierImplCopyWith<_$OrderDeliveryTierImpl> get copyWith =>
+      __$$OrderDeliveryTierImplCopyWithImpl<_$OrderDeliveryTierImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderDeliveryTierImplToJson(this);
+  }
+}
+
+abstract class _OrderDeliveryTier implements OrderDeliveryTier {
+  const factory _OrderDeliveryTier({
+    required final String id,
+    required final double minDistanceKm,
+    required final double maxDistanceKm,
+  }) = _$OrderDeliveryTierImpl;
+
+  factory _OrderDeliveryTier.fromJson(Map<String, dynamic> json) =
+      _$OrderDeliveryTierImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  double get minDistanceKm;
+  @override
+  double get maxDistanceKm;
+
+  /// Create a copy of OrderDeliveryTier
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderDeliveryTierImplCopyWith<_$OrderDeliveryTierImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+OrderDeliveryZoneSnapshot _$OrderDeliveryZoneSnapshotFromJson(
+  Map<String, dynamic> json,
+) {
+  return _OrderDeliveryZoneSnapshot.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OrderDeliveryZoneSnapshot {
+  String get id => throw _privateConstructorUsedError;
+  String get nameAr => throw _privateConstructorUsedError;
+  String get nameEn => throw _privateConstructorUsedError;
+
+  /// Serializes this OrderDeliveryZoneSnapshot to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of OrderDeliveryZoneSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $OrderDeliveryZoneSnapshotCopyWith<OrderDeliveryZoneSnapshot> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OrderDeliveryZoneSnapshotCopyWith<$Res> {
+  factory $OrderDeliveryZoneSnapshotCopyWith(
+    OrderDeliveryZoneSnapshot value,
+    $Res Function(OrderDeliveryZoneSnapshot) then,
+  ) = _$OrderDeliveryZoneSnapshotCopyWithImpl<$Res, OrderDeliveryZoneSnapshot>;
+  @useResult
+  $Res call({String id, String nameAr, String nameEn});
+}
+
+/// @nodoc
+class _$OrderDeliveryZoneSnapshotCopyWithImpl<
+  $Res,
+  $Val extends OrderDeliveryZoneSnapshot
+>
+    implements $OrderDeliveryZoneSnapshotCopyWith<$Res> {
+  _$OrderDeliveryZoneSnapshotCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of OrderDeliveryZoneSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? id = null, Object? nameAr = null, Object? nameEn = null}) {
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            nameAr: null == nameAr
+                ? _value.nameAr
+                : nameAr // ignore: cast_nullable_to_non_nullable
+                      as String,
+            nameEn: null == nameEn
+                ? _value.nameEn
+                : nameEn // ignore: cast_nullable_to_non_nullable
+                      as String,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$OrderDeliveryZoneSnapshotImplCopyWith<$Res>
+    implements $OrderDeliveryZoneSnapshotCopyWith<$Res> {
+  factory _$$OrderDeliveryZoneSnapshotImplCopyWith(
+    _$OrderDeliveryZoneSnapshotImpl value,
+    $Res Function(_$OrderDeliveryZoneSnapshotImpl) then,
+  ) = __$$OrderDeliveryZoneSnapshotImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String id, String nameAr, String nameEn});
+}
+
+/// @nodoc
+class __$$OrderDeliveryZoneSnapshotImplCopyWithImpl<$Res>
+    extends
+        _$OrderDeliveryZoneSnapshotCopyWithImpl<
+          $Res,
+          _$OrderDeliveryZoneSnapshotImpl
+        >
+    implements _$$OrderDeliveryZoneSnapshotImplCopyWith<$Res> {
+  __$$OrderDeliveryZoneSnapshotImplCopyWithImpl(
+    _$OrderDeliveryZoneSnapshotImpl _value,
+    $Res Function(_$OrderDeliveryZoneSnapshotImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of OrderDeliveryZoneSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? id = null, Object? nameAr = null, Object? nameEn = null}) {
+    return _then(
+      _$OrderDeliveryZoneSnapshotImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        nameAr: null == nameAr
+            ? _value.nameAr
+            : nameAr // ignore: cast_nullable_to_non_nullable
+                  as String,
+        nameEn: null == nameEn
+            ? _value.nameEn
+            : nameEn // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OrderDeliveryZoneSnapshotImpl implements _OrderDeliveryZoneSnapshot {
+  const _$OrderDeliveryZoneSnapshotImpl({
+    required this.id,
+    required this.nameAr,
+    required this.nameEn,
+  });
+
+  factory _$OrderDeliveryZoneSnapshotImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OrderDeliveryZoneSnapshotImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final String nameAr;
+  @override
+  final String nameEn;
+
+  @override
+  String toString() {
+    return 'OrderDeliveryZoneSnapshot(id: $id, nameAr: $nameAr, nameEn: $nameEn)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OrderDeliveryZoneSnapshotImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.nameAr, nameAr) || other.nameAr == nameAr) &&
+            (identical(other.nameEn, nameEn) || other.nameEn == nameEn));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, id, nameAr, nameEn);
+
+  /// Create a copy of OrderDeliveryZoneSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OrderDeliveryZoneSnapshotImplCopyWith<_$OrderDeliveryZoneSnapshotImpl>
+  get copyWith =>
+      __$$OrderDeliveryZoneSnapshotImplCopyWithImpl<
+        _$OrderDeliveryZoneSnapshotImpl
+      >(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OrderDeliveryZoneSnapshotImplToJson(this);
+  }
+}
+
+abstract class _OrderDeliveryZoneSnapshot implements OrderDeliveryZoneSnapshot {
+  const factory _OrderDeliveryZoneSnapshot({
+    required final String id,
+    required final String nameAr,
+    required final String nameEn,
+  }) = _$OrderDeliveryZoneSnapshotImpl;
+
+  factory _OrderDeliveryZoneSnapshot.fromJson(Map<String, dynamic> json) =
+      _$OrderDeliveryZoneSnapshotImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  String get nameAr;
+  @override
+  String get nameEn;
+
+  /// Create a copy of OrderDeliveryZoneSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$OrderDeliveryZoneSnapshotImplCopyWith<_$OrderDeliveryZoneSnapshotImpl>
   get copyWith => throw _privateConstructorUsedError;
 }
 

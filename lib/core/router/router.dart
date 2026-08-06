@@ -38,7 +38,6 @@ import '../../features/admin/presentation/screens/admin_order_details_screen.dar
 import '../../features/admin/presentation/screens/staff_management_screen.dart';
 import '../../features/admin/presentation/screens/customer_management_screen.dart';
 import '../../features/admin/presentation/screens/customer_details_screen.dart';
-import '../../features/admin/presentation/screens/delivery_zones_screen.dart';
 import '../../features/customer/presentation/notifiers/auth_notifier.dart';
 import '../../features/shared/domain/models/order.dart';
 import '../../features/shared/domain/models/menu_item.dart';
@@ -344,11 +343,6 @@ GoRouter router(Ref ref) {
             path: '/admin/staff',
             pageBuilder: (context, state) =>
                 kzAdminPage(state: state, child: const StaffManagementScreen()),
-          ),
-          GoRoute(
-            path: '/admin/delivery-zones',
-            pageBuilder: (context, state) =>
-                kzAdminPage(state: state, child: const DeliveryZonesScreen()),
           ),
           GoRoute(
             path: '/admin/customers',

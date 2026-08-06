@@ -11,6 +11,22 @@ import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_settings_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/restaurant_settings.dart';
 
+/// Shared latitude/longitude range validity check for the raw text fields —
+/// used both by the reactive configuration-error banner and by [_save]'s
+/// pre-submit guard, so they never disagree about what counts as valid.
+bool _hasValidCoordinateInputs(String latText, String lngText) {
+  final lat = double.tryParse(latText.trim());
+  final lng = double.tryParse(lngText.trim());
+  return lat != null &&
+      lng != null &&
+      lat.isFinite &&
+      lng.isFinite &&
+      lat >= -90 &&
+      lat <= 90 &&
+      lng >= -180 &&
+      lng <= 180;
+}
+
 /// Settings Center — one organized area for restaurant profile, weekly
 /// operating hours, and the manual order-acceptance gate
 /// (PHASE_8_RESTAURANT_SETTINGS_API_CONTRACT.md). `PUT /admin/settings` is
@@ -35,6 +51,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen>
   late TextEditingController _addressEnCtrl;
   late TextEditingController _timezoneCtrl;
   late TextEditingController _logoUrlCtrl;
+  late TextEditingController _restaurantLatCtrl;
+  late TextEditingController _restaurantLngCtrl;
   late TextEditingController _closedMessageArCtrl;
   late TextEditingController _closedMessageEnCtrl;
 
@@ -61,6 +79,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen>
       _addressEnCtrl.dispose();
       _timezoneCtrl.dispose();
       _logoUrlCtrl.dispose();
+      _restaurantLatCtrl.dispose();
+      _restaurantLngCtrl.dispose();
       _closedMessageArCtrl.dispose();
       _closedMessageEnCtrl.dispose();
     }
@@ -76,6 +96,15 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen>
     _addressEnCtrl = TextEditingController(text: settings.addressEn);
     _timezoneCtrl = TextEditingController(text: settings.timezone);
     _logoUrlCtrl = TextEditingController(text: settings.logoUrl ?? '');
+    // Blank (never the literal "null") when the backend didn't return a
+    // valid coordinate — the admin sees an empty field plus the
+    // configuration-error notice, not a fabricated value.
+    _restaurantLatCtrl = TextEditingController(
+      text: settings.restaurantLatitude?.toString() ?? '',
+    );
+    _restaurantLngCtrl = TextEditingController(
+      text: settings.restaurantLongitude?.toString() ?? '',
+    );
     _closedMessageArCtrl = TextEditingController(
       text: settings.closedMessageAr ?? '',
     );
@@ -91,6 +120,27 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen>
     RestaurantSettings current, {
     bool? overrideAccepting,
   }) async {
+    // Validate before touching network/state — a missing or invalid pair
+    // blocks the save entirely rather than silently substituting 0, the
+    // production coordinates, or dropping the fields; they keep showing
+    // exactly what the admin typed (or left blank) so it can be fixed.
+    if (!_hasValidCoordinateInputs(
+      _restaurantLatCtrl.text,
+      _restaurantLngCtrl.text,
+    )) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('admin_settings.invalid_coordinates_error'.tr()),
+            backgroundColor: KZ.error,
+          ),
+        );
+      }
+      return;
+    }
+    final restaurantLatitude = double.parse(_restaurantLatCtrl.text.trim());
+    final restaurantLongitude = double.parse(_restaurantLngCtrl.text.trim());
+
     setState(() => _isSaving = true);
     try {
       String? logoUrl = _logoUrlCtrl.text.trim().isEmpty
@@ -113,6 +163,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen>
         phone: _phoneCtrl.text.trim(),
         addressAr: _addressArCtrl.text.trim(),
         addressEn: _addressEnCtrl.text.trim(),
+        restaurantLatitude: restaurantLatitude,
+        restaurantLongitude: restaurantLongitude,
         timezone: _timezoneCtrl.text.trim(),
         workingHours: _workingHours,
         acceptingOrders: overrideAccepting ?? _acceptingOrders,
@@ -221,6 +273,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen>
                 addressEnCtrl: _addressEnCtrl,
                 timezoneCtrl: _timezoneCtrl,
                 logoUrlCtrl: _logoUrlCtrl,
+                restaurantLatCtrl: _restaurantLatCtrl,
+                restaurantLngCtrl: _restaurantLngCtrl,
                 isSaving: _isSaving,
                 onLogoPicked: (xFile) =>
                     setState(() => _pickedLogoFile = xFile),
@@ -261,6 +315,8 @@ class _ProfileTab extends StatelessWidget {
   final TextEditingController addressEnCtrl;
   final TextEditingController timezoneCtrl;
   final TextEditingController logoUrlCtrl;
+  final TextEditingController restaurantLatCtrl;
+  final TextEditingController restaurantLngCtrl;
   final bool isSaving;
   final ValueChanged<XFile> onLogoPicked;
   final ValueChanged<String> onLogoUrlChanged;
@@ -274,6 +330,8 @@ class _ProfileTab extends StatelessWidget {
     required this.addressEnCtrl,
     required this.timezoneCtrl,
     required this.logoUrlCtrl,
+    required this.restaurantLatCtrl,
+    required this.restaurantLngCtrl,
     required this.isSaving,
     required this.onLogoPicked,
     required this.onLogoUrlChanged,
@@ -368,6 +426,78 @@ class _ProfileTab extends StatelessWidget {
                   hint: 'Africa/Cairo',
                   prefixIcon: const Icon(
                     Icons.public_rounded,
+                    color: KZ.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: KZ.sp16),
+        KZCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'admin_settings.restaurant_location'.tr(),
+                style: KZ.labelLarge,
+              ),
+              const SizedBox(height: KZ.sp4),
+              Text(
+                'admin_settings.restaurant_location_hint'.tr(),
+                style: KZ.caption,
+              ),
+              // Reactive, not a one-time snapshot: reflects the current
+              // field contents, so it's present the moment the backend
+              // returns missing/malformed coordinates and clears the moment
+              // the admin has typed a valid replacement pair — never a
+              // silently-accepted fallback in either direction.
+              ListenableBuilder(
+                listenable: Listenable.merge([
+                  restaurantLatCtrl,
+                  restaurantLngCtrl,
+                ]),
+                builder: (context, _) {
+                  final isValid = _hasValidCoordinateInputs(
+                    restaurantLatCtrl.text,
+                    restaurantLngCtrl.text,
+                  );
+                  if (isValid) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: KZ.sp8),
+                    child: Text(
+                      'admin_settings.coordinates_missing_error'.tr(),
+                      style: KZ.caption.copyWith(color: KZ.error),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: KZ.sp12),
+              TextFormField(
+                controller: restaurantLatCtrl,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                  signed: true,
+                ),
+                decoration: KZ.inputDecoration(
+                  label: 'admin_settings.restaurant_latitude'.tr(),
+                  prefixIcon: const Icon(
+                    Icons.my_location_rounded,
+                    color: KZ.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: KZ.sp12),
+              TextFormField(
+                controller: restaurantLngCtrl,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                  signed: true,
+                ),
+                decoration: KZ.inputDecoration(
+                  label: 'admin_settings.restaurant_longitude'.tr(),
+                  prefixIcon: const Icon(
+                    Icons.my_location_rounded,
                     color: KZ.primary,
                   ),
                 ),

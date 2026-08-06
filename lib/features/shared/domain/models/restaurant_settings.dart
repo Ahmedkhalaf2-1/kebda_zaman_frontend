@@ -47,6 +47,12 @@ class DayWorkingHours {
   }
 }
 
+double? _toDouble(Object? value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
+}
+
 /// `RestaurantSettings` — restaurant profile, weekly hours, manual
 /// order-acceptance gate (PHASE_8_RESTAURANT_SETTINGS_API_CONTRACT.md).
 /// Same shape for `GET /settings` (public) and `GET/PUT /admin/settings`
@@ -58,6 +64,13 @@ class RestaurantSettings {
   final String phone;
   final String addressAr;
   final String addressEn;
+  // Distance-pricing migration — the single authoritative delivery-quote
+  // origin. `NOT NULL` on the backend, but nullable here: a missing or
+  // malformed response value is represented as `null` rather than silently
+  // substituted with 0 or the known production coordinates — an admin/UI
+  // consumer must treat `null` as "backend misconfigured", never guess.
+  final double? restaurantLatitude;
+  final double? restaurantLongitude;
   final double taxRatePercent;
   final double deliveryFee;
   final double minOrderAmount;
@@ -76,6 +89,8 @@ class RestaurantSettings {
     required this.phone,
     required this.addressAr,
     required this.addressEn,
+    this.restaurantLatitude,
+    this.restaurantLongitude,
     required this.taxRatePercent,
     required this.deliveryFee,
     required this.minOrderAmount,
@@ -97,6 +112,11 @@ class RestaurantSettings {
       phone: json['phone'] as String? ?? '',
       addressAr: json['addressAr'] as String? ?? '',
       addressEn: json['addressEn'] as String? ?? '',
+      // Missing or malformed (e.g. a non-numeric string) parses as `null` —
+      // never 0, never the production coordinates. A `null` here must be
+      // surfaced to the admin as a configuration problem, not hidden.
+      restaurantLatitude: _toDouble(json['restaurantLatitude']),
+      restaurantLongitude: _toDouble(json['restaurantLongitude']),
       taxRatePercent: (json['taxRatePercent'] as num?)?.toDouble() ?? 0,
       deliveryFee: (json['deliveryFee'] as num?)?.toDouble() ?? 0,
       minOrderAmount: (json['minOrderAmount'] as num?)?.toDouble() ?? 0,
@@ -113,7 +133,10 @@ class RestaurantSettings {
   }
 
   /// Full-replace payload for `PUT /admin/settings` — every field the
-  /// contract lists, in the exact shape it expects.
+  /// contract lists, in the exact shape it expects. `restaurantLatitude`/
+  /// `restaurantLongitude` are serialized as-is (including `null`) — the
+  /// admin UI is responsible for blocking the update entirely while either
+  /// is unset/invalid; this method never invents a value to send instead.
   Map<String, dynamic> toJson() => {
     'restaurantNameAr': restaurantNameAr,
     'restaurantNameEn': restaurantNameEn,
@@ -121,6 +144,8 @@ class RestaurantSettings {
     'phone': phone,
     'addressAr': addressAr,
     'addressEn': addressEn,
+    'restaurantLatitude': restaurantLatitude,
+    'restaurantLongitude': restaurantLongitude,
     'taxRatePercent': taxRatePercent,
     'deliveryFee': deliveryFee,
     'minOrderAmount': minOrderAmount,
@@ -140,6 +165,8 @@ class RestaurantSettings {
     String? phone,
     String? addressAr,
     String? addressEn,
+    double? restaurantLatitude,
+    double? restaurantLongitude,
     double? taxRatePercent,
     double? deliveryFee,
     double? minOrderAmount,
@@ -158,6 +185,8 @@ class RestaurantSettings {
       phone: phone ?? this.phone,
       addressAr: addressAr ?? this.addressAr,
       addressEn: addressEn ?? this.addressEn,
+      restaurantLatitude: restaurantLatitude ?? this.restaurantLatitude,
+      restaurantLongitude: restaurantLongitude ?? this.restaurantLongitude,
       taxRatePercent: taxRatePercent ?? this.taxRatePercent,
       deliveryFee: deliveryFee ?? this.deliveryFee,
       minOrderAmount: minOrderAmount ?? this.minOrderAmount,

@@ -3,6 +3,12 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'order.freezed.dart';
 part 'order.g.dart';
 
+double? _toDouble(Object? value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
+}
+
 enum OrderStatus {
   pending,
   confirmed,
@@ -75,6 +81,18 @@ class Order with _$Order {
     required OrderStatus status,
     required double subtotal,
     @Default(0.0) double deliveryFee,
+    // Distance-based delivery pricing snapshot (backend distance-pricing
+    // migration) — `null` for PICKUP orders and for any order placed before
+    // the migration. Never required together; each is independently
+    // nullable and never crashes when absent.
+    int? deliveryDistanceMeters,
+    double? deliveryDistanceKm,
+    int? deliveryDurationSeconds,
+    OrderDeliveryTier? deliveryTier,
+    // DEPRECATED zone-based pricing snapshot — historical orders only.
+    // Always `null` for orders placed after the distance-pricing migration;
+    // kept purely for display on older orders that still carry it.
+    OrderDeliveryZoneSnapshot? deliveryZone,
     @Default(0.0) double discountTotal,
     @Default(0) int loyaltyPointsUsed,
     @Default(0) int loyaltyPointsEarned,
@@ -179,6 +197,65 @@ extension OrderDeliveryAddressCoordsX on OrderDeliveryAddress {
     if (longitude < -180 || longitude > 180) return false;
     if (latitude == 0.0 && longitude == 0.0) return false;
     return true;
+  }
+}
+
+/// Distance tier snapshot captured at checkout time for a DELIVERY order
+/// (distance-pricing migration) — built from the order's own snapshot
+/// columns server-side, never a live tier join, so it never changes if the
+/// tier is later edited/deactivated.
+@freezed
+class OrderDeliveryTier with _$OrderDeliveryTier {
+  const factory OrderDeliveryTier({
+    required String id,
+    required double minDistanceKm,
+    required double maxDistanceKm,
+  }) = _OrderDeliveryTier;
+
+  factory OrderDeliveryTier.fromJson(Map<String, dynamic> json) =>
+      _$OrderDeliveryTierFromJson(json);
+
+  /// Tolerant of numeric or numeric-string wire values (the backend formats
+  /// these with `toFixed(2)`) — a missing/malformed value parses as `0.0`
+  /// rather than throwing.
+  factory OrderDeliveryTier.fromBackendJson(Map<String, dynamic> json) {
+    return OrderDeliveryTier(
+      id: (json['id'] ?? '').toString(),
+      minDistanceKm: _toDouble(json['minDistanceKm']) ?? 0.0,
+      maxDistanceKm: _toDouble(json['maxDistanceKm']) ?? 0.0,
+    );
+  }
+}
+
+/// DEPRECATED zone-based pricing snapshot — present only on orders placed
+/// before the distance-pricing migration. `null` for every order placed
+/// after it (and for PICKUP orders).
+@freezed
+class OrderDeliveryZoneSnapshot with _$OrderDeliveryZoneSnapshot {
+  const factory OrderDeliveryZoneSnapshot({
+    required String id,
+    required String nameAr,
+    required String nameEn,
+  }) = _OrderDeliveryZoneSnapshot;
+
+  factory OrderDeliveryZoneSnapshot.fromJson(Map<String, dynamic> json) =>
+      _$OrderDeliveryZoneSnapshotFromJson(json);
+
+  factory OrderDeliveryZoneSnapshot.fromBackendJson(Map<String, dynamic> json) {
+    return OrderDeliveryZoneSnapshot(
+      id: (json['id'] ?? '').toString(),
+      nameAr: (json['nameAr'] ?? '').toString(),
+      nameEn: (json['nameEn'] ?? '').toString(),
+    );
+  }
+}
+
+extension OrderDeliveryZoneSnapshotX on OrderDeliveryZoneSnapshot {
+  String localizedName(String languageCode) {
+    if (languageCode == 'ar') {
+      return nameAr.isNotEmpty ? nameAr : nameEn;
+    }
+    return nameEn.isNotEmpty ? nameEn : nameAr;
   }
 }
 

@@ -28,7 +28,6 @@ class CodegenLoader extends AssetLoader {
       "offers": "العروض",
       "notifications": "الإشعارات",
       "promo_codes": "أكواد الخصم",
-      "delivery_zones": "مناطق التوصيل",
     },
     "nav_group": {
       "catalog": "الأصناف",
@@ -183,6 +182,30 @@ class CodegenLoader extends AssetLoader {
           "هذه المكافأة غير قابلة للتطبيق على هذا الطلب.",
       "promo_remove_failed": "تعذر إزالة كود الخصم",
       "address_required": "من فضلك أضف عنوان توصيل قبل إتمام هذا الطلب.",
+      "distance": "المسافة",
+      "estimated_time": "الوقت المتوقع",
+      "calculating_delivery_fee": "جاري حساب رسوم التوصيل...",
+      "address_outside_range": "العنوان خارج نطاق التوصيل",
+      "delivery_fee_calc_error": "تعذر حساب رسوم التوصيل حاليًا",
+      "update_address_location": "حدّث موقع العنوان على الخريطة",
+      "address_missing_coordinates_error":
+          "من فضلك حدد موقع هذا العنوان على الخريطة لحساب رسوم التوصيل.",
+      "delivery_coordinates_required_error":
+          "من فضلك حدد موقع عنوانك على الخريطة قبل إتمام هذا الطلب.",
+      "outside_delivery_range_error":
+          "هذا العنوان خارج نطاق التوصيل لدينا (30 كم).",
+      "routes_timeout_error":
+          "حساب رسوم التوصيل يستغرق وقتًا أطول من المتوقع. من فضلك حاول مرة أخرى.",
+      "routes_quota_exceeded_error":
+          "خدمة تسعير التوصيل غير متاحة مؤقتًا. من فضلك حاول مرة أخرى بعد قليل.",
+      "routes_provider_error":
+          "خدمة تسعير التوصيل غير متاحة مؤقتًا. من فضلك حاول مرة أخرى بعد قليل.",
+      "routes_temporary_error":
+          "تعذر حساب رسوم التوصيل حاليًا. من فضلك حاول مرة أخرى.",
+      "routes_no_route_error":
+          "تعذر العثور على مسار يمكن للسائق سلوكه لهذا العنوان. من فضلك راجع موقع الدبوس.",
+      "restaurant_location_error":
+          "الطلب غير متاح مؤقتًا. من فضلك حاول مرة أخرى لاحقًا.",
       "free": "مجاني",
       "checkout_failed_generic": "تعذر إتمام الطلب. حاول مرة أخرى.",
       "place_order_total": "تأكيد الطلب • {amount}",
@@ -190,14 +213,7 @@ class CodegenLoader extends AssetLoader {
       "reward_discount_10": "خصم 10 ر.س",
       "reward_discount_25": "خصم 25 ر.س",
       "loyalty_points_suffix": "{points} نقطة",
-      "delivery_zone": "منطقة التوصيل",
       "delivery_fee": "رسوم التوصيل",
-      "delivery_zone_required": "من فضلك اختر منطقة توصيل قبل إتمام هذا الطلب.",
-      "delivery_zone_load_error": "تعذر تحميل مناطق التوصيل. حاول مرة أخرى.",
-      "delivery_zone_none_available": "لا توجد مناطق توصيل متاحة حالياً.",
-      "delivery_zone_unavailable_error":
-          "منطقة التوصيل هذه لم تعد متاحة. من فضلك اختر منطقة أخرى.",
-      "zone_minimum_order": "الحد الأدنى للمنطقة",
       "zone_minimum_order_error": "هذه المنطقة تتطلب حد أدنى للطلب قدره {min}.",
       "below_min_order_error": "طلبك أقل من الحد الأدنى للطلب في المطعم.",
       "settings_loading": "جاري تحميل بيانات الطلب…",
@@ -416,6 +432,8 @@ class CodegenLoader extends AssetLoader {
       "address_floor": "الطابق",
       "address_apartment": "الشقة",
       "address_notes": "إرشادات إضافية",
+      "delivery_distance": "مسافة التوصيل",
+      "delivery_duration": "مدة الطريق المتوقعة",
       "open_in_maps": "فتح الموقع على خرائط Google",
       "location_unavailable": "إحداثيات الموقع غير متاحة لهذا الطلب",
       "view_details": "عرض التفاصيل",
@@ -780,26 +798,6 @@ class CodegenLoader extends AssetLoader {
       "delete_title": "حذف كود الخصم؟",
       "delete_body": "حذف {code}؟ لا يمكن التراجع عن هذا الإجراء.",
     },
-    "delivery_zones": {
-      "title": "مناطق التوصيل",
-      "subtitle": "المناطق التي يوصل إليها المطعم مع رسومها وحدودها الدنيا",
-      "add_zone": "إضافة منطقة",
-      "edit_zone": "تعديل المنطقة",
-      "load_error": "تعذر تحميل مناطق التوصيل.",
-      "empty": "لا توجد مناطق توصيل بعد.",
-      "active": "مفعّلة",
-      "inactive": "غير مفعّلة",
-      "delivery_fee": "رسوم التوصيل",
-      "minimum_order": "الحد الأدنى للطلب",
-      "sort_order": "ترتيب العرض",
-      "name_en": "الاسم (إنجليزي)",
-      "name_ar": "الاسم (عربي)",
-      "delete_title": "حذف المنطقة؟",
-      "delete_body":
-          "حذف {name}؟ الطلبات السابقة تحتفظ ببيانات التوصيل الخاصة بها.",
-      "delete_success": "تم حذف المنطقة.",
-      "save_success": "تم حفظ المنطقة.",
-    },
     "admin_settings": {
       "center_title": "الإعدادات",
       "tab_profile": "بيانات المطعم",
@@ -812,6 +810,15 @@ class CodegenLoader extends AssetLoader {
       "phone": "الهاتف",
       "address_en": "العنوان (إنجليزي)",
       "address_ar": "العنوان (عربي)",
+      "restaurant_location": "موقع المطعم",
+      "restaurant_location_hint":
+          "يُستخدم لحساب مسافة القيادة ورسوم التوصيل لطلبات العملاء.",
+      "restaurant_latitude": "خط العرض",
+      "restaurant_longitude": "خط الطول",
+      "invalid_coordinates_error":
+          "من فضلك أدخل خط عرض صالح (-90 إلى 90) وخط طول صالح (-180 إلى 180).",
+      "coordinates_missing_error":
+          "موقع المطعم غير مُعد بشكل صحيح. أدخل خط عرض وخط طول صالحين قبل الحفظ.",
       "timezone": "المنطقة الزمنية",
       "hours_timezone_notice": "الساعات محددة بتوقيت {tz}.",
       "hours_informational_notice":
@@ -852,7 +859,6 @@ class CodegenLoader extends AssetLoader {
       "offers": "Offers",
       "notifications": "Notifications",
       "promo_codes": "Promo Codes",
-      "delivery_zones": "Delivery Zones",
     },
     "nav_group": {
       "catalog": "Catalog",
@@ -1019,17 +1025,31 @@ class CodegenLoader extends AssetLoader {
       "promo_remove_failed": "Could not remove promo code",
       "address_required":
           "Please add a delivery address before placing this order.",
-      "delivery_zone": "Delivery Zone",
+      "distance": "Distance",
+      "estimated_time": "Estimated time",
+      "calculating_delivery_fee": "Calculating delivery fee...",
+      "address_outside_range": "Address is outside the delivery area",
+      "delivery_fee_calc_error": "Delivery fee could not be calculated",
+      "update_address_location": "Update address location on map",
+      "address_missing_coordinates_error":
+          "Please set this address's location on the map to calculate delivery.",
+      "delivery_coordinates_required_error":
+          "Please select your address location on the map before placing this order.",
+      "outside_delivery_range_error":
+          "This address is outside our 30 km delivery range.",
+      "routes_timeout_error":
+          "Calculating your delivery fee is taking longer than expected. Please try again.",
+      "routes_quota_exceeded_error":
+          "Delivery pricing is temporarily unavailable. Please try again shortly.",
+      "routes_provider_error":
+          "Delivery pricing is temporarily unavailable. Please try again shortly.",
+      "routes_temporary_error":
+          "We couldn't calculate your delivery fee right now. Please try again.",
+      "routes_no_route_error":
+          "We couldn't find a drivable route to this address. Please check the pin location.",
+      "restaurant_location_error":
+          "Ordering is temporarily unavailable. Please try again later.",
       "delivery_fee": "Delivery Fee",
-      "delivery_zone_required":
-          "Please select a delivery zone before placing this order.",
-      "delivery_zone_load_error":
-          "Couldn't load delivery zones. Please try again.",
-      "delivery_zone_none_available":
-          "No delivery zones are available right now.",
-      "delivery_zone_unavailable_error":
-          "That delivery zone is no longer available. Please pick another.",
-      "zone_minimum_order": "Zone minimum",
       "zone_minimum_order_error":
           "This zone requires a minimum order of {min}.",
       "below_min_order_error":
@@ -1281,6 +1301,8 @@ class CodegenLoader extends AssetLoader {
       "address_floor": "Floor",
       "address_apartment": "Apartment",
       "address_notes": "Additional Directions",
+      "delivery_distance": "Delivery Distance",
+      "delivery_duration": "Estimated Route Duration",
       "open_in_maps": "Open in Google Maps",
       "location_unavailable":
           "Location coordinates are unavailable for this order",
@@ -1656,26 +1678,6 @@ class CodegenLoader extends AssetLoader {
       "delete_title": "Delete promo code?",
       "delete_body": "Delete {code}? This cannot be undone.",
     },
-    "delivery_zones": {
-      "title": "Delivery Zones",
-      "subtitle":
-          "Areas your restaurant delivers to, with their fees and minimums",
-      "add_zone": "Add Zone",
-      "edit_zone": "Edit Zone",
-      "load_error": "Failed to load delivery zones.",
-      "empty": "No delivery zones yet.",
-      "active": "Active",
-      "inactive": "Inactive",
-      "delivery_fee": "Delivery fee",
-      "minimum_order": "Minimum order",
-      "sort_order": "Sort order",
-      "name_en": "Name (English)",
-      "name_ar": "Name (Arabic)",
-      "delete_title": "Delete zone?",
-      "delete_body": "Delete {name}? Past orders keep their delivery details.",
-      "delete_success": "Zone deleted.",
-      "save_success": "Zone saved.",
-    },
     "admin_settings": {
       "center_title": "Settings",
       "tab_profile": "Restaurant Profile",
@@ -1688,6 +1690,15 @@ class CodegenLoader extends AssetLoader {
       "phone": "Phone",
       "address_en": "Address (English)",
       "address_ar": "Address (Arabic)",
+      "restaurant_location": "Restaurant Location",
+      "restaurant_location_hint":
+          "Used to calculate driving distance and delivery fees for customer orders.",
+      "restaurant_latitude": "Latitude",
+      "restaurant_longitude": "Longitude",
+      "invalid_coordinates_error":
+          "Please enter a valid latitude (-90 to 90) and longitude (-180 to 180).",
+      "coordinates_missing_error":
+          "Restaurant location is not configured correctly. Enter a valid latitude and longitude before saving.",
       "timezone": "Timezone",
       "hours_timezone_notice": "Hours are set in {tz} time.",
       "hours_informational_notice":

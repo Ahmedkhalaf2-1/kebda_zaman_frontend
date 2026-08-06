@@ -52,6 +52,21 @@ extension AddressFieldsExtension on Address {
   String? get recipientName => null;
   String? get phone => null;
 
+  /// True only when both coordinates are present and non-zero — mirrors
+  /// [OrderDeliveryAddressCoordsX.hasValidCoordinates]. The backend never
+  /// legitimately places an address at the (0, 0) "null island" sentinel, so
+  /// that combination is treated as missing/invalid, never as a real pin.
+  bool get hasValidCoordinates {
+    final latitude = lat;
+    final longitude = lng;
+    if (latitude == null || longitude == null) return false;
+    if (!latitude.isFinite || !longitude.isFinite) return false;
+    if (latitude < -90 || latitude > 90) return false;
+    if (longitude < -180 || longitude > 180) return false;
+    if (latitude == 0.0 && longitude == 0.0) return false;
+    return true;
+  }
+
   Map<String, dynamic> toBackendJson() {
     return {
       'title': label.isNotEmpty ? label : 'Home',

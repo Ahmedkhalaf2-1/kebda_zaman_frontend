@@ -28,7 +28,8 @@ mixin _$User {
   List<String> get addressIds => throw _privateConstructorUsedError;
   List<String> get favoriteItemIds => throw _privateConstructorUsedError;
   String? get loyaltyAccountId => throw _privateConstructorUsedError;
-  String? get role => throw _privateConstructorUsedError;
+  String? get role =>
+      throw _privateConstructorUsedError; // Backend-authoritative guest flag — avoids the fragile name/email heuristic.
   bool get isGuest => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
@@ -276,7 +277,9 @@ class _$UserImpl implements _User {
   final String? loyaltyAccountId;
   @override
   final String? role;
+  // Backend-authoritative guest flag — avoids the fragile name/email heuristic.
   @override
+  @JsonKey()
   final bool isGuest;
   @override
   final DateTime createdAt;
@@ -372,7 +375,7 @@ abstract class _User implements User {
   @override
   String? get loyaltyAccountId;
   @override
-  String? get role;
+  String? get role; // Backend-authoritative guest flag — avoids the fragile name/email heuristic.
   @override
   bool get isGuest;
   @override

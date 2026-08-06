@@ -96,12 +96,6 @@ class AdminShell extends ConsumerWidget {
           label: 'staff.title'.tr(),
           path: '/admin/staff',
         ),
-        _AdminNavEntry(
-          icon: Icons.map_outlined,
-          activeIcon: Icons.map_rounded,
-          label: 'nav.delivery_zones'.tr(),
-          path: '/admin/delivery-zones',
-        ),
       ],
     ),
     _AdminNavGroup(

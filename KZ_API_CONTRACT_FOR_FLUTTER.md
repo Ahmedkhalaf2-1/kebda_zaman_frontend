@@ -649,7 +649,7 @@ Errors:
 
 ---
 
-# 7. Restaurant Settings API (updated — Phase 8)
+# 7. Restaurant Settings API (updated — distance-based delivery pricing migration)
 
 ```http
 GET /settings
@@ -661,6 +661,7 @@ Public. Response (`RestaurantSettings` — `lib/features/shared/domain/models/re
 {
   "restaurantNameAr": "...", "restaurantNameEn": "...", "logoUrl": null,
   "phone": "...", "addressAr": "...", "addressEn": "...",
+  "restaurantLatitude": 21.5705641, "restaurantLongitude": 39.1681808,
   "deliveryFee": 20, "taxRatePercent": 14, "minOrderAmount": 50,
   "workingHours": [
     { "dayOfWeek": 0, "isOpen": true, "openTime": "10:00", "closeTime": "02:00" }
@@ -677,10 +678,16 @@ Public. Response (`RestaurantSettings` — `lib/features/shared/domain/models/re
   (plus `closedMessageAr`/`closedMessageEn`) to show a proactive "currently
   closed" banner, but the backend enforces it regardless of what the client
   shows.
+- `restaurantLatitude`/`restaurantLongitude` are the single authoritative
+  origin the backend uses for every `POST /delivery/quote` and checkout
+  distance calculation (§8, §20a). `NOT NULL` on the backend; Flutter's model
+  (`RestaurantSettings.restaurantLatitude/Longitude`) parses them as nullable
+  and never fabricates a value on a missing/malformed response — see §20.
 - `deliveryFee` here is a legacy/unused field kept for backward compatibility
-  — DELIVERY pricing is zone-specific (see §8 and the Delivery Zones API
-  below) and never reads this value.
-- Full details: `PHASE_8_RESTAURANT_SETTINGS_API_CONTRACT.md` (backend repo).
+  — DELIVERY pricing is distance-based (see §8/§20a) and never reads this
+  value.
+- Full details: `PHASE_8_RESTAURANT_SETTINGS_API_CONTRACT.md` (backend repo,
+  superseded for delivery pricing by the distance-pricing migration notes).
 
 ---
 
@@ -701,7 +708,8 @@ Recommended header:
 Idempotency-Key: <UNIQUE_CHECKOUT_ATTEMPT_ID>
 ```
 
-Request:
+Request (DELIVERY — distance-based pricing migration; `deliveryZoneId` is
+**gone**, `deliveryAddress.latitude`/`longitude` are **required** instead):
 
 ```json
 {
@@ -713,9 +721,10 @@ Request:
     "building": "10",
     "floor": "2",
     "apartment": "5",
-    "city": "Jeddah"
+    "city": "Jeddah",
+    "latitude": 21.5705641,
+    "longitude": 39.1681808
   },
-  "deliveryZoneId": "uuid",
   "promoCode": "WELCOME10",
   "notes": "Call on arrival"
 }
@@ -730,27 +739,46 @@ For pickup:
 }
 ```
 
-Do not send price, subtotal, fee, tax, discount, or total fields — and,
-since Phase 8, never send a delivery fee at all: `deliveryZoneId` (uuid,
-**required for `DELIVERY`**) is the only delivery-related field, fetched
-from `GET /delivery-zones` and picked by the customer at checkout. `PICKUP`
-ignores it if sent.
+Do not send price, subtotal, fee, tax, discount, or total fields. Flutter
+must never send `deliveryZoneId` (removed entirely), a client-computed
+delivery fee, distance, duration, a delivery-tier id, or a delivery-eligibility
+flag — the backend always recalculates the route and fee authoritatively at
+checkout via `GoogleRoutesService`/`DeliveryPricingService`, ignoring
+anything client-supplied. For `DELIVERY`, `deliveryAddress.latitude` and
+`deliveryAddress.longitude` (numeric, -90..90 / -180..180) are **required**;
+`PICKUP` never requires or reads them.
 
-Response `201`: full order object, now with an additive `deliveryZone: {id,
-nameAr, nameEn} | null` field (null for `PICKUP` and pre-Phase-8 orders).
+Response `201`: full order object (§9) with the new nullable
+`deliveryDistanceMeters`/`deliveryDistanceKm`/`deliveryDurationSeconds`/
+`deliveryTier` snapshot fields, plus the now-**deprecated** `deliveryZone:
+{id, nameAr, nameEn} | null` field — `deliveryZone` is `null` for every order
+placed after this migration (and for `PICKUP`); it is retained only so
+historical pre-migration orders keep displaying their original zone.
 
 Errors include:
 
-- `422 DELIVERY_ADDRESS_REQUIRED`
+- `422 DELIVERY_ADDRESS_REQUIRED` — no `deliveryAddress` object at all for `DELIVERY`.
+- `422 DELIVERY_COORDINATES_REQUIRED` — `deliveryAddress` present but missing/invalid `latitude`/`longitude`.
+- `422 OUTSIDE_DELIVERY_RANGE` — resolved driving distance exceeds every active tier (currently >30 km); `details: {distanceMeters}`.
+- `502 ROUTES_PROVIDER_CONFIG_ERROR` — Google Routes API key missing/rejected (403). Never expose details to the end user.
+- `503 ROUTES_QUOTA_EXCEEDED` — Google Routes API rate-limited (429).
+- `504 ROUTES_TIMEOUT` — Google Routes API call exceeded its timeout.
+- `502 ROUTES_TEMPORARY_ERROR` — other/unrecognized Google Routes failure or malformed response.
+- `422 ROUTES_NO_ROUTE_FOUND` — Google Routes found no drivable route to the pin.
+- `422 RESTAURANT_LOCATION_NOT_CONFIGURED` — `RestaurantSettings.restaurantLatitude/Longitude` missing/invalid server-side.
 - `409 EMPTY_CART`
 - `422 BELOW_MIN_ORDER` — store-wide floor (`settings.minOrderAmount`).
-- `422 MINIMUM_ORDER_NOT_MET` — zone-specific floor (`details.minimumOrder`), checked before `BELOW_MIN_ORDER`.
-- `422 DELIVERY_ZONE_UNAVAILABLE` — missing/unknown/inactive/deleted zone id.
-- `422 RESTAURANT_NOT_ACCEPTING_ORDERS` — `settings.acceptingOrders === false`; `details: {closedMessageAr, closedMessageEn}`. Checked first, before cart/zone validation. Cart/menu browsing stay unaffected — only this write path is gated.
+- `422 MINIMUM_ORDER_NOT_MET` — matched delivery tier's own minimum (`details.minimumOrder`), checked before `BELOW_MIN_ORDER`.
+- `422 RESTAURANT_NOT_ACCEPTING_ORDERS` — `settings.acceptingOrders === false`; `details: {closedMessageAr, closedMessageEn}`. Checked first, before cart/delivery validation. Cart/menu browsing stay unaffected — only this write path is gated.
 - Promo errors
 - `404 ITEM_UNAVAILABLE`
 - `422 INVALID_VARIANT`
 - `422 INVALID_ADDON_SELECTION`
+
+See §20a for the standalone pre-checkout `POST /delivery/quote` endpoint
+Flutter uses to show an estimated fee/distance/duration before the customer
+taps Place Order — checkout above always re-resolves this independently and
+never trusts a client-supplied quote.
 
 ---
 
@@ -843,9 +871,27 @@ There is currently:
   "discount": 0,
   "totalAmount": 156.8,
   "createdAt": "2026-07-28T00:00:00.000Z",
-  "estimatedDeliveryTime": null
+  "estimatedDeliveryTime": null,
+  "deliveryDistanceMeters": 13420,
+  "deliveryDistanceKm": "13.42",
+  "deliveryDurationSeconds": 1260,
+  "deliveryTier": { "id": "uuid", "minDistanceKm": "0.00", "maxDistanceKm": "15.00" },
+  "deliveryZone": null
 }
 ```
+
+- `deliveryDistanceMeters`/`deliveryDurationSeconds` are plain numbers;
+  `deliveryDistanceKm` and `deliveryTier.minDistanceKm/maxDistanceKm` are
+  fixed-2-decimal **strings** — Flutter parses all of them tolerant of either
+  numbers or numeric strings (`Order.deliveryDistanceMeters/Km`,
+  `deliveryDurationSeconds`, `deliveryTier` in
+  `lib/features/shared/domain/models/order.dart`). All four are `null` for
+  `PICKUP` orders and for any order placed before this migration.
+- `deliveryZone` (`{id, nameAr, nameEn} | null`, see §8) is **deprecated** —
+  `null` for every order placed after this migration; kept only so
+  historical pre-migration orders can still show the zone they were placed
+  in (`OrderDeliveryZoneSnapshot` in `order.dart`). A well-formed order never
+  carries both `deliveryTier` and a non-null `deliveryZone`.
 
 ---
 
@@ -1611,46 +1657,106 @@ PUT /admin/settings
 `GET` returns everything the public `/settings` shape returns (§7) plus `id`,
 `currency`, `updatedAt`. `PUT` is full replacement — see §7's example payload
 for the exact shape (`restaurantNameAr/En`, `logoUrl`, `phone`, `addressAr/En`,
-`taxRatePercent`, `deliveryFee`, `minOrderAmount`, `currency`, `workingHours`
-[7 entries], `timezone`, `isMaintenanceMode`, `acceptingOrders`,
-`closedMessageAr/En`). `logoUrl`/`closedMessageAr`/`closedMessageEn` are the
-only nullable/optional fields; everything else is required on every `PUT`.
+`restaurantLatitude`, `restaurantLongitude`, `taxRatePercent`, `deliveryFee`,
+`minOrderAmount`, `currency`, `workingHours` [7 entries], `timezone`,
+`isMaintenanceMode`, `acceptingOrders`, `closedMessageAr/En`).
+`logoUrl`/`closedMessageAr`/`closedMessageEn` are the only nullable/optional
+fields; everything else — **including `restaurantLatitude`/
+`restaurantLongitude` since the distance-pricing migration** — is required
+on every `PUT` (`Decimal(10,7) NOT NULL` on the backend).
 
 Flutter's Settings Center (`lib/features/admin/presentation/screens/admin_settings_screen.dart`)
 edits one shared draft across three tabs (Restaurant Profile / Working Hours /
 Order Acceptance) and always submits the full object, never a partial one.
-Logo upload reuses the existing `POST /admin/uploads/image` — there is no
-dedicated logo endpoint.
+The Profile tab's Restaurant Location card validates `restaurantLatitude`
+(-90..90) / `restaurantLongitude` (-180..180) client-side before every save
+and blocks the request (with a localized configuration-error notice) rather
+than ever submitting 0, `null`, or a fabricated default when the backend
+value is missing or malformed. Logo upload reuses the existing
+`POST /admin/uploads/image` — there is no dedicated logo endpoint.
 
 ---
 
-# 20a. Delivery Zones API (Phase 8)
+# 20a. Delivery Quote API (distance-based delivery pricing migration)
+
+The old zone-based delivery system (`/delivery-zones`,
+`/admin/delivery-zones`, `DeliveryZone`) is **retired**. Delivery fees are
+now computed server-side from actual driving distance (Google Routes) between
+`RestaurantSettings.restaurantLatitude/Longitude` (§7) and the customer's
+`deliveryAddress` coordinates, matched against a set of admin-configured
+distance tiers:
+
+| Tier | Distance | Fee |
+|---|---|---|
+| 1 | 0 – 15 km | 10 SAR |
+| 2 | 15 – 25 km | 15 SAR |
+| 3 | 25 – 30 km | 25 SAR |
+| — | > 30 km | not deliverable (`OUTSIDE_DELIVERY_RANGE`) |
 
 ```http
-GET  /delivery-zones                 (public, no auth)
-GET  /admin/delivery-zones           (ADMIN only)
-POST /admin/delivery-zones           (ADMIN only)
-PATCH /admin/delivery-zones/:id      (ADMIN only)
-DELETE /admin/delivery-zones/:id     (ADMIN only, soft delete)
+POST /delivery/quote
+Authorization: Bearer <ACCESS_TOKEN>   (CUSTOMER role required)
 ```
 
-`DeliveryZone`: `{ id, nameAr, nameEn, deliveryFee, minimumOrder, isActive,
-sortOrder }`. Public endpoint omits `isActive`/timestamps and only ever
-returns active, non-deleted zones, sorted `sortOrder` asc then `createdAt`
-asc — safe to feed directly into a picker. Admin endpoint returns every
-non-deleted zone (active and inactive).
+Request body — **only** the destination coordinates; origin, travel mode,
+and every money figure are always resolved server-side and never accepted
+from the client:
 
-`POST`/`PATCH` body: `{ nameAr, nameEn, deliveryFee>=0, minimumOrder>=0,
-isActive?, sortOrder? }`. `PATCH` is full-replace-style (not a partial
-merge), matching the approved spec for this resource. `DELETE` is a soft
-delete (`204`) — not blocked by historical orders, since `Order` snapshots
-the zone's name/fee at checkout time and the FK is `onDelete: SetNull`.
+```json
+{ "latitude": 21.5705641, "longitude": 39.1681808 }
+```
 
-Flutter: `DeliveryZoneRepository`/`ApiDeliveryZoneRepository`
-(`lib/features/shared/`) back both `deliveryZonesProvider` (public, used by
-checkout) and `deliveryZoneAdminProvider` (admin CRUD screen at
-`/admin/delivery-zones`). No maps, polygons, or radius config — a zone is
-just a named area with a flat fee and minimum.
+Deliverable response:
+
+```json
+{
+  "deliverable": true,
+  "distanceMeters": 13420,
+  "distanceKm": "13.42",
+  "durationSeconds": 1260,
+  "durationMinutes": 21,
+  "deliveryFee": "10.00",
+  "minimumOrder": "0.00",
+  "currency": "SAR",
+  "tier": { "id": "uuid", "minDistanceKm": "0.00", "maxDistanceKm": "15.00" }
+}
+```
+
+Out-of-range response:
+
+```json
+{
+  "deliverable": false,
+  "distanceMeters": 30500,
+  "distanceKm": "30.50",
+  "durationSeconds": 2400,
+  "durationMinutes": 40,
+  "currency": "SAR",
+  "reason": "OUTSIDE_DELIVERY_RANGE"
+}
+```
+
+This is an **advisory pre-checkout estimate only**, for UI display before the
+customer taps Place Order. `POST /checkout` (§8) always recalculates
+authoritatively and independently — Flutter must never submit a value from
+this response back to checkout (no `deliveryFee`, `distance`, `duration`,
+`deliveryTierId`, or `deliverable` flag). Public quotes are cached
+server-side for 60s keyed by rounded coordinates; checkout's own resolution
+is never cached. Rate-limited (`SENSITIVE_ROUTE_THROTTLE`) since it proxies a
+paid Google API.
+
+Flutter: `DeliveryQuoteRepository`/`ApiDeliveryQuoteRepository`
+(`lib/features/shared/`) back `deliveryQuoteProvider`
+(`DeliveryQuoteNotifier`, `lib/features/customer/presentation/notifiers/delivery_quote_notifier.dart`),
+watched by the checkout screen's delivery-fee card. Requested only for
+`DELIVERY` with a selected address that has valid coordinates; deduped per
+(method, lat, lng) so it never re-fires on every rebuild; cleared to `null`
+for `PICKUP` or when coordinates become invalid.
+
+Admin tier management (`GET/POST /admin/delivery-tiers`,
+`PATCH /admin/delivery-tiers/:id`, `ADMIN` only) exists backend-side but has
+no Flutter consumer yet — tiers are currently fixed to the table above and
+not editable from the app.
 
 ---
 
@@ -1769,7 +1875,6 @@ Catalog
 Marketing                          /admin/notifications    (existing compose+history screen, repositioned)
 Operations
   Staff                            /admin/staff
-  Delivery Zones                   /admin/delivery-zones   (new — Phase 8)
 Customers                          /admin/customers
 Settings                           /admin/settings          (rebuilt as a 3-tab Settings Center)
 ```

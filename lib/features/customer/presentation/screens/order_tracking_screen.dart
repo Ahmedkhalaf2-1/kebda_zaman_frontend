@@ -242,10 +242,12 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: OrderTrackingScreen.primaryColor.withValues(alpha: 0.4),
+                        color: OrderTrackingScreen.primaryColor.withValues(
+                          alpha: 0.4,
+                        ),
                         blurRadius: 6,
                         spreadRadius: 1,
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -508,6 +510,25 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                 'cart.delivery_fee'.tr(),
                 formatCurrency(order.deliveryFee, locale: locale),
               ),
+              // Distance-based delivery pricing snapshot — nullable for
+              // PICKUP and pre-migration orders; the route estimate captured
+              // at checkout time, never the actual delivered time.
+              if (order.fulfillmentType == FulfillmentType.delivery &&
+                  order.deliveryDistanceKm != null) ...[
+                const SizedBox(height: 6),
+                priceRow(
+                  'checkout.distance'.tr(),
+                  '${order.deliveryDistanceKm!.toStringAsFixed(2)} km',
+                ),
+              ],
+              if (order.fulfillmentType == FulfillmentType.delivery &&
+                  order.deliveryDurationSeconds != null) ...[
+                const SizedBox(height: 6),
+                priceRow(
+                  'checkout.estimated_time'.tr(),
+                  '${(order.deliveryDurationSeconds! / 60).round()} min',
+                ),
+              ],
               // No authoritative tax field on the Order model — omit the row
               // entirely rather than deriving a fake tax amount from
               // rounding differences.
@@ -784,9 +805,8 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: OrderTrackingScreen.primaryColor.withValues(
-                                alpha: 0.3,
-                              ),
+                              color: OrderTrackingScreen.primaryColor
+                                  .withValues(alpha: 0.3),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),

@@ -31,8 +31,8 @@ import 'package:kebda_zaman/features/admin/domain/repositories/customer_reposito
 import 'package:kebda_zaman/features/admin/data/api_customer_repository.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/reports_repository.dart';
 import 'package:kebda_zaman/features/admin/data/api_reports_repository.dart';
-import 'package:kebda_zaman/features/shared/domain/repositories/delivery_zone_repository.dart';
-import 'package:kebda_zaman/features/shared/data/api_delivery_zone_repository.dart';
+import 'package:kebda_zaman/features/shared/domain/repositories/delivery_quote_repository.dart';
+import 'package:kebda_zaman/features/shared/data/api_delivery_quote_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kebda_zaman/core/api/api_client.dart';
 import 'package:kebda_zaman/core/api/api_interceptors.dart';
@@ -144,8 +144,10 @@ final reportsRepositoryProvider = Provider<ReportsRepository>((ref) {
   return ApiReportsRepository(ref.watch(apiClientProvider));
 });
 
-final deliveryZoneRepositoryProvider = Provider<DeliveryZoneRepository>((ref) {
-  return ApiDeliveryZoneRepository(ref.watch(apiClientProvider));
+final deliveryQuoteRepositoryProvider = Provider<DeliveryQuoteRepository>((
+  ref,
+) {
+  return ApiDeliveryQuoteRepository(ref.watch(apiClientProvider));
 });
 
 final adminOrderNotificationRepositoryProvider =

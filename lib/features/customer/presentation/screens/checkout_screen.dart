@@ -10,10 +10,10 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/checkout_no
 import 'package:kebda_zaman/features/customer/presentation/notifiers/address_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/loyalty_notifier.dart';
-import 'package:kebda_zaman/features/customer/presentation/notifiers/delivery_zone_notifier.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/delivery_quote_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/user.dart';
 import 'package:kebda_zaman/features/shared/domain/models/address.dart';
-import 'package:kebda_zaman/features/shared/domain/models/delivery_zone.dart';
+import 'package:kebda_zaman/features/shared/domain/models/delivery_quote.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/core/api/api_exceptions.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
@@ -96,12 +96,32 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   // Selected loyalty reward id, mutually exclusive with an applied promo code
   // (enforced below via `effectiveRewardId`, never both sent to the server).
   String? _selectedRewardId;
-  // Required for DELIVERY checkout (Phase 8) — the backend resolves the fee
-  // fresh from this id, never from a client-supplied number.
-  String? _selectedZoneId;
   // Guards the address picker sheet + its follow-up navigation against
   // rapid double-taps opening/pushing more than once concurrently.
   bool _isAddressPickerBusy = false;
+  // Last (method, lat, lng) the delivery quote was requested for — lets
+  // [_maybeRequestQuote] skip re-dispatching on every rebuild and only fire
+  // when the actual target changed (address swap, coordinate change, or a
+  // PICKUP<->DELIVERY flip). The [DeliveryQuoteNotifier] itself also dedupes,
+  // this is just to avoid scheduling a redundant microtask each frame.
+  ({FulfillmentType method, double? lat, double? lng})? _lastQuoteTriggerKey;
+
+  /// Schedules a delivery-quote request for [method]/[lat]/[lng] after the
+  /// current frame, but only when the target actually changed since the
+  /// last call — never synchronously during build (Riverpod forbids
+  /// mutating provider state mid-build) and never repeatedly for an
+  /// unchanged target.
+  void _maybeRequestQuote(FulfillmentType method, double? lat, double? lng) {
+    final key = (method: method, lat: lat, lng: lng);
+    if (_lastQuoteTriggerKey == key) return;
+    _lastQuoteTriggerKey = key;
+    Future.microtask(() {
+      if (!mounted) return;
+      ref
+          .read(deliveryQuoteProvider.notifier)
+          .requestQuote(deliveryMethod: method, latitude: lat, longitude: lng);
+    });
+  }
 
   /// Client-side preview of a reward's flat subtotal discount — mirrors the
   /// backend's exact rule (02_API_REFERENCE.md): capped at the subtotal.
@@ -129,12 +149,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   /// current order-type + promo/reward selection. The server always re-prices
   /// authoritatively at checkout — this only drives what's shown on screen.
   ///
-  /// [selectedZoneFee] is the chosen delivery zone's fee (0 for PICKUP or
-  /// when no zone is selected yet) — `cart.deliveryFee` is always `0` post
-  /// Phase 8 (the real fee is zone-specific and only resolved at checkout),
-  /// so it is never used here.
+  /// [quoteDeliveryFee] is the current distance-based delivery quote's fee
+  /// (0 for PICKUP, or while no deliverable quote is available yet) —
+  /// `cart.deliveryFee` is always `0` (the real fee is distance-based and
+  /// only resolved via `POST /delivery/quote`/checkout), so it is never used
+  /// here.
   ({double deliveryFee, double discount, double tax, double grandTotal})
-  _previewTotals(Cart cart, double selectedZoneFee) {
+  _previewTotals(Cart cart, double quoteDeliveryFee) {
     final effectiveRewardId = _effectiveRewardId(cart);
     final rewardSubtotalDiscount = _rewardSubtotalDiscount(
       effectiveRewardId,
@@ -142,7 +163,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
     final rewardWaivesDelivery = effectiveRewardId == 'free-delivery';
 
-    final baseDeliveryFee = _orderType == 'pickup' ? 0.0 : selectedZoneFee;
+    final baseDeliveryFee = _orderType == 'pickup' ? 0.0 : quoteDeliveryFee;
     final deliveryFee = rewardWaivesDelivery ? 0.0 : baseDeliveryFee;
     final discount = cart.discountTotal + rewardSubtotalDiscount;
 
@@ -162,6 +183,34 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       tax: tax,
       grandTotal: taxableBaseAfter + deliveryFee + tax,
     );
+  }
+
+  /// Localization key for the footer notice explaining why DELIVERY
+  /// checkout is currently blocked by the address/quote state — `null` when
+  /// there's nothing to say (no address picked yet — the address card above
+  /// already covers that — or a deliverable quote is in hand).
+  String? _deliveryBlockReasonKey(
+    Address? address,
+    AsyncValue<DeliveryQuote?> quoteAsync,
+  ) {
+    if (address == null) return null;
+    if (!address.hasValidCoordinates) {
+      return 'checkout.address_missing_coordinates_error';
+    }
+    if (quoteAsync.isLoading) {
+      return 'checkout.calculating_delivery_fee';
+    }
+    if (quoteAsync.hasError) {
+      return 'checkout.delivery_fee_calc_error';
+    }
+    final quote = quoteAsync.valueOrNull;
+    if (quote == null) {
+      return 'checkout.calculating_delivery_fee';
+    }
+    if (!quote.deliverable) {
+      return 'checkout.address_outside_range';
+    }
+    return null;
   }
 
   String _formatAddress(Address a) {
@@ -368,26 +417,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  DeliveryZone? _findZone(List<DeliveryZone> zones) {
-    if (_selectedZoneId == null) return null;
-    for (final z in zones) {
-      if (z.id == _selectedZoneId) return z;
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final cartAsync = ref.watch(cartProvider);
     final checkoutState = ref.watch(checkoutProvider);
     final addressState = ref.watch(addressNotifierProvider);
     final authState = ref.watch(authNotifierProvider);
-    final zonesAsync = ref.watch(deliveryZonesProvider);
-    final zones = zonesAsync.valueOrNull ?? const <DeliveryZone>[];
-    final selectedZone = _findZone(zones);
-    final selectedZoneFee = _orderType == 'delivery'
-        ? (selectedZone?.deliveryFee ?? 0.0)
-        : 0.0;
     final isGuest = !authState.isLoggedIn || (authState.user?.isGuest ?? true);
     final loyaltyAsync = isGuest ? null : ref.watch(loyaltyProvider);
     final pointsBalance = loyaltyAsync?.valueOrNull?.account.pointsBalance ?? 0;
@@ -405,11 +440,32 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ? _formatAddress(effectiveAddress)
         : 'checkout.no_address_notice'.tr();
 
+    final deliveryMethodForQuote = _orderType == 'delivery'
+        ? FulfillmentType.delivery
+        : FulfillmentType.pickup;
+    _maybeRequestQuote(
+      deliveryMethodForQuote,
+      effectiveAddress?.lat,
+      effectiveAddress?.lng,
+    );
+    final quoteAsync = ref.watch(deliveryQuoteProvider);
+    final quote = quoteAsync.valueOrNull;
+    // Never a fake/stale fee while a fresh quote is loading or failed — 0
+    // until a deliverable quote is actually in hand.
+    final quoteDeliveryFee =
+        (_orderType == 'delivery' &&
+            !quoteAsync.isLoading &&
+            quote != null &&
+            quote.deliverable)
+        ? (quote.deliveryFee ?? 0.0)
+        : 0.0;
+
     ref.listen(checkoutProvider, (previous, next) {
       next.whenOrNull(
         error: (error, stackTrace) {
           String message = 'checkout.checkout_failed_generic'.tr();
           bool guideToSignIn = false;
+          bool guideToEditAddress = false;
 
           final cause = error is Failure ? error.cause : null;
           if (cause is ApiException) {
@@ -437,8 +493,33 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       localizedClosed ?? 'checkout.restaurant_closed'.tr();
                 }
                 break;
-              case 'DELIVERY_ZONE_UNAVAILABLE':
-                message = 'checkout.delivery_zone_unavailable_error'.tr();
+              // Distance-based delivery pricing errors (POST /checkout and
+              // POST /delivery/quote share this code space) — the user stays
+              // on checkout in every case here, never auto-retried.
+              case 'DELIVERY_COORDINATES_REQUIRED':
+                message = 'checkout.delivery_coordinates_required_error'.tr();
+                guideToEditAddress = effectiveAddress != null;
+                break;
+              case 'OUTSIDE_DELIVERY_RANGE':
+                message = 'checkout.outside_delivery_range_error'.tr();
+                break;
+              case 'ROUTES_TIMEOUT':
+                message = 'checkout.routes_timeout_error'.tr();
+                break;
+              case 'ROUTES_QUOTA_EXCEEDED':
+                message = 'checkout.routes_quota_exceeded_error'.tr();
+                break;
+              case 'ROUTES_PROVIDER_CONFIG_ERROR':
+                message = 'checkout.routes_provider_error'.tr();
+                break;
+              case 'ROUTES_TEMPORARY_ERROR':
+                message = 'checkout.routes_temporary_error'.tr();
+                break;
+              case 'ROUTES_NO_ROUTE_FOUND':
+                message = 'checkout.routes_no_route_error'.tr();
+                break;
+              case 'RESTAURANT_LOCATION_NOT_CONFIGURED':
+                message = 'checkout.restaurant_location_error'.tr();
                 break;
               case 'MINIMUM_ORDER_NOT_MET':
                 {
@@ -477,6 +558,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       label: 'checkout.sign_in'.tr(),
                       textColor: Colors.white,
                       onPressed: () => context.push('/login'),
+                    )
+                  : guideToEditAddress
+                  ? SnackBarAction(
+                      label: 'checkout.update_address_location'.tr(),
+                      textColor: Colors.white,
+                      onPressed: () => _editAddressLocation(effectiveAddress!),
                     )
                   : null,
             ),
@@ -585,7 +672,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             cart.promoCodeId != null &&
                             cart.promoCodeId!.isNotEmpty;
                         final effectiveRewardId = _effectiveRewardId(cart);
-                        final totals = _previewTotals(cart, selectedZoneFee);
+                        final totals = _previewTotals(cart, quoteDeliveryFee);
                         final effectiveDeliveryFee = totals.deliveryFee;
                         final totalDiscount = totals.discount;
                         final effectiveTax = totals.tax;
@@ -825,11 +912,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              _DeliveryZoneCard(
-                                zonesAsync: zonesAsync,
-                                selectedZoneId: _selectedZoneId,
-                                onSelect: (zoneId) =>
-                                    setState(() => _selectedZoneId = zoneId),
+                              _DeliveryQuoteCard(
+                                address: effectiveAddress,
+                                quoteAsync: quoteAsync,
+                                onEditAddressLocation: () =>
+                                    _editAddressLocation(effectiveAddress!),
+                                onRetry: () => ref
+                                    .read(deliveryQuoteProvider.notifier)
+                                    .retry(),
                               ),
                               const SizedBox(height: 16),
                             ],
@@ -1418,10 +1508,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 final effectiveRewardId = _effectiveRewardId(cart);
                 final grandTotal = _previewTotals(
                   cart,
-                  selectedZoneFee,
+                  quoteDeliveryFee,
                 ).grandTotal;
-                final needsZoneSelection =
-                    _orderType == 'delivery' && _selectedZoneId == null;
+                final deliveryBlockReasonKey = _orderType == 'delivery'
+                    ? _deliveryBlockReasonKey(effectiveAddress, quoteAsync)
+                    : null;
+                final deliveryNotReady =
+                    _orderType == 'delivery' &&
+                    (effectiveAddress == null ||
+                        !effectiveAddress.hasValidCoordinates ||
+                        quoteAsync.isLoading ||
+                        quoteAsync.hasError ||
+                        quote == null ||
+                        !quote.deliverable);
 
                 return settingsAsync.when(
                   loading: () => _CheckoutFooterShell(
@@ -1522,11 +1621,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 ),
                               ),
                             )
-                          else if (needsZoneSelection)
+                          else if (deliveryBlockReasonKey != null)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 10.0),
                               child: Text(
-                                'checkout.delivery_zone_required'.tr(),
+                                deliveryBlockReasonKey.tr(),
                                 style: KZ.body.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: CheckoutScreen.errorColor,
@@ -1549,7 +1648,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 (checkoutState.isLoading ||
                                     !settings.acceptingOrders ||
                                     isBelowMinOrder ||
-                                    needsZoneSelection)
+                                    deliveryNotReady)
                                 ? null
                                 : () async {
                                     final deliveryMethod =
@@ -1578,13 +1677,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         );
                                         return;
                                       }
-                                      if (_selectedZoneId == null) {
+                                      // Defensive re-check — the Place Order
+                                      // button is already disabled whenever
+                                      // this would fail, but coordinates and
+                                      // the current quote are never trusted
+                                      // implicitly right before submitting.
+                                      if (!effectiveAddress
+                                          .hasValidCoordinates) {
                                         ScaffoldMessenger.of(
                                           context,
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              'checkout.delivery_zone_required'
+                                              'checkout.delivery_coordinates_required_error'
                                                   .tr(),
                                             ),
                                             backgroundColor:
@@ -1593,22 +1698,25 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         );
                                         return;
                                       }
-                                      // Only forward coordinates the address
-                                      // picker actually resolved via reverse
-                                      // geocoding — never derive them from the
-                                      // text address, and never fall back to
-                                      // (0, 0).
-                                      final lat = effectiveAddress.lat;
-                                      final lng = effectiveAddress.lng;
-                                      final hasValidCoordinates =
-                                          lat != null &&
-                                          lng != null &&
-                                          lat.isFinite &&
-                                          lng.isFinite &&
-                                          lat >= -90 &&
-                                          lat <= 90 &&
-                                          lng >= -180 &&
-                                          lng <= 180;
+                                      final currentQuote = quote;
+                                      if (quoteAsync.isLoading ||
+                                          quoteAsync.hasError ||
+                                          currentQuote == null ||
+                                          !currentQuote.deliverable) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'checkout.address_outside_range'
+                                                  .tr(),
+                                            ),
+                                            backgroundColor:
+                                                CheckoutScreen.errorColor,
+                                          ),
+                                        );
+                                        return;
+                                      }
 
                                       deliveryAddress = {
                                         'title': effectiveAddress.label,
@@ -1625,10 +1733,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                           'apartment':
                                               effectiveAddress.apartment,
                                         'city': effectiveAddress.city,
-                                        if (hasValidCoordinates) ...{
-                                          'latitude': lat,
-                                          'longitude': lng,
-                                        },
+                                        'latitude': effectiveAddress.lat,
+                                        'longitude': effectiveAddress.lng,
                                       };
                                     }
 
@@ -1638,11 +1744,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                           deliveryMethod: deliveryMethod,
                                           paymentMethod: paymentMethod,
                                           deliveryAddress: deliveryAddress,
-                                          deliveryZoneId:
-                                              deliveryMethod ==
-                                                  FulfillmentType.delivery
-                                              ? _selectedZoneId
-                                              : null,
                                           promoCode: effectiveRewardId == null
                                               ? cart.promoCodeId
                                               : null,
@@ -1679,6 +1780,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   /// Lets the user pick from their saved addresses, or add/edit one if they
   /// need to — the picked address becomes the one actually sent at checkout.
+  /// "Update address location on map" action on the delivery-quote card's
+  /// missing-coordinates/error states — pushes the same edit route the
+  /// address-picker sheet's edit action uses, then clears the explicit pick
+  /// so the (now-updated) address is picked up fresh from the backend.
+  Future<void> _editAddressLocation(Address address) async {
+    await context.push('/profile/addresses/edit', extra: address);
+    if (mounted) setState(() => _selectedAddressId = null);
+  }
+
   void _showAddressPicker(BuildContext context) async {
     // Guard against rapid double-taps opening a second sheet (or pushing a
     // second follow-up route) while the first one is still in flight.
@@ -1856,23 +1966,29 @@ class _AddressSheetResult {
       editAddress = address;
 }
 
-/// DELIVERY-only zone picker (PHASE_8_RESTAURANT_SETTINGS_API_CONTRACT.md §6):
-/// the customer must pick one of the active zones returned by the public
-/// `GET /delivery-zones`; only the chosen zone's `id` is ever sent — its fee
-/// is never entered or computed client-side.
-class _DeliveryZoneCard extends StatelessWidget {
-  final AsyncValue<List<DeliveryZone>> zonesAsync;
-  final String? selectedZoneId;
-  final ValueChanged<String> onSelect;
+/// DELIVERY-only distance-based delivery quote card
+/// (`POST /delivery/quote`). Purely advisory display — checkout always
+/// re-prices authoritatively, this never submits anything itself. Renders
+/// nothing when [address] is `null`: the address card above already covers
+/// "no address selected" via `checkout.no_address_notice`.
+class _DeliveryQuoteCard extends StatelessWidget {
+  final Address? address;
+  final AsyncValue<DeliveryQuote?> quoteAsync;
+  final VoidCallback onEditAddressLocation;
+  final VoidCallback onRetry;
 
-  const _DeliveryZoneCard({
-    required this.zonesAsync,
-    required this.selectedZoneId,
-    required this.onSelect,
+  const _DeliveryQuoteCard({
+    required this.address,
+    required this.quoteAsync,
+    required this.onEditAddressLocation,
+    required this.onRetry,
   });
 
   @override
   Widget build(BuildContext context) {
+    final address = this.address;
+    if (address == null) return const SizedBox.shrink();
+
     return KZCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -1881,13 +1997,13 @@ class _DeliveryZoneCard extends StatelessWidget {
           Row(
             children: [
               const Icon(
-                Icons.map_rounded,
+                Icons.local_shipping_rounded,
                 color: CheckoutScreen.primaryColor,
                 size: KZ.iconControl,
               ),
               const SizedBox(width: 8),
               Text(
-                'checkout.delivery_zone'.tr(),
+                'checkout.delivery_fee'.tr(),
                 style: KZ.itemTitle.copyWith(
                   color: CheckoutScreen.primaryColor,
                   fontWeight: FontWeight.w700,
@@ -1897,100 +2013,163 @@ class _DeliveryZoneCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          zonesAsync.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Center(
-                child: SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2.5),
-                ),
-              ),
-            ),
-            error: (e, st) => Text(
-              'checkout.delivery_zone_load_error'.tr(),
-              style: KZ.body.copyWith(color: CheckoutScreen.errorColor),
-            ),
-            data: (zones) {
-              if (zones.isEmpty) {
-                return Text(
-                  'checkout.delivery_zone_none_available'.tr(),
-                  style: KZ.body.copyWith(
-                    color: CheckoutScreen.onSurfaceVariantColor,
-                  ),
+          Builder(
+            builder: (context) {
+              if (!address.hasValidCoordinates) {
+                return _DeliveryQuoteNotice(
+                  message: 'checkout.address_missing_coordinates_error'.tr(),
+                  actionLabel: 'checkout.update_address_location'.tr(),
+                  onAction: onEditAddressLocation,
                 );
               }
-              final isArabic = context.locale.languageCode == 'ar';
-              return Column(
-                children: zones.map((zone) {
-                  final selected = zone.id == selectedZoneId;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () => onSelect(zone.id),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: selected
-                                ? CheckoutScreen.primaryColor
-                                : CheckoutScreen.outlineVariantColor,
-                            width: selected ? 2 : 1,
-                          ),
-                          color: selected
-                              ? CheckoutScreen.primaryFixedColor.withValues(
-                                  alpha: 0.3,
-                                )
-                              : Colors.transparent,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              selected
-                                  ? Icons.radio_button_checked_rounded
-                                  : Icons.radio_button_off_rounded,
-                              color: selected
-                                  ? CheckoutScreen.primaryColor
-                                  : CheckoutScreen.secondaryColor,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    zone.localizedName(isArabic ? 'ar' : 'en'),
-                                    style: KZ.labelLarge,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    '${'checkout.delivery_fee'.tr()}: '
-                                    '${formatCurrency(zone.deliveryFee, locale: context.locale)}'
-                                    '  ·  ${'checkout.zone_minimum_order'.tr()}: '
-                                    '${formatCurrency(zone.minimumOrder, locale: context.locale)}',
-                                    style: KZ.caption,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+              if (quoteAsync.isLoading) {
+                return Row(
+                  children: [
+                    const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'checkout.calculating_delivery_fee'.tr(),
+                        style: KZ.body.copyWith(
+                          color: CheckoutScreen.onSurfaceVariantColor,
                         ),
                       ),
                     ),
-                  );
-                }).toList(),
+                  ],
+                );
+              }
+              if (quoteAsync.hasError) {
+                return _DeliveryQuoteNotice(
+                  message: 'checkout.delivery_fee_calc_error'.tr(),
+                  actionLabel: 'common.retry'.tr(),
+                  onAction: onRetry,
+                );
+              }
+              final quote = quoteAsync.valueOrNull;
+              if (quote == null) {
+                return Row(
+                  children: [
+                    const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'checkout.calculating_delivery_fee'.tr(),
+                        style: KZ.body.copyWith(
+                          color: CheckoutScreen.onSurfaceVariantColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+              if (!quote.deliverable) {
+                return _DeliveryQuoteNotice(
+                  message: 'checkout.address_outside_range'.tr(),
+                  actionLabel: 'checkout.update_address_location'.tr(),
+                  onAction: onEditAddressLocation,
+                );
+              }
+              final fee = quote.deliveryFee;
+              final distanceKm = quote.distanceKm;
+              final durationMinutes = quote.durationMinutes;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('checkout.delivery_fee'.tr(), style: KZ.bodyLarge),
+                      Text(
+                        fee != null
+                            ? formatCurrency(fee, locale: context.locale)
+                            : '—',
+                        style: KZ.bodyLarge.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: CheckoutScreen.primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (distanceKm != null) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('checkout.distance'.tr(), style: KZ.caption),
+                        Text(
+                          '${distanceKm.toStringAsFixed(2)} km',
+                          style: KZ.caption,
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (durationMinutes != null) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('checkout.estimated_time'.tr(), style: KZ.caption),
+                        Text('$durationMinutes min', style: KZ.caption),
+                      ],
+                    ),
+                  ],
+                ],
               );
             },
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Shared layout for the quote card's non-happy-path states — a short
+/// message plus a single action (retry, or edit the address's map pin).
+class _DeliveryQuoteNotice extends StatelessWidget {
+  final String message;
+  final String actionLabel;
+  final VoidCallback onAction;
+
+  const _DeliveryQuoteNotice({
+    required this.message,
+    required this.actionLabel,
+    required this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          message,
+          style: KZ.body.copyWith(color: CheckoutScreen.errorColor),
+        ),
+        const SizedBox(height: 8),
+        TextButton(
+          onPressed: onAction,
+          style: TextButton.styleFrom(
+            minimumSize: Size.zero,
+            padding: EdgeInsets.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: Text(
+            actionLabel,
+            style: KZ.labelLarge.copyWith(
+              color: CheckoutScreen.primaryColor,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

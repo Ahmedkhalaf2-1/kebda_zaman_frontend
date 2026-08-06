@@ -15,7 +15,6 @@ abstract class LocaleKeys {
   static const nav_offers = 'nav.offers';
   static const nav_notifications = 'nav.notifications';
   static const nav_promo_codes = 'nav.promo_codes';
-  static const nav_delivery_zones = 'nav.delivery_zones';
   static const nav = 'nav';
   static const nav_group_catalog = 'nav_group.catalog';
   static const nav_group_marketing = 'nav_group.marketing';
@@ -168,6 +167,33 @@ abstract class LocaleKeys {
       'checkout.reward_not_applicable_error';
   static const checkout_promo_remove_failed = 'checkout.promo_remove_failed';
   static const checkout_address_required = 'checkout.address_required';
+  static const checkout_distance = 'checkout.distance';
+  static const checkout_estimated_time = 'checkout.estimated_time';
+  static const checkout_calculating_delivery_fee =
+      'checkout.calculating_delivery_fee';
+  static const checkout_address_outside_range =
+      'checkout.address_outside_range';
+  static const checkout_delivery_fee_calc_error =
+      'checkout.delivery_fee_calc_error';
+  static const checkout_update_address_location =
+      'checkout.update_address_location';
+  static const checkout_address_missing_coordinates_error =
+      'checkout.address_missing_coordinates_error';
+  static const checkout_delivery_coordinates_required_error =
+      'checkout.delivery_coordinates_required_error';
+  static const checkout_outside_delivery_range_error =
+      'checkout.outside_delivery_range_error';
+  static const checkout_routes_timeout_error = 'checkout.routes_timeout_error';
+  static const checkout_routes_quota_exceeded_error =
+      'checkout.routes_quota_exceeded_error';
+  static const checkout_routes_provider_error =
+      'checkout.routes_provider_error';
+  static const checkout_routes_temporary_error =
+      'checkout.routes_temporary_error';
+  static const checkout_routes_no_route_error =
+      'checkout.routes_no_route_error';
+  static const checkout_restaurant_location_error =
+      'checkout.restaurant_location_error';
   static const checkout_free = 'checkout.free';
   static const checkout_checkout_failed_generic =
       'checkout.checkout_failed_generic';
@@ -177,17 +203,7 @@ abstract class LocaleKeys {
   static const checkout_reward_discount_25 = 'checkout.reward_discount_25';
   static const checkout_loyalty_points_suffix =
       'checkout.loyalty_points_suffix';
-  static const checkout_delivery_zone = 'checkout.delivery_zone';
   static const checkout_delivery_fee = 'checkout.delivery_fee';
-  static const checkout_delivery_zone_required =
-      'checkout.delivery_zone_required';
-  static const checkout_delivery_zone_load_error =
-      'checkout.delivery_zone_load_error';
-  static const checkout_delivery_zone_none_available =
-      'checkout.delivery_zone_none_available';
-  static const checkout_delivery_zone_unavailable_error =
-      'checkout.delivery_zone_unavailable_error';
-  static const checkout_zone_minimum_order = 'checkout.zone_minimum_order';
   static const checkout_zone_minimum_order_error =
       'checkout.zone_minimum_order_error';
   static const checkout_below_min_order_error =
@@ -408,6 +424,8 @@ abstract class LocaleKeys {
   static const admin_address_floor = 'admin.address_floor';
   static const admin_address_apartment = 'admin.address_apartment';
   static const admin_address_notes = 'admin.address_notes';
+  static const admin_delivery_distance = 'admin.delivery_distance';
+  static const admin_delivery_duration = 'admin.delivery_duration';
   static const admin_open_in_maps = 'admin.open_in_maps';
   static const admin_location_unavailable = 'admin.location_unavailable';
   static const admin_view_details = 'admin.view_details';
@@ -808,24 +826,6 @@ abstract class LocaleKeys {
   static const offers_delete_title = 'offers.delete_title';
   static const offers_delete_body = 'offers.delete_body';
   static const offers = 'offers';
-  static const delivery_zones_title = 'delivery_zones.title';
-  static const delivery_zones_subtitle = 'delivery_zones.subtitle';
-  static const delivery_zones_add_zone = 'delivery_zones.add_zone';
-  static const delivery_zones_edit_zone = 'delivery_zones.edit_zone';
-  static const delivery_zones_load_error = 'delivery_zones.load_error';
-  static const delivery_zones_empty = 'delivery_zones.empty';
-  static const delivery_zones_active = 'delivery_zones.active';
-  static const delivery_zones_inactive = 'delivery_zones.inactive';
-  static const delivery_zones_delivery_fee = 'delivery_zones.delivery_fee';
-  static const delivery_zones_minimum_order = 'delivery_zones.minimum_order';
-  static const delivery_zones_sort_order = 'delivery_zones.sort_order';
-  static const delivery_zones_name_en = 'delivery_zones.name_en';
-  static const delivery_zones_name_ar = 'delivery_zones.name_ar';
-  static const delivery_zones_delete_title = 'delivery_zones.delete_title';
-  static const delivery_zones_delete_body = 'delivery_zones.delete_body';
-  static const delivery_zones_delete_success = 'delivery_zones.delete_success';
-  static const delivery_zones_save_success = 'delivery_zones.save_success';
-  static const delivery_zones = 'delivery_zones';
   static const admin_settings_center_title = 'admin_settings.center_title';
   static const admin_settings_tab_profile = 'admin_settings.tab_profile';
   static const admin_settings_tab_hours = 'admin_settings.tab_hours';
@@ -838,6 +838,18 @@ abstract class LocaleKeys {
   static const admin_settings_phone = 'admin_settings.phone';
   static const admin_settings_address_en = 'admin_settings.address_en';
   static const admin_settings_address_ar = 'admin_settings.address_ar';
+  static const admin_settings_restaurant_location =
+      'admin_settings.restaurant_location';
+  static const admin_settings_restaurant_location_hint =
+      'admin_settings.restaurant_location_hint';
+  static const admin_settings_restaurant_latitude =
+      'admin_settings.restaurant_latitude';
+  static const admin_settings_restaurant_longitude =
+      'admin_settings.restaurant_longitude';
+  static const admin_settings_invalid_coordinates_error =
+      'admin_settings.invalid_coordinates_error';
+  static const admin_settings_coordinates_missing_error =
+      'admin_settings.coordinates_missing_error';
   static const admin_settings_timezone = 'admin_settings.timezone';
   static const admin_settings_hours_timezone_notice =
       'admin_settings.hours_timezone_notice';

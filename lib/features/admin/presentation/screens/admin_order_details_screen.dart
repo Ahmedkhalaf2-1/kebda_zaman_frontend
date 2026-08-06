@@ -151,7 +151,12 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
         const SizedBox(height: 12),
 
         if (order.fulfillmentType == FulfillmentType.delivery) ...[
-          _buildDeliveryAddressCard(context, order.deliveryAddress),
+          _buildDeliveryAddressCard(
+            context,
+            order.deliveryAddress,
+            distanceKm: order.deliveryDistanceKm,
+            durationSeconds: order.deliveryDurationSeconds,
+          ),
           const SizedBox(height: 12),
         ],
 
@@ -230,8 +235,10 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
 
   Widget _buildDeliveryAddressCard(
     BuildContext context,
-    OrderDeliveryAddress? address,
-  ) {
+    OrderDeliveryAddress? address, {
+    double? distanceKm,
+    int? durationSeconds,
+  }) {
     final rows = <Widget?>[
       _buildAddressRow('admin.address_street'.tr(), address?.street),
       _buildAddressRow('admin.address_area'.tr(), address?.area),
@@ -240,6 +247,19 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
       _buildAddressRow('admin.address_floor'.tr(), address?.floor),
       _buildAddressRow('admin.address_apartment'.tr(), address?.apartment),
       _buildAddressRow('admin.address_notes'.tr(), address?.notes),
+      // Distance-based delivery pricing snapshot — nullable for PICKUP and
+      // pre-migration orders; the route estimate captured at checkout time,
+      // never the actual delivered time.
+      if (distanceKm != null)
+        _buildAddressRow(
+          'admin.delivery_distance'.tr(),
+          '${distanceKm.toStringAsFixed(2)} km',
+        ),
+      if (durationSeconds != null)
+        _buildAddressRow(
+          'admin.delivery_duration'.tr(),
+          '${(durationSeconds / 60).round()} min',
+        ),
     ].whereType<Widget>().toList();
 
     final canNavigate = address?.hasValidCoordinates ?? false;

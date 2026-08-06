@@ -11,6 +11,22 @@ import 'package:kebda_zaman/features/shared/domain/repositories/order_repository
 /// real multi-second [Future.delayed] calls.
 typedef OrderPollDelayFn = Future<void> Function(Duration duration);
 
+/// Tolerant of numeric or numeric-string wire values (e.g. `"13.42"`) —
+/// used for the distance-pricing snapshot fields, which the backend formats
+/// as fixed-decimal strings. Returns `null` for a missing/malformed value
+/// rather than throwing.
+double? _toDoubleField(Object? value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
+}
+
+int? _toIntField(Object? value) {
+  if (value == null) return null;
+  if (value is num) return value.toInt();
+  return int.tryParse(value.toString());
+}
+
 class ApiOrderRepository implements OrderRepository {
   final ApiClient _apiClient;
   final OrderPollDelayFn _delay;
@@ -99,7 +115,6 @@ class ApiOrderRepository implements OrderRepository {
     required FulfillmentType deliveryMethod,
     required String paymentMethod,
     Map<String, dynamic>? deliveryAddress,
-    String? deliveryZoneId,
     String? promoCode,
     String? redeemRewardId,
     String? notes,
@@ -116,14 +131,6 @@ class ApiOrderRepository implements OrderRepository {
       if (deliveryMethod == FulfillmentType.delivery &&
           deliveryAddress != null) {
         payload['deliveryAddress'] = deliveryAddress;
-      }
-      // Required for DELIVERY, ignored (and never sent) for PICKUP — the
-      // backend re-reads the zone fresh from the DB; there is nowhere to put
-      // a client-supplied fee (CheckoutDto has no such field at all).
-      if (deliveryMethod == FulfillmentType.delivery &&
-          deliveryZoneId != null &&
-          deliveryZoneId.isNotEmpty) {
-        payload['deliveryZoneId'] = deliveryZoneId;
       }
       // promoCode and redeemRewardId are mutually exclusive server-side
       // (422 PROMO_AND_LOYALTY_MUTUALLY_EXCLUSIVE if both are sent) — the
@@ -522,6 +529,8 @@ class ApiOrderRepository implements OrderRepository {
     final deliveryAddressJson =
         (json['deliveryAddress'] ?? json['deliveryAddressJson'])
             as Map<String, dynamic>?;
+    final deliveryTierJson = json['deliveryTier'] as Map<String, dynamic>?;
+    final deliveryZoneJson = json['deliveryZone'] as Map<String, dynamic>?;
 
     return Order(
       id: json['id'] ?? '',
@@ -536,6 +545,20 @@ class ApiOrderRepository implements OrderRepository {
       status: status,
       subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
       deliveryFee: (json['deliveryFee'] as num?)?.toDouble() ?? 0.0,
+      // Distance-based delivery pricing snapshot — every field independently
+      // nullable (PICKUP orders, pre-migration orders), tolerant of numeric
+      // or numeric-string wire values, never crashes when absent.
+      deliveryDistanceMeters: _toIntField(json['deliveryDistanceMeters']),
+      deliveryDistanceKm: _toDoubleField(json['deliveryDistanceKm']),
+      deliveryDurationSeconds: _toIntField(json['deliveryDurationSeconds']),
+      deliveryTier: deliveryTierJson != null
+          ? OrderDeliveryTier.fromBackendJson(deliveryTierJson)
+          : null,
+      // DEPRECATED — historical zone-based orders only; always null for
+      // orders placed after the distance-pricing migration.
+      deliveryZone: deliveryZoneJson != null
+          ? OrderDeliveryZoneSnapshot.fromBackendJson(deliveryZoneJson)
+          : null,
       discountTotal: (json['discount'] as num?)?.toDouble() ?? 0.0,
       grandTotal: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
       paymentStatus: _mapPaymentStatus(json['paymentStatus']),

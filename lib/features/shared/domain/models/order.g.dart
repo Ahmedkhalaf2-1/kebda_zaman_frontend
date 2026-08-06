@@ -28,6 +28,19 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
   status: $enumDecode(_$OrderStatusEnumMap, json['status']),
   subtotal: (json['subtotal'] as num).toDouble(),
   deliveryFee: (json['deliveryFee'] as num?)?.toDouble() ?? 0.0,
+  deliveryDistanceMeters: (json['deliveryDistanceMeters'] as num?)?.toInt(),
+  deliveryDistanceKm: (json['deliveryDistanceKm'] as num?)?.toDouble(),
+  deliveryDurationSeconds: (json['deliveryDurationSeconds'] as num?)?.toInt(),
+  deliveryTier: json['deliveryTier'] == null
+      ? null
+      : OrderDeliveryTier.fromJson(
+          json['deliveryTier'] as Map<String, dynamic>,
+        ),
+  deliveryZone: json['deliveryZone'] == null
+      ? null
+      : OrderDeliveryZoneSnapshot.fromJson(
+          json['deliveryZone'] as Map<String, dynamic>,
+        ),
   discountTotal: (json['discountTotal'] as num?)?.toDouble() ?? 0.0,
   loyaltyPointsUsed: (json['loyaltyPointsUsed'] as num?)?.toInt() ?? 0,
   loyaltyPointsEarned: (json['loyaltyPointsEarned'] as num?)?.toInt() ?? 0,
@@ -63,6 +76,11 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'status': _$OrderStatusEnumMap[instance.status]!,
       'subtotal': instance.subtotal,
       'deliveryFee': instance.deliveryFee,
+      'deliveryDistanceMeters': instance.deliveryDistanceMeters,
+      'deliveryDistanceKm': instance.deliveryDistanceKm,
+      'deliveryDurationSeconds': instance.deliveryDurationSeconds,
+      'deliveryTier': instance.deliveryTier,
+      'deliveryZone': instance.deliveryZone,
       'discountTotal': instance.discountTotal,
       'loyaltyPointsUsed': instance.loyaltyPointsUsed,
       'loyaltyPointsEarned': instance.loyaltyPointsEarned,
@@ -121,6 +139,38 @@ Map<String, dynamic> _$$OrderDeliveryAddressImplToJson(
   'notes': instance.notes,
   'lat': instance.lat,
   'lng': instance.lng,
+};
+
+_$OrderDeliveryTierImpl _$$OrderDeliveryTierImplFromJson(
+  Map<String, dynamic> json,
+) => _$OrderDeliveryTierImpl(
+  id: json['id'] as String,
+  minDistanceKm: (json['minDistanceKm'] as num).toDouble(),
+  maxDistanceKm: (json['maxDistanceKm'] as num).toDouble(),
+);
+
+Map<String, dynamic> _$$OrderDeliveryTierImplToJson(
+  _$OrderDeliveryTierImpl instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'minDistanceKm': instance.minDistanceKm,
+  'maxDistanceKm': instance.maxDistanceKm,
+};
+
+_$OrderDeliveryZoneSnapshotImpl _$$OrderDeliveryZoneSnapshotImplFromJson(
+  Map<String, dynamic> json,
+) => _$OrderDeliveryZoneSnapshotImpl(
+  id: json['id'] as String,
+  nameAr: json['nameAr'] as String,
+  nameEn: json['nameEn'] as String,
+);
+
+Map<String, dynamic> _$$OrderDeliveryZoneSnapshotImplToJson(
+  _$OrderDeliveryZoneSnapshotImpl instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'nameAr': instance.nameAr,
+  'nameEn': instance.nameEn,
 };
 
 _$LoyaltyRedemptionInfoImpl _$$LoyaltyRedemptionInfoImplFromJson(
