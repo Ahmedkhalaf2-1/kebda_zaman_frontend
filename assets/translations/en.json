@@ -789,6 +789,7 @@
     "restaurant_location_hint": "Used to calculate driving distance and delivery fees for customer orders.",
     "restaurant_latitude": "Latitude",
     "restaurant_longitude": "Longitude",
+    "select_location_on_map": "Select restaurant location on map",
     "invalid_coordinates_error": "Please enter a valid latitude (-90 to 90) and longitude (-180 to 180).",
     "coordinates_missing_error": "Restaurant location is not configured correctly. Enter a valid latitude and longitude before saving.",
     "timezone": "Timezone",

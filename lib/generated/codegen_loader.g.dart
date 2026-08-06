@@ -815,6 +815,7 @@ class CodegenLoader extends AssetLoader {
           "يُستخدم لحساب مسافة القيادة ورسوم التوصيل لطلبات العملاء.",
       "restaurant_latitude": "خط العرض",
       "restaurant_longitude": "خط الطول",
+      "select_location_on_map": "تحديد موقع المطعم على الخريطة",
       "invalid_coordinates_error":
           "من فضلك أدخل خط عرض صالح (-90 إلى 90) وخط طول صالح (-180 إلى 180).",
       "coordinates_missing_error":
@@ -1695,6 +1696,7 @@ class CodegenLoader extends AssetLoader {
           "Used to calculate driving distance and delivery fees for customer orders.",
       "restaurant_latitude": "Latitude",
       "restaurant_longitude": "Longitude",
+      "select_location_on_map": "Select restaurant location on map",
       "invalid_coordinates_error":
           "Please enter a valid latitude (-90 to 90) and longitude (-180 to 180).",
       "coordinates_missing_error":

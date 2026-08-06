@@ -846,6 +846,8 @@ abstract class LocaleKeys {
       'admin_settings.restaurant_latitude';
   static const admin_settings_restaurant_longitude =
       'admin_settings.restaurant_longitude';
+  static const admin_settings_select_location_on_map =
+      'admin_settings.select_location_on_map';
   static const admin_settings_invalid_coordinates_error =
       'admin_settings.invalid_coordinates_error';
   static const admin_settings_coordinates_missing_error =

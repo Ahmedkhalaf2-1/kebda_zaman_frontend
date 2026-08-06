@@ -9,6 +9,7 @@ import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_image_picker.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_settings_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/screens/admin_location_picker_screen.dart';
 import 'package:kebda_zaman/features/shared/domain/models/restaurant_settings.dart';
 
 /// Shared latitude/longitude range validity check for the raw text fields —
@@ -338,6 +339,27 @@ class _ProfileTab extends StatelessWidget {
     required this.onSave,
   });
 
+  /// Opens the map picker seeded with whatever coordinate is currently in
+  /// the fields (or `null` if blank/invalid, so the picker falls back to
+  /// its own neutral map center — never the device's current location).
+  /// Only updates the fields on an explicit confirm; a cancelled pick
+  /// (`result == null`) leaves them exactly as they were.
+  Future<void> _pickLocationOnMap(BuildContext context) async {
+    final currentLat = double.tryParse(restaurantLatCtrl.text.trim());
+    final currentLng = double.tryParse(restaurantLngCtrl.text.trim());
+    final result = await Navigator.of(context).push<AdminLocationPickResult>(
+      MaterialPageRoute(
+        builder: (_) => AdminLocationPickerScreen(
+          initialLat: currentLat,
+          initialLng: currentLng,
+        ),
+      ),
+    );
+    if (result == null) return;
+    restaurantLatCtrl.text = result.latitude.toString();
+    restaurantLngCtrl.text = result.longitude.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -473,34 +495,30 @@ class _ProfileTab extends StatelessWidget {
                 },
               ),
               const SizedBox(height: KZ.sp12),
-              TextFormField(
-                controller: restaurantLatCtrl,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
-                ),
-                decoration: KZ.inputDecoration(
-                  label: 'admin_settings.restaurant_latitude'.tr(),
-                  prefixIcon: const Icon(
-                    Icons.my_location_rounded,
-                    color: KZ.primary,
+              Row(
+                children: [
+                  Expanded(
+                    child: _CoordinateReadout(
+                      label: 'admin_settings.restaurant_latitude'.tr(),
+                      controller: restaurantLatCtrl,
+                    ),
                   ),
-                ),
+                  const SizedBox(width: KZ.sp12),
+                  Expanded(
+                    child: _CoordinateReadout(
+                      label: 'admin_settings.restaurant_longitude'.tr(),
+                      controller: restaurantLngCtrl,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: KZ.sp12),
-              TextFormField(
-                controller: restaurantLngCtrl,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
-                ),
-                decoration: KZ.inputDecoration(
-                  label: 'admin_settings.restaurant_longitude'.tr(),
-                  prefixIcon: const Icon(
-                    Icons.my_location_rounded,
-                    color: KZ.primary,
-                  ),
-                ),
+              KZButton(
+                label: 'admin_settings.select_location_on_map'.tr(),
+                icon: Icons.map_rounded,
+                variant: KZButtonVariant.secondary,
+                fullWidth: true,
+                onPressed: () => _pickLocationOnMap(context),
               ),
             ],
           ),
@@ -515,6 +533,49 @@ class _ProfileTab extends StatelessWidget {
         ),
         const SizedBox(height: KZ.sp32),
       ],
+    );
+  }
+}
+
+/// Read-only verification display for a single coordinate — reflects
+/// [controller]'s current value live (updated only by the map picker or the
+/// initial load, never by direct typing) so the admin can confirm what will
+/// actually be submitted without an editable-looking text field.
+class _CoordinateReadout extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+
+  const _CoordinateReadout({required this.label, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, value, _) {
+        final text = value.text.trim();
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: KZ.sp12,
+            vertical: KZ.sp10,
+          ),
+          decoration: BoxDecoration(
+            color: KZ.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(KZ.radiusMd),
+            border: Border.all(color: KZ.outlineVariant),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: KZ.caption),
+              const SizedBox(height: 2),
+              Text(
+                text.isEmpty ? '—' : text,
+                style: KZ.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
