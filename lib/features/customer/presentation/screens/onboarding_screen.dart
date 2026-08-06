@@ -5,8 +5,68 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_brand_logo.dart';
+import 'package:kebda_zaman/core/widgets/kz_chip.dart';
+import 'package:kebda_zaman/core/responsive/responsive_container.dart';
+
+/// A single onboarding page's content. [chips] are small, non-interactive
+/// decorative labels (never fake controls) — empty for the brand/identity
+/// page, which stays deliberately minimal.
+class _OnboardingPageData {
+  final String titleKey;
+  final String subKey;
+  final String imageUrl;
+  final List<({IconData? icon, String labelKey})> chips;
+
+  const _OnboardingPageData({
+    required this.titleKey,
+    required this.subKey,
+    required this.imageUrl,
+    this.chips = const [],
+  });
+}
+
+// TODO: replace with approved Kebda Zaman photography.
+const List<_OnboardingPageData> _kOnboardingPages = [
+  _OnboardingPageData(
+    titleKey: 'onboarding.page1_title',
+    subKey: 'onboarding.page1_sub',
+    imageUrl:
+        'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',
+  ),
+  _OnboardingPageData(
+    titleKey: 'onboarding.page2_title',
+    subKey: 'onboarding.page2_sub',
+    imageUrl:
+        'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
+    chips: [
+      (
+        icon: Icons.local_fire_department_rounded,
+        labelKey: 'onboarding.page2_chip_spicy',
+      ),
+      (
+        icon: Icons.add_circle_outline_rounded,
+        labelKey: 'onboarding.page2_chip_extras',
+      ),
+      (icon: Icons.block_rounded, labelKey: 'onboarding.page2_chip_no_onion'),
+    ],
+  ),
+  _OnboardingPageData(
+    titleKey: 'onboarding.page3_title',
+    subKey: 'onboarding.page3_sub',
+    imageUrl:
+        'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80',
+    chips: [
+      (
+        icon: Icons.location_on_rounded,
+        labelKey: 'onboarding.page3_chip_location',
+      ),
+      (icon: Icons.route_rounded, labelKey: 'onboarding.page3_chip_tracking'),
+    ],
+  ),
+];
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -29,10 +89,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage < 2) {
+    if (_currentPage < _kOnboardingPages.length - 1) {
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
+        duration: KZMotion.emphasized,
+        curve: KZMotion.enterExit,
       );
     } else {
       _completeOnboarding();
@@ -47,60 +107,35 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> onboardingData = [
-      {
-        'title': 'onboarding.page1_title'.tr(),
-        'sub': 'onboarding.page1_sub'.tr(),
-        'imageUrl':
-            'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',
-        'badge': 'Kebda Zaman',
-      },
-      {
-        'title': 'onboarding.page2_title'.tr(),
-        'sub': 'onboarding.page2_sub'.tr(),
-        'imageUrl':
-            'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
-        'badge': 'Easy Ordering',
-      },
-      {
-        'title': 'onboarding.page3_title'.tr(),
-        'sub': 'onboarding.page3_sub'.tr(),
-        'imageUrl':
-            'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80',
-        'badge': 'Hot & Fresh',
-      },
-    ];
+    final isLastPage = _currentPage == _kOnboardingPages.length - 1;
 
     return Scaffold(
       backgroundColor: KZ.surface,
       body: SafeArea(
         child: Column(
           children: [
-            // Top Bar: Brand Title & Skip Button
+            // Top Bar: compact brand mark + Skip action.
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: KZ.screenPadding,
-                vertical: 12,
+                vertical: KZ.sp12,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const KZBrandLogo(height: 28),
+                  const KZBrandLogo(height: 26),
                   TextButton(
                     onPressed: _completeOnboarding,
                     style: TextButton.styleFrom(
                       foregroundColor: KZ.secondary,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
+                        horizontal: KZ.sp12,
+                        vertical: KZ.sp8,
                       ),
                     ),
                     child: Text(
                       'onboarding.skip'.tr(),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: KZ.labelLarge.copyWith(color: KZ.secondary),
                     ),
                   ),
                 ],
@@ -111,19 +146,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
-                itemCount: onboardingData.length,
+                onPageChanged: (index) => setState(() => _currentPage = index),
+                itemCount: _kOnboardingPages.length,
                 itemBuilder: (context, index) {
-                  final data = onboardingData[index];
-                  return _buildPageSlide(
-                    title: data['title'],
-                    sub: data['sub'],
-                    imageUrl: data['imageUrl'],
-                    badge: data['badge'],
+                  return _OnboardingPageView(
+                    key: ValueKey('onboarding_page_$index'),
+                    pageIndex: index,
+                    data: _kOnboardingPages[index],
                   );
                 },
               ),
@@ -131,50 +160,61 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
             // Bottom Navigation & Indicators Section
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: KZ.screenPadding,
-                vertical: 20,
+              padding: const EdgeInsets.fromLTRB(
+                KZ.screenPadding,
+                KZ.sp8,
+                KZ.screenPadding,
+                KZ.sp20,
               ),
-              child: Column(
-                children: [
-                  // Page Indicators
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      3,
-                      (index) => AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        height: 8,
-                        width: _currentPage == index ? 32 : 8,
-                        decoration: BoxDecoration(
-                          color: _currentPage == index
-                              ? KZ.primary
-                              : KZ.outlineVariant.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(999),
+              child: ResponsiveContainer(
+                maxWidth: 480,
+                child: Column(
+                  children: [
+                    // Page Indicators
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        _kOnboardingPages.length,
+                        (index) => AnimatedContainer(
+                          key: ValueKey('onboarding_indicator_$index'),
+                          duration: KZMotion.durationFor(
+                            context,
+                            KZMotion.standard,
+                          ),
+                          curve: KZMotion.stateChange,
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: KZ.sp4,
+                          ),
+                          height: 8,
+                          width: _currentPage == index ? 32 : 8,
+                          decoration: BoxDecoration(
+                            color: _currentPage == index
+                                ? KZ.primary
+                                : KZ.outlineVariant.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(KZ.radiusFull),
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 28),
+                    const SizedBox(height: KZ.sp24),
 
-                  // Next / Get Started Button (Pill button with trailing arrow icon)
-                  KZButton(
-                    label: _currentPage == 2
-                        ? 'onboarding.get_started'.tr()
-                        : 'onboarding.next'.tr(),
-                    icon: _currentPage == 2
-                        ? Icons.check_rounded
-                        : Icons.arrow_forward_rounded,
-                    trailingIcon: true,
-                    onPressed: _nextPage,
-                    variant: KZButtonVariant.primary,
-                    fullWidth: true,
-                    pill: true,
-                  ),
-                  const SizedBox(height: 8),
-                ],
+                    // Next / Start Ordering (pill button, directional icon).
+                    KZButton(
+                      label: isLastPage
+                          ? 'onboarding.start_ordering'.tr()
+                          : 'onboarding.next'.tr(),
+                      icon: isLastPage
+                          ? Icons.check_rounded
+                          : Icons.arrow_forward_rounded,
+                      trailingIcon: true,
+                      onPressed: _nextPage,
+                      variant: KZButtonVariant.primary,
+                      fullWidth: true,
+                      pill: true,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -182,140 +222,241 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       ),
     );
   }
+}
 
-  Widget _buildPageSlide({
-    required String title,
-    required String sub,
-    required String imageUrl,
-    required String badge,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(),
+/// A single onboarding slide: hero image card + optional decorative chips +
+/// title/subtitle. Wrapped in a scroll view constrained to the viewport
+/// height so short content stays vertically centered while tall content
+/// (large text scale, small phones) scrolls instead of overflowing.
+class _OnboardingPageView extends StatefulWidget {
+  final int pageIndex;
+  final _OnboardingPageData data;
 
-          // Hero Section: Circular Photo Frame with Overlapping Badge at Bottom Center
-          Stack(
-            alignment: Alignment.bottomCenter,
-            clipBehavior: Clip.none,
-            children: [
-              // Circular Photo Frame (~280x280)
-              Container(
-                width: 280,
-                height: 280,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: KZ.primaryFixed, // #ffdbcf (soft peach border)
-                    width: 6,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: KZ.primary.withValues(alpha: 0.15),
-                      blurRadius: 30,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: KZ.surfaceContainerLow,
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        color: KZ.primary,
-                        strokeWidth: 2.5,
+  const _OnboardingPageView({
+    super.key,
+    required this.pageIndex,
+    required this.data,
+  });
+
+  @override
+  State<_OnboardingPageView> createState() => _OnboardingPageViewState();
+}
+
+class _OnboardingPageViewState extends State<_OnboardingPageView> {
+  @override
+  Widget build(BuildContext context) {
+    final data = widget.data;
+    // Self-driving entrance fade/slide — animates from 0 to 1 the moment
+    // this widget is first built, with no manual setState/frame-callback
+    // scheduling involved (TweenAnimationBuilder owns its own
+    // AnimationController internally and disposes it automatically with
+    // the widget). Reduced-motion still gets a real (zero-duration) tween,
+    // so it settles at the end value immediately rather than skipping the
+    // builder.
+    final duration = KZMotion.durationFor(context, KZMotion.emphasized);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: KZ.screenPadding,
+            vertical: KZ.sp16,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight - KZ.sp16 * 2, // matches padding
+            ),
+            child: Center(
+              child: ResponsiveContainer(
+                maxWidth: 480,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: 1),
+                  duration: duration,
+                  curve: KZMotion.enterExit,
+                  builder: (context, t, child) {
+                    return Opacity(
+                      opacity: t,
+                      child: Transform.translate(
+                        offset: Offset(0, (1 - t) * 12),
+                        child: child,
                       ),
-                    ),
-                  ),
-                  errorWidget: (context, url, err) => Container(
-                    color: KZ.surfaceContainerLow,
-                    child: const Center(
-                      child: Icon(
-                        Icons.restaurant_menu_rounded,
-                        size: 64,
-                        color: KZ.primary,
+                    );
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _HeroImageCard(
+                        pageIndex: widget.pageIndex,
+                        imageUrl: data.imageUrl,
                       ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Overlapping Badge at Bottom Center
-              Positioned(
-                bottom: -16,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: KZ.primaryFixed, // #ffdbcf (peach pill background)
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: const Color(
-                        0xFFFFB59C,
-                      ).withValues(alpha: 0.6), // #ffb59c
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: KZ.primary.withValues(alpha: 0.12),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                      if (data.chips.isNotEmpty) ...[
+                        const SizedBox(height: KZ.sp20),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: KZ.sp8,
+                          runSpacing: KZ.sp8,
+                          children: [
+                            for (final chip in data.chips)
+                              KZChip(
+                                label: chip.labelKey.tr(),
+                                icon: chip.icon,
+                                selected: false,
+                                onTap: null,
+                              ),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: KZ.sp32),
+                      Text(
+                        data.titleKey.tr(),
+                        textAlign: TextAlign.center,
+                        style: KZ.display.copyWith(fontSize: 27),
+                      ),
+                      const SizedBox(height: KZ.sp12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KZ.sp12,
+                        ),
+                        child: Text(
+                          data.subKey.tr(),
+                          textAlign: TextAlign.center,
+                          style: KZ.bodyLarge,
+                        ),
                       ),
                     ],
                   ),
-                  child: Text(
-                    badge,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: KZ.primary, // #8c2b00
-                    ),
-                  ),
                 ),
               ),
-            ],
-          ),
-
-          const SizedBox(height: 44),
-
-          // Title
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: KZ.onSurface,
-              letterSpacing: -0.5,
-              height: 1.2,
             ),
           ),
+        );
+      },
+    );
+  }
+}
 
-          const SizedBox(height: 14),
+/// Layered hero visual: a rotated accent shape behind a rounded image card.
+/// Replaces the old fixed 280x280 circular frame — sizes itself to the
+/// available width (capped) and keeps a fixed aspect ratio so it never
+/// stretches or crops awkwardly. Purely decorative — excluded from the
+/// semantics tree; the page's title/subtitle already carry the meaning.
+class _HeroImageCard extends StatelessWidget {
+  final int pageIndex;
+  final String imageUrl;
 
-          // Subtitle
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              sub,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                color: KZ.onSurfaceVariant.withValues(alpha: 0.85),
-                height: 1.5,
+  const _HeroImageCard({required this.pageIndex, required this.imageUrl});
+
+  // Page-to-page variation so the three pages feel connected but not
+  // visually identical, using only existing KZ palette colors.
+  Color get _accentColor =>
+      pageIndex == 1 ? KZ.surfaceContainerHigh : KZ.primaryFixed;
+  double get _accentRotation => switch (pageIndex) {
+    0 => -0.05,
+    1 => 0.045,
+    _ => -0.035,
+  };
+  AlignmentDirectional get _accentAlignment => switch (pageIndex) {
+    0 => AlignmentDirectional.topStart,
+    1 => AlignmentDirectional.bottomEnd,
+    _ => AlignmentDirectional.bottomStart,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final cardWidth = constraints.maxWidth.clamp(200.0, 320.0);
+          return SizedBox(
+            width: cardWidth,
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  // Rotated accent shape behind the card — subtle depth,
+                  // no gradients, KZ palette only.
+                  Align(
+                    alignment: _accentAlignment,
+                    child: Transform.rotate(
+                      angle: _accentRotation,
+                      child: Container(
+                        width: cardWidth * 0.72,
+                        height: cardWidth * 0.72,
+                        decoration: BoxDecoration(
+                          color: _accentColor,
+                          borderRadius: BorderRadius.circular(KZ.radiusXl),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Small solid accent dot — red/black, brand-page only.
+                  if (pageIndex == 0)
+                    PositionedDirectional(
+                      top: -10,
+                      end: 6,
+                      child: Container(
+                        width: 22,
+                        height: 22,
+                        decoration: const BoxDecoration(
+                          color: KZ.onSurface,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+
+                  // Main image card.
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(KZ.radiusXl),
+                      boxShadow: [
+                        BoxShadow(
+                          color: KZ.primary.withValues(alpha: 0.16),
+                          blurRadius: 28,
+                          offset: const Offset(0, 14),
+                        ),
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(KZ.radiusXl),
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        fadeInDuration: KZMotion.durationFor(
+                          context,
+                          KZMotion.standard,
+                        ),
+                        placeholder: (context, url) => Container(
+                          color: KZ.surfaceContainerLow,
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: KZ.primary,
+                              strokeWidth: 2.5,
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, err) => Container(
+                          color: KZ.surfaceContainerLow,
+                          child: const Center(
+                            child: Icon(
+                              Icons.restaurant_menu_rounded,
+                              size: 56,
+                              color: KZ.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-
-          const Spacer(),
-        ],
+          );
+        },
       ),
     );
   }

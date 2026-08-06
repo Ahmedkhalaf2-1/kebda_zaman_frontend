@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class LocaleKeys {
+abstract class  LocaleKeys {
   static const app_name = 'app_name';
   static const nav_home = 'nav.home';
   static const nav_menu = 'nav.menu';
@@ -79,16 +79,13 @@ abstract class LocaleKeys {
   static const item_details_added_success = 'item_details.added_success';
   static const item_details_updated_success = 'item_details.updated_success';
   static const item_details_required_field = 'item_details.required_field';
-  static const item_details_required_field_named =
-      'item_details.required_field_named';
+  static const item_details_required_field_named = 'item_details.required_field_named';
   static const item_details_required_badge = 'item_details.required_badge';
   static const item_details_max_selections = 'item_details.max_selections';
   static const item_details_best_seller = 'item_details.best_seller';
-  static const item_details_remove_ingredient =
-      'item_details.remove_ingredient';
+  static const item_details_remove_ingredient = 'item_details.remove_ingredient';
   static const item_details = 'item_details';
-  static const product_details_often_ordered_with =
-      'product_details.often_ordered_with';
+  static const product_details_often_ordered_with = 'product_details.often_ordered_with';
   static const product_details = 'product_details';
   static const cart_title = 'cart.title';
   static const cart_empty = 'cart.empty';
@@ -134,14 +131,11 @@ abstract class LocaleKeys {
   static const checkout_guest_loyalty_notice = 'checkout.guest_loyalty_notice';
   static const checkout_sign_in = 'checkout.sign_in';
   static const checkout_promo_blocks_loyalty = 'checkout.promo_blocks_loyalty';
-  static const checkout_pickup_blocks_free_delivery =
-      'checkout.pickup_blocks_free_delivery';
-  static const checkout_reward_insufficient_points =
-      'checkout.reward_insufficient_points';
+  static const checkout_pickup_blocks_free_delivery = 'checkout.pickup_blocks_free_delivery';
+  static const checkout_reward_insufficient_points = 'checkout.reward_insufficient_points';
   static const checkout_pay_upon_receipt = 'checkout.pay_upon_receipt';
   static const checkout_coming_soon = 'checkout.coming_soon';
-  static const checkout_card_coming_soon_notice =
-      'checkout.card_coming_soon_notice';
+  static const checkout_card_coming_soon_notice = 'checkout.card_coming_soon_notice';
   static const checkout_no_address_notice = 'checkout.no_address_notice';
   static const checkout_estimated_arrival = 'checkout.estimated_arrival';
   static const checkout_delivery_eta = 'checkout.delivery_eta';
@@ -151,63 +145,42 @@ abstract class LocaleKeys {
   static const checkout_loyalty_reward_label = 'checkout.loyalty_reward_label';
   static const checkout_total_label = 'checkout.total_label';
   static const checkout_promo_applied_label = 'checkout.promo_applied_label';
-  static const checkout_loyalty_reward_applied_label =
-      'checkout.loyalty_reward_applied_label';
+  static const checkout_loyalty_reward_applied_label = 'checkout.loyalty_reward_applied_label';
   static const checkout_restaurant_closed = 'checkout.restaurant_closed';
   static const checkout_min_order_notice = 'checkout.min_order_notice';
   static const checkout_no_saved_addresses = 'checkout.no_saved_addresses';
-  static const checkout_address_fallback_label =
-      'checkout.address_fallback_label';
+  static const checkout_address_fallback_label = 'checkout.address_fallback_label';
   static const checkout_add_new_address = 'checkout.add_new_address';
-  static const checkout_guest_not_eligible_error =
-      'checkout.guest_not_eligible_error';
-  static const checkout_promo_loyalty_exclusive_error =
-      'checkout.promo_loyalty_exclusive_error';
-  static const checkout_reward_not_applicable_error =
-      'checkout.reward_not_applicable_error';
+  static const checkout_guest_not_eligible_error = 'checkout.guest_not_eligible_error';
+  static const checkout_promo_loyalty_exclusive_error = 'checkout.promo_loyalty_exclusive_error';
+  static const checkout_reward_not_applicable_error = 'checkout.reward_not_applicable_error';
   static const checkout_promo_remove_failed = 'checkout.promo_remove_failed';
   static const checkout_address_required = 'checkout.address_required';
   static const checkout_distance = 'checkout.distance';
   static const checkout_estimated_time = 'checkout.estimated_time';
-  static const checkout_calculating_delivery_fee =
-      'checkout.calculating_delivery_fee';
-  static const checkout_address_outside_range =
-      'checkout.address_outside_range';
-  static const checkout_delivery_fee_calc_error =
-      'checkout.delivery_fee_calc_error';
-  static const checkout_update_address_location =
-      'checkout.update_address_location';
-  static const checkout_address_missing_coordinates_error =
-      'checkout.address_missing_coordinates_error';
-  static const checkout_delivery_coordinates_required_error =
-      'checkout.delivery_coordinates_required_error';
-  static const checkout_outside_delivery_range_error =
-      'checkout.outside_delivery_range_error';
+  static const checkout_calculating_delivery_fee = 'checkout.calculating_delivery_fee';
+  static const checkout_address_outside_range = 'checkout.address_outside_range';
+  static const checkout_delivery_fee_calc_error = 'checkout.delivery_fee_calc_error';
+  static const checkout_update_address_location = 'checkout.update_address_location';
+  static const checkout_address_missing_coordinates_error = 'checkout.address_missing_coordinates_error';
+  static const checkout_delivery_coordinates_required_error = 'checkout.delivery_coordinates_required_error';
+  static const checkout_outside_delivery_range_error = 'checkout.outside_delivery_range_error';
   static const checkout_routes_timeout_error = 'checkout.routes_timeout_error';
-  static const checkout_routes_quota_exceeded_error =
-      'checkout.routes_quota_exceeded_error';
-  static const checkout_routes_provider_error =
-      'checkout.routes_provider_error';
-  static const checkout_routes_temporary_error =
-      'checkout.routes_temporary_error';
-  static const checkout_routes_no_route_error =
-      'checkout.routes_no_route_error';
-  static const checkout_restaurant_location_error =
-      'checkout.restaurant_location_error';
+  static const checkout_routes_quota_exceeded_error = 'checkout.routes_quota_exceeded_error';
+  static const checkout_routes_provider_error = 'checkout.routes_provider_error';
+  static const checkout_routes_temporary_error = 'checkout.routes_temporary_error';
+  static const checkout_routes_no_route_error = 'checkout.routes_no_route_error';
+  static const checkout_restaurant_location_error = 'checkout.restaurant_location_error';
   static const checkout_free = 'checkout.free';
-  static const checkout_checkout_failed_generic =
-      'checkout.checkout_failed_generic';
+  static const checkout_checkout_failed_generic = 'checkout.checkout_failed_generic';
   static const checkout_place_order_total = 'checkout.place_order_total';
   static const checkout_reward_free_delivery = 'checkout.reward_free_delivery';
   static const checkout_reward_discount_10 = 'checkout.reward_discount_10';
   static const checkout_reward_discount_25 = 'checkout.reward_discount_25';
-  static const checkout_loyalty_points_suffix =
-      'checkout.loyalty_points_suffix';
+  static const checkout_loyalty_points_suffix = 'checkout.loyalty_points_suffix';
   static const checkout_delivery_fee = 'checkout.delivery_fee';
-  static const checkout_zone_minimum_order_error =
-      'checkout.zone_minimum_order_error';
-  static const checkout_below_min_order_error =
-      'checkout.below_min_order_error';
+  static const checkout_zone_minimum_order_error = 'checkout.zone_minimum_order_error';
+  static const checkout_below_min_order_error = 'checkout.below_min_order_error';
   static const checkout_settings_loading = 'checkout.settings_loading';
   static const checkout_settings_error = 'checkout.settings_error';
   static const checkout = 'checkout';
@@ -218,22 +191,16 @@ abstract class LocaleKeys {
   static const order_success_mins = 'order_success.mins';
   static const order_success_track_order = 'order_success.track_order';
   static const order_success_back_to_home = 'order_success.back_to_home';
-  static const order_success_kitchen_location =
-      'order_success.kitchen_location';
-  static const order_success_earned_points_notice =
-      'order_success.earned_points_notice';
-  static const order_success_order_number_label =
-      'order_success.order_number_label';
-  static const order_success_estimated_time_label =
-      'order_success.estimated_time_label';
+  static const order_success_kitchen_location = 'order_success.kitchen_location';
+  static const order_success_earned_points_notice = 'order_success.earned_points_notice';
+  static const order_success_order_number_label = 'order_success.order_number_label';
+  static const order_success_estimated_time_label = 'order_success.estimated_time_label';
   static const order_success_delivery_eta = 'order_success.delivery_eta';
   static const order_success_pickup_eta = 'order_success.pickup_eta';
   static const order_success_item_other = 'order_success.item_other';
   static const order_success_items_others = 'order_success.items_others';
-  static const order_success_default_meal_name =
-      'order_success.default_meal_name';
-  static const order_success_earned_points_sub =
-      'order_success.earned_points_sub';
+  static const order_success_default_meal_name = 'order_success.default_meal_name';
+  static const order_success_earned_points_sub = 'order_success.earned_points_sub';
   static const order_success = 'order_success';
   static const orders_title = 'orders.title';
   static const orders_active = 'orders.active';
@@ -250,19 +217,16 @@ abstract class LocaleKeys {
   static const orders_load_error = 'orders.load_error';
   static const orders_checking_availability = 'orders.checking_availability';
   static const orders_added_to_cart = 'orders.added_to_cart';
-  static const orders_reorder_note_unavailable =
-      'orders.reorder_note_unavailable';
+  static const orders_reorder_note_unavailable = 'orders.reorder_note_unavailable';
   static const orders_reorder_note_failed = 'orders.reorder_note_failed';
   static const orders_reorder_failed = 'orders.reorder_failed';
   static const orders_reorder_none_available = 'orders.reorder_none_available';
   static const orders_status_pending = 'orders.status.pending';
   static const orders_status_confirmed = 'orders.status.confirmed';
   static const orders_status_preparing = 'orders.status.preparing';
-  static const orders_status_out_for_delivery =
-      'orders.status.out_for_delivery';
+  static const orders_status_out_for_delivery = 'orders.status.out_for_delivery';
   static const orders_status_delivered = 'orders.status.delivered';
-  static const orders_status_ready_for_pickup =
-      'orders.status.ready_for_pickup';
+  static const orders_status_ready_for_pickup = 'orders.status.ready_for_pickup';
   static const orders_status_picked_up = 'orders.status.picked_up';
   static const orders_status_cancelled = 'orders.status.cancelled';
   static const orders_status_unknown = 'orders.status.unknown';
@@ -276,8 +240,7 @@ abstract class LocaleKeys {
   static const tracking_step_delivery = 'tracking.step_delivery';
   static const tracking_step_ready_pickup = 'tracking.step_ready_pickup';
   static const tracking_step_delivered = 'tracking.step_delivered';
-  static const tracking_step_preparing_subtitle =
-      'tracking.step_preparing_subtitle';
+  static const tracking_step_preparing_subtitle = 'tracking.step_preparing_subtitle';
   static const tracking_step_expected_soon = 'tracking.step_expected_soon';
   static const tracking_step_completed = 'tracking.step_completed';
   static const tracking_driver_info = 'tracking.driver_info';
@@ -286,22 +249,15 @@ abstract class LocaleKeys {
   static const tracking_confirmed_msg = 'tracking.confirmed_msg';
   static const tracking_estimated_arrival = 'tracking.estimated_arrival';
   static const tracking_view_details = 'tracking.view_details';
-  static const tracking_tracking_status_title =
-      'tracking.tracking_status_title';
+  static const tracking_tracking_status_title = 'tracking.tracking_status_title';
   static const tracking_item_quantity = 'tracking.item_quantity';
   static const tracking_status_desc_pending = 'tracking.status_desc_pending';
-  static const tracking_status_desc_preparing =
-      'tracking.status_desc_preparing';
-  static const tracking_status_desc_out_for_delivery =
-      'tracking.status_desc_out_for_delivery';
-  static const tracking_status_desc_ready_pickup =
-      'tracking.status_desc_ready_pickup';
-  static const tracking_status_desc_picked_up =
-      'tracking.status_desc_picked_up';
-  static const tracking_status_desc_delivered =
-      'tracking.status_desc_delivered';
-  static const tracking_status_desc_cancelled =
-      'tracking.status_desc_cancelled';
+  static const tracking_status_desc_preparing = 'tracking.status_desc_preparing';
+  static const tracking_status_desc_out_for_delivery = 'tracking.status_desc_out_for_delivery';
+  static const tracking_status_desc_ready_pickup = 'tracking.status_desc_ready_pickup';
+  static const tracking_status_desc_picked_up = 'tracking.status_desc_picked_up';
+  static const tracking_status_desc_delivered = 'tracking.status_desc_delivered';
+  static const tracking_status_desc_cancelled = 'tracking.status_desc_cancelled';
   static const tracking_status_desc_unknown = 'tracking.status_desc_unknown';
   static const tracking_cancelled_title = 'tracking.cancelled_title';
   static const tracking_cancelled_message = 'tracking.cancelled_message';
@@ -313,8 +269,7 @@ abstract class LocaleKeys {
   static const tracking_opening_chat = 'tracking.opening_chat';
   static const tracking_step_picked_up = 'tracking.step_picked_up';
   static const tracking_estimate_unavailable = 'tracking.estimate_unavailable';
-  static const tracking_status_unavailable_title =
-      'tracking.status_unavailable_title';
+  static const tracking_status_unavailable_title = 'tracking.status_unavailable_title';
   static const tracking = 'tracking';
   static const profile_title = 'profile.title';
   static const profile_welcome = 'profile.welcome';
@@ -372,13 +327,10 @@ abstract class LocaleKeys {
   static const map_picker_locate_me = 'map_picker.locate_me';
   static const map_picker_location_disabled = 'map_picker.location_disabled';
   static const map_picker_location_denied = 'map_picker.location_denied';
-  static const map_picker_location_denied_forever =
-      'map_picker.location_denied_forever';
-  static const map_picker_location_unavailable =
-      'map_picker.location_unavailable';
+  static const map_picker_location_denied_forever = 'map_picker.location_denied_forever';
+  static const map_picker_location_unavailable = 'map_picker.location_unavailable';
   static const map_picker_geocoding_failed = 'map_picker.geocoding_failed';
-  static const map_picker_manual_selection_hint =
-      'map_picker.manual_selection_hint';
+  static const map_picker_manual_selection_hint = 'map_picker.manual_selection_hint';
   static const map_picker = 'map_picker';
   static const search_title = 'search.title';
   static const search_hint = 'search.hint';
@@ -518,84 +470,48 @@ abstract class LocaleKeys {
   static const customers_deactivated_success = 'customers.deactivated_success';
   static const customers = 'customers';
   static const admin_notifications_title = 'admin_notifications.title';
-  static const admin_notifications_compose_title =
-      'admin_notifications.compose_title';
-  static const admin_notifications_campaign_name =
-      'admin_notifications.campaign_name';
-  static const admin_notifications_campaign_name_required =
-      'admin_notifications.campaign_name_required';
-  static const admin_notifications_notification_title =
-      'admin_notifications.notification_title';
-  static const admin_notifications_notification_title_required =
-      'admin_notifications.notification_title_required';
-  static const admin_notifications_notification_body =
-      'admin_notifications.notification_body';
-  static const admin_notifications_notification_body_required =
-      'admin_notifications.notification_body_required';
-  static const admin_notifications_optional_image_url =
-      'admin_notifications.optional_image_url';
-  static const admin_notifications_notification_type =
-      'admin_notifications.notification_type';
-  static const admin_notifications_destination_link =
-      'admin_notifications.destination_link';
-  static const admin_notifications_target_audience =
-      'admin_notifications.target_audience';
-  static const admin_notifications_schedule_for_later =
-      'admin_notifications.schedule_for_later';
-  static const admin_notifications_schedule_campaign =
-      'admin_notifications.schedule_campaign';
+  static const admin_notifications_compose_title = 'admin_notifications.compose_title';
+  static const admin_notifications_campaign_name = 'admin_notifications.campaign_name';
+  static const admin_notifications_campaign_name_required = 'admin_notifications.campaign_name_required';
+  static const admin_notifications_notification_title = 'admin_notifications.notification_title';
+  static const admin_notifications_notification_title_required = 'admin_notifications.notification_title_required';
+  static const admin_notifications_notification_body = 'admin_notifications.notification_body';
+  static const admin_notifications_notification_body_required = 'admin_notifications.notification_body_required';
+  static const admin_notifications_optional_image_url = 'admin_notifications.optional_image_url';
+  static const admin_notifications_notification_type = 'admin_notifications.notification_type';
+  static const admin_notifications_destination_link = 'admin_notifications.destination_link';
+  static const admin_notifications_target_audience = 'admin_notifications.target_audience';
+  static const admin_notifications_schedule_for_later = 'admin_notifications.schedule_for_later';
+  static const admin_notifications_schedule_campaign = 'admin_notifications.schedule_campaign';
   static const admin_notifications_send_now = 'admin_notifications.send_now';
-  static const admin_notifications_live_preview_title =
-      'admin_notifications.live_preview_title';
-  static const admin_notifications_title_placeholder =
-      'admin_notifications.title_placeholder';
-  static const admin_notifications_body_placeholder =
-      'admin_notifications.body_placeholder';
-  static const admin_notifications_invalid_image_url =
-      'admin_notifications.invalid_image_url';
-  static const admin_notifications_route_target =
-      'admin_notifications.route_target';
-  static const admin_notifications_history_title =
-      'admin_notifications.history_title';
-  static const admin_notifications_col_campaign =
-      'admin_notifications.col_campaign';
+  static const admin_notifications_live_preview_title = 'admin_notifications.live_preview_title';
+  static const admin_notifications_title_placeholder = 'admin_notifications.title_placeholder';
+  static const admin_notifications_body_placeholder = 'admin_notifications.body_placeholder';
+  static const admin_notifications_invalid_image_url = 'admin_notifications.invalid_image_url';
+  static const admin_notifications_route_target = 'admin_notifications.route_target';
+  static const admin_notifications_history_title = 'admin_notifications.history_title';
+  static const admin_notifications_col_campaign = 'admin_notifications.col_campaign';
   static const admin_notifications_col_type = 'admin_notifications.col_type';
-  static const admin_notifications_col_audience =
-      'admin_notifications.col_audience';
-  static const admin_notifications_col_status =
-      'admin_notifications.col_status';
+  static const admin_notifications_col_audience = 'admin_notifications.col_audience';
+  static const admin_notifications_col_status = 'admin_notifications.col_status';
   static const admin_notifications_col_sent = 'admin_notifications.col_sent';
-  static const admin_notifications_col_recipients =
-      'admin_notifications.col_recipients';
-  static const admin_notifications_col_delivered =
-      'admin_notifications.col_delivered';
-  static const admin_notifications_col_click_rate =
-      'admin_notifications.col_click_rate';
-  static const admin_notifications_no_history =
-      'admin_notifications.no_history';
-  static const admin_notifications_load_error =
-      'admin_notifications.load_error';
-  static const admin_notifications_scheduled_label =
-      'admin_notifications.scheduled_label';
-  static const admin_notifications_schedule_success =
-      'admin_notifications.schedule_success';
-  static const admin_notifications_send_success =
-      'admin_notifications.send_success';
-  static const admin_notifications_audience_all =
-      'admin_notifications.audience_all';
-  static const admin_notifications_audience_selected_users =
-      'admin_notifications.audience_selected_users';
-  static const admin_notifications_audience_vip =
-      'admin_notifications.audience_vip';
-  static const admin_notifications_audience_city_cairo =
-      'admin_notifications.audience_city_cairo';
-  static const admin_notifications_audience_branch_heliopolis =
-      'admin_notifications.audience_branch_heliopolis';
+  static const admin_notifications_col_recipients = 'admin_notifications.col_recipients';
+  static const admin_notifications_col_delivered = 'admin_notifications.col_delivered';
+  static const admin_notifications_col_click_rate = 'admin_notifications.col_click_rate';
+  static const admin_notifications_no_history = 'admin_notifications.no_history';
+  static const admin_notifications_load_error = 'admin_notifications.load_error';
+  static const admin_notifications_scheduled_label = 'admin_notifications.scheduled_label';
+  static const admin_notifications_schedule_success = 'admin_notifications.schedule_success';
+  static const admin_notifications_send_success = 'admin_notifications.send_success';
+  static const admin_notifications_audience_all = 'admin_notifications.audience_all';
+  static const admin_notifications_audience_selected_users = 'admin_notifications.audience_selected_users';
+  static const admin_notifications_audience_vip = 'admin_notifications.audience_vip';
+  static const admin_notifications_audience_city_cairo = 'admin_notifications.audience_city_cairo';
+  static const admin_notifications_audience_branch_heliopolis = 'admin_notifications.audience_branch_heliopolis';
   static const admin_notifications = 'admin_notifications';
   static const admin_offers_empty_title = 'admin_offers.empty_title';
   static const admin_offers_empty_message = 'admin_offers.empty_message';
-  static const admin_offers_discount_percentage =
-      'admin_offers.discount_percentage';
+  static const admin_offers_discount_percentage = 'admin_offers.discount_percentage';
   static const admin_offers_discount_fixed = 'admin_offers.discount_fixed';
   static const admin_offers_summary = 'admin_offers.summary';
   static const admin_offers_delete_title = 'admin_offers.delete_title';
@@ -604,8 +520,7 @@ abstract class LocaleKeys {
   static const admin_offers_edit_tooltip = 'admin_offers.edit_tooltip';
   static const admin_offers_delete_tooltip = 'admin_offers.delete_tooltip';
   static const admin_offers_activate_tooltip = 'admin_offers.activate_tooltip';
-  static const admin_offers_deactivate_tooltip =
-      'admin_offers.deactivate_tooltip';
+  static const admin_offers_deactivate_tooltip = 'admin_offers.deactivate_tooltip';
   static const admin_offers = 'admin_offers';
   static const form_basic_info = 'form.basic_info';
   static const form_product_name = 'form.product_name';
@@ -638,8 +553,7 @@ abstract class LocaleKeys {
   static const form_category_name = 'form.category_name';
   static const form_category_name_hint = 'form.category_name_hint';
   static const form_category_name_required = 'form.category_name_required';
-  static const form_category_name_placeholder =
-      'form.category_name_placeholder';
+  static const form_category_name_placeholder = 'form.category_name_placeholder';
   static const form_internal_notes = 'form.internal_notes';
   static const form_internal_notes_hint = 'form.internal_notes_hint';
   static const form_display_order = 'form.display_order';
@@ -665,45 +579,30 @@ abstract class LocaleKeys {
   static const form_create_promo = 'form.create_promo';
   static const form_save_promo_success = 'form.save_promo_success';
   static const form = 'form';
-  static const admin_catalog_metadata_section =
-      'admin_catalog.metadata_section';
+  static const admin_catalog_metadata_section = 'admin_catalog.metadata_section';
   static const admin_catalog_calories = 'admin_catalog.calories';
   static const admin_catalog_calories_hint = 'admin_catalog.calories_hint';
   static const admin_catalog_calories_unit = 'admin_catalog.calories_unit';
-  static const admin_catalog_calories_invalid =
-      'admin_catalog.calories_invalid';
-  static const admin_catalog_compare_at_price =
-      'admin_catalog.compare_at_price';
-  static const admin_catalog_compare_at_price_hint =
-      'admin_catalog.compare_at_price_hint';
-  static const admin_catalog_compare_at_price_invalid =
-      'admin_catalog.compare_at_price_invalid';
+  static const admin_catalog_calories_invalid = 'admin_catalog.calories_invalid';
+  static const admin_catalog_compare_at_price = 'admin_catalog.compare_at_price';
+  static const admin_catalog_compare_at_price_hint = 'admin_catalog.compare_at_price_hint';
+  static const admin_catalog_compare_at_price_invalid = 'admin_catalog.compare_at_price_invalid';
   static const admin_catalog_badge = 'admin_catalog.badge';
   static const admin_catalog_no_badge = 'admin_catalog.no_badge';
-  static const admin_catalog_badge_bestseller =
-      'admin_catalog.badge_bestseller';
+  static const admin_catalog_badge_bestseller = 'admin_catalog.badge_bestseller';
   static const admin_catalog_badge_top_rated = 'admin_catalog.badge_top_rated';
   static const admin_catalog_recommendations = 'admin_catalog.recommendations';
-  static const admin_catalog_search_recommendations =
-      'admin_catalog.search_recommendations';
-  static const admin_catalog_no_recommendations =
-      'admin_catalog.no_recommendations';
-  static const admin_catalog_max_recommendations =
-      'admin_catalog.max_recommendations';
-  static const admin_catalog_self_recommendation_error =
-      'admin_catalog.self_recommendation_error';
-  static const admin_catalog_duplicate_recommendation_error =
-      'admin_catalog.duplicate_recommendation_error';
-  static const admin_catalog_recommendation_count_zero =
-      'admin_catalog.recommendation_count_zero';
-  static const admin_catalog_recommendation_count_one =
-      'admin_catalog.recommendation_count_one';
-  static const admin_catalog_recommendation_count_many =
-      'admin_catalog.recommendation_count_many';
+  static const admin_catalog_search_recommendations = 'admin_catalog.search_recommendations';
+  static const admin_catalog_no_recommendations = 'admin_catalog.no_recommendations';
+  static const admin_catalog_max_recommendations = 'admin_catalog.max_recommendations';
+  static const admin_catalog_self_recommendation_error = 'admin_catalog.self_recommendation_error';
+  static const admin_catalog_duplicate_recommendation_error = 'admin_catalog.duplicate_recommendation_error';
+  static const admin_catalog_recommendation_count_zero = 'admin_catalog.recommendation_count_zero';
+  static const admin_catalog_recommendation_count_one = 'admin_catalog.recommendation_count_one';
+  static const admin_catalog_recommendation_count_many = 'admin_catalog.recommendation_count_many';
   static const admin_catalog_move_up = 'admin_catalog.move_up';
   static const admin_catalog_move_down = 'admin_catalog.move_down';
-  static const admin_catalog_remove_recommendation =
-      'admin_catalog.remove_recommendation';
+  static const admin_catalog_remove_recommendation = 'admin_catalog.remove_recommendation';
   static const admin_catalog = 'admin_catalog';
   static const auth_login_title = 'auth.login_title';
   static const auth_login_subtitle = 'auth.login_subtitle';
@@ -745,25 +644,27 @@ abstract class LocaleKeys {
   static const auth_switch_to_admin_login = 'auth.switch_to_admin_login';
   static const auth = 'auth';
   static const onboarding_select_language = 'onboarding.select_language';
-  static const onboarding_select_language_sub =
-      'onboarding.select_language_sub';
+  static const onboarding_select_language_sub = 'onboarding.select_language_sub';
   static const onboarding_arabic = 'onboarding.arabic';
   static const onboarding_english = 'onboarding.english';
   static const onboarding_continue = 'onboarding.continue';
   static const onboarding_skip = 'onboarding.skip';
   static const onboarding_next = 'onboarding.next';
-  static const onboarding_get_started = 'onboarding.get_started';
+  static const onboarding_start_ordering = 'onboarding.start_ordering';
   static const onboarding_page1_title = 'onboarding.page1_title';
   static const onboarding_page1_sub = 'onboarding.page1_sub';
   static const onboarding_page2_title = 'onboarding.page2_title';
   static const onboarding_page2_sub = 'onboarding.page2_sub';
+  static const onboarding_page2_chip_spicy = 'onboarding.page2_chip_spicy';
+  static const onboarding_page2_chip_extras = 'onboarding.page2_chip_extras';
+  static const onboarding_page2_chip_no_onion = 'onboarding.page2_chip_no_onion';
   static const onboarding_page3_title = 'onboarding.page3_title';
   static const onboarding_page3_sub = 'onboarding.page3_sub';
+  static const onboarding_page3_chip_location = 'onboarding.page3_chip_location';
+  static const onboarding_page3_chip_tracking = 'onboarding.page3_chip_tracking';
   static const onboarding_welcome_title = 'onboarding.welcome_title';
   static const onboarding_welcome_sub = 'onboarding.welcome_sub';
   static const onboarding_continue_guest = 'onboarding.continue_guest';
-  static const onboarding_badge_ordering = 'onboarding.badge_ordering';
-  static const onboarding_badge_fresh = 'onboarding.badge_fresh';
   static const onboarding = 'onboarding';
   static const common_egp = 'common.egp';
   static const common_pts = 'common.pts';
@@ -803,12 +704,10 @@ abstract class LocaleKeys {
   static const dashboard_revenue = 'dashboard.revenue';
   static const dashboard_orders_volume = 'dashboard.orders_volume';
   static const dashboard_orders_operations = 'dashboard.orders_operations';
-  static const dashboard_order_status_breakdown =
-      'dashboard.order_status_breakdown';
+  static const dashboard_order_status_breakdown = 'dashboard.order_status_breakdown';
   static const dashboard_operations_mix = 'dashboard.operations_mix';
   static const dashboard_customer_insights = 'dashboard.customer_insights';
-  static const dashboard_customer_insights_summary =
-      'dashboard.customer_insights_summary';
+  static const dashboard_customer_insights_summary = 'dashboard.customer_insights_summary';
   static const dashboard_top_selling_items = 'dashboard.top_selling_items';
   static const dashboard_quantity_sold = 'dashboard.quantity_sold';
   static const dashboard_no_analytics_data = 'dashboard.no_analytics_data';
@@ -831,32 +730,22 @@ abstract class LocaleKeys {
   static const admin_settings_tab_hours = 'admin_settings.tab_hours';
   static const admin_settings_tab_acceptance = 'admin_settings.tab_acceptance';
   static const admin_settings_logo = 'admin_settings.logo';
-  static const admin_settings_restaurant_profile =
-      'admin_settings.restaurant_profile';
+  static const admin_settings_restaurant_profile = 'admin_settings.restaurant_profile';
   static const admin_settings_name_en = 'admin_settings.name_en';
   static const admin_settings_name_ar = 'admin_settings.name_ar';
   static const admin_settings_phone = 'admin_settings.phone';
   static const admin_settings_address_en = 'admin_settings.address_en';
   static const admin_settings_address_ar = 'admin_settings.address_ar';
-  static const admin_settings_restaurant_location =
-      'admin_settings.restaurant_location';
-  static const admin_settings_restaurant_location_hint =
-      'admin_settings.restaurant_location_hint';
-  static const admin_settings_restaurant_latitude =
-      'admin_settings.restaurant_latitude';
-  static const admin_settings_restaurant_longitude =
-      'admin_settings.restaurant_longitude';
-  static const admin_settings_select_location_on_map =
-      'admin_settings.select_location_on_map';
-  static const admin_settings_invalid_coordinates_error =
-      'admin_settings.invalid_coordinates_error';
-  static const admin_settings_coordinates_missing_error =
-      'admin_settings.coordinates_missing_error';
+  static const admin_settings_restaurant_location = 'admin_settings.restaurant_location';
+  static const admin_settings_restaurant_location_hint = 'admin_settings.restaurant_location_hint';
+  static const admin_settings_restaurant_latitude = 'admin_settings.restaurant_latitude';
+  static const admin_settings_restaurant_longitude = 'admin_settings.restaurant_longitude';
+  static const admin_settings_select_location_on_map = 'admin_settings.select_location_on_map';
+  static const admin_settings_invalid_coordinates_error = 'admin_settings.invalid_coordinates_error';
+  static const admin_settings_coordinates_missing_error = 'admin_settings.coordinates_missing_error';
   static const admin_settings_timezone = 'admin_settings.timezone';
-  static const admin_settings_hours_timezone_notice =
-      'admin_settings.hours_timezone_notice';
-  static const admin_settings_hours_informational_notice =
-      'admin_settings.hours_informational_notice';
+  static const admin_settings_hours_timezone_notice = 'admin_settings.hours_timezone_notice';
+  static const admin_settings_hours_informational_notice = 'admin_settings.hours_informational_notice';
   static const admin_settings_day_sunday = 'admin_settings.day_sunday';
   static const admin_settings_day_monday = 'admin_settings.day_monday';
   static const admin_settings_day_tuesday = 'admin_settings.day_tuesday';
@@ -865,24 +754,16 @@ abstract class LocaleKeys {
   static const admin_settings_day_friday = 'admin_settings.day_friday';
   static const admin_settings_day_saturday = 'admin_settings.day_saturday';
   static const admin_settings_day_closed = 'admin_settings.day_closed';
-  static const admin_settings_accepting_orders_open =
-      'admin_settings.accepting_orders_open';
-  static const admin_settings_accepting_orders_closed =
-      'admin_settings.accepting_orders_closed';
-  static const admin_settings_accepting_orders_description =
-      'admin_settings.accepting_orders_description';
+  static const admin_settings_accepting_orders_open = 'admin_settings.accepting_orders_open';
+  static const admin_settings_accepting_orders_closed = 'admin_settings.accepting_orders_closed';
+  static const admin_settings_accepting_orders_description = 'admin_settings.accepting_orders_description';
   static const admin_settings_closed_message = 'admin_settings.closed_message';
-  static const admin_settings_closed_message_hint =
-      'admin_settings.closed_message_hint';
-  static const admin_settings_closed_message_en =
-      'admin_settings.closed_message_en';
-  static const admin_settings_closed_message_ar =
-      'admin_settings.closed_message_ar';
-  static const admin_settings_close_restaurant_title =
-      'admin_settings.close_restaurant_title';
-  static const admin_settings_close_restaurant_body =
-      'admin_settings.close_restaurant_body';
-  static const admin_settings_close_restaurant_confirm =
-      'admin_settings.close_restaurant_confirm';
+  static const admin_settings_closed_message_hint = 'admin_settings.closed_message_hint';
+  static const admin_settings_closed_message_en = 'admin_settings.closed_message_en';
+  static const admin_settings_closed_message_ar = 'admin_settings.closed_message_ar';
+  static const admin_settings_close_restaurant_title = 'admin_settings.close_restaurant_title';
+  static const admin_settings_close_restaurant_body = 'admin_settings.close_restaurant_body';
+  static const admin_settings_close_restaurant_confirm = 'admin_settings.close_restaurant_confirm';
   static const admin_settings = 'admin_settings';
+
 }
