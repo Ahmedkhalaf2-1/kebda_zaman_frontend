@@ -6,6 +6,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/widgets/kz_google_signin_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_brand_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -540,9 +541,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ],
           ),
-          child: const Center(
-            child: Icon(Icons.restaurant_rounded, size: 40, color: KZ.primary),
-          ),
+          child: const Center(child: KZBrandLogo(width: 52, height: 52)),
         ),
 
         const SizedBox(height: 24),

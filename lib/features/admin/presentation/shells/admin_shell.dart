@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
+import 'package:kebda_zaman/core/widgets/kz_brand_logo.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 
 class _AdminNavEntry {
@@ -198,11 +199,7 @@ class _AdminSidebar extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.admin_panel_settings,
-                color: KZ.primary,
-                size: 28,
-              ),
+              const KZBrandLogo(width: 28, height: 28),
               const SizedBox(width: KZ.sp8),
               Text('admin.title'.tr(), style: KZ.sectionTitle),
             ],
@@ -368,11 +365,7 @@ class _AdminMobileShell extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.admin_panel_settings,
-                    color: KZ.primary,
-                    size: 28,
-                  ),
+                  const KZBrandLogo(width: 28, height: 28),
                   const SizedBox(width: KZ.sp8),
                   Text('admin.title'.tr(), style: KZ.sectionTitle),
                 ],
@@ -520,11 +513,7 @@ class _CashierShell extends StatelessWidget {
             leading: Column(
               children: [
                 const SizedBox(height: 16),
-                const Icon(
-                  Icons.admin_panel_settings,
-                  color: KZ.primary,
-                  size: 32,
-                ),
+                const KZBrandLogo(width: 32, height: 32),
                 const SizedBox(height: 8),
                 Text('Admin', style: Theme.of(context).textTheme.labelMedium),
                 const SizedBox(height: 16),

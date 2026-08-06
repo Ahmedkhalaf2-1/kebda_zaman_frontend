@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_brand_logo.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -84,16 +85,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Kebda Zaman',
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: KZ.primary, // #8c2b00
-                      letterSpacing: -0.5,
-                    ),
-                  ),
+                  const KZBrandLogo(height: 28),
                   TextButton(
                     onPressed: _completeOnboarding,
                     style: TextButton.styleFrom(

@@ -79,6 +79,7 @@ flutter:
 
   assets:
     - assets/mock/
+    - assets/photos/
     - assets/translations/en.json
     - assets/translations/ar.json
 

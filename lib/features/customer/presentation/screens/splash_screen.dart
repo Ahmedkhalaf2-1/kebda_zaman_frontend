@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/widgets/kz_brand_logo.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/session_bootstrap_notifier.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -152,11 +153,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           ],
                         ),
                         child: const Center(
-                          child: Icon(
-                            Icons.restaurant_rounded,
-                            size: 58,
-                            color: KZ.primary,
-                          ),
+                          child: KZBrandLogo(width: 72, height: 72),
                         ),
                       ),
                       const SizedBox(height: KZ.sp24),
