@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
@@ -181,6 +182,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 KZ.divider,
                 ListTile(
                   leading: const Icon(
+                    Icons.privacy_tip_outlined,
+                    color: KZ.primary,
+                  ),
+                  title: Text('settings.privacy'.tr(), style: KZ.body),
+                  trailing: const Icon(
+                    Icons.chevron_right_rounded,
+                    color: KZ.secondary,
+                  ),
+                  onTap: () => context.push('/legal/privacy'),
+                ),
+                KZ.divider,
+                ListTile(
+                  leading: const Icon(
                     Icons.info_outline_rounded,
                     color: KZ.primary,
                   ),
@@ -189,7 +203,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Icons.chevron_right_rounded,
                     color: KZ.secondary,
                   ),
-                  onTap: () {},
+                  onTap: () => context.push('/legal/terms'),
                 ),
               ],
             ),

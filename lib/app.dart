@@ -67,7 +67,14 @@ class KebdaZamanApp extends ConsumerWidget {
           scrolledUnderElevation: 0,
           surfaceTintColor: Colors.transparent,
           iconTheme: const IconThemeData(color: KZ.primary),
-          titleTextStyle: KZ.headingStyle,
+          // AppBarTheme.titleTextStyle is an isolated DefaultTextStyle
+          // boundary — it does NOT chain back to ThemeData.fontFamily the
+          // way ordinary Text widgets do, so any AppBar/SliverAppBar title
+          // that (like KZ.headingStyle) leaves fontFamily unset falls back
+          // to the platform's default system font instead of the brand
+          // font. Explicit fontFamily here keeps it consistent with every
+          // other Text style in the app.
+          titleTextStyle: KZ.headingStyle.copyWith(fontFamily: fontFamily),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,

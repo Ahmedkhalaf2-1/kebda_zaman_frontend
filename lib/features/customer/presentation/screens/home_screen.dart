@@ -22,6 +22,8 @@ import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
+import 'package:kebda_zaman/core/widgets/kz_lottie_add_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_lottie_heart_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
@@ -109,47 +111,64 @@ class HomeScreen extends ConsumerWidget {
                     title: const _AppBarAddressSelector(),
                     centerTitle: false,
                     actions: [
-                      // Dynamic Profile Avatar Button
+                      // Cart Button (with item-count badge)
                       Consumer(
                         builder: (context, ref, child) {
-                          final authState = ref.watch(authNotifierProvider);
-                          final user = authState.user;
-                          final hasName =
-                              user != null && user.name.trim().isNotEmpty;
-                          final initial = hasName
-                              ? user.name.trim()[0].toUpperCase()
-                              : '';
+                          final cartAsync = ref.watch(cartProvider);
+                          final itemCount =
+                              cartAsync.valueOrNull?.items.fold<int>(
+                                0,
+                                (sum, i) => sum + i.quantity,
+                              ) ??
+                              0;
 
                           return Semantics(
                             button: true,
-                            label: 'nav.profile'.tr(),
+                            label: 'nav.cart'.tr(),
                             child: InkWell(
-                              onTap: () => context.go('/profile'),
+                              onTap: () => context.push('/cart'),
                               customBorder: const CircleBorder(),
                               child: Container(
                                 width: KZ.iconTapTargetMin,
                                 height: KZ.iconTapTargetMin,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: surfaceContainerColor,
-                                  border: Border.all(
-                                    color: primaryColor.withValues(alpha: 0.5),
-                                    width: 2,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: hasName
-                                      ? Text(
-                                          initial,
-                                          style: KZ.labelLarge.copyWith(
-                                            color: primaryColor,
+                                alignment: Alignment.center,
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.shopping_cart_outlined,
+                                      color: primaryColor,
+                                      size: KZ.iconAction,
+                                    ),
+                                    if (itemCount > 0)
+                                      Positioned(
+                                        top: -4,
+                                        right: -6,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(3),
+                                          decoration: const BoxDecoration(
+                                            color: KZ.primary,
+                                            shape: BoxShape.circle,
                                           ),
-                                        )
-                                      : Icon(
-                                          Icons.person_outline_rounded,
-                                          color: primaryColor,
-                                          size: KZ.iconAction,
+                                          constraints: const BoxConstraints(
+                                            minWidth: 17,
+                                            minHeight: 17,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              '$itemCount',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                height: 1.0,
+                                              ),
+                                            ),
+                                          ),
                                         ),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -215,9 +234,7 @@ class HomeScreen extends ConsumerWidget {
                           onTap: () => context.go('/search'),
                           child: Container(
                             height: 56,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(100),
@@ -614,37 +631,12 @@ class _BestSellerCard extends ConsumerWidget {
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: GestureDetector(
+                  child: KZLottieHeartButton(
+                    isFavorite: isFavorite,
                     onTap: onToggleFavorite,
-                    child: Container(
-                      width: KZ.iconTapTargetMin,
-                      height: KZ.iconTapTargetMin,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.92),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: AnimatedScale(
-                          scale: isFavorite ? 1.1 : 1.0,
-                          duration: const Duration(milliseconds: 180),
-                          curve: Curves.easeOut,
-                          child: Icon(
-                            isFavorite
-                                ? Icons.favorite_rounded
-                                : Icons.favorite_border_rounded,
-                            color: HomeScreen.primaryColor,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ),
+                    semanticsLabel: 'profile.my_favorites'.tr(),
+                    size: KZ.iconTapTargetMin,
+                    iconSize: 20,
                   ),
                 ),
 
@@ -740,35 +732,13 @@ class _BestSellerCard extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      Semantics(
-                        button: true,
-                        label: 'home.add_to_cart'.tr(),
-                        child: InkWell(
-                          onTap: () => _handleAdd(context, ref),
-                          customBorder: const CircleBorder(),
-                          child: Container(
-                            width: KZ.iconTapTargetMin,
-                            height: KZ.iconTapTargetMin,
-                            decoration: BoxDecoration(
-                              color: HomeScreen.primaryColor,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: HomeScreen.primaryColor.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.add_rounded,
-                              color: Colors.white,
-                              size: KZ.iconControl,
-                            ),
-                          ),
-                        ),
+                      KZLottieAddButton(
+                        onTap: () => _handleAdd(context, ref),
+                        semanticsLabel: 'home.add_to_cart'.tr(),
+                        size: KZ.iconTapTargetMin,
+                        backgroundColor: HomeScreen.primaryColor,
+                        iconColor: Colors.white,
+                        iconSize: KZ.iconControl,
                       ),
                     ],
                   ),
@@ -1044,26 +1014,13 @@ class _RecommendedTile extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Semantics(
-              button: true,
-              label: 'home.add_to_cart'.tr(),
-              child: InkWell(
-                onTap: () => _handleAdd(context, ref),
-                customBorder: const CircleBorder(),
-                child: Container(
-                  width: KZ.iconTapTargetMin,
-                  height: KZ.iconTapTargetMin,
-                  decoration: BoxDecoration(
-                    color: HomeScreen.primaryColor.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.add_rounded,
-                    size: KZ.iconControl,
-                    color: HomeScreen.primaryColor,
-                  ),
-                ),
-              ),
+            KZLottieAddButton(
+              onTap: () => _handleAdd(context, ref),
+              semanticsLabel: 'home.add_to_cart'.tr(),
+              size: KZ.iconTapTargetMin,
+              backgroundColor: HomeScreen.primaryColor.withValues(alpha: 0.12),
+              iconColor: HomeScreen.primaryColor,
+              iconSize: KZ.iconControl,
             ),
           ],
         ),
@@ -1132,9 +1089,15 @@ class _GreetingHeader extends ConsumerWidget {
                   color: HomeScreen.primaryColor,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  _greetingTextKey(hour).tr(),
-                  style: KZ.labelLarge.copyWith(color: HomeScreen.primaryColor),
+                Flexible(
+                  child: Text(
+                    _greetingTextKey(hour).tr(),
+                    style: KZ.labelLarge.copyWith(
+                      color: HomeScreen.primaryColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -1143,7 +1106,11 @@ class _GreetingHeader extends ConsumerWidget {
               hasName
                   ? user.name.trim().split(' ').first
                   : 'home.guest_greeting'.tr(),
-              style: KZ.display.copyWith(fontSize: 32, height: 1.2, color: HomeScreen.onSurfaceColor),
+              style: KZ.display.copyWith(
+                fontSize: 32,
+                height: 1.2,
+                color: HomeScreen.onSurfaceColor,
+              ),
             ),
           ],
         ),

@@ -211,4 +211,54 @@ class ApiAuthRepository implements AuthRepository {
       return Err(_handleError(e));
     }
   }
+
+  /// [_handleError] maps 401/403 alike to [AuthFailure], which
+  /// [AuthNotifier] treats as "the session is invalid, log out". That fits
+  /// every other endpoint here, but not this one: a 403 on this endpoint
+  /// specifically means `GUEST_NOT_ELIGIBLE` — a guest account is real and
+  /// its session is fine, it's just not eligible to delete itself. Forcing a
+  /// logout on that response would be wrong, so deletion gets its own
+  /// mapping that only ever treats a genuine 401 as an auth failure.
+  Failure _handleDeleteAccountError(dynamic e) {
+    if (e is DioException) {
+      final statusCode = e.response?.statusCode;
+      if (e.error is ApiException) {
+        final apiException = e.error as ApiException;
+        if (statusCode == 401) {
+          return AuthFailure(apiException.message, apiException);
+        }
+        // 403 GUEST_NOT_ELIGIBLE, 409 ACTIVE_ORDER_EXISTS: real, actionable
+        // preconditions on an otherwise-valid session — not a session
+        // problem, so ValidationFailure (not AuthFailure) preserves that
+        // distinction for AuthNotifier/UI. The machine-readable `code` is
+        // preserved on the failure's `cause` either way.
+        if (statusCode == 403 || statusCode == 409) {
+          return ValidationFailure(apiException.message, apiException);
+        }
+        // 503 FIREBASE_DELETE_FAILED and anything else unexpected: a
+        // service-side failure, not a rejection of the request itself —
+        // retryable, so NetworkFailure (never logs the user out).
+        return NetworkFailure(apiException.message, apiException);
+      }
+      return NetworkFailure(e.message ?? 'Network error');
+    }
+    return UnknownFailure(e.toString());
+  }
+
+  @override
+  Future<Result<void>> deleteAccount() async {
+    try {
+      // 204 No Content on success — nothing to decode from the response
+      // body, so unlike every other call in this file there is no
+      // `response.data` parsing step at all.
+      await apiClient.dio.delete('/auth/account');
+      // Tokens are only ever cleared here, after a confirmed 204 — any
+      // exception above skips this line entirely, so a failed deletion
+      // never touches the stored session.
+      await _clearTokens();
+      return const Success(null);
+    } catch (e) {
+      return Err(_handleDeleteAccountError(e));
+    }
+  }
 }

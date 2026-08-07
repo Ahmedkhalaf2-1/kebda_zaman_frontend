@@ -26,6 +26,8 @@ class _FakeAuthRepository implements AuthRepository {
   @override
   Future<Result<void>> logout() async => const Success(null);
   @override
+  Future<Result<void>> deleteAccount() async => throw UnimplementedError();
+  @override
   Future<Result<User>> login(String email, String password) async =>
       throw UnimplementedError();
   @override
@@ -306,6 +308,14 @@ void main() {
     // (always rendered) but its section header isn't visible/built yet at
     // the initial scroll position — exactly one match, not two.
     expect(find.text('Desserts'), findsOneWidget);
+
+    // The "Desserts" tab chip is the 3rd in the horizontal category bar and
+    // isn't fully within the viewport at the initial scroll position (it
+    // sits partly past the right edge) — bring it into view first, exactly
+    // as a real user would scroll the bar before tapping it, otherwise the
+    // tap's hit-test point falls outside the render view entirely.
+    await tester.ensureVisible(find.text('Desserts'));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Desserts'));
     await tester.pumpAndSettle();

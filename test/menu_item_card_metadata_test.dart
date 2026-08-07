@@ -20,13 +20,18 @@ import 'package:kebda_zaman/generated/codegen_loader.g.dart';
 /// null-image fallback) on the customer-facing menu item cards. Covers the
 /// shared [MenuItemBadgeChip]/[MenuItemComparePriceText]/[MenuItemCaloriesText]
 /// widgets directly, plus an integration pass through the real [MenuScreen]
-/// (the active surface these widgets are wired into) to prove the shared
-/// card actually renders them.
+/// (the active surface [MenuItemBadgeChip] is wired into). The compact
+/// MenuScreen grid card intentionally omits compareAtPrice/calories — those
+/// render on ItemDetailsScreen instead (see item_details_screen_vo3_test.dart)
+/// — so the integration pass here confirms their deliberate *absence* on the
+/// grid card rather than their presence.
 class _FakeAuthRepository implements AuthRepository {
   @override
   Future<Result<User?>> getCurrentUser() async => const Success(null);
   @override
   Future<Result<void>> logout() async => const Success(null);
+  @override
+  Future<Result<void>> deleteAccount() async => throw UnimplementedError();
   @override
   Future<Result<User>> login(String email, String password) async =>
       throw UnimplementedError();
@@ -315,15 +320,20 @@ void main() {
       expect(find.text('SAR 136'), findsOneWidget);
     });
 
-    testWidgets('valid compareAtPrice renders crossed out', (tester) async {
+    // The compact MenuScreen grid card intentionally omits compare-at price
+    // (see menu_screen.dart's _MenuProductCard doc comment: "that belongs in
+    // item details only") — covered on ItemDetailsScreen instead, by
+    // item_details_screen_vo3_test.dart.
+    testWidgets('valid compareAtPrice is absent on the compact grid card', (
+      tester,
+    ) async {
       await setViewport(tester, const Size(390, 844));
       final overflows = await _pumpMenuScreen(tester, [
         _item('m1', basePrice: 136, compareAtPrice: 170),
       ]);
       expect(tester.takeException(), isNull);
       expect(overflows, isEmpty);
-      expect(find.byType(MenuItemComparePriceText), findsOneWidget);
-      expect(find.text('SAR 170'), findsOneWidget);
+      expect(find.byType(MenuItemComparePriceText), findsNothing);
     });
 
     testWidgets('null compareAtPrice renders no compare price text', (
@@ -350,14 +360,18 @@ void main() {
       expect(find.byType(MenuItemComparePriceText), findsNothing);
     });
 
-    testWidgets('calories render when present', (tester) async {
+    // The compact MenuScreen grid card intentionally omits calories (see
+    // menu_screen.dart's _MenuProductCard doc comment) — covered on
+    // ItemDetailsScreen instead, by item_details_screen_vo3_test.dart.
+    testWidgets('calories are absent on the compact grid card even when '
+        'present', (tester) async {
       await setViewport(tester, const Size(390, 844));
       final overflows = await _pumpMenuScreen(tester, [
         _item('m1', calories: 500),
       ]);
       expect(tester.takeException(), isNull);
       expect(overflows, isEmpty);
-      expect(find.text('500 kcal'), findsOneWidget);
+      expect(find.byType(MenuItemCaloriesText), findsNothing);
     });
 
     testWidgets('calories are absent when null', (tester) async {

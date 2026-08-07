@@ -30,6 +30,8 @@ class _FakeAuthRepository implements AuthRepository {
   @override
   Future<Result<void>> logout() async => const Success(null);
   @override
+  Future<Result<void>> deleteAccount() async => throw UnimplementedError();
+  @override
   Future<Result<User>> login(String email, String password) async =>
       throw UnimplementedError();
   @override
@@ -78,13 +80,13 @@ MenuItem _item(
   oftenOrderedWith: oftenOrderedWith,
 );
 
-/// The `MenuScreen` search bar has a pre-existing overflow at narrow widths
-/// unrelated to product-content localization (see
-/// `menu_item_card_metadata_test.dart`) — swallowed here so it doesn't mask
-/// genuine regressions from this phase.
+/// Retained for any future pre-existing overflow that needs swallowing so it
+/// doesn't mask genuine regressions from this phase; the MenuScreen search
+/// bar overflow this originally targeted has been fixed (see
+/// `menu_item_card_metadata_test.dart`), so this currently matches nothing.
 bool _isKnownPreExistingSearchBarOverflow(FlutterErrorDetails details) =>
     details.exceptionAsString().contains('overflowed') &&
-    details.toString().contains('menu_screen.dart:249');
+    details.toString().contains('menu_screen.dart:497');
 
 Future<void> _pumpAndSettleSwallowingKnownOverflow(
   WidgetTester tester,
@@ -237,9 +239,13 @@ void main() {
   }
 
   group('MenuScreen — locale-aware product content', () {
-    testWidgets('renders nameEn/descriptionEn under English locale', (
-      tester,
-    ) async {
+    // The compact MenuScreen grid card intentionally omits the item
+    // description (see menu_screen.dart's _MenuProductCard doc comment:
+    // "that belongs in item details only") — description localization on
+    // the surface that actually renders it is covered below by the
+    // "ItemDetailsScreen — locale-aware product content" group. These two
+    // tests therefore only assert the name, which the card does render.
+    testWidgets('renders nameEn under English locale', (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
@@ -263,13 +269,10 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Bread'), findsOneWidget);
-      expect(find.text('Fresh bread'), findsOneWidget);
       expect(find.text('خبز'), findsNothing);
     });
 
-    testWidgets('renders nameAr/descriptionAr under Arabic locale', (
-      tester,
-    ) async {
+    testWidgets('renders nameAr under Arabic locale', (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
@@ -294,7 +297,6 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('خبز'), findsOneWidget);
-      expect(find.text('خبز طازج'), findsOneWidget);
       expect(find.text('Bread'), findsNothing);
     });
 

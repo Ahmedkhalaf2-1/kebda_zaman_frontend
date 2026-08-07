@@ -78,6 +78,22 @@ Order _order({
   placedAt: DateTime(2026, 7, 1),
 );
 
+// Not pumpAndSettle: reached tracking steps render a repeating Lottie
+// animation (order_tracking_screen.dart's `repeat: isReached`), which by
+// design never stops — pumpAndSettle waits for all animations to finish and
+// times out. A bounded pump loop instead gives EasyLocalization's async
+// asset load and the fake order stream enough frames to settle without
+// waiting on an animation that runs forever.
+Future<void> _settle(
+  WidgetTester tester, {
+  int maxSteps = 20,
+  Duration step = const Duration(milliseconds: 100),
+}) async {
+  for (var i = 0; i < maxSteps; i++) {
+    await tester.pump(step);
+  }
+}
+
 Future<void> _pump(
   WidgetTester tester,
   Order order, {
@@ -106,7 +122,7 @@ Future<void> _pump(
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  await _settle(tester);
 }
 
 void main() {

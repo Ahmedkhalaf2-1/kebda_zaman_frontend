@@ -19,6 +19,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:kebda_zaman/core/widgets/kz_brand_logo.dart';
@@ -167,8 +168,12 @@ void main() {
 
     await _advancePages(tester, 1);
     expect(find.text('From Our Kitchen to You'), findsOneWidget);
-    expect(find.text('Map Location'), findsOneWidget);
-    expect(find.text('Order Tracking'), findsOneWidget);
+    // Page 3 was redesigned to show a Lottie delivery-guy hero animation
+    // instead of the old "Map Location"/"Order Tracking" decorative chips
+    // (see onboarding_screen.dart's _kOnboardingPages entry for page 3: it
+    // sets `lottieAsset` and leaves `chips` empty) — those translation keys
+    // are no longer referenced anywhere in the widget tree.
+    expect(find.byType(Lottie), findsOneWidget);
 
     expect(tester.takeException(), isNull);
   });

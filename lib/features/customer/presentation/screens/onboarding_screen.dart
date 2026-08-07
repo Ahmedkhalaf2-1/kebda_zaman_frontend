@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:lottie/lottie.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
@@ -17,13 +18,15 @@ import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 class _OnboardingPageData {
   final String titleKey;
   final String subKey;
-  final String imageUrl;
+  final String? imageUrl;
+  final String? lottieAsset;
   final List<({IconData? icon, String labelKey})> chips;
 
   const _OnboardingPageData({
     required this.titleKey,
     required this.subKey,
-    required this.imageUrl,
+    this.imageUrl,
+    this.lottieAsset,
     this.chips = const [],
   });
 }
@@ -56,15 +59,7 @@ const List<_OnboardingPageData> _kOnboardingPages = [
   _OnboardingPageData(
     titleKey: 'onboarding.page3_title',
     subKey: 'onboarding.page3_sub',
-    imageUrl:
-        'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80',
-    chips: [
-      (
-        icon: Icons.location_on_rounded,
-        labelKey: 'onboarding.page3_chip_location',
-      ),
-      (icon: Icons.route_rounded, labelKey: 'onboarding.page3_chip_tracking'),
-    ],
+    lottieAsset: 'assets/lottie/delivery_guy.json',
   ),
 ];
 
@@ -289,6 +284,7 @@ class _OnboardingPageViewState extends State<_OnboardingPageView> {
                       _HeroImageCard(
                         pageIndex: widget.pageIndex,
                         imageUrl: data.imageUrl,
+                        lottieAsset: data.lottieAsset,
                       ),
                       if (data.chips.isNotEmpty) ...[
                         const SizedBox(height: KZ.sp20),
@@ -343,9 +339,14 @@ class _OnboardingPageViewState extends State<_OnboardingPageView> {
 /// semantics tree; the page's title/subtitle already carry the meaning.
 class _HeroImageCard extends StatelessWidget {
   final int pageIndex;
-  final String imageUrl;
+  final String? imageUrl;
+  final String? lottieAsset;
 
-  const _HeroImageCard({required this.pageIndex, required this.imageUrl});
+  const _HeroImageCard({
+    required this.pageIndex,
+    this.imageUrl,
+    this.lottieAsset,
+  });
 
   // Page-to-page variation so the three pages feel connected but not
   // visually identical, using only existing KZ palette colors.
@@ -368,6 +369,17 @@ class _HeroImageCard extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final cardWidth = constraints.maxWidth.clamp(200.0, 320.0);
+          if (lottieAsset != null) {
+            // No card, shadow, or accent shape — just the animation on the
+            // plain page background.
+            return SizedBox(
+              width: cardWidth,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Lottie.asset(lottieAsset!, fit: BoxFit.contain),
+              ),
+            );
+          }
           return SizedBox(
             width: cardWidth,
             child: AspectRatio(
@@ -424,7 +436,7 @@ class _HeroImageCard extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(KZ.radiusXl),
                       child: CachedNetworkImage(
-                        imageUrl: imageUrl,
+                        imageUrl: imageUrl!,
                         fit: BoxFit.cover,
                         fadeInDuration: KZMotion.durationFor(
                           context,

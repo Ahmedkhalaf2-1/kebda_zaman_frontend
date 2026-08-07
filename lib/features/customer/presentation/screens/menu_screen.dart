@@ -6,7 +6,6 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../notifiers/menu_notifier.dart';
 import '../notifiers/cart_notifier.dart';
-import '../notifiers/auth_notifier.dart';
 import '../notifiers/favorites_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
@@ -17,6 +16,8 @@ import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
+import 'package:kebda_zaman/core/widgets/kz_lottie_add_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_lottie_heart_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
@@ -116,7 +117,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   void _ensureTabVisible(String categoryId) {
     final ctx = _tabKeys[categoryId]?.currentContext;
     if (ctx == null) return;
-    
+
     // Use Scrollable.maybeOf to get ONLY the horizontal scrollable and call ensureVisible on its position.
     // Calling the static Scrollable.ensureVisible(ctx) bubbles up and incorrectly scrolls the vertical CustomScrollView!
     final scrollable = Scrollable.maybeOf(ctx);
@@ -173,8 +174,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     final headerBox =
         _stickyHeaderKey.currentContext?.findRenderObject() as RenderBox?;
     if (headerBox == null || !headerBox.attached) return;
-    final thresholdY =
-        headerBox.localToGlobal(Offset(0, headerBox.size.height)).dy;
+    final thresholdY = headerBox
+        .localToGlobal(Offset(0, headerBox.size.height))
+        .dy;
 
     String? activeId;
     for (int i = 0; i < sections.length; i++) {
@@ -182,7 +184,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       final box =
           _sectionKeys[section.category.id]?.currentContext?.findRenderObject()
               as RenderBox?;
-              
+
       if (box == null || !box.attached) {
         // Unmounted sections are typically above the viewport when scrolling down.
         // We tentatively set them as active. If the next visible section is below
@@ -196,7 +198,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       if (topY <= thresholdY + 16) {
         activeId = section.category.id;
       } else {
-        // This section is below the threshold. If activeId is still null, 
+        // This section is below the threshold. If activeId is still null,
         // it means we are at the very top of the list, so default to this first section.
         activeId ??= section.category.id;
         break;
@@ -257,8 +259,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 SliverAppBar(
                   floating: true,
                   pinned: true,
-                  backgroundColor:
-                      MenuScreen.surfaceBg.withValues(alpha: 0.9),
+                  backgroundColor: MenuScreen.surfaceBg.withValues(alpha: 0.9),
                   elevation: 0,
                   shadowColor: Colors.black.withValues(alpha: 0.05),
                   toolbarHeight: 64,
@@ -271,47 +272,65 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                   ),
                   centerTitle: false,
                   actions: [
+                    // Cart Button (with item-count badge) — matches home
+                    // screen's top-right action exactly.
                     Consumer(
                       builder: (context, ref, child) {
-                        final authState = ref.watch(authNotifierProvider);
-                        final user = authState.user;
-                        final hasName =
-                            user != null && user.name.trim().isNotEmpty;
-                        final initial = hasName
-                            ? user.name.trim()[0].toUpperCase()
-                            : '';
+                        final cartAsync = ref.watch(cartProvider);
+                        final itemCount =
+                            cartAsync.valueOrNull?.items.fold<int>(
+                              0,
+                              (sum, i) => sum + i.quantity,
+                            ) ??
+                            0;
 
                         return Semantics(
                           button: true,
-                          label: 'nav.profile'.tr(),
+                          label: 'nav.cart'.tr(),
                           child: InkWell(
-                            onTap: () => context.go('/profile'),
+                            onTap: () => context.push('/cart'),
                             customBorder: const CircleBorder(),
                             child: Container(
                               width: KZ.iconTapTargetMin,
                               height: KZ.iconTapTargetMin,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: MenuScreen.surfaceContainerColor,
-                                border: Border.all(
-                                  color: MenuScreen.primaryColor
-                                      .withValues(alpha: 0.5),
-                                  width: 2,
-                                ),
-                              ),
-                              child: Center(
-                                child: hasName
-                                    ? Text(
-                                        initial,
-                                        style: KZ.labelLarge.copyWith(
-                                          color: MenuScreen.primaryColor,
+                              alignment: Alignment.center,
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                alignment: Alignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.shopping_cart_outlined,
+                                    color: MenuScreen.primaryColor,
+                                    size: KZ.iconAction,
+                                  ),
+                                  if (itemCount > 0)
+                                    Positioned(
+                                      top: -4,
+                                      right: -6,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: const BoxDecoration(
+                                          color: KZ.primary,
+                                          shape: BoxShape.circle,
                                         ),
-                                      )
-                                    : const Icon(
-                                        Icons.person_outline_rounded,
-                                        color: MenuScreen.primaryColor,
-                                        size: KZ.iconAction,
+                                        constraints: const BoxConstraints(
+                                          minWidth: 17,
+                                          minHeight: 17,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '$itemCount',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              height: 1.0,
+                                            ),
+                                          ),
+                                        ),
                                       ),
+                                    ),
+                                ],
                               ),
                             ),
                           ),
@@ -339,9 +358,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                   SliverToBoxAdapter(
                     child: _WeeklySpecialStrip(
                       onDismiss: () =>
-                          ref
-                              .read(menuHeroDismissedProvider.notifier)
-                              .state = true,
+                          ref.read(menuHeroDismissedProvider.notifier).state =
+                              true,
                     ),
                   ),
 
@@ -378,44 +396,38 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                       // spacing keeps the two-column grid from feeling cramped.
                       padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
                       sliver: SliverGrid(
-                        gridDelegate:
-                            SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: columnCount,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
                           mainAxisExtent: extent,
                         ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final item = section.items[index];
-                            final isFav = favorites.contains(item.id);
-                            return _MenuProductCard(
-                              item: item,
-                              isFavorite: isFav,
-                              onToggleFavorite: () async {
-                                final success = await ref
-                                    .read(customerFavoritesProvider.notifier)
-                                    .toggleFavorite(item.id);
-                                if (!success && context.mounted) {
-                                  final err = ref
-                                      .read(customerFavoritesProvider)
-                                      .errorMessage;
-                                  if (err != null) {
-                                    ScaffoldMessenger.of(
-                                      context,
-                                    ).showSnackBar(
-                                      SnackBar(
-                                        content: Text(err),
-                                        behavior: SnackBarBehavior.floating,
-                                      ),
-                                    );
-                                  }
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final item = section.items[index];
+                          final isFav = favorites.contains(item.id);
+                          return _MenuProductCard(
+                            item: item,
+                            isFavorite: isFav,
+                            onToggleFavorite: () async {
+                              final success = await ref
+                                  .read(customerFavoritesProvider.notifier)
+                                  .toggleFavorite(item.id);
+                              if (!success && context.mounted) {
+                                final err = ref
+                                    .read(customerFavoritesProvider)
+                                    .errorMessage;
+                                if (err != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(err),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
                                 }
-                              },
-                            );
-                          },
-                          childCount: section.items.length,
-                        ),
+                              }
+                            },
+                          );
+                        }, childCount: section.items.length),
                       ),
                     ),
                   ],
@@ -483,9 +495,13 @@ class _StickyMenuHeaderDelegate extends SliverPersistentHeaderDelegate {
                           size: KZ.iconControl,
                         ),
                         const SizedBox(width: 12),
-                        Text(
-                          'home.search_hint'.tr(),
-                          style: KZ.bodyLarge,
+                        Expanded(
+                          child: Text(
+                            'home.search_hint'.tr(),
+                            style: KZ.bodyLarge,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),
@@ -722,8 +738,7 @@ class _MenuProductCard extends ConsumerWidget {
                               fit: BoxFit.cover,
                               fadeInDuration: KZMotion.standard,
                               fadeInCurve: KZMotion.enterExit,
-                              placeholder: (_, __) =>
-                                  const _FoodPlaceholder(),
+                              placeholder: (_, __) => const _FoodPlaceholder(),
                               errorWidget: (_, __, ___) =>
                                   const _FoodPlaceholder(),
                             ),
@@ -790,42 +805,13 @@ class _MenuProductCard extends ConsumerWidget {
               PositionedDirectional(
                 top: 6,
                 end: 6,
-                child: Semantics(
-                  button: true,
-                  label: 'profile.my_favorites'.tr(),
-                  child: InkWell(
-                    onTap: onToggleFavorite,
-                    customBorder: const CircleBorder(),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.92),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.14),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: AnimatedScale(
-                          scale: isFavorite ? 1.15 : 1.0,
-                          duration: KZMotion.fast,
-                          curve: Curves.easeOut,
-                          child: Icon(
-                            isFavorite
-                                ? Icons.favorite_rounded
-                                : Icons.favorite_border_rounded,
-                            color: KZ.primary,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                child: KZLottieHeartButton(
+                  isFavorite: isFavorite,
+                  onTap: onToggleFavorite,
+                  semanticsLabel: 'profile.my_favorites'.tr(),
+                  size: 36,
+                  iconSize: 18,
+                  shadowOpacity: 0.14,
                 ),
               ),
 
@@ -837,26 +823,13 @@ class _MenuProductCard extends ConsumerWidget {
               PositionedDirectional(
                 top: imageH - 22,
                 end: 10,
-                child: Semantics(
-                  button: true,
-                  label: 'home.add_to_cart'.tr(),
-                  child: InkWell(
-                    onTap: () => _handleAdd(context, ref),
-                    customBorder: const CircleBorder(),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: const BoxDecoration(
-                        color: KZ.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.add_rounded,
-                        color: Colors.white,
-                        size: KZ.iconControl,
-                      ),
-                    ),
-                  ),
+                child: KZLottieAddButton(
+                  onTap: () => _handleAdd(context, ref),
+                  semanticsLabel: 'home.add_to_cart'.tr(),
+                  size: 44,
+                  backgroundColor: KZ.primary,
+                  iconColor: Colors.white,
+                  iconSize: KZ.iconControl,
                 ),
               ),
             ],

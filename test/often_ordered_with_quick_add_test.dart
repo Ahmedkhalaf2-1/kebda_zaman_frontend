@@ -29,6 +29,8 @@ class _FakeAuthRepository implements AuthRepository {
   @override
   Future<Result<void>> logout() async => const Success(null);
   @override
+  Future<Result<void>> deleteAccount() async => throw UnimplementedError();
+  @override
   Future<Result<User>> login(String email, String password) async =>
       throw UnimplementedError();
   @override
@@ -283,13 +285,19 @@ void main() {
     // "Often Ordered With" titles) and the sticky footer Add-to-Cart Row.
     // Both are swallowed so only a genuine overflow in the recommendation
     // card itself (its price+add-button Row) would fail this test.
+    //
+    // Line numbers below must track the current file — they drifted once
+    // already (177→179, 1287→1257) as unrelated edits shifted these Rows,
+    // which silently let both pre-existing, out-of-scope overflows leak
+    // through and fail this test even though the recommendation card itself
+    // was fine.
     final unexpectedOverflows = <FlutterErrorDetails>[];
     final origOnError = FlutterError.onError;
     FlutterError.onError = (details) {
       final isKnownPreExisting =
           details.exceptionAsString().contains('overflowed') &&
-          (details.toString().contains('item_details_screen.dart:177') ||
-              details.toString().contains('item_details_screen.dart:1287'));
+          (details.toString().contains('item_details_screen.dart:179') ||
+              details.toString().contains('item_details_screen.dart:1257'));
       if (details.exceptionAsString().contains('overflowed') &&
           !isKnownPreExisting) {
         unexpectedOverflows.add(details);

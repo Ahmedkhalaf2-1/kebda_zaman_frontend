@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lottie/lottie.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -138,11 +139,8 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                     ),
                     Text(
                       'app_name'.tr(),
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
+                      style: KZ.pageTitle.copyWith(
                         color: OrderTrackingScreen.primaryColor,
-                        letterSpacing: -0.5,
                       ),
                     ),
                     Container(
@@ -252,17 +250,24 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                AnimatedSwitcher(
-                  duration: KZMotion.durationFor(context, KZMotion.standard),
-                  transitionBuilder: (child, animation) =>
-                      FadeTransition(opacity: animation, child: child),
-                  child: Text(
-                    statusDescription,
-                    key: ValueKey(order.status),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: OrderTrackingScreen.primaryColor,
+                Flexible(
+                  child: AnimatedSwitcher(
+                    duration: KZMotion.durationFor(
+                      context,
+                      KZMotion.standard,
+                    ),
+                    transitionBuilder: (child, animation) =>
+                        FadeTransition(opacity: animation, child: child),
+                    child: Text(
+                      statusDescription,
+                      key: ValueKey(order.status),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: OrderTrackingScreen.primaryColor,
+                      ),
                     ),
                   ),
                 ),
@@ -687,6 +692,90 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
     );
   }
 
+  Widget _buildStepIndicator(
+    BuildContext context, {
+    required _TrackingStepData step,
+    required bool isActive,
+    required bool isCompleted,
+    required OrderStatus statusKey,
+  }) {
+    final lottieAsset = step.lottieAsset;
+    if (lottieAsset != null) {
+      // Once a step has been reached (active or already completed), its
+      // animation keeps looping rather than freezing on the first frame —
+      // only steps still ahead in the timeline are paused/dimmed.
+      final isReached = isActive || isCompleted;
+      final indicator = SizedBox(
+        width: 48,
+        height: 48,
+        child: Opacity(
+          opacity: isReached ? 1.0 : 0.4,
+          child: Lottie.asset(
+            lottieAsset,
+            animate: isReached,
+            repeat: isReached,
+            fit: BoxFit.contain,
+          ),
+        ),
+      );
+      return isActive
+          ? _ActiveStepEmphasis(statusKey: statusKey, child: indicator)
+          : indicator;
+    }
+
+    if (isActive) {
+      return _ActiveStepEmphasis(
+        statusKey: statusKey,
+        child: Container(
+          width: 48,
+          height: 48,
+          alignment: Alignment.center,
+          child: Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: OrderTrackingScreen.primaryColor,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: OrderTrackingScreen.primaryColor.withValues(
+                    alpha: 0.3,
+                  ),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(step.icon, color: Colors.white, size: 16),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: 48,
+      height: 48,
+      alignment: Alignment.center,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: isCompleted
+              ? OrderTrackingScreen.primaryColor
+              : OrderTrackingScreen.surfaceContainerHighestColor,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          step.icon,
+          color: isCompleted
+              ? Colors.white
+              : OrderTrackingScreen.secondaryColor.withValues(alpha: 0.6),
+          size: 16,
+        ),
+      ),
+    );
+  }
+
   Widget _buildVerticalTimeline(BuildContext context, Order order) {
     final isPickup = order.fulfillmentType == FulfillmentType.pickup;
 
@@ -711,30 +800,35 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
               title: 'tracking.step_received'.tr(),
               subtitleFallback: 'tracking.status_desc_pending'.tr(),
               icon: Icons.check_rounded,
+              lottieAsset: 'assets/lottie/received.json',
             ),
             _TrackingStepData(
               status: OrderStatus.confirmed,
               title: 'tracking.step_confirmed'.tr(),
               subtitleFallback: 'tracking.confirmed_msg'.tr(),
               icon: Icons.check_rounded,
+              lottieAsset: 'assets/lottie/received.json',
             ),
             _TrackingStepData(
               status: OrderStatus.preparing,
               title: 'tracking.step_preparing'.tr(),
               subtitleFallback: 'tracking.step_preparing_subtitle'.tr(),
               icon: Icons.soup_kitchen_rounded,
+              lottieAsset: 'assets/lottie/preparing_in_kitchen.json',
             ),
             _TrackingStepData(
               status: OrderStatus.readyForPickup,
               title: 'tracking.step_ready_pickup'.tr(),
               subtitleFallback: 'tracking.ready_pickup_subtitle'.tr(),
               icon: Icons.storefront_rounded,
+              lottieAsset: 'assets/lottie/ready.json',
             ),
             _TrackingStepData(
               status: OrderStatus.pickedUp,
               title: 'tracking.step_picked_up'.tr(),
               subtitleFallback: 'tracking.picked_up_subtitle'.tr(),
               icon: Icons.check_circle_rounded,
+              lottieAsset: 'assets/lottie/delivered.json',
             ),
           ]
         : [
@@ -743,30 +837,35 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
               title: 'tracking.step_received'.tr(),
               subtitleFallback: 'tracking.status_desc_pending'.tr(),
               icon: Icons.check_rounded,
+              lottieAsset: 'assets/lottie/received.json',
             ),
             _TrackingStepData(
               status: OrderStatus.confirmed,
               title: 'tracking.step_confirmed'.tr(),
               subtitleFallback: 'tracking.confirmed_msg'.tr(),
               icon: Icons.check_rounded,
+              lottieAsset: 'assets/lottie/received.json',
             ),
             _TrackingStepData(
               status: OrderStatus.preparing,
               title: 'tracking.step_preparing'.tr(),
               subtitleFallback: 'tracking.step_preparing_subtitle'.tr(),
               icon: Icons.soup_kitchen_rounded,
+              lottieAsset: 'assets/lottie/preparing_in_kitchen.json',
             ),
             _TrackingStepData(
               status: OrderStatus.outForDelivery,
               title: 'tracking.step_delivery'.tr(),
               subtitleFallback: 'tracking.status_desc_out_for_delivery'.tr(),
               icon: Icons.delivery_dining_rounded,
+              lottieAsset: 'assets/lottie/delivery_riding.json',
             ),
             _TrackingStepData(
               status: OrderStatus.delivered,
               title: 'tracking.step_delivered'.tr(),
               subtitleFallback: 'tracking.status_desc_delivered'.tr(),
               icon: Icons.home_outlined,
+              lottieAsset: 'assets/lottie/delivered.json',
             ),
           ];
 
@@ -790,57 +889,13 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
           children: [
             Column(
               children: [
-                if (isActive)
-                  _ActiveStepEmphasis(
-                    statusKey: order.status,
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      alignment: Alignment.center,
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: OrderTrackingScreen.primaryColor,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: OrderTrackingScreen.primaryColor
-                                  .withValues(alpha: 0.3),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Icon(step.icon, color: Colors.white, size: 16),
-                      ),
-                    ),
-                  )
-                else
-                  Container(
-                    width: 48,
-                    height: 48,
-                    alignment: Alignment.center,
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: isCompleted
-                            ? OrderTrackingScreen.primaryColor
-                            : OrderTrackingScreen.surfaceContainerHighestColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        step.icon,
-                        color: isCompleted
-                            ? Colors.white
-                            : OrderTrackingScreen.secondaryColor.withValues(
-                                alpha: 0.6,
-                              ),
-                        size: 16,
-                      ),
-                    ),
-                  ),
+                _buildStepIndicator(
+                  context,
+                  step: step,
+                  isActive: isActive,
+                  isCompleted: isCompleted,
+                  statusKey: order.status,
+                ),
                 if (!isLast)
                   Container(
                     width: 2,
@@ -905,12 +960,14 @@ class _TrackingStepData {
   final String title;
   final String subtitleFallback;
   final IconData icon;
+  final String? lottieAsset;
 
   _TrackingStepData({
     required this.status,
     required this.title,
     required this.subtitleFallback,
     required this.icon,
+    this.lottieAsset,
   });
 }
 

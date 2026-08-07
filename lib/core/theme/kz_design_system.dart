@@ -424,7 +424,7 @@ class KZ {
         onPressed: () => Navigator.of(context).maybePop(),
         icon: const Icon(Icons.arrow_back_rounded, color: primary, size: 26),
       ),
-      title: Text(title, style: headingStyle),
+      title: Text(title, style: pageTitle.copyWith(color: primary)),
       actions: actions,
     );
   }

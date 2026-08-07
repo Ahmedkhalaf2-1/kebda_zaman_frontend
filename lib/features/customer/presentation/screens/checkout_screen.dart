@@ -615,8 +615,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           'checkout.title'.tr(),
                           style: KZ.pageTitle.copyWith(
                             color: CheckoutScreen.primaryColor,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20,
                           ),
                         ),
                         Semantics(

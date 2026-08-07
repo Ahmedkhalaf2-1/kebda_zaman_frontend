@@ -405,6 +405,60 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     state = const AuthState(user: null, isLoggedIn: false, isLoading: false);
   }
+
+  /// Permanently deletes the signed-in customer's own account.
+  ///
+  /// Unlike [logout], this never calls the backend `/auth/logout` endpoint —
+  /// once the account is deleted/anonymized server-side, that endpoint has
+  /// nothing valid left to invalidate. Only the *local* portions of the
+  /// logout sequence are reused: device-token cleanup (while the access
+  /// token is still valid, mirroring [logout]'s ordering), best-effort
+  /// Google/Firebase sign-out, and clearing the cached session.
+  ///
+  /// Returns the repository [Result] directly (rather than folding it into
+  /// [AuthState.errorMessage] like the other methods) so the caller can
+  /// distinguish `ACTIVE_ORDER_EXISTS` / `GUEST_NOT_ELIGIBLE` /
+  /// `FIREBASE_DELETE_FAILED` and show the correct specific message —
+  /// reusing the shared error banner field here would either lose that
+  /// detail or bleed a deletion-specific message into unrelated auth UI.
+  ///
+  /// Guards against duplicate submissions the same way [googleSignIn] does:
+  /// a call that arrives while one is already in flight is a no-op.
+  Future<Result<void>> deleteAccount() async {
+    if (state.isLoading) {
+      return const Err(UnknownFailure('A request is already in progress.'));
+    }
+
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    // Device-token cleanup while the access token is still valid — same
+    // ordering logout() uses. Best-effort/non-blocking by design.
+    await DeviceService.instance.onBeforeLogout();
+
+    final result = await _authRepository.deleteAccount();
+
+    if (result.isFailure) {
+      // Preserve the session on any failure: reset isLoading only, leave
+      // user/isLoggedIn/tokens exactly as they were.
+      state = state.copyWith(isLoading: false);
+      return result;
+    }
+
+    // Success: local-only session teardown (no backend /auth/logout call —
+    // the account no longer exists to log out of).
+    try {
+      await _googleSignOut();
+    } catch (_) {}
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(isLoggedInKey);
+      await prefs.remove(userKey);
+    } catch (_) {}
+
+    state = const AuthState(user: null, isLoggedIn: false, isLoading: false);
+    return result;
+  }
 }
 
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((

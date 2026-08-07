@@ -30,6 +30,8 @@ class _FakeAuthRepository implements AuthRepository {
   @override
   Future<Result<void>> logout() async => const Success(null);
   @override
+  Future<Result<void>> deleteAccount() async => throw UnimplementedError();
+  @override
   Future<Result<User>> login(String email, String password) async =>
       Success(_testUser());
   @override

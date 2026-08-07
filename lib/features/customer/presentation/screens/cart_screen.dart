@@ -99,14 +99,42 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Flexible(
-                          child: Text(
-                            'cart.title'.tr(),
-                            style: KZ.pageTitle.copyWith(
-                              color: CartScreen.primaryColor,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Semantics(
+                                button: true,
+                                label: 'common.back'.tr(),
+                                child: InkWell(
+                                  onTap: () {
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.go('/home');
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(30),
+                                  child: const Padding(
+                                    padding: EdgeInsets.only(right: 8.0),
+                                    child: Icon(
+                                      Icons.arrow_back,
+                                      color: CartScreen.primaryColor,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                child: Text(
+                                  'cart.title'.tr(),
+                                  style: KZ.pageTitle.copyWith(
+                                    color: CartScreen.primaryColor,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         if (cartAsync.valueOrNull != null &&
@@ -152,7 +180,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       data: (cart) {
                         if (cart == null || cart.items.isEmpty) {
                           return KZEmptyState(
-                            icon: Icons.shopping_cart_outlined,
+                            lottieAsset: 'assets/lottie/shopping_loader.json',
                             title: 'cart.empty'.tr(),
                             message: 'cart.empty_sub'.tr(),
                             actionLabel: 'cart.browse_menu'.tr(),
@@ -655,31 +683,40 @@ class _CartItemCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    InkWell(
-                      onTap: onEdit,
-                      borderRadius: BorderRadius.circular(6),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 4,
-                          horizontal: 4,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.edit_rounded,
-                              size: 16,
-                              color: CartScreen.secondaryColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'common.edit'.tr(),
-                              style: KZ.labelLarge.copyWith(
+                    // Flexible so the fixed-width quantity stepper always
+                    // keeps its full tap targets — the label shrinks/ellipsizes
+                    // first on narrow cards instead of overflowing the row.
+                    Flexible(
+                      child: InkWell(
+                        onTap: onEdit,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 4,
+                            horizontal: 4,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.edit_rounded,
+                                size: 16,
                                 color: CartScreen.secondaryColor,
-                                fontWeight: FontWeight.w600,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  'common.edit'.tr(),
+                                  style: KZ.labelLarge.copyWith(
+                                    color: CartScreen.secondaryColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

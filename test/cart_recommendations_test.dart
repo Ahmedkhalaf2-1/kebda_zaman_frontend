@@ -43,6 +43,21 @@ class _FixedCartNotifier extends CartNotifier {
   Future<Cart?> build() async => data;
 }
 
+// Not pumpAndSettle: an empty cart renders KZEmptyState's repeating
+// `shopping_loader` Lottie animation, which by design never stops —
+// pumpAndSettle waits for all animations to finish and times out. A bounded
+// pump loop instead gives async provider/localization work enough frames to
+// settle without waiting on an animation that runs forever.
+Future<void> _settle(
+  WidgetTester tester, {
+  int maxSteps = 20,
+  Duration step = const Duration(milliseconds: 100),
+}) async {
+  for (var i = 0; i < maxSteps; i++) {
+    await tester.pump(step);
+  }
+}
+
 Future<void> _pump(WidgetTester tester, Cart? cart) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -57,7 +72,7 @@ Future<void> _pump(WidgetTester tester, Cart? cart) async {
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  await _settle(tester);
 }
 
 void main() {

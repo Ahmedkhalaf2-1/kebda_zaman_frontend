@@ -24,4 +24,15 @@ abstract class AuthRepository {
     String? avatarUrl,
     String? locale,
   });
+
+  /// Permanently deletes the authenticated customer's own account.
+  ///
+  /// Backend contract: `DELETE /auth/account`, no request body. Succeeds
+  /// with 204 No Content. Known failure codes: `GUEST_NOT_ELIGIBLE` (403,
+  /// guests cannot delete an account they don't own), `ACTIVE_ORDER_EXISTS`
+  /// (409, must wait for the order to complete/cancel), and
+  /// `FIREBASE_DELETE_FAILED` (503, retryable service failure). Implementors
+  /// must only clear local session state after a confirmed success — never
+  /// on failure.
+  Future<Result<void>> deleteAccount();
 }

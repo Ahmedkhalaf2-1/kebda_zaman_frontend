@@ -47,6 +47,21 @@ Cart _cart({
   grandTotal: 182 + 20 - discountTotal + taxTotal,
 );
 
+// Not pumpAndSettle: the empty-cart state renders a repeating Lottie
+// animation (KZEmptyState's `shopping_loader` asset), which by design never
+// stops — pumpAndSettle waits for all animations to finish and times out.
+// A bounded pump loop instead gives async provider/localization work enough
+// frames to settle without waiting on an animation that runs forever.
+Future<void> _settle(
+  WidgetTester tester, {
+  int maxSteps = 20,
+  Duration step = const Duration(milliseconds: 100),
+}) async {
+  for (var i = 0; i < maxSteps; i++) {
+    await tester.pump(step);
+  }
+}
+
 Future<void> _pump(WidgetTester tester, List<Override> overrides) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -134,7 +149,7 @@ void main() {
     ];
 
     await _pump(tester, overrides);
-    await tester.pumpAndSettle();
+    await _settle(tester);
 
     expect(tester.takeException(), isNull);
   });
@@ -147,7 +162,7 @@ void main() {
     ];
 
     await _pump(tester, overrides);
-    await tester.pumpAndSettle();
+    await _settle(tester);
 
     expect(tester.takeException(), isNull);
   });
@@ -165,9 +180,12 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('expanding the promo code field renders without exceptions', (
-    tester,
-  ) async {
+  // The promo code field no longer has a collapsed/expand-on-tap state (see
+  // cart_screen.dart's _buildPromoSection — it's an unconditional TextField
+  // whenever no promo is applied; the old `Icons.sell_rounded` expand
+  // trigger this test used to tap was removed in an earlier UI change).
+  // This just confirms the field renders without exceptions.
+  testWidgets('promo code field renders without exceptions', (tester) async {
     await setViewport(tester, const Size(375, 812));
 
     final overrides = [
@@ -175,12 +193,6 @@ void main() {
     ];
 
     await _pump(tester, overrides);
-    await tester.pumpAndSettle();
-
-    // Tap by icon, not text — translation keys don't resolve reliably in
-    // this test harness (a pre-existing, investigated limitation; see
-    // home_screen_regression_test.dart), so assert on structure instead.
-    await tester.tap(find.byIcon(Icons.sell_rounded));
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);

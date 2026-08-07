@@ -83,6 +83,8 @@ class _FakeAuthRepository implements AuthRepository {
   @override
   Future<Result<void>> logout() async => const Success(null);
   @override
+  Future<Result<void>> deleteAccount() async => throw UnimplementedError();
+  @override
   Future<Result<User?>> getCurrentUser() async => Success(user);
   @override
   Future<Result<User>> updateProfile({
@@ -421,7 +423,13 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Ahmed'), findsOneWidget); // first-name greeting
-      expect(find.textContaining('Heliopolis'), findsOneWidget);
+      // _AppBarAddressSelector's subtitle intentionally shows only the
+      // address label (falling back to street) — the " • {area}" suffix
+      // was deliberately dropped from the compact selector (see
+      // home_screen.dart's _AppBarAddressSelector; area is no longer
+      // referenced there at all), so "Heliopolis" (area) is correctly never
+      // shown here — asserting on the label it does render instead.
+      expect(find.text('Home'), findsOneWidget);
     },
   );
 }

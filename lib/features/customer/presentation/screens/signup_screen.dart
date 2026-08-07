@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,12 +25,24 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   bool _obscurePassword = true;
   bool _agreeTerms = true;
 
+  // Recognizers for the tappable "Terms of Service" / "Privacy Policy"
+  // spans inside the agreement RichText below. Created once per widget
+  // lifetime (not per build) and explicitly disposed — a TapGestureRecognizer
+  // left undisposed leaks, and recreating one on every build would drop
+  // in-flight gesture state.
+  late final TapGestureRecognizer _termsRecognizer = TapGestureRecognizer()
+    ..onTap = () => context.push('/legal/terms');
+  late final TapGestureRecognizer _privacyRecognizer = TapGestureRecognizer()
+    ..onTap = () => context.push('/legal/privacy');
+
   @override
   void dispose() {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _passwordCtrl.dispose();
+    _termsRecognizer.dispose();
+    _privacyRecognizer.dispose();
     super.dispose();
   }
 
@@ -421,6 +434,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                               color: KZ.primary,
                                               fontWeight: FontWeight.w600,
                                             ),
+                                            recognizer: _termsRecognizer,
                                           ),
                                           TextSpan(text: 'auth.and'.tr()),
                                           TextSpan(
@@ -429,6 +443,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                               color: KZ.primary,
                                               fontWeight: FontWeight.w600,
                                             ),
+                                            recognizer: _privacyRecognizer,
                                           ),
                                         ],
                                       ),

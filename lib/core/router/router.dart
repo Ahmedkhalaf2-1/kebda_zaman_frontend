@@ -22,6 +22,8 @@ import '../../features/customer/presentation/screens/splash_screen.dart';
 import '../../features/customer/presentation/screens/language_select_screen.dart';
 import '../../features/customer/presentation/screens/onboarding_screen.dart';
 import '../../features/customer/presentation/screens/auth_choice_screen.dart';
+import '../../features/customer/presentation/screens/privacy_policy_screen.dart';
+import '../../features/customer/presentation/screens/terms_of_service_screen.dart';
 import '../../features/customer/presentation/shells/customer_shell.dart';
 import '../../features/admin/presentation/shells/admin_shell.dart';
 import '../../features/admin/presentation/screens/dashboard_screen.dart';
@@ -123,14 +125,6 @@ GoRouter router(Ref ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/cart',
-                builder: (context, state) => const CartScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
                 path: '/orders',
                 builder: (context, state) => const OrdersScreen(),
                 routes: [
@@ -194,6 +188,21 @@ GoRouter router(Ref ref) {
         path: '/search',
         pageBuilder: (context, state) =>
             kzFadeSlidePage(state: state, child: const SearchScreen()),
+      ),
+      GoRoute(
+        path: '/legal/privacy',
+        pageBuilder: (context, state) =>
+            kzFadeSlidePage(state: state, child: const PrivacyPolicyScreen()),
+      ),
+      GoRoute(
+        path: '/legal/terms',
+        pageBuilder: (context, state) =>
+            kzFadeSlidePage(state: state, child: const TermsOfServiceScreen()),
+      ),
+      GoRoute(
+        path: '/cart',
+        pageBuilder: (context, state) =>
+            kzFadeSlidePage(state: state, child: const CartScreen()),
       ),
       GoRoute(
         path: '/item/:id',

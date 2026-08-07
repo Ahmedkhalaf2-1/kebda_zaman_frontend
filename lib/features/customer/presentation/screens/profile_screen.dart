@@ -7,13 +7,18 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/loyalty_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/cart_notifier.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/favorites_notifier.dart';
+import 'package:kebda_zaman/features/customer/presentation/widgets/delete_account_dialog.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 
-final localAvatarProvider = StateNotifierProvider<LocalAvatarNotifier, String?>((ref) {
-  return LocalAvatarNotifier();
-});
+final localAvatarProvider = StateNotifierProvider<LocalAvatarNotifier, String?>(
+  (ref) {
+    return LocalAvatarNotifier();
+  },
+);
 
 class LocalAvatarNotifier extends StateNotifier<String?> {
   LocalAvatarNotifier() : super(null) {
@@ -92,7 +97,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => ref.read(localAvatarProvider.notifier).pickImage(),
+                      onTap: () =>
+                          ref.read(localAvatarProvider.notifier).pickImage(),
                       child: Container(
                         width: 40,
                         height: 40,
@@ -103,7 +109,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: localAvatarPath != null
-                            ? Image.file(File(localAvatarPath), fit: BoxFit.cover)
+                            ? Image.file(
+                                File(localAvatarPath),
+                                fit: BoxFit.cover,
+                              )
                             : const Icon(
                                 Icons.person_rounded,
                                 color: KZ.primary,
@@ -131,7 +140,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             children: [
                               // 96x96 Avatar circle with primary border
                               GestureDetector(
-                                onTap: () => ref.read(localAvatarProvider.notifier).pickImage(),
+                                onTap: () => ref
+                                    .read(localAvatarProvider.notifier)
+                                    .pickImage(),
                                 child: Container(
                                   width: 96,
                                   height: 96,
@@ -151,11 +162,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       color: Color(0xFFE2E8F0), // slate-200
                                     ),
                                     child: localAvatarPath != null
-                                        ? Image.file(File(localAvatarPath), fit: BoxFit.cover)
+                                        ? Image.file(
+                                            File(localAvatarPath),
+                                            fit: BoxFit.cover,
+                                          )
                                         : const Icon(
                                             Icons.person_rounded,
                                             size: 56,
-                                            color: Color(0xFF94A3B8), // slate-400
+                                            color: Color(
+                                              0xFF94A3B8,
+                                            ), // slate-400
                                           ),
                                   ),
                                 ),
@@ -315,8 +331,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                           _buildDivider(),
 
+                          // Privacy Policy
+                          _buildSettingRow(
+                            icon: Icons.privacy_tip_outlined,
+                            title: 'settings.privacy'.tr(),
+                            onTap: () => context.push('/legal/privacy'),
+                          ),
+                          _buildDivider(),
+
+                          // Terms of Service
+                          _buildSettingRow(
+                            icon: Icons.info_outline_rounded,
+                            title: 'settings.terms'.tr(),
+                            onTap: () => context.push('/legal/terms'),
+                          ),
+                          _buildDivider(),
+
                           // Logout Row (red tinted)
                           _buildLogoutRow(context),
+
+                          // Delete Account — a real, persistent account only.
+                          // Guests don't own a persistent account to delete,
+                          // so this never renders for them.
+                          if (authState.isLoggedIn &&
+                              user != null &&
+                              !user.isGuest) ...[
+                            _buildDivider(),
+                            _buildDeleteAccountRow(context),
+                          ],
                         ],
                       ),
                     ),
@@ -953,6 +995,72 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildDeleteAccountRow(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _handleDeleteAccount(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEE2E2), // red-50 tint
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.delete_forever_rounded,
+                  color: KZ.error,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Flexible(
+                child: Text(
+                  'delete_account.tile_title'.tr(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: KZ.error,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleDeleteAccount(BuildContext context) async {
+    final deleted = await showDeleteAccountDialog(context);
+    if (!deleted || !context.mounted) return;
+
+    // Success cleanup: AuthNotifier.deleteAccount already cleared tokens,
+    // stored session and auth state — this invalidates the remaining
+    // user-scoped Riverpod state so nothing stale survives into the next
+    // (unauthenticated) session, mirroring what navigating away from an
+    // authenticated screen after logout already achieves for autodispose
+    // providers.
+    ref.invalidate(cartProvider);
+    ref.invalidate(customerFavoritesProvider);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('delete_account.success'.tr()),
+        backgroundColor: KZ.primary,
+      ),
+    );
+    // go() (not push()) replaces the whole stack, matching the existing
+    // logout row — the back button cannot return to authenticated Profile.
+    context.go('/login');
   }
 
   void _showEditProfileDialog(BuildContext context, user) {

@@ -15,6 +15,8 @@ import '../notifiers/favorites_notifier.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
+import 'package:kebda_zaman/core/widgets/kz_lottie_add_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_lottie_heart_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import 'package:kebda_zaman/core/widgets/kz_quantity_stepper.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
@@ -951,62 +953,30 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                           ),
                         ),
                       ),
-                      Semantics(
-                        button: true,
-                        label: 'profile.my_favorites'.tr(),
-                        child: InkWell(
-                          onTap: () async {
-                            final success = await ref
-                                .read(customerFavoritesProvider.notifier)
-                                .toggleFavorite(widget.itemId);
-                            if (!success && context.mounted) {
-                              final err = ref
-                                  .read(customerFavoritesProvider)
-                                  .errorMessage;
-                              if (err != null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(err),
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                              }
+                      KZLottieHeartButton(
+                        isFavorite: isFav,
+                        semanticsLabel: 'profile.my_favorites'.tr(),
+                        size: KZ.iconTapTargetMin,
+                        iconSize: KZ.iconControl,
+                        shadowOpacity: 0.15,
+                        onTap: () async {
+                          final success = await ref
+                              .read(customerFavoritesProvider.notifier)
+                              .toggleFavorite(widget.itemId);
+                          if (!success && context.mounted) {
+                            final err = ref
+                                .read(customerFavoritesProvider)
+                                .errorMessage;
+                            if (err != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(err),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
                             }
-                          },
-                          customBorder: const CircleBorder(),
-                          child: Container(
-                            width: KZ.iconTapTargetMin,
-                            height: KZ.iconTapTargetMin,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.9),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.15),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: AnimatedScale(
-                                scale: isFav ? 1.1 : 1.0,
-                                duration: KZMotion.durationFor(
-                                  context,
-                                  KZMotion.fast,
-                                ),
-                                curve: KZMotion.press,
-                                child: Icon(
-                                  isFav
-                                      ? Icons.favorite_rounded
-                                      : Icons.favorite_border_rounded,
-                                  color: ItemDetailsScreen.primaryColor,
-                                  size: KZ.iconControl,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -1390,26 +1360,13 @@ class _OftenOrderedWithCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Semantics(
-                  button: true,
-                  label: 'home.add_to_cart'.tr(),
-                  child: InkWell(
-                    onTap: onAdd,
-                    customBorder: const CircleBorder(),
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        color: KZ.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.add_rounded,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                  ),
+                KZLottieAddButton(
+                  onTap: onAdd,
+                  semanticsLabel: 'home.add_to_cart'.tr(),
+                  size: 24,
+                  backgroundColor: KZ.primary,
+                  iconColor: Colors.white,
+                  iconSize: 16,
                 ),
               ],
             ),
