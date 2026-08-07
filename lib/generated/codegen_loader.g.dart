@@ -838,7 +838,7 @@ class CodegenLoader extends AssetLoader{
     "privacy_section_updates_title": "تغييرات على هذه السياسة",
     "privacy_section_updates_body": "قد نقوم بتحديث سياسة الخصوصية هذه مع تطور ميزات التطبيق. يعكس تاريخ \"آخر تحديث\" أعلى هذه الصفحة أحدث مراجعة. استمرارك في استخدام التطبيق بعد أي تحديث يعني موافقتك على السياسة المُحدّثة.",
     "privacy_section_contact_title": "تواصل معنا",
-    "privacy_section_contact_body": "لم يتم نشر وسيلة تواصل رسمية مؤكدة لأسئلة الخصوصية لهذا التطبيق بعد. سيتم تحديث هذا القسم ببيانات تواصل موثّقة فور تأكيدها من قبل الجهة المالكة للتطبيق.",
+    "privacy_section_contact_body": "لأي استفسارات متعلقة بالخصوصية أو طلبات حذف الحساب أو بياناتك الشخصية، يمكنك التواصل معنا عبر bodymoka8@gmail.com.",
     "terms_title": "شروط الاستخدام",
     "terms_intro": "تحكم شروط الاستخدام هذه استخدامك لتطبيق كبدة زمان. هذه مسودة معتمدة من صاحب التطبيق تعكس ميزات التطبيق الحالية، وليست بديلاً عن استشارة قانونية رسمية.",
     "terms_section_account_title": "مسؤوليات الحساب",
@@ -866,7 +866,7 @@ class CodegenLoader extends AssetLoader{
     "terms_section_changes_title": "تغييرات على الخدمة وهذه الشروط",
     "terms_section_changes_body": "قد نقوم بتحديث ميزات التطبيق وهذه الشروط بمرور الوقت. يعكس تاريخ \"آخر تحديث\" أعلى هذه الصفحة أحدث مراجعة. استمرارك في استخدام التطبيق بعد أي تحديث يعني موافقتك على الشروط المُحدّثة.",
     "terms_section_contact_title": "تواصل معنا",
-    "terms_section_contact_body": "لم يتم نشر وسيلة تواصل رسمية مؤكدة لهذا التطبيق بعد. سيتم تحديث هذا القسم ببيانات تواصل موثّقة فور تأكيدها من قبل الجهة المالكة للتطبيق."
+    "terms_section_contact_body": "لأي استفسارات حول شروط الاستخدام أو خدمة كبدة زمان، يمكنك التواصل معنا عبر bodymoka8@gmail.com."
   },
   "delete_account": {
     "tile_title": "حذف الحساب",
@@ -1732,7 +1732,7 @@ static const Map<String,dynamic> _en = {
     "privacy_section_updates_title": "Changes to This Policy",
     "privacy_section_updates_body": "We may update this Privacy Policy as the app's features change. The \"Last updated\" date at the top of this page reflects the most recent revision. Continued use of the app after an update means you accept the revised policy.",
     "privacy_section_contact_title": "Contact Us",
-    "privacy_section_contact_body": "A confirmed public support contact method for privacy questions has not yet been published for this app. This section will be updated with a verified contact address once one is confirmed by the business.",
+    "privacy_section_contact_body": "For privacy questions, account deletion requests, or questions about your personal data, contact us at bodymoka8@gmail.com.",
     "terms_title": "Terms of Service",
     "terms_intro": "These Terms of Service govern your use of the Kebda Zaman app. This is a working draft reviewed by the app owner, reflecting the app's current features; it is not a substitute for formal legal advice.",
     "terms_section_account_title": "Account Responsibilities",
@@ -1760,7 +1760,7 @@ static const Map<String,dynamic> _en = {
     "terms_section_changes_title": "Changes to the Service and These Terms",
     "terms_section_changes_body": "We may update the app's features and these Terms over time. The \"Last updated\" date at the top of this page reflects the most recent revision. Continued use of the app after an update means you accept the revised Terms.",
     "terms_section_contact_title": "Contact Us",
-    "terms_section_contact_body": "A confirmed public support contact method has not yet been published for this app. This section will be updated with a verified contact address once one is confirmed by the business."
+    "terms_section_contact_body": "For questions about these Terms or the Kebda Zaman service, contact us at bodymoka8@gmail.com."
   },
   "delete_account": {
     "tile_title": "Delete Account",

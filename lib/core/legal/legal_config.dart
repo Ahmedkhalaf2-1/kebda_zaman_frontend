@@ -12,12 +12,10 @@ class LegalConfig {
   /// screen reads the same value, so there is exactly one place to edit.
   static final DateTime lastUpdated = DateTime(2026, 8, 7);
 
-  /// No confirmed public business support email has been provided by the
-  /// business owner yet. This stays `null` — never replaced with an invented
-  /// address — until product/ops confirms real contact details, at which
-  /// point this constant becomes the one place that needs updating for both
-  /// legal documents to pick it up.
-  static const String? businessContactEmail = null;
+  /// Confirmed public business support email, used by both legal documents'
+  /// contact sections. This is the single place to update if it ever
+  /// changes.
+  static const String businessContactEmail = 'bodymoka8@gmail.com';
 
   /// Same as [businessContactEmail]: unresolved until confirmed by the
   /// business owner. No phone number should ever be invented for display.
