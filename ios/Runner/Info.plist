@@ -25,11 +25,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Allow Kebda Zaman to take a profile or menu photo.</string>
+	<string>Allow Kebda Zaman to use your camera to take a profile photo.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Allow Kebda Zaman to use your location to select an accurate delivery address.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow Kebda Zaman to choose a profile or menu photo from your library.</string>
+	<string>Allow Kebda Zaman to access your photo library to choose a profile photo.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -54,6 +54,17 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.168591231387-7su05cc20ro9ui0ig7c784a15cv5220k</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>168591231387-7su05cc20ro9ui0ig7c784a15cv5220k.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.168591231387-7su05cc20ro9ui0ig7c784a15cv5220k</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>168591231387-vm7jpemmmtg9tpgumijisqkr932ve4go.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDxFTS2dJy5HX3lpnpRQQ6NXwvY2KnedGw</string>
+	<key>GCM_SENDER_ID</key>
+	<string>168591231387</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.kebdtzaman.app</string>
+	<key>PROJECT_ID</key>
+	<string>keebda-zaman</string>
+	<key>STORAGE_BUCKET</key>
+	<string>keebda-zaman.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:168591231387:ios:ceb4fe71d1511a7542793e</string>
+</dict>
+</plist>

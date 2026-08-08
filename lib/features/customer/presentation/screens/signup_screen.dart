@@ -581,9 +581,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
                       const SizedBox(height: 40),
 
-                      // Footer Navigation
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      // Footer Navigation — Wrap (not Row) so this gracefully
+                      // wraps onto a second line on narrow screens instead of
+                      // overflowing horizontally when the translated string
+                      // is longer than the available width.
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6,
                         children: [
                           Text(
                             'auth.already_account'.tr(),
@@ -592,7 +597,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               fontSize: 14,
                             ),
                           ),
-                          const SizedBox(width: 6),
                           GestureDetector(
                             onTap: () {
                               if (Navigator.canPop(context)) {
