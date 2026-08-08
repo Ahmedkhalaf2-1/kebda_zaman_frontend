@@ -104,6 +104,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     }
   }
 
+  void _handleAppleSignIn() async {
+    final success = await ref
+        .read(authNotifierProvider.notifier)
+        .appleSignIn();
+
+    if (success && mounted) {
+      context.go('/home');
+    }
+  }
+
   InputDecoration _buildInputDecoration({
     required String hint,
     required IconData prefixIcon,
@@ -162,7 +172,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   Widget _buildSocialButton({
     required String label,
     required Widget icon,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
+    bool isLoading = false,
   }) {
     return Expanded(
       child: Container(
@@ -175,12 +186,22 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: onTap,
+            onTap: isLoading ? null : onTap,
             borderRadius: BorderRadius.circular(12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                icon,
+                if (isLoading)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.2,
+                      color: KZ.onSurface,
+                    ),
+                  )
+                else
+                  icon,
                 const SizedBox(width: 10),
                 Text(
                   label,
@@ -552,7 +573,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               size: 24,
                               color: KZ.onSurface,
                             ),
-                            onTap: () {},
+                            isLoading: authState.isLoading,
+                            onTap: _handleAppleSignIn,
                           ),
                         ],
                       ),

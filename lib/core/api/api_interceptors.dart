@@ -55,6 +55,7 @@ class AuthInterceptor extends Interceptor {
         '/auth/signup',
         '/auth/guest',
         '/auth/google',
+        '/auth/apple',
         '/admin/auth/login',
         '/auth/admin/login',
         '/auth/refresh',
@@ -112,6 +113,7 @@ class RetryInterceptor extends Interceptor {
     '/auth/signup',
     '/auth/guest',
     '/auth/google',
+    '/auth/apple',
     '/admin/auth/login',
     '/auth/admin/login',
   };

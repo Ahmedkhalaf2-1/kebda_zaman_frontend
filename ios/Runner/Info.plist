@@ -24,6 +24,12 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow Kebda Zaman to take a profile or menu photo.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Allow Kebda Zaman to use your location to select an accurate delivery address.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow Kebda Zaman to choose a profile or menu photo from your library.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

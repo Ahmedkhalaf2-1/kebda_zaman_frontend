@@ -36,3 +36,10 @@ abstract class AuthRepository {
   /// on failure.
   Future<Result<void>> deleteAccount();
 }
+
+/// Optional capability kept separate from [AuthRepository] so existing fake
+/// repositories and tests do not need an Apple implementation. Production's
+/// API repository implements both interfaces.
+abstract interface class AppleAuthRepository {
+  Future<Result<User>> appleLogin(String firebaseIdToken);
+}

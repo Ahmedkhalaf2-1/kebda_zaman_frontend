@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/features/shared/domain/models/user.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/auth_repository.dart';
 import 'package:kebda_zaman/features/shared/data/google_auth_service.dart';
+import 'package:kebda_zaman/features/shared/data/apple_auth_service.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/notifications/device_service.dart';
 import 'package:kebda_zaman/core/api/api_exceptions.dart';
@@ -53,13 +54,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// injection pattern as [_googleSignIn] — a plain function so tests never
   /// touch real platform channels.
   final Future<void> Function() _googleSignOut;
+  final Future<String?> Function() _appleSignIn;
 
   AuthNotifier(
     this._authRepository, {
     Future<String?> Function()? googleSignIn,
     Future<void> Function()? googleSignOut,
+    Future<String?> Function()? appleSignIn,
   }) : _googleSignIn = googleSignIn ?? _lazyGoogleSignIn,
        _googleSignOut = googleSignOut ?? _lazyGoogleSignOut,
+       _appleSignIn = appleSignIn ?? _lazyAppleSignIn,
        super(const AuthState(isLoading: true)) {
     _loadCachedUserForDisplay();
   }
@@ -71,6 +75,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   // construction to actual invocation keeps the untouched default lazy.
   static Future<String?> _lazyGoogleSignIn() => GoogleAuthService().signIn();
   static Future<void> _lazyGoogleSignOut() => GoogleAuthService().signOut();
+  static Future<String?> _lazyAppleSignIn() => AppleAuthService().signIn();
 
   /// Loads the cached user (if any) purely for presentation — e.g. so the
   /// UI can show a name while SessionBootstrapNotifier's cold-start token
@@ -259,6 +264,58 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       return false;
     }
+  }
+
+  Future<bool> appleSignIn() async {
+    if (state.isLoading) return false;
+
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    String? idToken;
+    try {
+      idToken = await _appleSignIn();
+    } catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'auth.apple_signin_failed'.tr(),
+      );
+      return false;
+    }
+
+    if (idToken == null) {
+      state = state.copyWith(isLoading: false);
+      return false;
+    }
+
+    final repository = _authRepository;
+    if (repository is! AppleAuthRepository) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'auth.apple_signin_failed'.tr(),
+      );
+      return false;
+    }
+
+    final appleRepository = repository as AppleAuthRepository;
+    final result = await appleRepository.appleLogin(idToken);
+    if (result.isSuccess) {
+      final user = result.value;
+      await _saveUserSession(user);
+      state = AuthState(user: user, isLoggedIn: true, isLoading: false);
+      DeviceService.instance.onSessionEstablished();
+      return true;
+    }
+
+    final cause = result.failure.cause;
+    state = state.copyWith(
+      isLoading: false,
+      errorMessage: cause is ApiException && cause.code == 'INVALID_APPLE_TOKEN'
+          ? 'auth.apple_token_invalid'.tr()
+          : result.failure is NetworkFailure
+          ? 'common.something_wrong'.tr()
+          : 'auth.apple_signin_failed'.tr(),
+    );
+    return false;
   }
 
   /// Backend `INVALID_GOOGLE_TOKEN` maps to a friendly localized message;

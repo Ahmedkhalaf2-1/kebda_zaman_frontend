@@ -628,6 +628,8 @@ abstract class  LocaleKeys {
   static const auth_continue_with_google = 'auth.continue_with_google';
   static const auth_google_signin_failed = 'auth.google_signin_failed';
   static const auth_google_token_invalid = 'auth.google_token_invalid';
+  static const auth_apple_signin_failed = 'auth.apple_signin_failed';
+  static const auth_apple_token_invalid = 'auth.apple_token_invalid';
   static const auth_apple = 'auth.apple';
   static const auth_no_account = 'auth.no_account';
   static const auth_already_account = 'auth.already_account';

@@ -7,7 +7,7 @@ import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/shared/domain/models/user.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/auth_repository.dart';
 
-class ApiAuthRepository implements AuthRepository {
+class ApiAuthRepository implements AuthRepository, AppleAuthRepository {
   final ApiClient apiClient;
   final FlutterSecureStorage secureStorage;
   final TokenStorage tokenStorage;
@@ -107,6 +107,19 @@ class ApiAuthRepository implements AuthRepository {
         '/auth/google',
         // Only the verified Firebase ID token is sent — the backend derives
         // every identity value (email, name, uid) from it server-side.
+        data: {'firebaseIdToken': firebaseIdToken},
+      );
+      return await _handleAuthResult(response);
+    } catch (e) {
+      return Err(_handleError(e));
+    }
+  }
+
+  @override
+  Future<Result<User>> appleLogin(String firebaseIdToken) async {
+    try {
+      final response = await apiClient.dio.post(
+        '/auth/apple',
         data: {'firebaseIdToken': firebaseIdToken},
       );
       return await _handleAuthResult(response);
