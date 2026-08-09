@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/notifications/notification_model.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
@@ -15,6 +16,9 @@ final adminCampaignsProvider = FutureProvider<List<NotificationCampaign>>((
   final res = await repo.getCampaigns();
   return res.fold((l) => throw l, (r) => r);
 });
+
+const double _kDesktopBreakpoint = 900;
+const double _kMaxContentWidth = 1280;
 
 class AdminNotificationsScreen extends ConsumerStatefulWidget {
   const AdminNotificationsScreen({super.key});
@@ -166,12 +170,18 @@ class _AdminNotificationsScreenState
     final campaignsAsync = ref.watch(adminCampaignsProvider);
 
     return Scaffold(
-      backgroundColor: KZ.surface,
+      backgroundColor: KZ.surfaceContainerLow,
       appBar: AppBar(
-        title: Text('admin_notifications.title'.tr()),
+        backgroundColor: KZ.surface,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: Text(
+          'admin_notifications.title'.tr(),
+          style: KZ.pageTitle.copyWith(fontSize: 19),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(Icons.refresh_rounded, color: KZ.onSurfaceVariant),
             tooltip: 'home.retry'.tr(),
             onPressed: () => ref.invalidate(adminCampaignsProvider),
           ),
@@ -179,298 +189,263 @@ class _AdminNotificationsScreenState
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(KZ.screenPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Section 1: Composer & Live Preview (2-Column Responsive Layout) ──
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isDesktop = constraints.maxWidth > 900;
-                return isDesktop
-                    ? Row(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _kMaxContentWidth),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isDesktop = constraints.maxWidth > _kDesktopBreakpoint;
+                    if (isDesktop) {
+                      return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(flex: 3, child: _buildComposerCard()),
-                          const SizedBox(width: KZ.sp24),
+                          Expanded(
+                            flex: 3,
+                            child: _buildForm(includeInlinePreview: false),
+                          ),
+                          const SizedBox(width: KZ.sp32),
                           Expanded(flex: 2, child: _buildLivePreviewCard()),
                         ],
-                      )
-                    : Column(
-                        children: [
-                          _buildComposerCard(),
-                          const SizedBox(height: KZ.sp24),
-                          _buildLivePreviewCard(),
-                        ],
                       );
-              },
+                    }
+                    return _buildForm(includeInlinePreview: true);
+                  },
+                ),
+                const SizedBox(height: KZ.sp32),
+                _buildCampaignHistorySection(campaignsAsync),
+                const SizedBox(height: KZ.sp24),
+              ],
             ),
-
-            const SizedBox(height: KZ.sp32),
-
-            // ── Section 2: Campaign History Table ──
-            _buildCampaignHistorySection(campaignsAsync),
-
-            const SizedBox(height: KZ.sp32),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildComposerCard() {
-    return Container(
-      padding: const EdgeInsets.all(KZ.sp20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(KZ.radiusLg),
-        border: Border.all(color: KZ.outlineVariant.withOpacity(0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+  /// The whole composer, top-to-bottom as one deliberate flow: Campaign
+  /// Details -> Content -> Audience -> Destination -> Schedule -> Review &
+  /// Send. Sections are separated by spacing and a small heading, not by
+  /// wrapping each one in its own card — only the phone-notification preview
+  /// (a genuinely distinct visual object) keeps a card treatment.
+  Widget _buildForm({required bool includeInlinePreview}) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionHeader(title: 'admin_notifications.section_campaign_details'.tr()),
+          const SizedBox(height: KZ.sp12),
+          TextFormField(
+            controller: _campaignNameCtrl,
+            decoration: KZ.inputDecoration(
+              label: 'admin_notifications.campaign_name'.tr(),
+              prefixIcon: const Icon(
+                Icons.campaign_outlined,
+                color: KZ.onSurfaceVariant,
+              ),
+            ),
+            validator: (v) => v == null || v.isEmpty
+                ? 'admin_notifications.campaign_name_required'.tr()
+                : null,
           ),
-        ],
-      ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          const SizedBox(height: KZ.sp14),
+          DropdownButtonFormField<NotificationType>(
+            value: _selectedType,
+            isExpanded: true,
+            decoration: KZ.inputDecoration(
+              label: 'admin_notifications.notification_type'.tr(),
+              prefixIcon: const Icon(
+                Icons.category_outlined,
+                color: KZ.onSurfaceVariant,
+              ),
+            ),
+            items: NotificationType.values
+                .where((t) => t != NotificationType.unknown)
+                .map(
+                  (t) => DropdownMenuItem(
+                    value: t,
+                    child: Text(
+                      t.toPayloadString().toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                )
+                .toList(),
+            onChanged: (val) {
+              if (val != null) {
+                setState(() {
+                  _selectedType = val;
+                  _selectedDestination = _destinationOptions.first;
+                });
+              }
+            },
+          ),
+
+          const SizedBox(height: KZ.sp28),
+          _SectionHeader(title: 'admin_notifications.section_content'.tr()),
+          const SizedBox(height: KZ.sp12),
+          TextFormField(
+            controller: _titleCtrl,
+            onChanged: (_) => setState(() {}),
+            decoration: KZ.inputDecoration(
+              label: 'admin_notifications.notification_title'.tr(),
+              prefixIcon: const Icon(
+                Icons.title_rounded,
+                color: KZ.onSurfaceVariant,
+              ),
+            ),
+            validator: (v) => v == null || v.isEmpty
+                ? 'admin_notifications.notification_title_required'.tr()
+                : null,
+          ),
+          const SizedBox(height: KZ.sp14),
+          TextFormField(
+            controller: _bodyCtrl,
+            maxLines: 3,
+            onChanged: (_) => setState(() {}),
+            decoration: KZ.inputDecoration(
+              label: 'admin_notifications.notification_body'.tr(),
+              prefixIcon: const Icon(
+                Icons.notes_rounded,
+                color: KZ.onSurfaceVariant,
+              ),
+            ),
+            validator: (v) => v == null || v.isEmpty
+                ? 'admin_notifications.notification_body_required'.tr()
+                : null,
+          ),
+          const SizedBox(height: KZ.sp14),
+          TextFormField(
+            controller: _imageUrlCtrl,
+            onChanged: (_) => setState(() {}),
+            decoration: KZ.inputDecoration(
+              label: 'admin_notifications.optional_image_url'.tr(),
+              prefixIcon: const Icon(
+                Icons.image_outlined,
+                color: KZ.onSurfaceVariant,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: KZ.sp28),
+          _SectionHeader(
+            title: 'admin_notifications.section_audience'.tr(),
+            subtitle: 'admin_notifications.section_audience_sub'.tr(),
+          ),
+          const SizedBox(height: KZ.sp12),
+          _AudienceSelector(
+            options: _targetAudiences,
+            selected: _selectedAudience,
+            labelOf: _audienceLabel,
+            onChanged: (val) => setState(() => _selectedAudience = val),
+          ),
+
+          const SizedBox(height: KZ.sp28),
+          _SectionHeader(title: 'admin_notifications.section_destination'.tr()),
+          const SizedBox(height: KZ.sp12),
+          DropdownButtonFormField<String>(
+            value: _destinationOptions.contains(_selectedDestination)
+                ? _selectedDestination
+                : _destinationOptions.first,
+            isExpanded: true,
+            decoration: KZ.inputDecoration(
+              label: 'admin_notifications.destination_link'.tr(),
+              prefixIcon: const Icon(
+                Icons.link_rounded,
+                color: KZ.onSurfaceVariant,
+              ),
+            ),
+            items: _destinationOptions
+                .map(
+                  (opt) => DropdownMenuItem(
+                    value: opt,
+                    child: Text(
+                      opt,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                )
+                .toList(),
+            onChanged: (val) {
+              if (val != null) {
+                setState(() => _selectedDestination = val);
+              }
+            },
+          ),
+
+          const SizedBox(height: KZ.sp28),
+          _SectionHeader(title: 'admin_notifications.section_schedule'.tr()),
+          const SizedBox(height: KZ.sp12),
+          KZ.toggleRow(
+            label: 'admin_notifications.schedule_for_later'.tr(),
+            value: _isScheduled,
+            onChanged: (v) => setState(() => _isScheduled = v),
+          ),
+          if (_isScheduled) ...[
+            const SizedBox(height: KZ.sp12),
             Row(
               children: [
-                const Icon(
-                  Icons.send_rounded,
-                  color: KZ.primary,
-                  size: KZ.iconAction,
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.calendar_today_rounded, size: 18),
+                    label: Text(_scheduledDate.toString().split(' ')[0]),
+                    onPressed: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _scheduledDate,
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (picked != null) {
+                        setState(() => _scheduledDate = picked);
+                      }
+                    },
+                  ),
                 ),
                 const SizedBox(width: KZ.sp8),
-                Text(
-                  'admin_notifications.compose_title'.tr(),
-                  style: KZ.sectionTitle,
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.access_time_rounded, size: 18),
+                    label: Text(_scheduledTime.format(context)),
+                    onPressed: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: _scheduledTime,
+                      );
+                      if (picked != null) {
+                        setState(() => _scheduledTime = picked);
+                      }
+                    },
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: KZ.sp16),
-            KZ.divider,
-            const SizedBox(height: KZ.sp16),
-
-            // Campaign Internal Name
-            TextFormField(
-              controller: _campaignNameCtrl,
-              decoration: KZ.inputDecoration(
-                label: 'admin_notifications.campaign_name'.tr(),
-                prefixIcon: const Icon(
-                  Icons.campaign_outlined,
-                  color: KZ.primary,
-                ),
-              ),
-              validator: (v) => v == null || v.isEmpty
-                  ? 'admin_notifications.campaign_name_required'.tr()
-                  : null,
-            ),
-            const SizedBox(height: KZ.sp14),
-
-            // Notification Title
-            TextFormField(
-              controller: _titleCtrl,
-              onChanged: (_) => setState(() {}),
-              decoration: KZ.inputDecoration(
-                label: 'admin_notifications.notification_title'.tr(),
-                prefixIcon: const Icon(Icons.title_rounded, color: KZ.primary),
-              ),
-              validator: (v) => v == null || v.isEmpty
-                  ? 'admin_notifications.notification_title_required'.tr()
-                  : null,
-            ),
-            const SizedBox(height: KZ.sp14),
-
-            // Notification Body
-            TextFormField(
-              controller: _bodyCtrl,
-              maxLines: 3,
-              onChanged: (_) => setState(() {}),
-              decoration: KZ.inputDecoration(
-                label: 'admin_notifications.notification_body'.tr(),
-                prefixIcon: const Icon(Icons.notes_rounded, color: KZ.primary),
-              ),
-              validator: (v) => v == null || v.isEmpty
-                  ? 'admin_notifications.notification_body_required'.tr()
-                  : null,
-            ),
-            const SizedBox(height: KZ.sp14),
-
-            // Optional Image URL
-            TextFormField(
-              controller: _imageUrlCtrl,
-              onChanged: (_) => setState(() {}),
-              decoration: KZ.inputDecoration(
-                label: 'admin_notifications.optional_image_url'.tr(),
-                prefixIcon: const Icon(Icons.image_outlined, color: KZ.primary),
-              ),
-            ),
-            const SizedBox(height: KZ.sp16),
-
-            // Notification Type Dropdown
-            DropdownButtonFormField<NotificationType>(
-              value: _selectedType,
-              decoration: KZ.inputDecoration(
-                label: 'admin_notifications.notification_type'.tr(),
-                prefixIcon: const Icon(
-                  Icons.category_outlined,
-                  color: KZ.primary,
-                ),
-              ),
-              items: NotificationType.values
-                  .where((t) => t != NotificationType.unknown)
-                  .map(
-                    (t) => DropdownMenuItem(
-                      value: t,
-                      child: Text(t.toPayloadString().toUpperCase()),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (val) {
-                if (val != null) {
-                  setState(() {
-                    _selectedType = val;
-                    _selectedDestination = _destinationOptions.first;
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: KZ.sp14),
-
-            // Dynamic Destination / Deep Link Dropdown
-            DropdownButtonFormField<String>(
-              value: _destinationOptions.contains(_selectedDestination)
-                  ? _selectedDestination
-                  : _destinationOptions.first,
-              decoration: KZ.inputDecoration(
-                label: 'admin_notifications.destination_link'.tr(),
-                prefixIcon: const Icon(Icons.link_rounded, color: KZ.primary),
-              ),
-              items: _destinationOptions
-                  .map((opt) => DropdownMenuItem(value: opt, child: Text(opt)))
-                  .toList(),
-              onChanged: (val) {
-                if (val != null) {
-                  setState(() => _selectedDestination = val);
-                }
-              },
-            ),
-            const SizedBox(height: KZ.sp14),
-
-            // Target Audience Selector
-            DropdownButtonFormField<String>(
-              value: _selectedAudience,
-              decoration: KZ.inputDecoration(
-                label: 'admin_notifications.target_audience'.tr(),
-                prefixIcon: const Icon(
-                  Icons.people_alt_outlined,
-                  color: KZ.primary,
-                ),
-              ),
-              items: _targetAudiences
-                  .map(
-                    (aud) => DropdownMenuItem(
-                      value: aud,
-                      child: Text(
-                        _audienceLabel(aud),
-                        style: TextStyle(
-                          color: aud.contains('Backend Required')
-                              ? KZ.secondary
-                              : KZ.onSurface,
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (val) {
-                if (val != null) {
-                  setState(() => _selectedAudience = val);
-                }
-              },
-            ),
-            const SizedBox(height: KZ.sp16),
-
-            // Send Options: Send Now vs Schedule for Later
-            KZ.toggleRow(
-              label: 'admin_notifications.schedule_for_later'.tr(),
-              value: _isScheduled,
-              onChanged: (v) => setState(() => _isScheduled = v),
-            ),
-
-            if (_isScheduled) ...[
-              const SizedBox(height: KZ.sp12),
-              Container(
-                padding: const EdgeInsets.all(KZ.sp12),
-                decoration: BoxDecoration(
-                  color: KZ.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(KZ.radiusMd),
-                  border: Border.all(color: KZ.outlineVariant),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(
-                          Icons.calendar_today_rounded,
-                          size: 18,
-                        ),
-                        label: Text(_scheduledDate.toString().split(' ')[0]),
-                        onPressed: () async {
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate: _scheduledDate,
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(
-                              const Duration(days: 365),
-                            ),
-                          );
-                          if (picked != null) {
-                            setState(() => _scheduledDate = picked);
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: KZ.sp8),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.access_time_rounded, size: 18),
-                        label: Text(_scheduledTime.format(context)),
-                        onPressed: () async {
-                          final picked = await showTimePicker(
-                            context: context,
-                            initialTime: _scheduledTime,
-                          );
-                          if (picked != null) {
-                            setState(() => _scheduledTime = picked);
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-
-            const SizedBox(height: KZ.sp24),
-
-            // Submit Button
-            KZButton(
-              label: _isScheduled
-                  ? 'admin_notifications.schedule_campaign'.tr()
-                  : 'admin_notifications.send_now'.tr(),
-              icon: _isScheduled
-                  ? Icons.schedule_send_rounded
-                  : Icons.send_rounded,
-              loading: _isSubmitting,
-              fullWidth: true,
-              onPressed: _submitCampaign,
-            ),
           ],
-        ),
+
+          const SizedBox(height: KZ.sp28),
+          _SectionHeader(title: 'admin_notifications.section_review_send'.tr()),
+          const SizedBox(height: KZ.sp12),
+          if (includeInlinePreview) ...[
+            _buildLivePreviewCard(),
+            const SizedBox(height: KZ.sp16),
+          ],
+          KZButton(
+            label: _isScheduled
+                ? 'admin_notifications.schedule_campaign'.tr()
+                : 'admin_notifications.send_now'.tr(),
+            icon: _isScheduled
+                ? Icons.schedule_send_rounded
+                : Icons.send_rounded,
+            loading: _isSubmitting,
+            fullWidth: true,
+            onPressed: _submitCampaign,
+          ),
+        ],
       ),
     );
   }
@@ -483,7 +458,7 @@ class _AdminNotificationsScreenState
         borderRadius: BorderRadius.circular(KZ.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 20,
             offset: const Offset(0, 6),
           ),
@@ -500,11 +475,15 @@ class _AdminNotificationsScreenState
                 size: KZ.iconAction,
               ),
               const SizedBox(width: KZ.sp8),
-              Text(
-                'admin_notifications.live_preview_title'.tr(),
-                style: KZ.sectionTitle.copyWith(
-                  fontSize: 16,
-                  color: Colors.white,
+              Expanded(
+                child: Text(
+                  'admin_notifications.live_preview_title'.tr(),
+                  style: KZ.sectionTitle.copyWith(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -515,11 +494,11 @@ class _AdminNotificationsScreenState
           Container(
             padding: const EdgeInsets.all(KZ.sp14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.95),
+              color: Colors.white.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -528,7 +507,6 @@ class _AdminNotificationsScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header: App Logo + App Name + Timestamp
                 Row(
                   children: [
                     Container(
@@ -545,12 +523,16 @@ class _AdminNotificationsScreenState
                       ),
                     ),
                     const SizedBox(width: KZ.sp8),
-                    Text(
-                      'app_name'.tr(),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: KZ.onSurface,
+                    Flexible(
+                      child: Text(
+                        'app_name'.tr(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: KZ.onSurface,
+                        ),
                       ),
                     ),
                     const Text(
@@ -579,8 +561,6 @@ class _AdminNotificationsScreenState
                   ],
                 ),
                 const SizedBox(height: KZ.sp8),
-
-                // Title
                 Text(
                   _titleCtrl.text.isNotEmpty
                       ? _titleCtrl.text
@@ -592,8 +572,6 @@ class _AdminNotificationsScreenState
                   ),
                 ),
                 const SizedBox(height: 4),
-
-                // Body
                 Text(
                   _bodyCtrl.text.isNotEmpty
                       ? _bodyCtrl.text
@@ -604,8 +582,6 @@ class _AdminNotificationsScreenState
                     height: 1.3,
                   ),
                 ),
-
-                // Image Preview if provided
                 if (_imageUrlCtrl.text.trim().isNotEmpty) ...[
                   const SizedBox(height: KZ.sp10),
                   ClipRRect(
@@ -638,7 +614,6 @@ class _AdminNotificationsScreenState
           const SizedBox(height: KZ.sp20),
           const Divider(color: Colors.white24),
           const SizedBox(height: KZ.sp12),
-
           Row(
             children: [
               const Icon(
@@ -669,41 +644,13 @@ class _AdminNotificationsScreenState
   Widget _buildCampaignHistorySection(
     AsyncValue<List<NotificationCampaign>> campaignsAsync,
   ) {
-    return Container(
+    return KZCard(
       padding: const EdgeInsets.all(KZ.sp20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(KZ.radiusLg),
-        border: Border.all(color: KZ.outlineVariant.withOpacity(0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.history_rounded,
-                color: KZ.primary,
-                size: KZ.iconAction,
-              ),
-              const SizedBox(width: KZ.sp8),
-              Text(
-                'admin_notifications.history_title'.tr(),
-                style: KZ.sectionTitle,
-              ),
-            ],
-          ),
+          _SectionHeader(title: 'admin_notifications.history_title'.tr()),
           const SizedBox(height: KZ.sp16),
-          KZ.divider,
-          const SizedBox(height: KZ.sp16),
-
           campaignsAsync.when(
             loading: () => const Center(
               child: CircularProgressIndicator(color: KZ.primary),
@@ -837,6 +784,150 @@ class _AdminNotificationsScreenState
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A section heading with a small leading accent bar and optional
+/// supporting text — the same motif used across the rest of the redesigned
+/// admin panel, so this reads as one deliberate step in a sequence rather
+/// than a random label.
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  const _SectionHeader({required this.title, this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 3,
+              height: 16,
+              decoration: BoxDecoration(
+                color: KZ.primary,
+                borderRadius: BorderRadius.circular(KZ.radiusFull),
+              ),
+            ),
+            const SizedBox(width: KZ.sp8),
+            Expanded(
+              child: Text(
+                title,
+                style: KZ.sectionTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 2),
+          Padding(
+            padding: const EdgeInsets.only(left: KZ.sp16),
+            child: Text(subtitle!, style: KZ.bodySmall),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Audience picker as a selectable list rather than a collapsed dropdown —
+/// exactly one option is ever selected (radio semantics matching the
+/// original `_selectedAudience` string field), so exactly one row ever gets
+/// the red selected treatment; every other row stays a neutral surface.
+/// Same option values, same permissiveness (every option remains tappable,
+/// including the "(coming soon)" ones) as the dropdown it replaces.
+class _AudienceSelector extends StatelessWidget {
+  final List<String> options;
+  final String selected;
+  final String Function(String) labelOf;
+  final ValueChanged<String> onChanged;
+
+  const _AudienceSelector({
+    required this.options,
+    required this.selected,
+    required this.labelOf,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (final option in options) ...[
+          _AudienceOption(
+            label: labelOf(option),
+            selected: option == selected,
+            onTap: () => onChanged(option),
+          ),
+          if (option != options.last) const SizedBox(height: KZ.sp8),
+        ],
+      ],
+    );
+  }
+}
+
+class _AudienceOption extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _AudienceOption({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(KZ.radiusMd),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: KZ.sp12,
+            vertical: KZ.sp10,
+          ),
+          decoration: BoxDecoration(
+            color: selected
+                ? KZ.primaryFixed.withValues(alpha: 0.35)
+                : KZ.surface,
+            borderRadius: BorderRadius.circular(KZ.radiusMd),
+            border: Border.all(
+              color: selected
+                  ? KZ.primary
+                  : KZ.outlineVariant.withValues(alpha: 0.4),
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                selected
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_unchecked_rounded,
+                color: selected ? KZ.primary : KZ.outline,
+                size: 20,
+              ),
+              const SizedBox(width: KZ.sp10),
+              Expanded(
+                child: Text(
+                  label,
+                  style: KZ.body.copyWith(
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

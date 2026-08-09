@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
-import 'package:kebda_zaman/core/widgets/kz_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_chip.dart';
+import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/domain/models/customer_summary.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/customer_management_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_person_card.dart';
 
 class CustomerManagementScreen extends ConsumerStatefulWidget {
   const CustomerManagementScreen({super.key});
@@ -55,71 +57,46 @@ class _CustomerManagementScreenState
     final listAsync = ref.watch(customerListProvider);
 
     return Scaffold(
-      backgroundColor: KZ.surface,
+      backgroundColor: KZ.surfaceContainerLow,
       appBar: AppBar(
         backgroundColor: KZ.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        title: Text(
-          'customers.title'.tr(),
-          style: const TextStyle(
-            color: KZ.onSurface,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        title: Text('customers.title'.tr(), style: KZ.pageTitle),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
             child: TextField(
               controller: _searchCtrl,
               onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: 'customers.search_hint'.tr(),
-                prefixIcon: const Icon(Icons.search, color: KZ.primary),
-                fillColor: Colors.white,
-                filled: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(
-                    color: KZ.outlineVariant.withValues(alpha: 0.4),
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(
-                    color: KZ.outlineVariant.withValues(alpha: 0.4),
-                  ),
-                ),
+              decoration: KZ.searchInputDecoration(
+                hint: 'customers.search_hint'.tr(),
               ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
+            child: Wrap(
+              spacing: KZ.sp8,
+              runSpacing: KZ.sp8,
               children: [
-                _FilterChip(
+                KZChip(
                   label: 'customers.filter_all'.tr(),
                   selected: listAsync.valueOrNull?.isActiveFilter == null,
                   onTap: () => ref
                       .read(customerListProvider.notifier)
                       .setActiveFilter(null),
                 ),
-                const SizedBox(width: 8),
-                _FilterChip(
+                KZChip(
                   label: 'customers.active'.tr(),
                   selected: listAsync.valueOrNull?.isActiveFilter == true,
                   onTap: () => ref
                       .read(customerListProvider.notifier)
                       .setActiveFilter(true),
                 ),
-                const SizedBox(width: 8),
-                _FilterChip(
+                KZChip(
                   label: 'customers.inactive'.tr(),
                   selected: listAsync.valueOrNull?.isActiveFilter == false,
                   onTap: () => ref
@@ -129,41 +106,22 @@ class _CustomerManagementScreenState
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: KZ.sp8),
           Expanded(
             child: listAsync.when(
               loading: () => const Center(
                 child: CircularProgressIndicator(color: KZ.primary),
               ),
-              error: (e, st) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'common.something_wrong'.tr(),
-                      style: const TextStyle(color: KZ.onSurface),
-                    ),
-                    const SizedBox(height: 12),
-                    KZButton(
-                      label: 'common.retry'.tr(),
-                      onPressed: () => ref.invalidate(customerListProvider),
-                    ),
-                  ],
-                ),
+              error: (e, st) => KZErrorState(
+                message: 'common.something_wrong'.tr(),
+                retryLabel: 'common.retry'.tr(),
+                onRetry: () => ref.invalidate(customerListProvider),
               ),
               data: (listState) {
                 if (listState.customers.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'customers.empty'.tr(),
-                      style: const TextStyle(color: KZ.secondary),
-                    ),
+                  return KZEmptyState(
+                    icon: Icons.groups_outlined,
+                    title: 'customers.empty'.tr(),
                   );
                 }
                 return RefreshIndicator(
@@ -171,7 +129,7 @@ class _CustomerManagementScreenState
                   onRefresh: () => ref.refresh(customerListProvider.future),
                   child: ListView.builder(
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                     itemCount:
                         listState.customers.length +
                         (listState.isLoadingMore ? 1 : 0),
@@ -209,46 +167,11 @@ class _CustomerManagementScreenState
   }
 }
 
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? KZ.primary : Colors.white,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: selected
-                ? KZ.primary
-                : KZ.outlineVariant.withValues(alpha: 0.4),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : KZ.onSurface,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
+/// Priority fields per the People-management brief: name, phone, order
+/// count, spend. Email was dropped from this compact row (it's not on the
+/// requested priority list and every card already opens the full Customer
+/// Details screen, unchanged, where it's still shown) — that's the "move
+/// secondary details to the detail flow" trim.
 class _CustomerCard extends StatelessWidget {
   final CustomerSummary customer;
   final VoidCallback onTap;
@@ -257,107 +180,33 @@ class _CustomerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return AdminPersonCard(
+      name: customer.name,
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: KZ.outlineVariant.withValues(alpha: 0.25)),
+      badges: [
+        if (customer.isGuest)
+          AdminStatusPill(
+            label: 'customers.guest'.tr(),
+            color: KZ.secondary,
+          ),
+        AdminStatusPill(
+          label: customer.isActive
+              ? 'customers.active'.tr()
+              : 'customers.inactive'.tr(),
+          color: customer.isActive ? KZ.tertiary : KZ.error,
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          customer.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: KZ.onSurface,
-                          ),
-                        ),
-                      ),
-                      if (customer.isGuest) ...[
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: KZ.secondary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'customers.guest'.tr(),
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: KZ.secondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: (customer.isActive ? KZ.tertiary : KZ.error)
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          customer.isActive
-                              ? 'customers.active'.tr()
-                              : 'customers.inactive'.tr(),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: customer.isActive ? KZ.tertiary : KZ.error,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  if (customer.email != null)
-                    Text(
-                      customer.email!,
-                      style: const TextStyle(fontSize: 13, color: KZ.secondary),
-                    ),
-                  if (customer.phone != null)
-                    Text(
-                      customer.phone!,
-                      style: const TextStyle(fontSize: 13, color: KZ.secondary),
-                    ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${'customers.orders'.tr()}: ${customer.orderCount}  •  '
-                    '${'customers.total_spent'.tr()}: ${formatCurrency(customer.totalSpent, locale: context.locale)}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: KZ.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded, color: KZ.secondary),
-          ],
-        ),
+      ],
+      subtitle: customer.phone,
+      metaLine: Text(
+        '${'customers.orders'.tr()}: ${customer.orderCount}  ·  '
+        '${'customers.total_spent'.tr()}: ${formatCurrency(customer.totalSpent, locale: context.locale)}',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: KZ.label,
+      ),
+      trailing: const Icon(
+        Icons.chevron_right_rounded,
+        color: KZ.outline,
       ),
     );
   }

@@ -27,11 +27,19 @@ class CodegenLoader extends AssetLoader{
     "settings": "الإعدادات",
     "offers": "العروض",
     "notifications": "الإشعارات",
-    "promo_codes": "أكواد الخصم"
+    "promo_codes": "أكواد الخصم",
+    "menu_items": "عناصر المنيو",
+    "restaurant_profile": "بيانات المطعم",
+    "working_hours": "ساعات العمل",
+    "order_settings": "إعدادات الطلبات"
   },
   "nav_group": {
+    "overview": "نظرة عامة",
+    "orders_operations": "الطلبات والعمليات",
     "catalog": "الأصناف",
     "marketing": "التسويق",
+    "people": "الفريق",
+    "restaurant": "المطعم",
     "operations": "العمليات"
   },
   "home": {
@@ -388,6 +396,7 @@ class CodegenLoader extends AssetLoader{
   },
   "admin": {
     "title": "لوحة تحكم الأدمن",
+    "shell_badge": "لوحة الإدارة",
     "greeting": "صباح الخير، الأدمن",
     "overview": "نظرة عامة",
     "live": "مباشر",
@@ -544,7 +553,14 @@ class CodegenLoader extends AssetLoader{
     "audience_selected_users": "مستخدمون مختارون (قريباً)",
     "audience_vip": "فئة العملاء: VIP (قريباً)",
     "audience_city_cairo": "المدينة: القاهرة (قريباً)",
-    "audience_branch_heliopolis": "الفرع: مصر الجديدة (قريباً)"
+    "audience_branch_heliopolis": "الفرع: مصر الجديدة (قريباً)",
+    "section_campaign_details": "تفاصيل الحملة",
+    "section_content": "المحتوى",
+    "section_audience": "الجمهور المستهدف",
+    "section_audience_sub": "اختر من سيستلم هذا الإشعار.",
+    "section_destination": "الوجهة",
+    "section_schedule": "الجدولة",
+    "section_review_send": "المراجعة والإرسال"
   },
   "admin_offers": {
     "empty_title": "لا توجد أكواد خصم بعد",
@@ -616,7 +632,20 @@ class CodegenLoader extends AssetLoader{
     "value_required": "مطلوب",
     "active_promo_toggle": "مفعّل — يمكن للعملاء استخدام هذا الكود",
     "create_promo": "إنشاء كود الخصم",
-    "save_promo_success": "تم حفظ كود الخصم بنجاح!"
+    "save_promo_success": "تم حفظ كود الخصم بنجاح!",
+    "code_discount_section": "الكود والخصم",
+    "conditions_section": "الشروط",
+    "usage_limits_section": "حدود الاستخدام",
+    "current_usage_note": "تم استخدامه {count} مرة حتى الآن.",
+    "total_usage_limit": "الحد الإجمالي للاستخدام",
+    "total_usage_limit_hint": "أقصى عدد مرات استخدام ناجحة لهذا الكود. اتركه فارغًا لاستخدام غير محدود.",
+    "total_usage_limit_invalid": "أدخل رقمًا صحيحًا 1 أو أكثر، أو اتركه فارغًا لاستخدام غير محدود.",
+    "per_user_limit": "الحد لكل عميل",
+    "per_user_limit_hint": "أقصى عدد مرات يمكن لعميل واحد استخدام هذا الكود. اتركه فارغًا لاستخدام غير محدود.",
+    "per_user_limit_invalid": "أدخل رقمًا صحيحًا 1 أو أكثر، أو اتركه فارغًا لاستخدام غير محدود.",
+    "validity_section": "الصلاحية",
+    "start_date": "تاريخ البداية",
+    "end_date": "تاريخ الانتهاء"
   },
   "admin_catalog": {
     "metadata_section": "بيانات القائمة الإضافية",
@@ -640,6 +669,9 @@ class CodegenLoader extends AssetLoader{
     "recommendation_count_zero": "لا توجد توصيات",
     "recommendation_count_one": "توصية واحدة",
     "recommendation_count_many": "{count} توصيات",
+    "item_count_zero": "لا توجد عناصر",
+    "item_count_one": "عنصر واحد",
+    "item_count_many": "{count} عناصر",
     "move_up": "تحريك لأعلى",
     "move_down": "تحريك لأسفل",
     "remove_recommendation": "إزالة"
@@ -767,8 +799,16 @@ class CodegenLoader extends AssetLoader{
     "empty": "لا توجد أكواد خصم بعد.",
     "active": "مفعّل",
     "inactive": "غير مفعّل",
+    "activate": "تفعيل",
+    "deactivate": "إيقاف",
     "validity": "صالح",
     "usage_limit": "حد الاستخدام",
+    "unlimited": "غير محدود",
+    "used_of_limit": "{used} / {limit} استخدام",
+    "used_unlimited": "{used} استخدام · غير محدود",
+    "exhausted": "مستنفد",
+    "expired": "منتهي",
+    "valid_until": "صالح حتى {date}",
     "delete_title": "حذف كود الخصم؟",
     "delete_body": "حذف {code}؟ لا يمكن التراجع عن هذا الإجراء."
   },
@@ -811,7 +851,10 @@ class CodegenLoader extends AssetLoader{
     "closed_message_ar": "رسالة الإغلاق (عربي)",
     "close_restaurant_title": "إغلاق المطعم؟",
     "close_restaurant_body": "سيظل بإمكان العملاء تصفح المنيو، لكن سيتم رفض عمليات الدفع الجديدة حتى تعيد الفتح.",
-    "close_restaurant_confirm": "إغلاق المطعم"
+    "close_restaurant_confirm": "إغلاق المطعم",
+    "section_identity": "هوية المطعم",
+    "section_contact": "التواصل",
+    "section_location": "الموقع"
   },
   "legal": {
     "last_updated_label": "آخر تحديث: {date}",
@@ -897,12 +940,20 @@ static const Map<String,dynamic> _en = {
     "dashboard": "Dashboard",
     "settings": "Settings",
     "offers": "Offers",
-    "notifications": "Notifications",
-    "promo_codes": "Promo Codes"
+    "notifications": "Push Notifications",
+    "promo_codes": "Promo Codes",
+    "menu_items": "Menu Items",
+    "restaurant_profile": "Restaurant Profile",
+    "working_hours": "Working Hours",
+    "order_settings": "Order Settings"
   },
   "nav_group": {
+    "overview": "Overview",
+    "orders_operations": "Orders & Operations",
     "catalog": "Catalog",
     "marketing": "Marketing",
+    "people": "People",
+    "restaurant": "Restaurant",
     "operations": "Operations"
   },
   "home": {
@@ -1284,6 +1335,7 @@ static const Map<String,dynamic> _en = {
   },
   "admin": {
     "title": "Admin Control Panel",
+    "shell_badge": "Admin Panel",
     "greeting": "Good Morning, Admin",
     "overview": "Overview",
     "live": "Live",
@@ -1440,7 +1492,14 @@ static const Map<String,dynamic> _en = {
     "audience_selected_users": "Selected users (coming soon)",
     "audience_vip": "Customer segment: VIP (coming soon)",
     "audience_city_cairo": "City: Cairo (coming soon)",
-    "audience_branch_heliopolis": "Branch: Heliopolis (coming soon)"
+    "audience_branch_heliopolis": "Branch: Heliopolis (coming soon)",
+    "section_campaign_details": "Campaign Details",
+    "section_content": "Content",
+    "section_audience": "Audience",
+    "section_audience_sub": "Choose who receives this notification.",
+    "section_destination": "Destination",
+    "section_schedule": "Schedule",
+    "section_review_send": "Review & Send"
   },
   "admin_offers": {
     "empty_title": "No promo codes yet",
@@ -1512,7 +1571,20 @@ static const Map<String,dynamic> _en = {
     "value_required": "Required",
     "active_promo_toggle": "Active — customers can apply this code",
     "create_promo": "Create Promo Code",
-    "save_promo_success": "Promo code saved successfully!"
+    "save_promo_success": "Promo code saved successfully!",
+    "code_discount_section": "Code & Discount",
+    "conditions_section": "Conditions",
+    "usage_limits_section": "Usage Limits",
+    "current_usage_note": "Used {count} times so far.",
+    "total_usage_limit": "Total Usage Limit",
+    "total_usage_limit_hint": "Maximum total number of successful uses. Leave empty for unlimited.",
+    "total_usage_limit_invalid": "Enter a whole number of 1 or more, or leave empty for unlimited.",
+    "per_user_limit": "Per-user Limit",
+    "per_user_limit_hint": "Maximum times a single customer can use this code. Leave empty for unlimited.",
+    "per_user_limit_invalid": "Enter a whole number of 1 or more, or leave empty for unlimited.",
+    "validity_section": "Validity",
+    "start_date": "Start Date",
+    "end_date": "End Date"
   },
   "admin_catalog": {
     "metadata_section": "Catalog Metadata",
@@ -1536,6 +1608,9 @@ static const Map<String,dynamic> _en = {
     "recommendation_count_zero": "0 recommendations",
     "recommendation_count_one": "1 recommendation",
     "recommendation_count_many": "{count} recommendations",
+    "item_count_zero": "No items",
+    "item_count_one": "1 item",
+    "item_count_many": "{count} items",
     "move_up": "Move up",
     "move_down": "Move down",
     "remove_recommendation": "Remove"
@@ -1663,8 +1738,16 @@ static const Map<String,dynamic> _en = {
     "empty": "No promo codes yet.",
     "active": "Active",
     "inactive": "Inactive",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
     "validity": "Valid",
     "usage_limit": "Usage limit",
+    "unlimited": "Unlimited",
+    "used_of_limit": "{used} / {limit} used",
+    "used_unlimited": "{used} used · Unlimited",
+    "exhausted": "Exhausted",
+    "expired": "Expired",
+    "valid_until": "Valid until {date}",
     "delete_title": "Delete promo code?",
     "delete_body": "Delete {code}? This cannot be undone."
   },
@@ -1707,7 +1790,10 @@ static const Map<String,dynamic> _en = {
     "closed_message_ar": "Closed message (Arabic)",
     "close_restaurant_title": "Close the restaurant?",
     "close_restaurant_body": "Customers will still be able to browse the menu, but new checkouts will be rejected until you reopen.",
-    "close_restaurant_confirm": "Close restaurant"
+    "close_restaurant_confirm": "Close restaurant",
+    "section_identity": "Restaurant Identity",
+    "section_contact": "Contact",
+    "section_location": "Location"
   },
   "legal": {
     "last_updated_label": "Last updated: {date}",

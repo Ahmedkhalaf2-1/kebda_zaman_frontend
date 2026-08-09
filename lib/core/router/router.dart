@@ -33,7 +33,9 @@ import '../../features/admin/presentation/screens/admin_category_form_screen.dar
 import '../../features/admin/presentation/screens/admin_promo_form_screen.dart';
 import '../../features/admin/presentation/screens/order_management_screen.dart';
 import '../../features/admin/presentation/screens/offers_screen.dart';
-import '../../features/admin/presentation/screens/admin_settings_screen.dart';
+import '../../features/admin/presentation/screens/restaurant_profile_screen.dart';
+import '../../features/admin/presentation/screens/working_hours_screen.dart';
+import '../../features/admin/presentation/screens/order_settings_screen.dart';
 import '../../features/admin/presentation/screens/admin_notifications_screen.dart';
 import '../../features/admin/presentation/screens/admin_notification_center_screen.dart';
 import '../../features/admin/presentation/screens/admin_order_details_screen.dart';
@@ -344,9 +346,21 @@ GoRouter router(Ref ref) {
             ),
           ),
           GoRoute(
-            path: '/admin/settings',
+            path: '/admin/restaurant-profile',
+            pageBuilder: (context, state) => kzAdminPage(
+              state: state,
+              child: const RestaurantProfileScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/working-hours',
             pageBuilder: (context, state) =>
-                kzAdminPage(state: state, child: const AdminSettingsScreen()),
+                kzAdminPage(state: state, child: const WorkingHoursScreen()),
+          ),
+          GoRoute(
+            path: '/admin/order-settings',
+            pageBuilder: (context, state) =>
+                kzAdminPage(state: state, child: const OrderSettingsScreen()),
           ),
           GoRoute(
             path: '/admin/staff',

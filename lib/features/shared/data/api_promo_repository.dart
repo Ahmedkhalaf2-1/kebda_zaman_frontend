@@ -142,8 +142,14 @@ class ApiPromoRepository implements PromoRepository {
           : 'PERCENT',
       'value': promo.value,
       'minOrderAmount': promo.minOrderValue,
-      'maxUsage': promo.usageLimit ?? 100,
-      'perUserLimit': promo.perUserLimit ?? 1,
+      // `maxUsage`/`perUserLimit` are optional on the backend (`int>=1` when
+      // present) — null means unlimited. Previously this defaulted to 100/1
+      // whenever the admin left them unset, silently capping every promo
+      // regardless of what was actually chosen. Send exactly what's on the
+      // model — including null — so "leave empty for unlimited" in the admin
+      // form actually reaches the backend as unlimited.
+      'maxUsage': promo.usageLimit,
+      'perUserLimit': promo.perUserLimit,
       'isActive': promo.isActive,
       'startsAt': promo.startDate.toUtc().toIso8601String(),
       'expiresAt': promo.endDate.toUtc().toIso8601String(),
@@ -172,6 +178,7 @@ class ApiPromoRepository implements PromoRepository {
           : DateTime.now().add(const Duration(days: 30)),
       usageLimit: (json['maxUsage'] as num?)?.toInt(),
       perUserLimit: (json['perUserLimit'] as num?)?.toInt(),
+      usageCount: (json['usageCount'] as num?)?.toInt() ?? 0,
       isActive: json['isActive'] ?? true,
     );
   }

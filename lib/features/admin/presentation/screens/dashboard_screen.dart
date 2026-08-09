@@ -52,7 +52,7 @@ class DashboardScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: KZ.surface,
+      backgroundColor: KZ.surfaceContainerLow,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -87,69 +87,69 @@ class _DashboardContent extends ConsumerWidget {
       color: KZ.primary,
       onRefresh: () => ref.read(reportsDashboardProvider.notifier).refresh(),
       child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
-          _DashboardHeader(filter: filter, isRefreshing: isRefreshing),
+          _DashboardHeader(isRefreshing: isRefreshing),
+          const SizedBox(height: KZ.sp16),
+          _FilterBar(filter: filter),
           const SizedBox(height: KZ.sp20),
-          _DateRangeControls(filter: filter),
-          const SizedBox(height: KZ.sp24),
-          _SectionTitle('dashboard.primary_metrics'.tr()),
-          const SizedBox(height: KZ.sp12),
           _KpiSection(overview: data.overview),
           const SizedBox(height: KZ.sp28),
-          _SectionTitle('dashboard.sales_performance'.tr()),
+          _SectionHeading('dashboard.sales_performance'.tr()),
           const SizedBox(height: KZ.sp12),
           _SalesPerformanceCard(sales: data.sales, groupBy: filter.groupBy),
-          const SizedBox(height: KZ.sp28),
-          _SectionTitle('dashboard.orders_operations'.tr()),
+          const SizedBox(height: KZ.sp24),
+          _SectionHeading('dashboard.orders_operations'.tr()),
           const SizedBox(height: KZ.sp12),
           _OrdersOperationsSection(breakdown: data.ordersBreakdown),
-          const SizedBox(height: KZ.sp28),
-          _SectionTitle('dashboard.customer_insights'.tr()),
+          const SizedBox(height: KZ.sp24),
+          _SectionHeading('dashboard.customer_insights'.tr()),
           const SizedBox(height: KZ.sp12),
           _CustomerInsightsCard(overview: data.overview),
-          const SizedBox(height: KZ.sp28),
-          _SectionTitle('dashboard.top_selling_items'.tr()),
+          const SizedBox(height: KZ.sp24),
+          _SectionHeading('dashboard.top_selling_items'.tr()),
           const SizedBox(height: KZ.sp12),
           _TopItemsSection(items: data.topItems),
-          const SizedBox(height: KZ.sp32),
+          const SizedBox(height: KZ.sp24),
         ],
       ),
     );
   }
 }
 
-class _SectionTitle extends StatelessWidget {
+/// A section heading with a small leading accent bar — the one repeated
+/// motif used for every major section break on this screen, so scanning
+/// down the page reads as a sequence of deliberate sections rather than a
+/// flat list of cards.
+class _SectionHeading extends StatelessWidget {
   final String title;
-  const _SectionTitle(this.title);
+  const _SectionHeading(this.title);
 
   @override
   Widget build(BuildContext context) {
-    return Text(title, style: KZ.sectionTitle);
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 16,
+          decoration: BoxDecoration(
+            color: KZ.primary,
+            borderRadius: BorderRadius.circular(KZ.radiusFull),
+          ),
+        ),
+        const SizedBox(width: KZ.sp8),
+        Text(title, style: KZ.sectionTitle),
+      ],
+    );
   }
 }
 
 // ─── 1. Header ────────────────────────────────────────────────────────────
 
 class _DashboardHeader extends ConsumerWidget {
-  final ReportsFilter filter;
   final bool isRefreshing;
 
-  const _DashboardHeader({required this.filter, required this.isRefreshing});
-
-  String _periodLabel() {
-    switch (filter.preset) {
-      case DateRangePreset.last7Days:
-        return 'dashboard.last_7_days'.tr();
-      case DateRangePreset.last30Days:
-        return 'dashboard.last_30_days'.tr();
-      case DateRangePreset.thisMonth:
-        return 'dashboard.this_month'.tr();
-      case DateRangePreset.custom:
-        final (from, to) = filter.resolvedRange();
-        return '${from.day}/${from.month} – ${to.day}/${to.month}/${to.year}';
-    }
-  }
+  const _DashboardHeader({required this.isRefreshing});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -162,32 +162,19 @@ class _DashboardHeader extends ConsumerWidget {
             children: [
               Text('dashboard.title'.tr(), style: KZ.pageTitle),
               const SizedBox(height: 2),
-              Text('dashboard.subtitle'.tr(), style: KZ.bodySmall),
-              const SizedBox(height: KZ.sp8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: KZ.sp10,
-                  vertical: KZ.sp4,
-                ),
-                decoration: BoxDecoration(
-                  color: KZ.primaryFixed.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(KZ.radiusFull),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.event_rounded,
-                      size: KZ.iconInline,
-                      color: KZ.primary,
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      'dashboard.subtitle'.tr(),
+                      style: KZ.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(width: KZ.sp4),
-                    Text(
-                      _periodLabel(),
-                      style: KZ.label.copyWith(color: KZ.primary),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: KZ.sp8),
+                  const _PeriodPill(),
+                ],
               ),
             ],
           ),
@@ -222,11 +209,62 @@ class _DashboardHeader extends ConsumerWidget {
   }
 }
 
-// ─── 2. Date range controls ───────────────────────────────────────────────
+/// The currently-resolved date-range label — read from a [ProviderScope]
+/// ancestor via [Consumer] rather than threaded as a parameter, purely so
+/// [_DashboardHeader] doesn't have to rebuild its whole Row for it. Neutral
+/// surface, not a red-tinted pill: this is passive information, not an
+/// active/selected control, so it shouldn't compete visually with the real
+/// filter chips below it.
+class _PeriodPill extends ConsumerWidget {
+  const _PeriodPill();
 
-class _DateRangeControls extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final filter = ref.watch(reportsFilterProvider);
+    final String label = switch (filter.preset) {
+      DateRangePreset.last7Days => 'dashboard.last_7_days'.tr(),
+      DateRangePreset.last30Days => 'dashboard.last_30_days'.tr(),
+      DateRangePreset.thisMonth => 'dashboard.this_month'.tr(),
+      DateRangePreset.custom => () {
+        final (from, to) = filter.resolvedRange();
+        return '${from.day}/${from.month} – ${to.day}/${to.month}/${to.year}';
+      }(),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: KZ.sp10,
+        vertical: KZ.sp4,
+      ),
+      decoration: BoxDecoration(
+        color: KZ.surfaceContainer,
+        borderRadius: BorderRadius.circular(KZ.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.event_rounded,
+            size: KZ.iconInline,
+            color: KZ.onSurfaceVariant,
+          ),
+          const SizedBox(width: KZ.sp4),
+          Text(
+            label,
+            style: KZ.label.copyWith(color: KZ.onSurfaceVariant),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── 2. Filter bar — date range + group-by as one coherent component ──────
+
+class _FilterBar extends ConsumerWidget {
   final ReportsFilter filter;
-  const _DateRangeControls({required this.filter});
+  const _FilterBar({required this.filter});
 
   Future<void> _pickCustomRange(BuildContext context, WidgetRef ref) async {
     final now = DateTime.now();
@@ -252,104 +290,77 @@ class _DateRangeControls extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(reportsFilterProvider.notifier);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          spacing: KZ.sp8,
-          runSpacing: KZ.sp8,
-          children: [
-            KZChip(
-              label: 'dashboard.last_7_days'.tr(),
-              selected: filter.preset == DateRangePreset.last7Days,
-              onTap: () => notifier.selectPreset(DateRangePreset.last7Days),
-            ),
-            KZChip(
-              label: 'dashboard.last_30_days'.tr(),
-              selected: filter.preset == DateRangePreset.last30Days,
-              onTap: () => notifier.selectPreset(DateRangePreset.last30Days),
-            ),
-            KZChip(
-              label: 'dashboard.this_month'.tr(),
-              selected: filter.preset == DateRangePreset.thisMonth,
-              onTap: () => notifier.selectPreset(DateRangePreset.thisMonth),
-            ),
-            KZChip(
-              label: 'dashboard.custom_range'.tr(),
-              selected: filter.preset == DateRangePreset.custom,
-              icon: Icons.date_range_rounded,
-              onTap: () => _pickCustomRange(context, ref),
-            ),
-          ],
-        ),
-        const SizedBox(height: KZ.sp12),
-        Row(
-          children: [
-            Text('dashboard.group_by'.tr(), style: KZ.label),
-            const SizedBox(width: KZ.sp10),
-            Wrap(
-              spacing: KZ.sp6,
-              children: [
-                _GroupByChip(
-                  label: 'dashboard.group_day'.tr(),
-                  value: ReportGroupBy.day,
-                  filter: filter,
-                  notifier: notifier,
-                ),
-                _GroupByChip(
-                  label: 'dashboard.group_week'.tr(),
-                  value: ReportGroupBy.week,
-                  filter: filter,
-                  notifier: notifier,
-                ),
-                _GroupByChip(
-                  label: 'dashboard.group_month'.tr(),
-                  value: ReportGroupBy.month,
-                  filter: filter,
-                  notifier: notifier,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _GroupByChip extends StatelessWidget {
-  final String label;
-  final ReportGroupBy value;
-  final ReportsFilter filter;
-  final ReportsFilterNotifier notifier;
-
-  const _GroupByChip({
-    required this.label,
-    required this.value,
-    required this.filter,
-    required this.notifier,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = filter.groupBy == value;
-    return Material(
-      color: selected ? KZ.primary : KZ.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(KZ.radiusFull),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(KZ.radiusFull),
-        onTap: () => notifier.selectGroupBy(value),
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 32),
-          padding: const EdgeInsets.symmetric(horizontal: KZ.sp12),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: KZ.label.copyWith(
-              color: selected ? Colors.white : KZ.onSurfaceVariant,
-            ),
+    return Container(
+      padding: const EdgeInsets.all(KZ.sp12),
+      decoration: BoxDecoration(
+        color: KZ.surface,
+        borderRadius: BorderRadius.circular(KZ.radiusLg),
+        border: Border.all(color: KZ.outlineVariant.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: KZ.sp8,
+            runSpacing: KZ.sp8,
+            children: [
+              KZChip(
+                label: 'dashboard.last_7_days'.tr(),
+                selected: filter.preset == DateRangePreset.last7Days,
+                onTap: () => notifier.selectPreset(DateRangePreset.last7Days),
+              ),
+              KZChip(
+                label: 'dashboard.last_30_days'.tr(),
+                selected: filter.preset == DateRangePreset.last30Days,
+                onTap: () => notifier.selectPreset(DateRangePreset.last30Days),
+              ),
+              KZChip(
+                label: 'dashboard.this_month'.tr(),
+                selected: filter.preset == DateRangePreset.thisMonth,
+                onTap: () => notifier.selectPreset(DateRangePreset.thisMonth),
+              ),
+              KZChip(
+                label: 'dashboard.custom_range'.tr(),
+                selected: filter.preset == DateRangePreset.custom,
+                icon: Icons.date_range_rounded,
+                onTap: () => _pickCustomRange(context, ref),
+              ),
+            ],
           ),
-        ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: KZ.sp10),
+            child: Divider(height: 1, color: KZ.outlineVariant),
+          ),
+          Row(
+            children: [
+              Text('dashboard.group_by'.tr(), style: KZ.label),
+              const SizedBox(width: KZ.sp10),
+              Expanded(
+                child: Wrap(
+                  spacing: KZ.sp6,
+                  runSpacing: KZ.sp6,
+                  children: [
+                    KZChip(
+                      label: 'dashboard.group_day'.tr(),
+                      selected: filter.groupBy == ReportGroupBy.day,
+                      onTap: () => notifier.selectGroupBy(ReportGroupBy.day),
+                    ),
+                    KZChip(
+                      label: 'dashboard.group_week'.tr(),
+                      selected: filter.groupBy == ReportGroupBy.week,
+                      onTap: () => notifier.selectGroupBy(ReportGroupBy.week),
+                    ),
+                    KZChip(
+                      label: 'dashboard.group_month'.tr(),
+                      selected: filter.groupBy == ReportGroupBy.month,
+                      onTap: () => notifier.selectGroupBy(ReportGroupBy.month),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -371,6 +382,10 @@ class _KpiSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Revenue is the one metric that earns brand-red emphasis — every other
+    // KPI gets its own distinct, non-red accent so the KPI area doesn't read
+    // as a wall of pink/red fills (colors reused from elsewhere on this
+    // screen rather than introduced fresh, so the palette stays disciplined).
     final primary = [
       _KpiSpec(
         'dashboard.total_revenue'.tr(),
@@ -382,7 +397,7 @@ class _KpiSection extends StatelessWidget {
         'dashboard.total_orders'.tr(),
         '${overview.totalOrders}',
         Icons.shopping_basket_rounded,
-        KZ.primaryContainer,
+        const Color(0xFF00ACC1),
       ),
       _KpiSpec(
         'dashboard.average_order_value'.tr(),
@@ -430,9 +445,19 @@ class _KpiSection extends StatelessWidget {
             : 1;
         return Column(
           children: [
-            _ResponsiveCardGrid(columns: columns, specs: primary),
-            const SizedBox(height: KZ.sp12),
-            _ResponsiveCardGrid(columns: columns, specs: secondary),
+            _ResponsiveCardGrid(
+              columns: columns,
+              children: [
+                for (final spec in primary) _KpiCard(spec: spec),
+              ],
+            ),
+            const SizedBox(height: KZ.sp10),
+            _ResponsiveCardGrid(
+              columns: width >= _kMobileBreakpoint ? 3 : columns,
+              children: [
+                for (final spec in secondary) _KpiCardCompact(spec: spec),
+              ],
+            ),
           ],
         );
       },
@@ -442,8 +467,8 @@ class _KpiSection extends StatelessWidget {
 
 class _ResponsiveCardGrid extends StatelessWidget {
   final int columns;
-  final List<_KpiSpec> specs;
-  const _ResponsiveCardGrid({required this.columns, required this.specs});
+  final List<Widget> children;
+  const _ResponsiveCardGrid({required this.columns, required this.children});
 
   @override
   Widget build(BuildContext context) {
@@ -455,13 +480,8 @@ class _ResponsiveCardGrid extends StatelessWidget {
         return Wrap(
           spacing: spacing,
           runSpacing: spacing,
-          children: specs
-              .map(
-                (spec) => SizedBox(
-                  width: itemWidth,
-                  child: _KpiCard(spec: spec),
-                ),
-              )
+          children: children
+              .map((child) => SizedBox(width: itemWidth, child: child))
               .toList(),
         );
       },
@@ -469,38 +489,120 @@ class _ResponsiveCardGrid extends StatelessWidget {
   }
 }
 
+/// Primary-tier KPI card — the 4 headline operational numbers. A colored
+/// left accent strip plus a matching icon chip give each metric a clear,
+/// premium visual identity without filling the whole card in color.
 class _KpiCard extends StatelessWidget {
   final _KpiSpec spec;
   const _KpiCard({required this.spec});
 
   @override
   Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: KZ.surface,
+        borderRadius: BorderRadius.circular(KZ.radiusLg),
+        border: Border.all(color: KZ.outlineVariant.withValues(alpha: 0.35)),
+        boxShadow: KZ.cardShadow,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 4, color: spec.color),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  KZ.sp12,
+                  KZ.sp14,
+                  KZ.sp14,
+                  KZ.sp14,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: spec.color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(KZ.radiusSm),
+                      ),
+                      child: Icon(spec.icon, color: spec.color, size: 17),
+                    ),
+                    const SizedBox(height: KZ.sp10),
+                    Text(
+                      spec.label,
+                      style: KZ.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      spec.value,
+                      style: KZ.display.copyWith(fontSize: 23),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Secondary-tier KPI card — compact, single-row layout for the supporting
+/// stats, visibly lighter-weight than the primary tier so the hierarchy
+/// between "headline" and "supporting" numbers is immediate.
+class _KpiCardCompact extends StatelessWidget {
+  final _KpiSpec spec;
+  const _KpiCardCompact({required this.spec});
+
+  @override
+  Widget build(BuildContext context) {
     return KZCard(
-      padding: const EdgeInsets.all(KZ.sp16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(
+        horizontal: KZ.sp12,
+        vertical: KZ.sp10,
+      ),
+      child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(KZ.sp8),
+            width: 26,
+            height: 26,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               color: spec.color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(KZ.radiusMd),
+              borderRadius: BorderRadius.circular(KZ.radiusSm),
             ),
-            child: Icon(spec.icon, color: spec.color, size: KZ.iconControl),
+            child: Icon(spec.icon, color: spec.color, size: 15),
           ),
-          const SizedBox(height: KZ.sp12),
-          Text(
-            spec.label,
-            style: KZ.bodySmall,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: KZ.sp4),
-          Text(
-            spec.value,
-            style: KZ.display.copyWith(fontSize: 22),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          const SizedBox(width: KZ.sp10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  spec.value,
+                  style: KZ.itemTitle.copyWith(fontSize: 16),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  spec.label,
+                  style: KZ.caption,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -892,10 +994,11 @@ class _SplitBar extends StatelessWidget {
           ),
         ),
         const SizedBox(height: KZ.sp8),
-        Row(
+        Wrap(
+          spacing: KZ.sp16,
+          runSpacing: KZ.sp4,
           children: [
             _LegendDot(color: leftColor, label: '$leftLabel · $leftValue'),
-            const SizedBox(width: KZ.sp16),
             _LegendDot(color: rightColor, label: '$rightLabel · $rightValue'),
           ],
         ),
@@ -917,73 +1020,25 @@ class _CustomerInsightsCard extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth >= _kMobileBreakpoint;
-          final active = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(KZ.sp10),
-                    decoration: BoxDecoration(
-                      color: KZ.primaryFixed.withValues(alpha: 0.5),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.groups_rounded, color: KZ.primary),
-                  ),
-                  const SizedBox(width: KZ.sp12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${overview.activeCustomers}',
-                          style: KZ.display.copyWith(fontSize: 26),
-                        ),
-                        Text(
-                          'dashboard.active_customers'.tr(),
-                          style: KZ.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          final active = _CustomerStat(
+            value: '${overview.activeCustomers}',
+            label: 'dashboard.active_customers'.tr(),
+            icon: Icons.groups_rounded,
+            color: KZ.primary,
           );
-          final newC = Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(KZ.sp10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF6A4DFF).withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.person_add_alt_1_rounded,
-                  color: Color(0xFF6A4DFF),
-                ),
-              ),
-              const SizedBox(width: KZ.sp12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${overview.newCustomers}',
-                    style: KZ.display.copyWith(fontSize: 26),
-                  ),
-                  Text('dashboard.new_customers'.tr(), style: KZ.bodySmall),
-                ],
-              ),
-            ],
+          final newC = _CustomerStat(
+            value: '${overview.newCustomers}',
+            label: 'dashboard.new_customers'.tr(),
+            icon: Icons.person_add_alt_1_rounded,
+            color: const Color(0xFF6A4DFF),
           );
 
+          // No inner card title here — the page-level section heading
+          // above already reads "Customer Insights"; repeating it inside
+          // the card was a duplicated heading.
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('dashboard.customer_insights'.tr(), style: KZ.cardTitle),
-              const SizedBox(height: KZ.sp14),
               isWide
                   ? Row(
                       children: [
@@ -1010,6 +1065,47 @@ class _CustomerInsightsCard extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _CustomerStat extends StatelessWidget {
+  final String value;
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  const _CustomerStat({
+    required this.value,
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(KZ.radiusMd),
+          ),
+          child: Icon(icon, color: color, size: KZ.iconControl),
+        ),
+        const SizedBox(width: KZ.sp12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(value, style: KZ.display.copyWith(fontSize: 24)),
+            Text(label, style: KZ.bodySmall),
+          ],
+        ),
+      ],
     );
   }
 }

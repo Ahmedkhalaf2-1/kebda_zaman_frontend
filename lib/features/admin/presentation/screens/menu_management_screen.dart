@@ -3,11 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
+import 'package:kebda_zaman/core/widgets/kz_chip.dart';
+import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/menu_admin_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
+
+const double _kTabletBreakpoint = 700;
+const double _kDesktopBreakpoint = 1200;
+const double _kMaxContentWidth = 1280;
+
+String _itemCountLabel(int count) {
+  if (count == 0) return 'admin_catalog.item_count_zero'.tr();
+  if (count == 1) return 'admin_catalog.item_count_one'.tr();
+  return 'admin_catalog.item_count_many'.tr(namedArgs: {'count': '$count'});
+}
 
 class MenuManagementScreen extends ConsumerStatefulWidget {
   const MenuManagementScreen({super.key});
@@ -27,249 +39,170 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> {
     final stateAsync = ref.watch(menuAdminProvider);
 
     return Scaffold(
-      backgroundColor: KZ.surface,
+      backgroundColor: KZ.surfaceContainerLow,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Top AppBar
-            _buildAppBar(context),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _kMaxContentWidth),
+            child: Column(
+              children: [
+                _buildHeader(context),
+                Expanded(
+                  child: stateAsync.when(
+                    loading: () => const Center(
+                      child: CircularProgressIndicator(color: KZ.primary),
+                    ),
+                    error: (e, st) => KZErrorState(
+                      message: 'admin.error_loading'.tr(
+                        namedArgs: {'error': '$e'},
+                      ),
+                      retryLabel: 'retry'.tr(),
+                      onRetry: () => ref.invalidate(menuAdminProvider),
+                    ),
+                    data: (data) {
+                      final categories = data.categories;
+                      final allItems = data.items;
 
-            // Main Content Area
-            Expanded(
-              child: stateAsync.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: KZ.primary),
-                ),
-                error: (e, st) => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'admin.error_loading'.tr(namedArgs: {'error': '$e'}),
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: KZ.primary,
-                          foregroundColor: Colors.white,
-                          shape: const StadiumBorder(),
+                      // Filter items by category & search query
+                      final filteredItems = allItems.where((item) {
+                        final matchesCategory =
+                            _selectedCategoryId == 'all' ||
+                            item.categoryId == _selectedCategoryId;
+                        final matchesSearch =
+                            _searchQuery.isEmpty ||
+                            item.name.toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            ) ||
+                            item.description.toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            );
+                        return matchesCategory && matchesSearch;
+                      }).toList();
+
+                      return RefreshIndicator(
+                        color: KZ.primary,
+                        onRefresh: () async =>
+                            ref.invalidate(menuAdminProvider),
+                        child: ListView(
+                          padding: const EdgeInsets.only(bottom: 24),
+                          children: [
+                            _buildCategoryTabs(categories),
+                            const SizedBox(height: KZ.sp10),
+                            if (_isSearching) _buildSearchBar(),
+                            _buildCategoryBar(filteredItems.length),
+                            if (filteredItems.isEmpty)
+                              _buildEmptyItemsState()
+                            else
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: KZ.sp16,
+                                ),
+                                child: _ItemGrid(
+                                  items: filteredItems,
+                                  categories: categories,
+                                ),
+                              ),
+                          ],
                         ),
-                        onPressed: () => ref.invalidate(menuAdminProvider),
-                        icon: const Icon(Icons.refresh),
-                        label: Text('retry'.tr()),
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
-                data: (data) {
-                  final categories = data.categories;
-                  final allItems = data.items;
-
-                  // Filter items by category & search query
-                  final filteredItems = allItems.where((item) {
-                    final matchesCategory =
-                        _selectedCategoryId == 'all' ||
-                        item.categoryId == _selectedCategoryId;
-                    final matchesSearch =
-                        _searchQuery.isEmpty ||
-                        item.name.toLowerCase().contains(
-                          _searchQuery.toLowerCase(),
-                        ) ||
-                        item.description.toLowerCase().contains(
-                          _searchQuery.toLowerCase(),
-                        );
-                    return matchesCategory && matchesSearch;
-                  }).toList();
-
-                  return RefreshIndicator(
-                    color: KZ.primary,
-                    onRefresh: () async => ref.invalidate(menuAdminProvider),
-                    child: ListView(
-                      padding: const EdgeInsets.only(bottom: 100),
-                      children: [
-                        // Category Horizontal Tabs
-                        _buildCategoryTabs(categories),
-                        const SizedBox(height: 16),
-
-                        // Search Bar (if search active)
-                        if (_isSearching) _buildSearchBar(),
-
-                        // Category Management Bar
-                        _buildCategoryHeader(context, categories),
-
-                        // Product List
-                        if (filteredItems.isEmpty)
-                          _buildEmptyItemsState()
-                        else
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Column(
-                              children: filteredItems
-                                  .map(
-                                    (item) => _buildProductCard(
-                                      context,
-                                      item,
-                                      categories,
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          context.push('/admin/menu/add');
-        },
-        backgroundColor: KZ.primary,
-        foregroundColor: Colors.white,
-        elevation: 6,
-        icon: const Icon(Icons.add_rounded, size: 26),
-        label: Text(
-          'admin.add_item'.tr(),
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      color: KZ.surface,
+  /// One page title, one visually dominant primary action (Add Item, filled)
+  /// — search and the overflow (Clear All) menu stay compact and muted so
+  /// they never compete with it. No brand logo/name block: the admin shell's
+  /// sidebar/drawer already carries that.
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: KZ.primary,
-                ),
-                child: const Icon(
-                  Icons.restaurant_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'admin.menu'.tr(),
-                style: const TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: KZ.primary,
-                ),
-              ),
-            ],
+          Expanded(
+            child: Text(
+              'admin.menu'.tr(),
+              style: KZ.pageTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    _isSearching = !_isSearching;
-                    if (!_isSearching) _searchQuery = '';
-                  });
-                },
-                icon: Icon(
-                  _isSearching ? Icons.close : Icons.search_rounded,
-                  color: KZ.primary,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: KZ.surfaceContainerLow,
-                  shape: const CircleBorder(),
-                ),
-              ),
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert_rounded, color: KZ.primary),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                onSelected: (val) async {
-                  if (val == 'add_category') {
-                    context.push('/admin/menu/add-category');
-                  } else if (val == 'clear') {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: Text('admin.clear_menu_title'.tr()),
-                        content: Text('admin.clear_menu_body'.tr()),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(ctx, false),
-                            child: Text('common.cancel'.tr()),
-                          ),
-                          FilledButton(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.red,
-                            ),
-                            onPressed: () => Navigator.pop(ctx, true),
-                            child: Text('admin.clear_all'.tr()),
-                          ),
-                        ],
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) _searchQuery = '';
+              });
+            },
+            icon: Icon(
+              _isSearching ? Icons.close_rounded : Icons.search_rounded,
+              color: KZ.onSurfaceVariant,
+              size: 22,
+            ),
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(
+              Icons.more_vert_rounded,
+              color: KZ.onSurfaceVariant,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(KZ.radiusMd),
+            ),
+            onSelected: (val) async {
+              if (val == 'clear') {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text('admin.clear_menu_title'.tr()),
+                    content: Text('admin.clear_menu_body'.tr()),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text('common.cancel'.tr()),
                       ),
-                    );
-                    if (confirm == true) {
-                      await ref
-                          .read(menuAdminProvider.notifier)
-                          .clearAllMenuData();
-                    }
-                  }
-                },
-                itemBuilder: (ctx) => [
-                  const PopupMenuItem(
-                    value: 'add_category',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.category_rounded,
-                          color: KZ.primary,
-                          size: 20,
+                      FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: KZ.error,
                         ),
-                        SizedBox(width: 8),
-                        Text('إضافة قسم'),
-                      ],
-                    ),
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: Text('admin.clear_all'.tr()),
+                      ),
+                    ],
                   ),
-                  const PopupMenuItem(
-                    value: 'clear',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.delete_sweep_rounded,
-                          color: Colors.red,
-                          size: 20,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'مسح بيانات المنيو',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
+                );
+                if (confirm == true) {
+                  await ref.read(menuAdminProvider.notifier).clearAllMenuData();
+                }
+              }
+            },
+            itemBuilder: (ctx) => [
+              PopupMenuItem(
+                value: 'clear',
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.delete_sweep_rounded,
+                      color: KZ.error,
+                      size: 20,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: KZ.sp8),
+                    Text(
+                      'admin.clear_all'.tr(),
+                      style: const TextStyle(color: KZ.error),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
+          const SizedBox(width: KZ.sp4),
+          _AddItemButton(onPressed: () => context.push('/admin/menu/add')),
         ],
       ),
     );
@@ -277,110 +210,68 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
       child: TextField(
         autofocus: true,
         onChanged: (val) => setState(() => _searchQuery = val),
-        decoration: InputDecoration(
-          hintText: 'admin.search_food'.tr(),
-          prefixIcon: const Icon(Icons.search, color: KZ.primary),
-          fillColor: Colors.white,
-          filled: true,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: KZ.outlineVariant.withOpacity(0.4)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: KZ.outlineVariant.withOpacity(0.4)),
-          ),
-        ),
+        decoration: KZ.searchInputDecoration(hint: 'admin.search_food'.tr()),
       ),
     );
   }
 
   Widget _buildCategoryTabs(List<Category> categories) {
     return SizedBox(
-      height: 44,
+      height: 40,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         children: [
-          _buildCategoryPill('admin.all_items'.tr(), 'all'),
-          ...categories.map((c) => _buildCategoryPill(c.name, c.id)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryPill(String label, String categoryId) {
-    final isSelected = _selectedCategoryId == categoryId;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: isSelected,
-        showCheckmark: false,
-        onSelected: (selected) {
-          if (selected) {
-            setState(() => _selectedCategoryId = categoryId);
-          }
-        },
-        selectedColor: KZ.primary,
-        backgroundColor: KZ.surfaceContainerHigh,
-        labelStyle: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: isSelected ? Colors.white : KZ.onSurfaceVariant,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        side: BorderSide.none,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      ),
-    );
-  }
-
-  Widget _buildCategoryHeader(BuildContext context, List<Category> categories) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            _selectedCategoryId == 'all'
-                ? 'admin.all_menu_items'.tr()
-                : (categories
-                      .firstWhere(
-                        (c) => c.id == _selectedCategoryId,
-                        orElse: () =>
-                            Category(id: '', name: 'Items', sortOrder: 0),
-                      )
-                      .name),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: KZ.onSurface,
+          Padding(
+            padding: const EdgeInsets.only(right: KZ.sp8),
+            child: KZChip(
+              label: 'admin.all_items'.tr(),
+              selected: _selectedCategoryId == 'all',
+              onTap: () => setState(() => _selectedCategoryId = 'all'),
             ),
           ),
-          OutlinedButton.icon(
-            onPressed: () => context.push('/admin/menu/add-category'),
-            icon: const Icon(Icons.add, size: 18),
-            label: Text(
-              'admin.add_category'.tr(),
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: KZ.primary,
-              side: const BorderSide(color: KZ.primary),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+          for (final c in categories)
+            Padding(
+              padding: const EdgeInsets.only(right: KZ.sp8),
+              child: KZChip(
+                label: c.name,
+                selected: _selectedCategoryId == c.id,
+                onTap: () => setState(() => _selectedCategoryId = c.id),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Item count for the current filter, not a repeated category-name heading
+  /// — the selected chip above already makes that obvious. "Add Category"
+  /// lives here: accessible, but a small outlined control, never competing
+  /// with the header's primary Add Item action.
+  Widget _buildCategoryBar(int itemCount) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(_itemCountLabel(itemCount), style: KZ.bodySmall),
+          ),
+          TextButton.icon(
+            onPressed: () => context.push('/admin/menu/add-category'),
+            icon: const Icon(Icons.add_rounded, size: 16),
+            label: Text('admin.add_category'.tr()),
+            style: TextButton.styleFrom(
+              foregroundColor: KZ.onSurfaceVariant,
+              padding: const EdgeInsets.symmetric(
+                horizontal: KZ.sp10,
+                vertical: KZ.sp4,
+              ),
+              textStyle: KZ.label,
+              minimumSize: const Size(0, 32),
             ),
           ),
         ],
@@ -388,166 +279,271 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> {
     );
   }
 
-  Widget _buildProductCard(
-    BuildContext context,
-    MenuItem item,
-    List<Category> categories,
-  ) {
+  Widget _buildEmptyItemsState() {
+    return KZEmptyState(
+      icon: Icons.restaurant_menu_rounded,
+      title: 'admin.no_food_items'.tr(),
+      message: 'admin.no_food_items_sub'.tr(),
+      actionLabel: 'admin.add_food_item'.tr(),
+      onAction: () => context.push('/admin/menu/add'),
+    );
+  }
+}
+
+/// The one dominant primary action for this screen — compact filled button,
+/// not a floating action button, so it reads as part of the header's action
+/// hierarchy rather than a separate mobile-web affordance.
+class _AddItemButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  const _AddItemButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 38,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(Icons.add_rounded, size: 18),
+        label: Text(
+          'admin.add_item'.tr(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: KZ.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: KZ.sp14),
+          textStyle: KZ.buttonLabel.copyWith(fontSize: 13),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(KZ.radiusMd),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Responsive item layout: a single column on mobile, more columns as width
+/// allows — same width-driven `Wrap` approach already used by the Dashboard
+/// KPI grid, so every card just gets a fixed column width and wraps its own
+/// (variable) height naturally.
+class _ItemGrid extends StatelessWidget {
+  final List<MenuItem> items;
+  final List<Category> categories;
+  const _ItemGrid({required this.items, required this.categories});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final columns = width >= _kDesktopBreakpoint
+            ? 3
+            : width >= _kTabletBreakpoint
+            ? 2
+            : 1;
+        if (columns == 1) {
+          return Column(
+            children: [
+              for (final item in items)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: KZ.sp8),
+                  child: _ItemCard(item: item, categories: categories),
+                ),
+            ],
+          );
+        }
+        const spacing = KZ.sp10;
+        final itemWidth = (width - spacing * (columns - 1)) / columns;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final item in items)
+              SizedBox(
+                width: itemWidth,
+                child: _ItemCard(item: item, categories: categories),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ItemCard extends ConsumerWidget {
+  final MenuItem item;
+  final List<Category> categories;
+  const _ItemCard({required this.item, required this.categories});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final categoryName = categories
         .firstWhere(
           (c) => c.id == item.categoryId,
           orElse: () => Category(id: '', name: item.categoryId, sortOrder: 0),
         )
         .name;
-
     final isAvailable = item.isAvailable;
+    final hasMeta =
+        item.badge != null ||
+        (item.compareAtPrice != null && item.compareAtPrice! > item.basePrice) ||
+        item.calories != null;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(KZ.sp10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(isAvailable ? 1.0 : 0.65),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: KZ.outlineVariant.withOpacity(0.3)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isAvailable ? 0.04 : 0.01),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: KZ.surface,
+        borderRadius: BorderRadius.circular(KZ.radiusMd),
+        border: Border.all(color: KZ.outlineVariant.withValues(alpha: 0.3)),
       ),
-      child: Row(
-        children: [
-          // Food Thumbnail
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: SizedBox(
-              width: 72,
-              height: 72,
-              child: item.imageUrl.isNotEmpty
-                  ? Image.network(
-                      item.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (ctx, err, st) => _buildImagePlaceholder(),
-                    )
-                  : _buildImagePlaceholder(),
+      child: Opacity(
+        opacity: isAvailable ? 1.0 : 0.55,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(KZ.radiusSm),
+              child: SizedBox(
+                width: 56,
+                height: 56,
+                child: item.imageUrl.isNotEmpty
+                    ? Image.network(
+                        item.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (ctx, err, st) =>
+                            _buildImagePlaceholder(),
+                      )
+                    : _buildImagePlaceholder(),
+              ),
             ),
-          ),
-          const SizedBox(width: 14),
-
-          // Details Column
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: isAvailable ? KZ.onSurface : Colors.grey.shade600,
+            const SizedBox(width: KZ.sp10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: KZ.itemTitle,
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  categoryName,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: KZ.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  formatCurrency(item.basePrice, locale: context.locale),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: KZ.primary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    if (item.badge != null)
-                      MenuItemBadgeChip(badge: item.badge!),
-                    if (item.compareAtPrice != null &&
-                        item.compareAtPrice! > item.basePrice)
-                      MenuItemComparePriceText(
-                        compareAtPrice: item.compareAtPrice!,
+                  const SizedBox(height: 3),
+                  Wrap(
+                    spacing: KZ.sp8,
+                    runSpacing: 2,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        categoryName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: KZ.caption,
                       ),
-                    Text(
-                      item.oftenOrderedWith.isEmpty
-                          ? 'admin_catalog.recommendation_count_zero'.tr()
-                          : item.oftenOrderedWith.length == 1
-                          ? 'admin_catalog.recommendation_count_one'.tr()
-                          : 'admin_catalog.recommendation_count_many'.tr(
-                              namedArgs: {
-                                'count': '${item.oftenOrderedWith.length}',
-                              },
-                            ),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: KZ.onSurfaceVariant,
+                      Text(
+                        formatCurrency(item.basePrice, locale: context.locale),
+                        style: KZ.price.copyWith(color: KZ.primary),
                       ),
+                    ],
+                  ),
+                  if (hasMeta) ...[
+                    const SizedBox(height: 3),
+                    Wrap(
+                      spacing: KZ.sp8,
+                      runSpacing: 2,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (item.badge != null)
+                          MenuItemBadgeChip(badge: item.badge!),
+                        if (item.compareAtPrice != null &&
+                            item.compareAtPrice! > item.basePrice)
+                          MenuItemComparePriceText(
+                            compareAtPrice: item.compareAtPrice!,
+                          ),
+                        if (item.calories != null)
+                          MenuItemCaloriesText(calories: item.calories!),
+                      ],
                     ),
-                    if (item.calories != null)
-                      MenuItemCaloriesText(calories: item.calories!),
                   ],
+                ],
+              ),
+            ),
+            const SizedBox(width: KZ.sp4),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Transform.scale(
+                  scale: 0.8,
+                  child: Switch(
+                    value: item.isAvailable,
+                    activeColor: KZ.tertiary,
+                    onChanged: (val) {
+                      ref
+                          .read(menuAdminProvider.notifier)
+                          .toggleItemAvailability(item);
+                    },
+                  ),
+                ),
+                SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: PopupMenuButton<String>(
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(
+                      Icons.more_vert_rounded,
+                      size: 18,
+                      color: KZ.onSurfaceVariant,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(KZ.radiusMd),
+                    ),
+                    onSelected: (val) {
+                      if (val == 'edit') {
+                        context.push('/admin/menu/edit', extra: item);
+                      } else if (val == 'delete') {
+                        _confirmDeleteItem(context, ref, item);
+                      }
+                    },
+                    itemBuilder: (ctx) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.edit_outlined,
+                              color: KZ.onSurfaceVariant,
+                              size: 18,
+                            ),
+                            const SizedBox(width: KZ.sp8),
+                            Text('common.edit'.tr()),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.delete_outline,
+                              color: KZ.error,
+                              size: 18,
+                            ),
+                            const SizedBox(width: KZ.sp8),
+                            Text(
+                              'common.delete'.tr(),
+                              style: const TextStyle(color: KZ.error),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-
-          // Actions Column (Toggle & Edit / Delete)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Availability Switch
-              Transform.scale(
-                scale: 0.85,
-                child: Switch(
-                  value: item.isAvailable,
-                  activeColor: KZ.tertiary,
-                  onChanged: (val) {
-                    ref
-                        .read(menuAdminProvider.notifier)
-                        .toggleItemAvailability(item);
-                  },
-                ),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.edit_outlined,
-                      color: KZ.primary,
-                      size: 20,
-                    ),
-                    onPressed: () {
-                      context.push('/admin/menu/edit', extra: item);
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      color: Colors.red,
-                      size: 20,
-                    ),
-                    onPressed: () => _confirmDeleteItem(context, item),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -555,60 +551,11 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> {
   Widget _buildImagePlaceholder() {
     return Container(
       color: KZ.surfaceContainerLow,
-      child: const Icon(Icons.restaurant, color: KZ.secondary, size: 30),
+      child: const Icon(Icons.restaurant, color: KZ.secondary, size: 24),
     );
   }
 
-  Widget _buildEmptyItemsState() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: KZ.outlineVariant.withOpacity(0.25)),
-      ),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.restaurant_menu_rounded,
-            size: 56,
-            color: Colors.grey,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'admin.no_food_items'.tr(),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: KZ.onSurface,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'admin.no_food_items_sub'.tr(),
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, color: KZ.secondary),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () => context.push('/admin/menu/add'),
-            icon: const Icon(Icons.add, size: 18),
-            label: Text('admin.add_food_item'.tr()),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: KZ.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _confirmDeleteItem(BuildContext context, MenuItem item) {
+  void _confirmDeleteItem(BuildContext context, WidgetRef ref, MenuItem item) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -622,7 +569,7 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> {
             child: Text('common.cancel'.tr()),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: KZ.error),
             onPressed: () {
               ref.read(menuAdminProvider.notifier).deleteItem(item.id);
               Navigator.pop(ctx);

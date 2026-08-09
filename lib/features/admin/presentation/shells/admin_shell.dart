@@ -44,8 +44,13 @@ class AdminShell extends ConsumerWidget {
     path: '/admin/orders',
   );
 
+  /// Information architecture: Overview / Orders & Operations / Catalog /
+  /// Marketing / People / Restaurant — approved 2026 IA restructuring. Both
+  /// the desktop sidebar and mobile drawer render from this single list, so
+  /// they can never drift apart.
   List<_AdminNavGroup> _adminGroups() => [
     _AdminNavGroup(
+      header: 'nav_group.overview'.tr(),
       entries: [
         _AdminNavEntry(
           icon: Icons.grid_view_rounded,
@@ -53,11 +58,28 @@ class AdminShell extends ConsumerWidget {
           label: 'nav.dashboard'.tr(),
           path: '/admin/dashboard',
         ),
+      ],
+    ),
+    _AdminNavGroup(
+      header: 'nav_group.orders_operations'.tr(),
+      entries: [
         _AdminNavEntry(
           icon: Icons.receipt_long_outlined,
           activeIcon: Icons.receipt_long,
           label: 'nav.orders'.tr(),
           path: '/admin/orders',
+        ),
+        _AdminNavEntry(
+          icon: Icons.tune_rounded,
+          activeIcon: Icons.tune_rounded,
+          label: 'nav.order_settings'.tr(),
+          path: '/admin/order-settings',
+        ),
+        _AdminNavEntry(
+          icon: Icons.schedule_outlined,
+          activeIcon: Icons.schedule_rounded,
+          label: 'nav.working_hours'.tr(),
+          path: '/admin/working-hours',
         ),
       ],
     ),
@@ -67,30 +89,37 @@ class AdminShell extends ConsumerWidget {
         _AdminNavEntry(
           icon: Icons.restaurant_menu_outlined,
           activeIcon: Icons.restaurant_menu,
-          label: 'nav.menu'.tr(),
+          label: 'nav.menu_items'.tr(),
           path: '/admin/menu',
         ),
+      ],
+    ),
+    _AdminNavGroup(
+      header: 'nav_group.marketing'.tr(),
+      entries: [
         _AdminNavEntry(
           icon: Icons.local_offer_outlined,
           activeIcon: Icons.local_offer,
           label: 'nav.promo_codes'.tr(),
           path: '/admin/offers',
         ),
-      ],
-    ),
-    _AdminNavGroup(
-      entries: [
         _AdminNavEntry(
           icon: Icons.campaign_outlined,
           activeIcon: Icons.campaign_rounded,
-          label: 'nav_group.marketing'.tr(),
+          label: 'nav.notifications'.tr(),
           path: '/admin/notifications',
         ),
       ],
     ),
     _AdminNavGroup(
-      header: 'nav_group.operations'.tr(),
+      header: 'nav_group.people'.tr(),
       entries: [
+        _AdminNavEntry(
+          icon: Icons.groups_outlined,
+          activeIcon: Icons.groups,
+          label: 'customers.title'.tr(),
+          path: '/admin/customers',
+        ),
         _AdminNavEntry(
           icon: Icons.people_alt_outlined,
           activeIcon: Icons.people_alt,
@@ -100,18 +129,13 @@ class AdminShell extends ConsumerWidget {
       ],
     ),
     _AdminNavGroup(
+      header: 'nav_group.restaurant'.tr(),
       entries: [
         _AdminNavEntry(
-          icon: Icons.groups_outlined,
-          activeIcon: Icons.groups,
-          label: 'customers.title'.tr(),
-          path: '/admin/customers',
-        ),
-        _AdminNavEntry(
-          icon: Icons.settings_outlined,
-          activeIcon: Icons.settings,
-          label: 'admin_settings.center_title'.tr(),
-          path: '/admin/settings',
+          icon: Icons.storefront_outlined,
+          activeIcon: Icons.storefront,
+          label: 'nav.restaurant_profile'.tr(),
+          path: '/admin/restaurant-profile',
         ),
       ],
     ),
@@ -156,6 +180,7 @@ class AdminShell extends ConsumerWidget {
     }
 
     return Scaffold(
+      backgroundColor: KZ.surfaceContainerLow,
       body: Row(
         children: [
           _AdminSidebar(
@@ -164,10 +189,155 @@ class AdminShell extends ConsumerWidget {
             onNavigate: navigateTo,
             onLogout: onLogout,
           ),
-          const VerticalDivider(thickness: 1, width: 1),
+          const VerticalDivider(
+            thickness: 1,
+            width: 1,
+            color: KZ.outlineVariant,
+          ),
           Expanded(child: child),
         ],
       ),
+    );
+  }
+}
+
+/// The compact brand block shown at the top of both the desktop sidebar and
+/// the mobile drawer — the shell's one source of Kebda Zaman branding, so
+/// individual screens never need to repeat a logo/name block of their own.
+class _ShellBrandHeader extends StatelessWidget {
+  const _ShellBrandHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        KZ.sp16,
+        KZ.sp20,
+        KZ.sp16,
+        KZ.sp16,
+      ),
+      child: Row(
+        children: [
+          const KZBrandLogo(width: 32, height: 32),
+          const SizedBox(width: KZ.sp10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'app_name'.tr(),
+                  style: KZ.itemTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'admin.shell_badge'.tr(),
+                  style: KZ.caption,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Renders every group + destination from the shared nav model. Used
+/// verbatim by both the desktop sidebar and the mobile drawer so the two
+/// surfaces can never visually drift apart.
+class _ShellNavList extends StatelessWidget {
+  final List<_AdminNavGroup> groups;
+  final String currentPath;
+  final ValueChanged<String> onNavigate;
+
+  const _ShellNavList({
+    required this.groups,
+    required this.currentPath,
+    required this.onNavigate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: KZ.sp8),
+      children: [
+        for (int g = 0; g < groups.length; g++) ...[
+          if (groups[g].header != null)
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                KZ.sp12,
+                g == 0 ? KZ.sp4 : KZ.sp24,
+                KZ.sp12,
+                KZ.sp8,
+              ),
+              child: Text(
+                groups[g].header!.toUpperCase(),
+                style: KZ.label.copyWith(
+                  color: KZ.onSurfaceVariant.withValues(alpha: 0.6),
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ),
+          for (final entry in groups[g].entries)
+            _SidebarTile(
+              entry: entry,
+              selected: currentPath.startsWith(entry.path),
+              onTap: () => onNavigate(entry.path),
+            ),
+        ],
+        const SizedBox(height: KZ.sp8),
+      ],
+    );
+  }
+}
+
+/// Bottom-of-shell logout action — visually separated from primary
+/// navigation by a hairline divider and neutral (non-competing) styling, so
+/// it stays easy to find without reading as another destination.
+class _ShellLogoutButton extends StatelessWidget {
+  final VoidCallback onLogout;
+
+  const _ShellLogoutButton({required this.onLogout});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Divider(height: 1, color: KZ.outlineVariant),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onLogout,
+            hoverColor: KZ.error.withValues(alpha: 0.05),
+            splashColor: KZ.error.withValues(alpha: 0.08),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: KZ.sp16,
+                vertical: KZ.sp14,
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.logout_rounded,
+                    color: KZ.secondary,
+                    size: KZ.iconControl,
+                  ),
+                  const SizedBox(width: KZ.sp12),
+                  Text(
+                    'profile.logout'.tr(),
+                    style: KZ.body.copyWith(color: KZ.secondary),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -191,61 +361,19 @@ class _AdminSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 240,
+      width: 248,
       color: KZ.surface,
       child: Column(
         children: [
-          const SizedBox(height: KZ.sp20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const KZBrandLogo(width: 28, height: 28),
-              const SizedBox(width: KZ.sp8),
-              Text('admin.title'.tr(), style: KZ.sectionTitle),
-            ],
-          ),
-          const SizedBox(height: KZ.sp16),
+          const _ShellBrandHeader(),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: KZ.sp8),
-              children: [
-                for (final group in groups) ...[
-                  if (group.header != null) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        KZ.sp12,
-                        KZ.sp16,
-                        KZ.sp12,
-                        KZ.sp6,
-                      ),
-                      child: Text(
-                        group.header!,
-                        style: KZ.label.copyWith(letterSpacing: 0.6),
-                      ),
-                    ),
-                  ],
-                  for (final entry in group.entries)
-                    _SidebarTile(
-                      entry: entry,
-                      selected: currentPath.startsWith(entry.path),
-                      onTap: () => onNavigate(entry.path),
-                    ),
-                ],
-              ],
+            child: _ShellNavList(
+              groups: groups,
+              currentPath: currentPath,
+              onNavigate: onNavigate,
             ),
           ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.all(KZ.sp12),
-            child: TextButton.icon(
-              onPressed: onLogout,
-              icon: const Icon(Icons.logout_rounded, color: KZ.secondary),
-              label: Text(
-                'profile.logout'.tr(),
-                style: const TextStyle(color: KZ.secondary),
-              ),
-            ),
-          ),
+          _ShellLogoutButton(onLogout: onLogout),
         ],
       ),
     );
@@ -274,14 +402,26 @@ class _SidebarTile extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(KZ.radiusMd),
             onTap: onTap,
+            hoverColor: KZ.surfaceContainerLow,
+            splashColor: KZ.primary.withValues(alpha: 0.08),
+            highlightColor: KZ.primary.withValues(alpha: 0.06),
             child: AnimatedContainer(
               duration: KZMotion.durationFor(context, KZMotion.fast),
               curve: KZMotion.stateChange,
+              constraints: const BoxConstraints(
+                minHeight: KZ.iconTapTargetMin,
+              ),
               decoration: BoxDecoration(
                 color: selected
-                    ? KZ.primaryFixed.withValues(alpha: 0.5)
+                    ? KZ.primary.withValues(alpha: 0.09)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(KZ.radiusMd),
+                border: Border(
+                  left: BorderSide(
+                    color: selected ? KZ.primary : Colors.transparent,
+                    width: 3,
+                  ),
+                ),
               ),
               padding: const EdgeInsets.symmetric(
                 horizontal: KZ.sp12,
@@ -348,6 +488,7 @@ class _AdminMobileShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: KZ.surfaceContainerLow,
       appBar: AppBar(
         backgroundColor: KZ.surface,
         elevation: 0,
@@ -355,65 +496,27 @@ class _AdminMobileShell extends StatelessWidget {
         title: Text(
           _currentLabel(),
           style: KZ.pageTitle.copyWith(fontSize: 18),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
       drawer: Drawer(
+        backgroundColor: KZ.surface,
         child: SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: KZ.sp12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const KZBrandLogo(width: 28, height: 28),
-                  const SizedBox(width: KZ.sp8),
-                  Text('admin.title'.tr(), style: KZ.sectionTitle),
-                ],
-              ),
-              const SizedBox(height: KZ.sp12),
+              const _ShellBrandHeader(),
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: KZ.sp8),
-                  children: [
-                    for (final group in groups) ...[
-                      if (group.header != null)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            KZ.sp12,
-                            KZ.sp16,
-                            KZ.sp12,
-                            KZ.sp6,
-                          ),
-                          child: Text(
-                            group.header!,
-                            style: KZ.label.copyWith(letterSpacing: 0.6),
-                          ),
-                        ),
-                      for (final entry in group.entries)
-                        _SidebarTile(
-                          entry: entry,
-                          selected: currentPath.startsWith(entry.path),
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            onNavigate(entry.path);
-                          },
-                        ),
-                    ],
-                  ],
+                child: _ShellNavList(
+                  groups: groups,
+                  currentPath: currentPath,
+                  onNavigate: (path) {
+                    Navigator.of(context).pop();
+                    onNavigate(path);
+                  },
                 ),
               ),
-              const Divider(height: 1),
-              Padding(
-                padding: const EdgeInsets.all(KZ.sp12),
-                child: TextButton.icon(
-                  onPressed: onLogout,
-                  icon: const Icon(Icons.logout_rounded, color: KZ.secondary),
-                  label: Text(
-                    'profile.logout'.tr(),
-                    style: const TextStyle(color: KZ.secondary),
-                  ),
-                ),
-              ),
+              _ShellLogoutButton(onLogout: onLogout),
             ],
           ),
         ),
@@ -447,16 +550,19 @@ class _CashierShell extends StatelessWidget {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
+                color: KZ.onSurface.withValues(alpha: 0.06),
                 blurRadius: 16,
                 offset: const Offset(0, -4),
               ),
             ],
-            border: Border(
-              top: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+            border: const Border(
+              top: BorderSide(color: KZ.outlineVariant),
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(
+            horizontal: KZ.sp12,
+            vertical: KZ.sp8,
+          ),
           child: SafeArea(
             top: false,
             child: Row(
@@ -465,27 +571,36 @@ class _CashierShell extends StatelessWidget {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.receipt_long, color: KZ.primary, size: 22),
-                    const SizedBox(height: 4),
+                    const Icon(
+                      Icons.receipt_long,
+                      color: KZ.primary,
+                      size: KZ.iconAction,
+                    ),
+                    const SizedBox(height: KZ.sp4),
                     Text(
                       entry.label.tr(),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                      style: KZ.navigationLabel.copyWith(
                         color: KZ.primary,
+                        fontWeight: FontWeight.w700,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
                 InkWell(
                   onTap: onLogout,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(KZ.radiusLg),
+                  hoverColor: KZ.error.withValues(alpha: 0.05),
                   child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: KZ.sp16,
+                      vertical: KZ.sp8,
+                    ),
                     child: Icon(
                       Icons.logout_rounded,
                       color: KZ.secondary,
-                      size: 22,
+                      size: KZ.iconAction,
                     ),
                   ),
                 ),
@@ -497,12 +612,23 @@ class _CashierShell extends StatelessWidget {
     }
 
     return Scaffold(
+      backgroundColor: KZ.surfaceContainerLow,
       body: Row(
         children: [
           NavigationRail(
+            backgroundColor: KZ.surface,
             selectedIndex: 0,
             onDestinationSelected: (_) {},
             labelType: NavigationRailLabelType.all,
+            useIndicator: true,
+            indicatorColor: KZ.primary.withValues(alpha: 0.09),
+            selectedIconTheme: const IconThemeData(color: KZ.primary),
+            unselectedIconTheme: const IconThemeData(color: KZ.secondary),
+            selectedLabelTextStyle: KZ.navigationLabel.copyWith(
+              color: KZ.primary,
+              fontWeight: FontWeight.w700,
+            ),
+            unselectedLabelTextStyle: KZ.navigationLabel,
             destinations: [
               NavigationRailDestination(
                 icon: const Icon(Icons.receipt_long_outlined),
@@ -512,28 +638,35 @@ class _CashierShell extends StatelessWidget {
             ],
             leading: Column(
               children: [
-                const SizedBox(height: 16),
+                const SizedBox(height: KZ.sp16),
                 const KZBrandLogo(width: 32, height: 32),
-                const SizedBox(height: 8),
-                Text('Admin', style: Theme.of(context).textTheme.labelMedium),
-                const SizedBox(height: 16),
+                const SizedBox(height: KZ.sp8),
+                Text('admin.shell_badge'.tr(), style: KZ.caption),
+                const SizedBox(height: KZ.sp16),
               ],
             ),
             trailing: Expanded(
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.only(bottom: KZ.sp16),
                   child: IconButton(
                     onPressed: onLogout,
                     tooltip: 'profile.logout'.tr(),
-                    icon: const Icon(Icons.logout_rounded),
+                    icon: const Icon(
+                      Icons.logout_rounded,
+                      color: KZ.secondary,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          const VerticalDivider(thickness: 1, width: 1),
+          const VerticalDivider(
+            thickness: 1,
+            width: 1,
+            color: KZ.outlineVariant,
+          ),
           Expanded(child: child),
         ],
       ),

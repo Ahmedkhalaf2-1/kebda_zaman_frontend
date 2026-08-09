@@ -396,7 +396,14 @@ class KZ {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: bodyStyle),
+          Expanded(
+            child: Text(
+              label,
+              style: bodyStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           Transform.scale(
             scale: 0.85,
             child: Switch(

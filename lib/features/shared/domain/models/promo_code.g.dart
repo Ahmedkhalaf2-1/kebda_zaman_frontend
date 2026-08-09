@@ -18,6 +18,7 @@ _$PromoCodeImpl _$$PromoCodeImplFromJson(Map<String, dynamic> json) =>
       isActive: json['isActive'] as bool? ?? true,
       usageLimit: (json['usageLimit'] as num?)?.toInt(),
       perUserLimit: (json['perUserLimit'] as num?)?.toInt(),
+      usageCount: (json['usageCount'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$$PromoCodeImplToJson(_$PromoCodeImpl instance) =>
@@ -32,6 +33,7 @@ Map<String, dynamic> _$$PromoCodeImplToJson(_$PromoCodeImpl instance) =>
       'isActive': instance.isActive,
       'usageLimit': instance.usageLimit,
       'perUserLimit': instance.perUserLimit,
+      'usageCount': instance.usageCount,
     };
 
 const _$DiscountTypeEnumMap = {

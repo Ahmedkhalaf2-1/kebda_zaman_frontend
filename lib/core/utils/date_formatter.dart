@@ -43,6 +43,12 @@ String formatOrderTimestamp(DateTime dateTime) {
   return '$dayLabel • $timeStr';
 }
 
+/// Formats a plain date (no time-of-day) as e.g. "31 Aug" — used for promo
+/// code validity/expiry, where only the calendar date matters. Same
+/// month-abbreviation convention as [formatOrderTimestamp].
+String formatShortDate(DateTime date) =>
+    '${date.day} ${_kMonthAbbreviations[date.month - 1]}';
+
 /// Formats a timestamp as a short relative string, e.g. "Just now",
 /// "5 mins ago", "3 hrs ago", "2 days ago" — for compact contexts like a
 /// notification list. [dateTime] must already be in local time (see

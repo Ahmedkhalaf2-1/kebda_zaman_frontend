@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/domain/models/staff_account.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/staff_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_person_card.dart';
 
 class StaffManagementScreen extends ConsumerWidget {
   const StaffManagementScreen({super.key});
@@ -14,58 +16,38 @@ class StaffManagementScreen extends ConsumerWidget {
     final staffAsync = ref.watch(staffProvider);
 
     return Scaffold(
-      backgroundColor: KZ.surface,
+      backgroundColor: KZ.surfaceContainerLow,
       appBar: AppBar(
         backgroundColor: KZ.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        title: Text(
-          'staff.title'.tr(),
-          style: const TextStyle(
-            color: KZ.onSurface,
-            fontWeight: FontWeight.w700,
+        title: Text('staff.title'.tr(), style: KZ.pageTitle),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: KZ.sp16),
+            child: _AddCashierButton(
+              onPressed: () => _showStaffForm(context, ref),
+            ),
           ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: KZ.primary,
-        foregroundColor: Colors.white,
-        onPressed: () => _showStaffForm(context, ref),
-        icon: const Icon(Icons.person_add_alt_1_rounded),
-        label: Text('staff.add_cashier'.tr()),
+        ],
       ),
       body: staffAsync.when(
         loading: () =>
             const Center(child: CircularProgressIndicator(color: KZ.primary)),
-        error: (e, st) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 12),
-              Text(
-                'common.something_wrong'.tr(),
-                style: const TextStyle(color: KZ.onSurface),
-              ),
-              const SizedBox(height: 12),
-              KZButton(
-                label: 'common.retry'.tr(),
-                onPressed: () => ref.invalidate(staffProvider),
-              ),
-            ],
-          ),
+        error: (e, st) => KZErrorState(
+          message: 'common.something_wrong'.tr(),
+          retryLabel: 'common.retry'.tr(),
+          onRetry: () => ref.invalidate(staffProvider),
         ),
         data: (staffList) {
           if (staffList.isEmpty) {
-            return Center(
-              child: Text(
-                'staff.empty'.tr(),
-                style: const TextStyle(color: KZ.secondary),
-              ),
+            return KZEmptyState(
+              icon: Icons.badge_outlined,
+              title: 'staff.empty'.tr(),
             );
           }
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             itemCount: staffList.length,
             itemBuilder: (context, index) {
               final staff = staffList[index];
@@ -102,6 +84,47 @@ class StaffManagementScreen extends ConsumerWidget {
   }
 }
 
+/// The one dominant primary action for this screen — a compact filled
+/// header button rather than a floating action button, matching the
+/// pattern already established on the Menu Items screen.
+class _AddCashierButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  const _AddCashierButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 38,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+        label: Text(
+          'staff.add_cashier'.tr(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: KZ.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: KZ.sp14),
+          textStyle: KZ.buttonLabel.copyWith(fontSize: 13),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(KZ.radiusMd),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Priority fields: name, active/inactive state, contact. No per-record
+/// "role" field exists on [StaffAccount] — every account managed here is
+/// implicitly a cashier (the whole screen/dialog is scoped to that), so no
+/// role badge was invented. Edit and the active-toggle are both per-record
+/// management actions, not this screen's primary workflow — moved into one
+/// compact overflow menu; the status pill itself stays always visible so
+/// the state is still immediately readable without opening anything.
 class _StaffCard extends StatelessWidget {
   final StaffAccount staff;
   final VoidCallback onEdit;
@@ -115,87 +138,80 @@ class _StaffCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: KZ.outlineVariant.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        staff.name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: KZ.onSurface,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: (staff.isActive ? KZ.tertiary : KZ.error)
-                            .withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        staff.isActive
-                            ? 'staff.active'.tr()
-                            : 'staff.inactive'.tr(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: staff.isActive ? KZ.tertiary : KZ.error,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                if (staff.email != null)
-                  Text(
-                    staff.email!,
-                    style: const TextStyle(fontSize: 13, color: KZ.secondary),
+    final contactParts = [
+      if (staff.email != null && staff.email!.isNotEmpty) staff.email!,
+      if (staff.phone != null && staff.phone!.isNotEmpty) staff.phone!,
+    ];
+
+    return AdminPersonCard(
+      name: staff.name,
+      badges: [
+        AdminStatusPill(
+          label: staff.isActive ? 'staff.active'.tr() : 'staff.inactive'.tr(),
+          color: staff.isActive ? KZ.tertiary : KZ.error,
+        ),
+      ],
+      subtitle: contactParts.isEmpty ? null : contactParts.join('  ·  '),
+      trailing: SizedBox(
+        height: 32,
+        width: 32,
+        child: PopupMenuButton<String>(
+          padding: EdgeInsets.zero,
+          icon: const Icon(
+            Icons.more_vert_rounded,
+            size: 18,
+            color: KZ.onSurfaceVariant,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(KZ.radiusMd),
+          ),
+          onSelected: (val) {
+            if (val == 'edit') {
+              onEdit();
+            } else if (val == 'toggle') {
+              onToggleActive();
+            }
+          },
+          itemBuilder: (ctx) => [
+            PopupMenuItem(
+              value: 'edit',
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.edit_outlined,
+                    color: KZ.onSurfaceVariant,
+                    size: 18,
                   ),
-                if (staff.phone != null)
-                  Text(
-                    staff.phone!,
-                    style: const TextStyle(fontSize: 13, color: KZ.secondary),
+                  const SizedBox(width: KZ.sp8),
+                  Text('common.edit'.tr()),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'toggle',
+              child: Row(
+                children: [
+                  Icon(
+                    staff.isActive
+                        ? Icons.toggle_off_outlined
+                        : Icons.toggle_on_rounded,
+                    color: staff.isActive ? KZ.error : KZ.tertiary,
+                    size: 18,
                   ),
-              ],
+                  const SizedBox(width: KZ.sp8),
+                  Text(
+                    staff.isActive
+                        ? 'staff.deactivate'.tr()
+                        : 'staff.activate'.tr(),
+                    style: TextStyle(
+                      color: staff.isActive ? KZ.error : KZ.tertiary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            onPressed: onEdit,
-            icon: const Icon(Icons.edit_outlined, color: KZ.secondary),
-          ),
-          IconButton(
-            onPressed: onToggleActive,
-            tooltip: staff.isActive
-                ? 'staff.deactivate'.tr()
-                : 'staff.activate'.tr(),
-            icon: Icon(
-              staff.isActive
-                  ? Icons.toggle_on_rounded
-                  : Icons.toggle_off_outlined,
-              color: staff.isActive ? KZ.tertiary : KZ.secondary,
-              size: 28,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

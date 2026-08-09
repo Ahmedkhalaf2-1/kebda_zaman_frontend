@@ -1,4 +1,4 @@
-// Focused widget tests for AdminSettingsScreen's
+// Focused widget tests for RestaurantProfileScreen's
 // restaurantLatitude/restaurantLongitude handling (distance-based delivery
 // pricing migration, now map-picker based). RestaurantSettings.
 // restaurantLatitude/Longitude are nullable — a missing/malformed backend
@@ -12,6 +12,11 @@
 // pumped in a widget test here; a GoogleMap camera target is always a
 // valid coordinate by construction, so the "manual out-of-range/non-numeric
 // input" scenarios that used to be reachable by typing no longer apply.
+//
+// RestaurantProfileScreen is one of three destinations split out of the
+// former single tabbed AdminSettingsScreen (IA restructuring) — this file
+// now pumps it directly with no tab to switch to, since Profile fields are
+// the screen's entire content.
 //
 //  1. Coordinates load correctly into the read-only display.
 //  2. The "Select restaurant location on map" action is present and
@@ -31,7 +36,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
-import 'package:kebda_zaman/features/admin/presentation/screens/admin_settings_screen.dart';
+import 'package:kebda_zaman/features/admin/presentation/screens/restaurant_profile_screen.dart';
 import 'package:kebda_zaman/features/shared/domain/models/restaurant_settings.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/settings_repository.dart';
 import 'package:kebda_zaman/generated/codegen_loader.g.dart';
@@ -81,7 +86,7 @@ class _MockSettingsRepository implements SettingsRepository {
 }
 
 Future<void> _pump(WidgetTester tester, _MockSettingsRepository repo) async {
-  // Tall surface so every field in the Profile tab's ListView is actually
+  // Tall surface so every field in the screen's ListView is actually
   // built (slivers only build children within the viewport/cache extent —
   // a normal phone-sized surface would leave the coordinate display and
   // Save button unbuilt and unfindable).
@@ -111,7 +116,7 @@ Future<void> _pump(WidgetTester tester, _MockSettingsRepository repo) async {
               localizationsDelegates: context.localizationDelegates,
               supportedLocales: context.supportedLocales,
               locale: context.locale,
-              home: const AdminSettingsScreen(),
+              home: const RestaurantProfileScreen(),
             );
           },
         ),

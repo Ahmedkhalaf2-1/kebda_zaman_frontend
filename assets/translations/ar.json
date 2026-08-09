@@ -11,11 +11,19 @@
     "settings": "الإعدادات",
     "offers": "العروض",
     "notifications": "الإشعارات",
-    "promo_codes": "أكواد الخصم"
+    "promo_codes": "أكواد الخصم",
+    "menu_items": "عناصر المنيو",
+    "restaurant_profile": "بيانات المطعم",
+    "working_hours": "ساعات العمل",
+    "order_settings": "إعدادات الطلبات"
   },
   "nav_group": {
+    "overview": "نظرة عامة",
+    "orders_operations": "الطلبات والعمليات",
     "catalog": "الأصناف",
     "marketing": "التسويق",
+    "people": "الفريق",
+    "restaurant": "المطعم",
     "operations": "العمليات"
   },
   "home": {
@@ -372,6 +380,7 @@
   },
   "admin": {
     "title": "لوحة تحكم الأدمن",
+    "shell_badge": "لوحة الإدارة",
     "greeting": "صباح الخير، الأدمن",
     "overview": "نظرة عامة",
     "live": "مباشر",
@@ -528,7 +537,14 @@
     "audience_selected_users": "مستخدمون مختارون (قريباً)",
     "audience_vip": "فئة العملاء: VIP (قريباً)",
     "audience_city_cairo": "المدينة: القاهرة (قريباً)",
-    "audience_branch_heliopolis": "الفرع: مصر الجديدة (قريباً)"
+    "audience_branch_heliopolis": "الفرع: مصر الجديدة (قريباً)",
+    "section_campaign_details": "تفاصيل الحملة",
+    "section_content": "المحتوى",
+    "section_audience": "الجمهور المستهدف",
+    "section_audience_sub": "اختر من سيستلم هذا الإشعار.",
+    "section_destination": "الوجهة",
+    "section_schedule": "الجدولة",
+    "section_review_send": "المراجعة والإرسال"
   },
   "admin_offers": {
     "empty_title": "لا توجد أكواد خصم بعد",
@@ -600,7 +616,20 @@
     "value_required": "مطلوب",
     "active_promo_toggle": "مفعّل — يمكن للعملاء استخدام هذا الكود",
     "create_promo": "إنشاء كود الخصم",
-    "save_promo_success": "تم حفظ كود الخصم بنجاح!"
+    "save_promo_success": "تم حفظ كود الخصم بنجاح!",
+    "code_discount_section": "الكود والخصم",
+    "conditions_section": "الشروط",
+    "usage_limits_section": "حدود الاستخدام",
+    "current_usage_note": "تم استخدامه {count} مرة حتى الآن.",
+    "total_usage_limit": "الحد الإجمالي للاستخدام",
+    "total_usage_limit_hint": "أقصى عدد مرات استخدام ناجحة لهذا الكود. اتركه فارغًا لاستخدام غير محدود.",
+    "total_usage_limit_invalid": "أدخل رقمًا صحيحًا 1 أو أكثر، أو اتركه فارغًا لاستخدام غير محدود.",
+    "per_user_limit": "الحد لكل عميل",
+    "per_user_limit_hint": "أقصى عدد مرات يمكن لعميل واحد استخدام هذا الكود. اتركه فارغًا لاستخدام غير محدود.",
+    "per_user_limit_invalid": "أدخل رقمًا صحيحًا 1 أو أكثر، أو اتركه فارغًا لاستخدام غير محدود.",
+    "validity_section": "الصلاحية",
+    "start_date": "تاريخ البداية",
+    "end_date": "تاريخ الانتهاء"
   },
   "admin_catalog": {
     "metadata_section": "بيانات القائمة الإضافية",
@@ -624,6 +653,9 @@
     "recommendation_count_zero": "لا توجد توصيات",
     "recommendation_count_one": "توصية واحدة",
     "recommendation_count_many": "{count} توصيات",
+    "item_count_zero": "لا توجد عناصر",
+    "item_count_one": "عنصر واحد",
+    "item_count_many": "{count} عناصر",
     "move_up": "تحريك لأعلى",
     "move_down": "تحريك لأسفل",
     "remove_recommendation": "إزالة"
@@ -751,8 +783,16 @@
     "empty": "لا توجد أكواد خصم بعد.",
     "active": "مفعّل",
     "inactive": "غير مفعّل",
+    "activate": "تفعيل",
+    "deactivate": "إيقاف",
     "validity": "صالح",
     "usage_limit": "حد الاستخدام",
+    "unlimited": "غير محدود",
+    "used_of_limit": "{used} / {limit} استخدام",
+    "used_unlimited": "{used} استخدام · غير محدود",
+    "exhausted": "مستنفد",
+    "expired": "منتهي",
+    "valid_until": "صالح حتى {date}",
     "delete_title": "حذف كود الخصم؟",
     "delete_body": "حذف {code}؟ لا يمكن التراجع عن هذا الإجراء."
   },
@@ -795,7 +835,10 @@
     "closed_message_ar": "رسالة الإغلاق (عربي)",
     "close_restaurant_title": "إغلاق المطعم؟",
     "close_restaurant_body": "سيظل بإمكان العملاء تصفح المنيو، لكن سيتم رفض عمليات الدفع الجديدة حتى تعيد الفتح.",
-    "close_restaurant_confirm": "إغلاق المطعم"
+    "close_restaurant_confirm": "إغلاق المطعم",
+    "section_identity": "هوية المطعم",
+    "section_contact": "التواصل",
+    "section_location": "الموقع"
   },
   "legal": {
     "last_updated_label": "آخر تحديث: {date}",

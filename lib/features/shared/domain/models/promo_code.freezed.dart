@@ -28,9 +28,19 @@ mixin _$PromoCode {
   double get minOrderValue => throw _privateConstructorUsedError;
   DateTime get startDate => throw _privateConstructorUsedError;
   DateTime get endDate => throw _privateConstructorUsedError;
-  bool get isActive => throw _privateConstructorUsedError;
-  int? get usageLimit => throw _privateConstructorUsedError;
-  int? get perUserLimit => throw _privateConstructorUsedError;
+  bool get isActive =>
+      throw _privateConstructorUsedError; // Global usage cap — backend field `maxUsage`. `null` means unlimited;
+  // this exact convention is reused everywhere (model, payload, and the
+  // admin form's "leave empty for unlimited" UX), never a second field.
+  int? get usageLimit =>
+      throw _privateConstructorUsedError; // Per-customer usage cap — backend field `perUserLimit`. Same
+  // null-means-unlimited convention as [usageLimit].
+  int? get perUserLimit =>
+      throw _privateConstructorUsedError; // How many times this code has actually been successfully redeemed —
+  // backend field `usageCount`, returned on every admin list/detail
+  // response (AdminPromoResponseDto). Read-only from Flutter's side: it's
+  // never sent in a create/update payload, only displayed.
+  int get usageCount => throw _privateConstructorUsedError;
 
   /// Serializes this PromoCode to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -58,6 +68,7 @@ abstract class $PromoCodeCopyWith<$Res> {
     bool isActive,
     int? usageLimit,
     int? perUserLimit,
+    int usageCount,
   });
 }
 
@@ -86,6 +97,7 @@ class _$PromoCodeCopyWithImpl<$Res, $Val extends PromoCode>
     Object? isActive = null,
     Object? usageLimit = freezed,
     Object? perUserLimit = freezed,
+    Object? usageCount = null,
   }) {
     return _then(
       _value.copyWith(
@@ -129,6 +141,10 @@ class _$PromoCodeCopyWithImpl<$Res, $Val extends PromoCode>
                 ? _value.perUserLimit
                 : perUserLimit // ignore: cast_nullable_to_non_nullable
                       as int?,
+            usageCount: null == usageCount
+                ? _value.usageCount
+                : usageCount // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -155,6 +171,7 @@ abstract class _$$PromoCodeImplCopyWith<$Res>
     bool isActive,
     int? usageLimit,
     int? perUserLimit,
+    int usageCount,
   });
 }
 
@@ -182,6 +199,7 @@ class __$$PromoCodeImplCopyWithImpl<$Res>
     Object? isActive = null,
     Object? usageLimit = freezed,
     Object? perUserLimit = freezed,
+    Object? usageCount = null,
   }) {
     return _then(
       _$PromoCodeImpl(
@@ -225,6 +243,10 @@ class __$$PromoCodeImplCopyWithImpl<$Res>
             ? _value.perUserLimit
             : perUserLimit // ignore: cast_nullable_to_non_nullable
                   as int?,
+        usageCount: null == usageCount
+            ? _value.usageCount
+            : usageCount // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -244,6 +266,7 @@ class _$PromoCodeImpl implements _PromoCode {
     this.isActive = true,
     this.usageLimit,
     this.perUserLimit,
+    this.usageCount = 0,
   });
 
   factory _$PromoCodeImpl.fromJson(Map<String, dynamic> json) =>
@@ -267,14 +290,26 @@ class _$PromoCodeImpl implements _PromoCode {
   @override
   @JsonKey()
   final bool isActive;
+  // Global usage cap — backend field `maxUsage`. `null` means unlimited;
+  // this exact convention is reused everywhere (model, payload, and the
+  // admin form's "leave empty for unlimited" UX), never a second field.
   @override
   final int? usageLimit;
+  // Per-customer usage cap — backend field `perUserLimit`. Same
+  // null-means-unlimited convention as [usageLimit].
   @override
   final int? perUserLimit;
+  // How many times this code has actually been successfully redeemed —
+  // backend field `usageCount`, returned on every admin list/detail
+  // response (AdminPromoResponseDto). Read-only from Flutter's side: it's
+  // never sent in a create/update payload, only displayed.
+  @override
+  @JsonKey()
+  final int usageCount;
 
   @override
   String toString() {
-    return 'PromoCode(id: $id, code: $code, discountType: $discountType, value: $value, minOrderValue: $minOrderValue, startDate: $startDate, endDate: $endDate, isActive: $isActive, usageLimit: $usageLimit, perUserLimit: $perUserLimit)';
+    return 'PromoCode(id: $id, code: $code, discountType: $discountType, value: $value, minOrderValue: $minOrderValue, startDate: $startDate, endDate: $endDate, isActive: $isActive, usageLimit: $usageLimit, perUserLimit: $perUserLimit, usageCount: $usageCount)';
   }
 
   @override
@@ -297,7 +332,9 @@ class _$PromoCodeImpl implements _PromoCode {
             (identical(other.usageLimit, usageLimit) ||
                 other.usageLimit == usageLimit) &&
             (identical(other.perUserLimit, perUserLimit) ||
-                other.perUserLimit == perUserLimit));
+                other.perUserLimit == perUserLimit) &&
+            (identical(other.usageCount, usageCount) ||
+                other.usageCount == usageCount));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -314,6 +351,7 @@ class _$PromoCodeImpl implements _PromoCode {
     isActive,
     usageLimit,
     perUserLimit,
+    usageCount,
   );
 
   /// Create a copy of PromoCode
@@ -342,6 +380,7 @@ abstract class _PromoCode implements PromoCode {
     final bool isActive,
     final int? usageLimit,
     final int? perUserLimit,
+    final int usageCount,
   }) = _$PromoCodeImpl;
 
   factory _PromoCode.fromJson(Map<String, dynamic> json) =
@@ -362,11 +401,19 @@ abstract class _PromoCode implements PromoCode {
   @override
   DateTime get endDate;
   @override
-  bool get isActive;
+  bool get isActive; // Global usage cap — backend field `maxUsage`. `null` means unlimited;
+  // this exact convention is reused everywhere (model, payload, and the
+  // admin form's "leave empty for unlimited" UX), never a second field.
   @override
-  int? get usageLimit;
+  int? get usageLimit; // Per-customer usage cap — backend field `perUserLimit`. Same
+  // null-means-unlimited convention as [usageLimit].
   @override
-  int? get perUserLimit;
+  int? get perUserLimit; // How many times this code has actually been successfully redeemed —
+  // backend field `usageCount`, returned on every admin list/detail
+  // response (AdminPromoResponseDto). Read-only from Flutter's side: it's
+  // never sent in a create/update payload, only displayed.
+  @override
+  int get usageCount;
 
   /// Create a copy of PromoCode
   /// with the given fields replaced by the non-null parameter values.
