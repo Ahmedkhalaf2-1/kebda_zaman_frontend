@@ -168,22 +168,32 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
     return missing;
   }
 
-  // Section Header matching Stitch typography & spacing
+  // Section Header matching Stitch typography & spacing. `dense` renders a
+  // nested modifier group's own header — one step quieter than a top-level
+  // group so typography + indentation together read as "belongs to the
+  // option above", not a brand-new independent section.
   Widget _buildSectionHeader({
     required String title,
     bool isRequired = false,
     String? subtitle,
+    bool dense = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: EdgeInsets.only(bottom: dense ? 10.0 : 16.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title.toUpperCase(),
-            style: KZ.sectionTitle.copyWith(fontSize: 16),
+          Expanded(
+            child: Text(
+              dense ? title : title.toUpperCase(),
+              style: dense
+                  ? KZ.labelLarge.copyWith(color: ItemDetailsScreen.onSurfaceColor)
+                  : KZ.sectionTitle.copyWith(fontSize: 16),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          if (isRequired)
+          if (isRequired) ...[
+            const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
@@ -196,18 +206,64 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                   color: ItemDetailsScreen.primaryColor,
                 ),
               ),
-            )
-          else if (subtitle != null)
-            Text(subtitle, style: KZ.label),
+            ),
+          ] else if (subtitle != null) ...[
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                subtitle,
+                style: KZ.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  // Build Modifier Group Card
-  Widget _buildModifierGroupSection(BuildContext context, ModifierGroup group) {
+  bool _isOptionSelected(ModifierGroup group, ModifierOption opt) {
+    switch (group.selectionType) {
+      case 'SINGLE':
+        return selectedSingleOptions[group.id] == opt.id;
+      case 'MULTIPLE':
+        return (selectedMultipleOptions[group.id] ?? const []).contains(opt.id);
+      case 'QUANTITY':
+        return (extraQuantities[group.id]?[opt.id] ?? 0) > 0;
+      default:
+        return false;
+    }
+  }
+
+  // Renders a modifier group as one flat, lightly-bordered container with
+  // divided rows instead of a stack of individually-shadowed cards — the
+  // selected state uses a restrained primary tint + left accent bar rather
+  // than a heavy border/shadow per option. `depth > 0` is a nested group,
+  // rendered directly beneath its selected parent option and indented —
+  // purely presentational; the selection/pricing/validation logic that
+  // already recurses into `nestedModifierGroups` (`_calculateGroupPrice`,
+  // `_getMissingRequiredGroups`) is completely untouched.
+  Widget _buildModifierGroupSection(
+    BuildContext context,
+    ModifierGroup group, {
+    int depth = 0,
+  }) {
+    final nestedChildren = <Widget>[];
+    for (final opt in group.options) {
+      if (_isOptionSelected(group, opt) && opt.nestedModifierGroups.isNotEmpty) {
+        for (final nested in opt.nestedModifierGroups) {
+          nestedChildren.add(const SizedBox(height: 16));
+          nestedChildren.add(
+            _buildModifierGroupSection(context, nested, depth: depth + 1),
+          );
+        }
+      }
+    }
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 32.0),
+      padding: EdgeInsets.only(bottom: 28.0, left: depth > 0 ? 20.0 : 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -219,277 +275,311 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                     namedArgs: {'max': '${group.maxSelections}'},
                   )
                 : null,
+            dense: depth > 0,
           ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: ItemDetailsScreen.outlineVariantColor),
+              ),
+              child: Column(
+                children: [
+                  for (int i = 0; i < group.options.length; i++) ...[
+                    if (i > 0)
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: ItemDetailsScreen.outlineVariantColor
+                            .withValues(alpha: 0.5),
+                      ),
+                    _buildOptionRow(context, group, group.options[i]),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          ...nestedChildren,
+        ],
+      ),
+    );
+  }
 
-          // SINGLE Selection (Radio Cards)
-          if (group.selectionType == 'SINGLE')
-            Column(
-              children: group.options.map((opt) {
-                final isSelected = selectedSingleOptions[group.id] == opt.id;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        selectedSingleOptions[group.id] = opt.id;
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(16),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? ItemDetailsScreen.primaryFixedColor.withValues(
-                                alpha: 0.3,
-                              )
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isSelected
-                              ? ItemDetailsScreen.primaryColor
-                              : ItemDetailsScreen.outlineVariantColor,
-                          width: isSelected ? 1.5 : 1.0,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            opt.name,
-                            style: KZ.bodyLarge.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: KZ.onSurface,
+  Widget _buildOptionRow(
+    BuildContext context,
+    ModifierGroup group,
+    ModifierOption opt,
+  ) {
+    switch (group.selectionType) {
+      case 'MULTIPLE':
+        return _buildMultipleOptionRow(context, group, opt);
+      case 'QUANTITY':
+        return _buildQuantityOptionRow(context, group, opt);
+      default:
+        return _buildSingleOptionRow(context, group, opt);
+    }
+  }
+
+  Widget _buildSingleOptionRow(
+    BuildContext context,
+    ModifierGroup group,
+    ModifierOption opt,
+  ) {
+    final isSelected = selectedSingleOptions[group.id] == opt.id;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          selectedSingleOptions[group.id] = opt.id;
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected
+              ? ItemDetailsScreen.primaryColor.withValues(alpha: 0.06)
+              : Colors.transparent,
+          border: Border(
+            left: BorderSide(
+              color: isSelected
+                  ? ItemDetailsScreen.primaryColor
+                  : Colors.transparent,
+              width: 3,
+            ),
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.check_circle_rounded : Icons.circle_outlined,
+              size: 20,
+              color: isSelected
+                  ? ItemDetailsScreen.primaryColor
+                  : ItemDetailsScreen.outlineVariantColor,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                opt.name,
+                style: KZ.bodyLarge.copyWith(
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                  color: isSelected
+                      ? ItemDetailsScreen.primaryColor
+                      : KZ.onSurface,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '+${formatCurrency(opt.priceModifier, locale: context.locale)}',
+              style: KZ.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMultipleOptionRow(
+    BuildContext context,
+    ModifierGroup group,
+    ModifierOption opt,
+  ) {
+    final selectedList = selectedMultipleOptions[group.id] ?? [];
+    final isSelected = selectedList.contains(opt.id);
+    final groupMap = extraQuantities[group.id] ?? {};
+    final optQty = groupMap[opt.id] ?? (isSelected ? 1 : 0);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isSelected
+            ? ItemDetailsScreen.primaryColor.withValues(alpha: 0.06)
+            : Colors.transparent,
+        border: Border(
+          left: BorderSide(
+            color: isSelected
+                ? ItemDetailsScreen.primaryColor
+                : Colors.transparent,
+            width: 3,
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 22,
+            height: 22,
+            child: Checkbox(
+              value: isSelected,
+              activeColor: ItemDetailsScreen.primaryColor,
+              side: const BorderSide(
+                color: ItemDetailsScreen.outlineColor,
+                width: 1.5,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              onChanged: (val) {
+                setState(() {
+                  final list = List<String>.from(
+                    selectedMultipleOptions[group.id] ?? [],
+                  );
+                  if (val == true) {
+                    if (list.length < group.maxSelections) {
+                      list.add(opt.id);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'item_details.max_selections'.tr(
+                              namedArgs: {'max': '${group.maxSelections}'},
                             ),
                           ),
-                          Text(
-                            opt.priceModifier == 0
-                                ? '+${formatCurrency(0, locale: context.locale)}'
-                                : '+${formatCurrency(opt.priceModifier, locale: context.locale)}',
-                            style: KZ.body,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  } else {
+                    list.remove(opt.id);
+                  }
+                  selectedMultipleOptions[group.id] = list;
+                });
+              },
             ),
-
-          // MULTIPLE Selection (Checkbox Cards with Stepper)
-          if (group.selectionType == 'MULTIPLE')
-            Column(
-              children: group.options.map((opt) {
-                final selectedList = selectedMultipleOptions[group.id] ?? [];
-                final isSelected = selectedList.contains(opt.id);
-                final groupMap = extraQuantities[group.id] ?? {};
-                final optQty = groupMap[opt.id] ?? (isSelected ? 1 : 0);
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isSelected
-                            ? ItemDetailsScreen.primaryColor
-                            : ItemDetailsScreen.outlineVariantColor,
-                        width: isSelected ? 1.5 : 1.0,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: Checkbox(
-                                value: isSelected,
-                                activeColor: ItemDetailsScreen.primaryColor,
-                                side: const BorderSide(
-                                  color: ItemDetailsScreen.outlineColor,
-                                  width: 1.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                onChanged: (val) {
-                                  setState(() {
-                                    final list = List<String>.from(
-                                      selectedMultipleOptions[group.id] ?? [],
-                                    );
-                                    if (val == true) {
-                                      if (list.length < group.maxSelections) {
-                                        list.add(opt.id);
-                                      } else {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'item_details.max_selections'.tr(
-                                                namedArgs: {
-                                                  'max':
-                                                      '${group.maxSelections}',
-                                                },
-                                              ),
-                                            ),
-                                            behavior: SnackBarBehavior.floating,
-                                          ),
-                                        );
-                                      }
-                                    } else {
-                                      list.remove(opt.id);
-                                    }
-                                    selectedMultipleOptions[group.id] = list;
-                                  });
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  opt.name,
-                                  style: KZ.bodyLarge.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: KZ.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '+${formatCurrency(opt.priceModifier, locale: context.locale)}',
-                                  style: KZ.bodySmall,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-
-                        // Stepper (- 1 +)
-                        if (isSelected)
-                          KZQuantityStepper(
-                            quantity: optQty,
-                            minQuantity: 0,
-                            maxQuantity: group.maxSelections,
-                            onChanged: (newQty) {
-                              setState(() {
-                                if (newQty < 1) {
-                                  final map = Map<String, int>.from(
-                                    extraQuantities[group.id] ?? {},
-                                  );
-                                  map.remove(opt.id);
-                                  extraQuantities[group.id] = map;
-                                  final list = List<String>.from(
-                                    selectedMultipleOptions[group.id] ?? [],
-                                  );
-                                  list.remove(opt.id);
-                                  selectedMultipleOptions[group.id] = list;
-                                } else {
-                                  final map = Map<String, int>.from(
-                                    extraQuantities[group.id] ?? {},
-                                  );
-                                  map[opt.id] = newQty;
-                                  extraQuantities[group.id] = map;
-                                }
-                              });
-                            },
-                          ),
-                      ],
-                    ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  opt.name,
+                  style: KZ.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? ItemDetailsScreen.primaryColor
+                        : KZ.onSurface,
                   ),
-                );
-              }).toList(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '+${formatCurrency(opt.priceModifier, locale: context.locale)}',
+                  style: KZ.bodySmall,
+                ),
+              ],
             ),
+          ),
+          // Stepper (- 1 +)
+          if (isSelected) ...[
+            const SizedBox(width: 8),
+            KZQuantityStepper(
+              quantity: optQty,
+              minQuantity: 0,
+              maxQuantity: group.maxSelections,
+              onChanged: (newQty) {
+                setState(() {
+                  if (newQty < 1) {
+                    final map = Map<String, int>.from(
+                      extraQuantities[group.id] ?? {},
+                    );
+                    map.remove(opt.id);
+                    extraQuantities[group.id] = map;
+                    final list = List<String>.from(
+                      selectedMultipleOptions[group.id] ?? [],
+                    );
+                    list.remove(opt.id);
+                    selectedMultipleOptions[group.id] = list;
+                  } else {
+                    final map = Map<String, int>.from(
+                      extraQuantities[group.id] ?? {},
+                    );
+                    map[opt.id] = newQty;
+                    extraQuantities[group.id] = map;
+                  }
+                });
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
-          // QUANTITY Selection (Stepper Card)
-          if (group.selectionType == 'QUANTITY')
-            Column(
-              children: group.options.map((opt) {
-                final groupMap = extraQuantities[group.id] ?? {};
-                final optQty = groupMap[opt.id] ?? 0;
-                final isSelected = optQty > 0;
+  Widget _buildQuantityOptionRow(
+    BuildContext context,
+    ModifierGroup group,
+    ModifierOption opt,
+  ) {
+    final groupMap = extraQuantities[group.id] ?? {};
+    final optQty = groupMap[opt.id] ?? 0;
+    final isSelected = optQty > 0;
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isSelected
-                            ? ItemDetailsScreen.primaryColor
-                            : ItemDetailsScreen.outlineVariantColor,
-                        width: isSelected ? 1.5 : 1.0,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              opt.name,
-                              style: KZ.bodyLarge.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: KZ.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '+${formatCurrency(opt.priceModifier, locale: context.locale)}',
-                              style: KZ.bodySmall,
-                            ),
-                          ],
-                        ),
-                        KZQuantityStepper(
-                          quantity: optQty,
-                          minQuantity: 0,
-                          maxQuantity: group.maxSelections,
-                          onChanged: (newQty) {
-                            setState(() {
-                              final map = Map<String, int>.from(
-                                extraQuantities[group.id] ?? {},
-                              );
-                              if (newQty <= 0) {
-                                map.remove(opt.id);
-                              } else {
-                                map[opt.id] = newQty;
-                              }
-                              extraQuantities[group.id] = map;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
+    return Container(
+      decoration: BoxDecoration(
+        color: isSelected
+            ? ItemDetailsScreen.primaryColor.withValues(alpha: 0.06)
+            : Colors.transparent,
+        border: Border(
+          left: BorderSide(
+            color: isSelected
+                ? ItemDetailsScreen.primaryColor
+                : Colors.transparent,
+            width: 3,
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  opt.name,
+                  style: KZ.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? ItemDetailsScreen.primaryColor
+                        : KZ.onSurface,
                   ),
-                );
-              }).toList(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '+${formatCurrency(opt.priceModifier, locale: context.locale)}',
+                  style: KZ.bodySmall,
+                ),
+              ],
             ),
+          ),
+          const SizedBox(width: 8),
+          KZQuantityStepper(
+            quantity: optQty,
+            minQuantity: 0,
+            maxQuantity: group.maxSelections,
+            onChanged: (newQty) {
+              setState(() {
+                final map = Map<String, int>.from(
+                  extraQuantities[group.id] ?? {},
+                );
+                if (newQty <= 0) {
+                  map.remove(opt.id);
+                } else {
+                  map[opt.id] = newQty;
+                }
+                extraQuantities[group.id] = map;
+              });
+            },
+          ),
         ],
       ),
     );
@@ -631,12 +721,19 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
           body: ResponsiveContainer(
             child: Stack(
               children: [
-                // 1. Top Hero Image Background (Height 340px)
+                // 1. Top Hero Image — the product itself is the visual
+                // focus; height trimmed from the original 340px so it no
+                // longer dominates the screen, and the no-image/error
+                // fallback is now the same neutral, icon-based placeholder
+                // used everywhere else a product photo is missing (see
+                // KZFoodImage) instead of a full-bleed brand-red block
+                // repeating the product name a second time (the title right
+                // below already shows it once).
                 Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
-                  height: 340,
+                  height: 300,
                   child: Stack(
                     children: [
                       Positioned.fill(
@@ -648,38 +745,15 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                   color: ItemDetailsScreen
                                       .surfaceContainerHighestColor,
                                 ),
-                                errorWidget: (context, url, err) => Container(
-                                  color: ItemDetailsScreen.primaryColor,
-                                  child: Center(
-                                    child: Text(
-                                      item.localizedName(
-                                        context.locale.languageCode,
-                                      ),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                errorWidget: (context, url, err) =>
+                                    const _HeroImageFallback(),
                               )
-                            : Container(
-                                color: ItemDetailsScreen.primaryColor,
-                                child: Center(
-                                  child: Text(
-                                    item.localizedName(
-                                      context.locale.languageCode,
-                                    ),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                            : const _HeroImageFallback(),
                       ),
+                      // Just enough of a top scrim for the back/favorite
+                      // glass buttons to stay legible — the bottom of the
+                      // hero is already covered by the rounded content
+                      // sheet, so it no longer needs its own dark wash.
                       Positioned.fill(
                         child: Container(
                           decoration: BoxDecoration(
@@ -687,10 +761,10 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                Colors.black.withValues(alpha: 0.4),
+                                Colors.black.withValues(alpha: 0.25),
                                 Colors.transparent,
-                                Colors.black.withValues(alpha: 0.4),
                               ],
+                              stops: const [0.0, 0.35],
                             ),
                           ),
                         ),
@@ -699,12 +773,13 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                   ),
                 ),
 
-                // 2. Scrollable Content Sheet (Starts at Y=300px to overlap 40px of Hero Image)
+                // 2. Scrollable Content Sheet (starts at Y=260px, overlapping
+                // 40px of the hero — same overlap the original design used).
                 Positioned.fill(
                   child: CustomScrollView(
                     physics: const BouncingScrollPhysics(),
                     slivers: [
-                      const SliverToBoxAdapter(child: SizedBox(height: 300)),
+                      const SliverToBoxAdapter(child: SizedBox(height: 260)),
                       SliverToBoxAdapter(
                         child: Container(
                           decoration: const BoxDecoration(
@@ -891,23 +966,21 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                 ),
                               ),
 
-                              // Special Instructions Section
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildSectionHeader(
-                                    title: 'item_details.notes'.tr(),
-                                  ),
-                                  TextField(
-                                    controller: notesController,
-                                    maxLines: 3,
-                                    style: KZ.body,
-                                    decoration: KZ.inputDecoration(
-                                      label: 'item_details.notes'.tr(),
-                                      hint: 'item_details.notes_hint'.tr(),
-                                    ),
-                                  ),
-                                ],
+                              // Special Instructions — kept visually
+                              // secondary to required customization: no
+                              // section header (the field's own floating
+                              // label already says "Special Instructions",
+                              // so a second uppercase heading above it would
+                              // just repeat the same word) and no required
+                              // badge, since notes are always optional.
+                              TextField(
+                                controller: notesController,
+                                maxLines: 3,
+                                style: KZ.body,
+                                decoration: KZ.inputDecoration(
+                                  label: 'item_details.notes'.tr(),
+                                  hint: 'item_details.notes_hint'.tr(),
+                                ),
                               ),
                             ],
                           ),
@@ -1005,58 +1078,25 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                       ],
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Total Price Display
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'item_details.total'.tr().toUpperCase(),
-                              style: KZ.label,
-                            ),
-                            const SizedBox(height: 2),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
-                              children: context.locale.languageCode == 'ar'
-                                  ? [
-                                      Text(
-                                        totalPrice.toStringAsFixed(0),
-                                        style: KZ.priceLarge.copyWith(
-                                          fontSize: 28,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'ر.س',
-                                        style: KZ.label.copyWith(
-                                          color: ItemDetailsScreen.primaryColor,
-                                        ),
-                                      ),
-                                    ]
-                                  : [
-                                      Text(
-                                        'SAR',
-                                        style: KZ.label.copyWith(
-                                          color: ItemDetailsScreen.primaryColor,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        totalPrice.toStringAsFixed(0),
-                                        style: KZ.priceLarge.copyWith(
-                                          fontSize: 28,
-                                        ),
-                                      ),
-                                    ],
-                            ),
-                          ],
+                        // Quantity — belongs right next to Add to Cart
+                        // rather than living elsewhere on the page; same
+                        // exact `quantity` state used in the price
+                        // calculation and the cart payload below, just
+                        // finally exposed as a control (previously only
+                        // settable by re-opening an existing cart line).
+                        Semantics(
+                          label: 'item_details.quantity'.tr(),
+                          child: KZQuantityStepper(
+                            quantity: quantity,
+                            onChanged: (v) => setState(() => quantity = v),
+                          ),
                         ),
-                        const SizedBox(width: 20),
+                        const SizedBox(width: 12),
 
-                        // Add to Cart Button
+                        // Add to Cart Button — the one dominant action;
+                        // the total price now lives inside it instead of a
+                        // separate adjacent price block.
                         Expanded(
                           child: InkWell(
                             onTap: _isAddingToCart
@@ -1254,28 +1294,42 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                             color: Colors.white,
                                           ),
                                         )
-                                      : Row(
+                                      : FittedBox(
                                           key: const ValueKey('idle'),
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              widget.cartItemId != null
-                                                  ? 'item_details.update_cart'
-                                                        .tr()
-                                                  : 'item_details.add_to_cart'
-                                                        .tr(),
-                                              style: KZ.buttonLabel.copyWith(
-                                                color: Colors.white,
+                                          fit: BoxFit.scaleDown,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                widget.cartItemId != null
+                                                    ? 'item_details.update_cart'
+                                                          .tr()
+                                                    : 'item_details.add_to_cart'
+                                                          .tr(),
+                                                style: KZ.buttonLabel.copyWith(
+                                                  color: Colors.white,
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            const Icon(
-                                              Icons.shopping_bag_rounded,
-                                              color: Colors.white,
-                                              size: KZ.iconControl,
-                                            ),
-                                          ],
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                width: 1,
+                                                height: 16,
+                                                color: Colors.white
+                                                    .withValues(alpha: 0.4),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                formatCurrency(
+                                                  totalPrice,
+                                                  locale: context.locale,
+                                                ),
+                                                style: KZ.buttonLabel.copyWith(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                 ),
                               ),
@@ -1291,6 +1345,28 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Neutral hero placeholder for a missing/failed product photo — the same
+/// icon-based treatment [KZFoodImage] uses everywhere else a product photo
+/// is absent, so a hero without a real image never invents artwork or
+/// falls back to a full-bleed brand-red block.
+class _HeroImageFallback extends StatelessWidget {
+  const _HeroImageFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: ItemDetailsScreen.surfaceContainerHighestColor,
+      child: Center(
+        child: Icon(
+          Icons.restaurant_rounded,
+          size: 64,
+          color: ItemDetailsScreen.outlineColor,
+        ),
+      ),
     );
   }
 }

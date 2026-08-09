@@ -12,6 +12,7 @@ import '../notifiers/orders_notifier.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
 final orderTrackingProvider = StreamProvider.family<Order, String>((ref, id) {
@@ -214,6 +215,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
 
   Widget _buildTrackingContent(BuildContext context, Order order) {
     final statusDescription = _getStatusDescription(order);
+    final statusColor = orderStatusVisual(order.status).color;
 
     return ListView(
       key: const ValueKey('content'),
@@ -221,33 +223,23 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       children: [
-        // 1. Sleek Status Header
+        // 1. Sleek Status Header — dot/text color matches the same
+        // status→color language as Orders History's KZStatusBadge, so
+        // "delivered" reads the same (green) in both places.
         Center(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: OrderTrackingScreen.primaryColor.withValues(alpha: 0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(30),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: OrderTrackingScreen.primaryColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: OrderTrackingScreen.primaryColor.withValues(
-                          alpha: 0.4,
-                        ),
-                        blurRadius: 6,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 10),
                 Flexible(
@@ -263,10 +255,9 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                       key: ValueKey(order.status),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
+                      style: KZ.labelLarge.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: OrderTrackingScreen.primaryColor,
+                        color: statusColor,
                       ),
                     ),
                   ),
@@ -275,33 +266,71 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
+        // Order number — kept identifiable but not dominant, since real
+        // order numbers can be long; a single ellipsized line rather than
+        // a huge headline that could wrap or overflow.
         Center(
-          child: Text(
-            'orders.order_num'.tr(namedArgs: {'id': _orderDisplayId(order)}),
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: OrderTrackingScreen.onSurfaceColor,
-              letterSpacing: -1,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              'orders.order_num'.tr(
+                namedArgs: {'id': _orderDisplayId(order)},
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: KZ.sectionTitle.copyWith(
+                fontSize: 20,
+                color: OrderTrackingScreen.onSurfaceColor,
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 32),
+        // Fulfillment info — only real, already-known data (fulfillment
+        // type + the delivery-address snapshot or pickup location already
+        // on the order); grouped as one compact line, not a separate card.
+        if (_fulfillmentSummary(order) != null) ...[
+          const SizedBox(height: 6),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    order.fulfillmentType == FulfillmentType.pickup
+                        ? Icons.storefront_rounded
+                        : Icons.delivery_dining_rounded,
+                    size: 14,
+                    color: OrderTrackingScreen.secondaryColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      _fulfillmentSummary(order)!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: KZ.bodySmall.copyWith(
+                        color: OrderTrackingScreen.secondaryColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 24),
 
         // 2. Branded Status Card (no external image — offline-safe)
         _StatusBannerCard(order: order, onViewDetails: _scrollToSummary),
-        const SizedBox(height: 32),
+        const SizedBox(height: 28),
 
         // 3. Vertical Timeline Stepper
         Text(
           'tracking.tracking_status_title'.tr(),
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: OrderTrackingScreen.onSurfaceColor,
-            letterSpacing: -0.3,
-          ),
+          style: KZ.sectionTitle,
         ),
         const SizedBox(height: 16),
         _buildVerticalTimeline(context, order),
@@ -337,11 +366,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                       children: [
                         Text(
                           'cart.order_summary'.tr(),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: OrderTrackingScreen.onSurfaceColor,
-                          ),
+                          style: KZ.sectionTitle.copyWith(fontSize: 16),
                         ),
                         AnimatedRotation(
                           turns: _isSummaryExpanded ? 0.5 : 0.0,
@@ -564,6 +589,28 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
     return order.orderNumber.isNotEmpty
         ? order.orderNumber
         : (order.id.length >= 8 ? order.id.substring(0, 8) : order.id);
+  }
+
+  /// One-line fulfillment summary from data the order already carries —
+  /// the delivery-address snapshot for DELIVERY orders, or the pickup
+  /// location for PICKUP orders. `null` when neither is available (older
+  /// orders, or a snapshot that was never captured) rather than inventing
+  /// placeholder text.
+  String? _fulfillmentSummary(Order order) {
+    if (order.fulfillmentType == FulfillmentType.pickup) {
+      final loc = order.pickupLocation?.trim();
+      return (loc != null && loc.isNotEmpty) ? loc : null;
+    }
+    final addr = order.deliveryAddress;
+    if (addr == null) return null;
+    final parts = <String>[
+      if (addr.street != null && addr.street!.trim().isNotEmpty) addr.street!.trim(),
+      if (addr.building != null && addr.building!.trim().isNotEmpty)
+        addr.building!.trim(),
+      if (addr.city != null && addr.city!.trim().isNotEmpty) addr.city!.trim(),
+    ];
+    if (parts.isEmpty) return null;
+    return parts.join(', ');
   }
 
   String _getStatusDescription(Order order) {
@@ -911,14 +958,16 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
             const SizedBox(width: 20),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(top: 12, bottom: isLast ? 0 : 38),
+                padding: EdgeInsets.only(top: 12, bottom: isLast ? 0 : 32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       step.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 17,
+                        fontSize: 16,
                         fontWeight: isActive || isCompleted
                             ? FontWeight.w800
                             : FontWeight.w600,
@@ -930,11 +979,13 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                         letterSpacing: -0.3,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Text(
                       subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w500,
                         height: 1.4,
                         color: isActive
@@ -1010,128 +1061,81 @@ class _StatusBannerCard extends StatelessWidget {
         ? order.estimatedTime!.trim()
         : null;
 
+    // A single flat, compact brand-colored row — progress (the timeline
+    // below) is the actual focus of this screen; this card's job is just
+    // to surface the current status icon + estimated arrival + a way to
+    // jump to the summary, not to be a decorative hero. No rotated ghost
+    // icon, no background blob — those never carried information.
     return Container(
-      height: 220,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            OrderTrackingScreen.primaryColor,
-            Color(0xFFB54310), // Richer, darker orange
-          ],
-        ),
+        color: OrderTrackingScreen.primaryColor,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: OrderTrackingScreen.primaryColor.withValues(alpha: 0.35),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+            color: OrderTrackingScreen.primaryColor.withValues(alpha: 0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
+      child: Row(
         children: [
-          // Background abstract elements
-          Positioned(
-            right: -30,
-            top: -30,
-            child: Transform.rotate(
-              angle: -0.2,
-              child: Icon(
-                _statusIcon(),
-                size: 180,
-                color: Colors.white.withValues(alpha: 0.08),
-              ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(14),
             ),
+            child: Icon(_statusIcon(), color: Colors.white, size: 24),
           ),
-          Positioned(
-            left: -50,
-            bottom: -50,
-            child: Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.05),
-              ),
-            ),
-          ),
-          // Foreground Content
-          Padding(
-            padding: const EdgeInsets.all(24),
+          const SizedBox(width: 14),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Icon(_statusIcon(), color: Colors.white, size: 34),
-                    ),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: onViewDetails,
-                        borderRadius: BorderRadius.circular(999),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.35),
-                            ),
-                          ),
-                          child: Text(
-                            'tracking.view_details'.tr(),
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
                 Text(
                   'tracking.estimated_arrival'.tr(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                  style: KZ.caption.copyWith(
                     color: Colors.white.withValues(alpha: 0.85),
-                    letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 2),
                 Text(
                   estimatedArrival ?? 'tracking.estimate_unavailable'.tr(),
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: KZ.sectionTitle.copyWith(
+                    fontSize: 18,
                     color: Colors.white,
-                    letterSpacing: -0.5,
-                    height: 1.1,
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onViewDetails,
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'tracking.view_details'.tr(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: KZ.labelLarge.copyWith(color: Colors.white),
+                ),
+              ),
             ),
           ),
         ],

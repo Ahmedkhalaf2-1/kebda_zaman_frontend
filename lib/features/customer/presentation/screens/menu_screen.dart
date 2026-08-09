@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,13 +11,8 @@ import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import 'package:kebda_zaman/core/responsive/responsive_breakpoints.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
-import 'package:kebda_zaman/core/theme/kz_motion.dart';
-import 'package:kebda_zaman/core/utils/currency_formatter.dart';
-import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
-import 'package:kebda_zaman/core/widgets/kz_lottie_add_button.dart';
-import 'package:kebda_zaman/core/widgets/kz_lottie_heart_button.dart';
-import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
+import 'package:kebda_zaman/core/widgets/kz_product_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
 // Whether the compact weekly-special strip has been dismissed this session.
@@ -114,7 +108,14 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   GlobalKey _tabKeyFor(String categoryId) =>
       _tabKeys.putIfAbsent(categoryId, () => GlobalKey());
 
-  void _ensureTabVisible(String categoryId) {
+  // [animate] is false when this is called from the passive scroll listener
+  // (a new section became active purely because the user is dragging the
+  // main list) — an animated 350ms chip-scroll competing with the user's
+  // own in-progress drag on every section change is what actually reads as
+  // "laggy": two animations fighting for the same frames. Tap-driven
+  // navigation ([_scrollToCategory]) is a deliberate, standalone action, so
+  // it keeps the smooth animated scroll.
+  void _ensureTabVisible(String categoryId, {bool animate = true}) {
     final ctx = _tabKeys[categoryId]?.currentContext;
     if (ctx == null) return;
 
@@ -126,7 +127,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       scrollable.position.ensureVisible(
         renderObject,
         alignment: 0.5,
-        duration: const Duration(milliseconds: 350),
+        duration: animate ? const Duration(milliseconds: 350) : Duration.zero,
         curve: Curves.easeOutCubic,
       );
     }
@@ -205,10 +206,19 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       }
     }
 
+    // Only the highlight color changes here (a cheap AnimatedContainer
+    // fade inside KZChip) — deliberately NOT calling _ensureTabVisible.
+    // Forcing the horizontal chip strip to scroll/jump every time the
+    // active section changes, while the user's finger is still actively
+    // dragging the vertical list, is what produced the stutter — a second
+    // scrollable's position mutating mid-gesture. The chip bar now only
+    // auto-scrolls on a deliberate tap (_scrollToCategory); while scrolling,
+    // it simply highlights whichever chip is already on screen (or doesn't,
+    // if the active one has scrolled out — no worse than before, and no
+    // more mid-scroll jumps).
     if (activeId != null && activeId != _selectedCategoryId) {
       final id = activeId;
       setState(() => _selectedCategoryId = id);
-      _ensureTabVisible(id);
     }
   }
 
@@ -405,26 +415,35 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final item = section.items[index];
                           final isFav = favorites.contains(item.id);
-                          return _MenuProductCard(
-                            item: item,
-                            isFavorite: isFav,
-                            onToggleFavorite: () async {
-                              final success = await ref
-                                  .read(customerFavoritesProvider.notifier)
-                                  .toggleFavorite(item.id);
-                              if (!success && context.mounted) {
-                                final err = ref
-                                    .read(customerFavoritesProvider)
-                                    .errorMessage;
-                                if (err != null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(err),
-                                      behavior: SnackBarBehavior.floating,
-                                    ),
-                                  );
-                                }
-                              }
+                          return Consumer(
+                            builder: (context, ref, child) {
+                              return ProductGridCard(
+                                item: item,
+                                isFavorite: isFav,
+                                onTap: () =>
+                                    context.push('/menu/item/${item.id}'),
+                                onAdd: () => _handleMenuAdd(context, ref, item),
+                                onToggleFavorite: () async {
+                                  final success = await ref
+                                      .read(customerFavoritesProvider.notifier)
+                                      .toggleFavorite(item.id);
+                                  if (!success && context.mounted) {
+                                    final err = ref
+                                        .read(customerFavoritesProvider)
+                                        .errorMessage;
+                                    if (err != null) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(err),
+                                          behavior: SnackBarBehavior.floating,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                              );
                             },
                           );
                         }, childCount: section.items.length),
@@ -623,236 +642,42 @@ class _WeeklySpecialStrip extends StatelessWidget {
   }
 }
 
-// ── Premium minimal product card ────────────────────────────────────────────
-//
-// Layout (all proportions computed from the exact card height via LayoutBuilder
-// so they are correct at every responsive breakpoint):
-//
-//   ┌─────────────────────────────────────┐
-//   │  [badge start-top]   [fav end-top]  │
-//   │                                     │  70% image
-//   │                     [+ end-bottom]  │
-//   ├─────────────────────────────────────┤
-//   │  Product name (≤ 2 lines)           │  30% info
-//   │  Price                              │
-//   └─────────────────────────────────────┘
-//
-// The "+" button is centred on the image/info boundary (top = imageH − 22,
-// so its midpoint aligns with the dividing line). It is positioned inside
-// the full-card Stack so its hit-test area is always within the card bounds.
-//
-// Only the admin-managed badge (BESTSELLER / TOP_RATED) is shown.
-// Discount price, compare-at price, calories, description, restaurant name,
-// category name, and rating are intentionally absent from the card.
-
-class _MenuProductCard extends ConsumerWidget {
-  final MenuItem item;
-  final bool isFavorite;
-  final VoidCallback onToggleFavorite;
-
-  const _MenuProductCard({
-    required this.item,
-    required this.isFavorite,
-    required this.onToggleFavorite,
-  });
-
-  void _handleAdd(BuildContext context, WidgetRef ref) {
-    if (!item.isAvailable) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('menu.item_unavailable'.tr()),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
-    final hasRequired = item.modifierGroups.any((g) => g.isRequired);
-    if (hasRequired) {
-      context.push('/menu/item/${item.id}');
-    } else {
-      final cartItem = CartItem(
-        id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
-        menuItemId: item.id,
-        productName: item.name,
-        productImage: item.imageUrl,
-        basePrice: item.discountPrice ?? item.basePrice,
-        quantity: 1,
-        selectedOptions: {},
-        extraQuantities: {},
-        unitPrice: item.discountPrice ?? item.basePrice,
-        lineTotal: item.discountPrice ?? item.basePrice,
-      );
-      ref.read(cartProvider.notifier).addItem(cartItem);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'home.added_to_cart'.tr(namedArgs: {'name': item.name}),
-          ),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final lang = context.locale.languageCode;
-    // Show effective price (discounted when available); no price crossing or
-    // compare-at display on the card — that belongs in item details only.
-    final effectivePrice = item.discountPrice ?? item.basePrice;
-
-    return KZCard(
-      padding: EdgeInsets.zero,
-      onTap: () => context.push('/menu/item/${item.id}'),
-      child: LayoutBuilder(
-        builder: (_, constraints) {
-          // Exact card height from the SliverGrid's mainAxisExtent — always
-          // finite and bounded, so division is safe.
-          final cardH = constraints.maxHeight;
-          final imageH = cardH * 0.70;
-
-          return Stack(
-            // Stack stays within card bounds — no overflow needed because the
-            // "+" button (top = imageH − 22) stays well inside the card.
-            children: [
-              // ── Base: image column + info area ──────────────────────────
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Image — exactly 70 % of card height; top corners rounded
-                  // to match the card's own border radius.
-                  SizedBox(
-                    height: imageH,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(KZ.radiusLg),
-                      ),
-                      child: item.imageUrl.isEmpty
-                          ? const _FoodPlaceholder()
-                          : CachedNetworkImage(
-                              imageUrl: item.imageUrl,
-                              fit: BoxFit.cover,
-                              fadeInDuration: KZMotion.standard,
-                              fadeInCurve: KZMotion.enterExit,
-                              placeholder: (_, __) => const _FoodPlaceholder(),
-                              errorWidget: (_, __, ___) =>
-                                  const _FoodPlaceholder(),
-                            ),
-                    ),
-                  ),
-
-                  // Info — remaining 30 %; right inset of 58 dp reserves
-                  // space for the floating "+" button (44 wide + 10 end + 4
-                  // breathing gap = 58 dp).
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                        12,
-                        8,
-                        58,
-                        6,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Name — top-aligned so every card in the same row
-                          // starts its text at the same vertical position.
-                          // Price stays anchored at the bottom of the info slot.
-                          Expanded(
-                            child: Align(
-                              alignment: AlignmentDirectional.topStart,
-                              child: Text(
-                                item.localizedName(lang),
-                                style: KZ.itemTitle,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          // Price — anchored at the bottom of the info slot.
-                          Text(
-                            formatCurrency(
-                              effectivePrice,
-                              locale: context.locale,
-                            ),
-                            style: KZ.price,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              // ── Admin badge — top-start (BESTSELLER / TOP_RATED only) ──
-              // Discount badges, compare-at price, and any other computed
-              // metadata are intentionally excluded from the card.
-              if (item.badge != null)
-                PositionedDirectional(
-                  top: 8,
-                  start: 8,
-                  child: MenuItemBadgeChip(badge: item.badge!),
-                ),
-
-              // ── Favourite — top-end, 36 × 36 frosted circle ─────────────
-              PositionedDirectional(
-                top: 6,
-                end: 6,
-                child: KZLottieHeartButton(
-                  isFavorite: isFavorite,
-                  onTap: onToggleFavorite,
-                  semanticsLabel: 'profile.my_favorites'.tr(),
-                  size: 36,
-                  iconSize: 18,
-                  shadowOpacity: 0.14,
-                ),
-              ),
-
-              // ── Circular add (+) — floating at image/info boundary ───────
-              // top = imageH − 22 places the button's vertical centre exactly
-              // on the image/info dividing line (half of 44 dp = 22 dp).
-              // The hit-test area is 44 × 44 dp, satisfying the minimum
-              // interactive target requirement.
-              PositionedDirectional(
-                top: imageH - 22,
-                end: 10,
-                child: KZLottieAddButton(
-                  onTap: () => _handleAdd(context, ref),
-                  semanticsLabel: 'home.add_to_cart'.tr(),
-                  size: 44,
-                  backgroundColor: KZ.primary,
-                  iconColor: Colors.white,
-                  iconSize: KZ.iconControl,
-                ),
-              ),
-            ],
-          );
-        },
+// ── Shared product grid card (kebda_zaman/core/widgets/kz_product_card.dart)
+// used above — this is only the add-to-cart handler Menu's catalog grid
+// needs, preserved exactly as it was on the old `_MenuProductCard`.
+void _handleMenuAdd(BuildContext context, WidgetRef ref, MenuItem item) {
+  if (!item.isAvailable) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('menu.item_unavailable'.tr()),
+        behavior: SnackBarBehavior.floating,
       ),
     );
+    return;
   }
-}
 
-/// Stable, const placeholder rendered while a food image is loading or
-/// unavailable. Extracted as a named widget so the same instance can be
-/// reused as both the `placeholder` and `errorWidget` callback return values
-/// without allocating a new closure + widget per frame.
-class _FoodPlaceholder extends StatelessWidget {
-  const _FoodPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: KZ.surfaceContainerLow,
-      child: const Center(
-        child: Icon(Icons.restaurant_rounded, color: KZ.outline),
+  final hasRequired = item.modifierGroups.any((g) => g.isRequired);
+  if (hasRequired) {
+    context.push('/menu/item/${item.id}');
+  } else {
+    final cartItem = CartItem(
+      id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
+      menuItemId: item.id,
+      productName: item.name,
+      productImage: item.imageUrl,
+      basePrice: item.discountPrice ?? item.basePrice,
+      quantity: 1,
+      selectedOptions: {},
+      extraQuantities: {},
+      unitPrice: item.discountPrice ?? item.basePrice,
+      lineTotal: item.discountPrice ?? item.basePrice,
+    );
+    ref.read(cartProvider.notifier).addItem(cartItem);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('home.added_to_cart'.tr(namedArgs: {'name': item.name})),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

@@ -59,7 +59,7 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const Icon(Icons.error_outline, size: 48, color: KZ.error),
               const SizedBox(height: 16),
               const Text(
                 'Could not load this order',

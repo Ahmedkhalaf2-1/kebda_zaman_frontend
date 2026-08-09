@@ -11,9 +11,9 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/address_not
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/loyalty_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/delivery_quote_notifier.dart';
-import 'package:kebda_zaman/features/shared/domain/models/user.dart';
 import 'package:kebda_zaman/features/shared/domain/models/address.dart';
 import 'package:kebda_zaman/features/shared/domain/models/delivery_quote.dart';
+import 'package:kebda_zaman/features/shared/domain/models/restaurant_settings.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/core/api/api_exceptions.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
@@ -70,7 +70,6 @@ String _rewardDisplayName(String rewardId) {
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
 
-  // Exact Design Tokens from Stitch Checkout HTML
   static const Color surfaceBg = KZ.surface;
   static const Color primaryColor = KZ.primary;
   static const Color primaryFixedColor = KZ.primaryFixed;
@@ -226,6 +225,32 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return parts.where((p) => p.isNotEmpty).join(', ');
   }
 
+  // Consistent floating placement for every snackbar this screen shows — a
+  // wide bottom margin so none of them ever sit under (or visually compete
+  // with) the sticky Place Order footer.
+  void _showSnack(String message, {bool isError = false, SnackBarAction? action}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: isError ? const TextStyle(color: Colors.white) : null),
+        backgroundColor: isError ? CheckoutScreen.errorColor : null,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 180),
+        action: action,
+      ),
+    );
+  }
+
+  void _removeAppliedDiscount(bool hasPromoApplied) {
+    if (hasPromoApplied) {
+      ref.read(cartProvider.notifier).removePromoCode().catchError((Object e) {
+        _showSnack('checkout.promo_remove_failed'.tr());
+      });
+    } else {
+      setState(() => _selectedRewardId = null);
+    }
+  }
+
   /// Loyalty Rewards section — mutually exclusive with an applied cart promo
   /// code. Guests never see selectable rewards (403 GUEST_NOT_ELIGIBLE server-side)
   /// and are guided to sign in instead.
@@ -235,183 +260,134 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     required bool hasPromoApplied,
     required String? promoCode,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      clipBehavior: Clip.antiAlias,
-      decoration: KZ.cardDecoration(color: Colors.white),
-      child: Stack(
-        clipBehavior: Clip.none,
+    return KZCard(
+      padding: const EdgeInsets.all(KZ.sp20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned(
-            right: -16,
-            bottom: -16,
-            child: Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: CheckoutScreen.secondaryColor.withValues(alpha: 0.06),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.card_giftcard_rounded,
-                    color: CheckoutScreen.secondaryColor,
-                    size: KZ.iconControl,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'checkout.loyalty_rewards'.tr(),
-                    style: KZ.labelLarge.copyWith(
-                      color: CheckoutScreen.secondaryColor,
-                      fontSize: 15,
-                    ),
-                  ),
-                  if (!isGuest) ...[
-                    const Spacer(),
-                    Text(
-                      'checkout.loyalty_points_suffix'.tr(
-                        namedArgs: {'points': '$pointsBalance'},
-                      ),
-                      style: KZ.label.copyWith(
-                        color: CheckoutScreen.secondaryColor,
-                      ),
-                    ),
-                  ],
-                ],
+              const Icon(
+                Icons.card_giftcard_rounded,
+                color: CheckoutScreen.secondaryColor,
+                size: KZ.iconControl,
               ),
-              const SizedBox(height: 12),
-              if (isGuest) ...[
+              const SizedBox(width: KZ.sp8),
+              Text(
+                'checkout.loyalty_rewards'.tr(),
+                style: KZ.labelLarge.copyWith(
+                  color: CheckoutScreen.secondaryColor,
+                  fontSize: 15,
+                ),
+              ),
+              if (!isGuest) ...[
+                const Spacer(),
                 Text(
-                  'checkout.guest_loyalty_notice'.tr(),
-                  style: KZ.body.copyWith(
-                    color: CheckoutScreen.onSurfaceVariantColor,
-                    height: 1.5,
+                  'checkout.loyalty_points_suffix'.tr(
+                    namedArgs: {'points': '$pointsBalance'},
                   ),
+                  style: KZ.label.copyWith(color: CheckoutScreen.secondaryColor),
                 ),
-                const SizedBox(height: 16),
-                OutlinedButton(
-                  onPressed: () => context.push('/login'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: CheckoutScreen.primaryColor,
-                    side: const BorderSide(
-                      color: CheckoutScreen.primaryColor,
-                      width: 1.5,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text(
-                    'checkout.sign_in'.tr(),
-                    style: KZ.labelLarge.copyWith(
-                      color: CheckoutScreen.primaryColor,
-                    ),
-                  ),
-                ),
-              ] else if (hasPromoApplied) ...[
-                Text(
-                  'checkout.promo_blocks_loyalty'.tr(
-                    namedArgs: {
-                      'code': promoCode != null ? ' ($promoCode)' : '',
-                    },
-                  ),
-                  style: KZ.bodySmall,
-                ),
-              ] else
-                ..._kLoyaltyRewards.map((reward) {
-                  final blockedForPickup =
-                      reward.deliveryOnly && _orderType == 'pickup';
-                  final insufficientPoints = pointsBalance < reward.pointsCost;
-                  final disabled = blockedForPickup || insufficientPoints;
-                  final isSelected = _selectedRewardId == reward.id;
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Opacity(
-                      opacity: disabled ? 0.45 : 1.0,
-                      child: InkWell(
-                        onTap: disabled
-                            ? () {
-                                final reason = blockedForPickup
-                                    ? 'checkout.pickup_blocks_free_delivery'
-                                          .tr()
-                                    : 'checkout.reward_insufficient_points'
-                                          .tr();
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).showSnackBar(SnackBar(content: Text(reason)));
-                              }
-                            : () => setState(
-                                () => _selectedRewardId = isSelected
-                                    ? null
-                                    : reward.id,
-                              ),
-                        borderRadius: BorderRadius.circular(KZ.radiusMd),
-                        child: Container(
-                          constraints: const BoxConstraints(
-                            minHeight: KZ.iconTapTargetMin,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? CheckoutScreen.primaryFixedColor.withValues(
-                                    alpha: 0.4,
-                                  )
-                                : CheckoutScreen.surfaceContainerLowColor,
-                            borderRadius: BorderRadius.circular(KZ.radiusMd),
-                            border: Border.all(
-                              color: isSelected
-                                  ? CheckoutScreen.primaryColor
-                                  : CheckoutScreen.surfaceContainerColor,
-                              width: isSelected ? 1.5 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                isSelected
-                                    ? Icons.check_circle_rounded
-                                    : Icons.circle_outlined,
-                                color: isSelected
-                                    ? CheckoutScreen.primaryColor
-                                    : CheckoutScreen.outlineVariantColor,
-                                size: KZ.iconControl,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  _rewardDisplayName(reward.id),
-                                  style: KZ.itemTitle,
-                                ),
-                              ),
-                              Text(
-                                'checkout.loyalty_points_suffix'.tr(
-                                  namedArgs: {'points': '${reward.pointsCost}'},
-                                ),
-                                style: KZ.label,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
+              ],
             ],
           ),
+          const SizedBox(height: KZ.sp12),
+          if (isGuest) ...[
+            Text(
+              'checkout.guest_loyalty_notice'.tr(),
+              style: KZ.body.copyWith(
+                color: CheckoutScreen.onSurfaceVariantColor,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: KZ.sp16),
+            OutlinedButton(
+              onPressed: () => context.push('/login'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: CheckoutScreen.primaryColor,
+                side: const BorderSide(color: CheckoutScreen.primaryColor, width: 1.5),
+                padding: const EdgeInsets.symmetric(horizontal: KZ.sp24, vertical: KZ.sp12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(KZ.radiusMd),
+                ),
+              ),
+              child: Text(
+                'checkout.sign_in'.tr(),
+                style: KZ.labelLarge.copyWith(color: CheckoutScreen.primaryColor),
+              ),
+            ),
+          ] else if (hasPromoApplied) ...[
+            Text(
+              'checkout.promo_blocks_loyalty'.tr(
+                namedArgs: {'code': promoCode != null ? ' ($promoCode)' : ''},
+              ),
+              style: KZ.bodySmall,
+            ),
+          ] else
+            ..._kLoyaltyRewards.map((reward) {
+              final blockedForPickup =
+                  reward.deliveryOnly && _orderType == 'pickup';
+              final insufficientPoints = pointsBalance < reward.pointsCost;
+              final disabled = blockedForPickup || insufficientPoints;
+              final isSelected = _selectedRewardId == reward.id;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: KZ.sp8),
+                child: Opacity(
+                  opacity: disabled ? 0.45 : 1.0,
+                  child: InkWell(
+                    onTap: disabled
+                        ? () {
+                            final reason = blockedForPickup
+                                ? 'checkout.pickup_blocks_free_delivery'.tr()
+                                : 'checkout.reward_insufficient_points'.tr();
+                            _showSnack(reason);
+                          }
+                        : () => setState(
+                            () => _selectedRewardId = isSelected ? null : reward.id,
+                          ),
+                    borderRadius: BorderRadius.circular(KZ.radiusMd),
+                    child: Container(
+                      constraints: const BoxConstraints(minHeight: KZ.iconTapTargetMin),
+                      padding: const EdgeInsets.symmetric(horizontal: KZ.sp14, vertical: KZ.sp12),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? CheckoutScreen.primaryColor.withValues(alpha: 0.06)
+                            : CheckoutScreen.surfaceContainerLowColor,
+                        borderRadius: BorderRadius.circular(KZ.radiusMd),
+                        border: Border.all(
+                          color: isSelected
+                              ? CheckoutScreen.primaryColor
+                              : CheckoutScreen.outlineVariantColor,
+                          width: isSelected ? 1.5 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isSelected ? Icons.check_circle_rounded : Icons.circle_outlined,
+                            color: isSelected
+                                ? CheckoutScreen.primaryColor
+                                : CheckoutScreen.outlineVariantColor,
+                            size: KZ.iconControl,
+                          ),
+                          const SizedBox(width: KZ.sp10),
+                          Expanded(
+                            child: Text(_rewardDisplayName(reward.id), style: KZ.itemTitle),
+                          ),
+                          Text(
+                            'checkout.loyalty_points_suffix'.tr(
+                              namedArgs: {'points': '${reward.pointsCost}'},
+                            ),
+                            style: KZ.label,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
         ],
       ),
     );
@@ -426,6 +402,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final isGuest = !authState.isLoggedIn || (authState.user?.isGuest ?? true);
     final loyaltyAsync = isGuest ? null : ref.watch(loyaltyProvider);
     final pointsBalance = loyaltyAsync?.valueOrNull?.account.pointsBalance ?? 0;
+    final settingsAsync = ref.watch(restaurantSettingsProvider);
     Address? selectedAddress;
     if (_selectedAddressId != null) {
       for (final a in addressState.addresses) {
@@ -489,8 +466,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   final localizedClosed = context.locale.languageCode == 'ar'
                       ? (details?['closedMessageAr'] as String?)
                       : (details?['closedMessageEn'] as String?);
-                  message =
-                      localizedClosed ?? 'checkout.restaurant_closed'.tr();
+                  message = localizedClosed ?? 'checkout.restaurant_closed'.tr();
                 }
                 break;
               // Distance-based delivery pricing errors (POST /checkout and
@@ -544,29 +520,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             }
           }
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                message,
-                style: const TextStyle(color: Colors.white),
-              ),
-              backgroundColor: CheckoutScreen.errorColor,
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(20),
-              action: guideToSignIn
-                  ? SnackBarAction(
-                      label: 'checkout.sign_in'.tr(),
-                      textColor: Colors.white,
-                      onPressed: () => context.push('/login'),
-                    )
-                  : guideToEditAddress
-                  ? SnackBarAction(
-                      label: 'checkout.update_address_location'.tr(),
-                      textColor: Colors.white,
-                      onPressed: () => _editAddressLocation(effectiveAddress!),
-                    )
-                  : null,
-            ),
+          _showSnack(
+            message,
+            isError: true,
+            action: guideToSignIn
+                ? SnackBarAction(
+                    label: 'checkout.sign_in'.tr(),
+                    textColor: Colors.white,
+                    onPressed: () => context.push('/login'),
+                  )
+                : guideToEditAddress
+                ? SnackBarAction(
+                    label: 'checkout.update_address_location'.tr(),
+                    textColor: Colors.white,
+                    onPressed: () => _editAddressLocation(effectiveAddress!),
+                  )
+                : null,
           );
         },
       );
@@ -581,64 +550,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               bottom: false,
               child: Column(
                 children: [
-                  // Top Navigation Bar
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: CheckoutScreen.primaryColor.withValues(
-                              alpha: 0.1,
-                            ),
-                            border: Border.all(
-                              color: CheckoutScreen.primaryColor.withValues(
-                                alpha: 0.2,
-                              ),
-                              width: 1,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.person_rounded,
-                            color: CheckoutScreen.onSurfaceVariantColor,
-                            size: 22,
-                          ),
-                        ),
-                        Text(
-                          'checkout.title'.tr(),
-                          style: KZ.pageTitle.copyWith(
-                            color: CheckoutScreen.primaryColor,
-                          ),
-                        ),
-                        Semantics(
-                          button: true,
-                          label: 'common.back'.tr(),
-                          child: InkWell(
-                            onTap: () => context.pop(),
-                            customBorder: const CircleBorder(),
-                            child: const SizedBox(
-                              width: 44,
-                              height: 44,
-                              child: Icon(
-                                Icons.arrow_forward_rounded,
-                                color: CheckoutScreen.onSurfaceColor,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Main Checkout Content
+                  _CheckoutHeader(onBack: () => context.pop()),
                   Expanded(
                     child: cartAsync.when(
                       loading: () => const Center(
@@ -667,825 +579,88 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         // here) are mutually exclusive — a promo already applied always wins
                         // and the reward selection is ignored/disabled until it's removed.
                         final hasPromoApplied =
-                            cart.promoCodeId != null &&
-                            cart.promoCodeId!.isNotEmpty;
+                            cart.promoCodeId != null && cart.promoCodeId!.isNotEmpty;
                         final effectiveRewardId = _effectiveRewardId(cart);
                         final totals = _previewTotals(cart, quoteDeliveryFee);
-                        final effectiveDeliveryFee = totals.deliveryFee;
-                        final totalDiscount = totals.discount;
-                        final effectiveTax = totals.tax;
-                        final grandTotal = totals.grandTotal;
 
                         return ListView(
                           physics: const BouncingScrollPhysics(),
                           padding: const EdgeInsets.fromLTRB(20, 8, 20, 180),
                           children: [
-                            // 1. Order Type Toggle (Delivery vs Pickup)
-                            Container(
-                              height: 58,
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: CheckoutScreen.primaryColor.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.03),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          _orderType = 'delivery';
-                                        });
-                                      },
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 200,
-                                        ),
-                                        height: double.infinity,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: _orderType == 'delivery'
-                                              ? CheckoutScreen.primaryColor
-                                              : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          boxShadow: _orderType == 'delivery'
-                                              ? [
-                                                  BoxShadow(
-                                                    color: Colors.black
-                                                        .withValues(
-                                                          alpha: 0.08,
-                                                        ),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ]
-                                              : [],
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.delivery_dining_rounded,
-                                              size: KZ.iconControl,
-                                              color: _orderType == 'delivery'
-                                                  ? Colors.white
-                                                  : CheckoutScreen
-                                                        .onSurfaceVariantColor,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              'checkout.delivery'.tr(),
-                                              style: KZ.labelLarge.copyWith(
-                                                color: _orderType == 'delivery'
-                                                    ? Colors.white
-                                                    : CheckoutScreen
-                                                          .onSurfaceVariantColor,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          _orderType = 'pickup';
-                                        });
-                                      },
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 200,
-                                        ),
-                                        height: double.infinity,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: _orderType == 'pickup'
-                                              ? CheckoutScreen.primaryColor
-                                              : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          boxShadow: _orderType == 'pickup'
-                                              ? [
-                                                  BoxShadow(
-                                                    color: Colors.black
-                                                        .withValues(
-                                                          alpha: 0.08,
-                                                        ),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ]
-                                              : [],
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.storefront_rounded,
-                                              size: KZ.iconControl,
-                                              color: _orderType == 'pickup'
-                                                  ? Colors.white
-                                                  : CheckoutScreen
-                                                        .onSurfaceVariantColor,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              'checkout.pickup'.tr(),
-                                              style: KZ.labelLarge.copyWith(
-                                                color: _orderType == 'pickup'
-                                                    ? Colors.white
-                                                    : CheckoutScreen
-                                                          .onSurfaceVariantColor,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            _FulfillmentToggle(
+                              orderType: _orderType,
+                              onChanged: (v) => setState(() => _orderType = v),
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: KZ.sp16),
 
-                            // 2. Address & Time Group Cards
-                            if (_orderType == 'delivery') ...[
-                              Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: CheckoutScreen.primaryColor
-                                        .withValues(alpha: 0.1),
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.03,
-                                      ),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.home_rounded,
-                                              color:
-                                                  CheckoutScreen.primaryColor,
-                                              size: 20,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              'checkout.delivery_address'.tr(),
-                                              style: KZ.itemTitle.copyWith(
-                                                color:
-                                                    CheckoutScreen.primaryColor,
-                                                fontWeight: FontWeight.w800,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        TextButton(
-                                          onPressed: () =>
-                                              _showAddressPicker(context),
-                                          style: TextButton.styleFrom(
-                                            minimumSize: Size.zero,
-                                            padding: EdgeInsets.zero,
-                                            tapTargetSize: MaterialTapTargetSize
-                                                .shrinkWrap,
-                                          ),
-                                          child: Text(
-                                            'checkout.change_address'.tr(),
-                                            style: KZ.labelLarge.copyWith(
-                                              color:
-                                                  CheckoutScreen.primaryColor,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      displayAddress,
-                                      style: KZ.body.copyWith(
-                                        color: CheckoutScreen
-                                            .onSurfaceVariantColor,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              _DeliveryQuoteCard(
-                                address: effectiveAddress,
-                                quoteAsync: quoteAsync,
-                                onEditAddressLocation: () =>
-                                    _editAddressLocation(effectiveAddress!),
-                                onRetry: () => ref
-                                    .read(deliveryQuoteProvider.notifier)
-                                    .retry(),
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-
-                            // Estimated Arrival Card
-                            Container(
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: CheckoutScreen.primaryColor.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.03),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'checkout.estimated_arrival'.tr(),
-                                        style: KZ.label.copyWith(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: CheckoutScreen.onSurfaceColor,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        _orderType == 'delivery'
-                                            ? '25-35 دقيقة'
-                                            : '15-20 دقيقة',
-                                        style: KZ.priceLarge.copyWith(
-                                          fontSize: 26,
-                                          fontWeight: FontWeight.w800,
-                                          color: CheckoutScreen.primaryColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Container(
-                                    width: 52,
-                                    height: 52,
-                                    decoration: BoxDecoration(
-                                      color: CheckoutScreen.primaryColor
-                                          .withValues(alpha: 0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.schedule_rounded,
-                                      color: CheckoutScreen.primaryColor,
-                                      size: 26,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            _FulfillmentCard(
+                              orderType: _orderType,
+                              address: effectiveAddress,
+                              displayAddress: displayAddress,
+                              onChangeAddress: () => _showAddressPicker(context),
+                              quoteAsync: quoteAsync,
+                              onEditAddressLocation: () =>
+                                  _editAddressLocation(effectiveAddress!),
+                              onRetryQuote: () =>
+                                  ref.read(deliveryQuoteProvider.notifier).retry(),
+                              settingsAsync: settingsAsync,
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: KZ.sp24),
 
-                            // 3. Payment Method Section
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'checkout.payment_method'.tr(),
-                                  style: KZ.sectionTitle.copyWith(fontSize: 18),
-                                ),
-                                TextButton(
-                                  onPressed: () {},
-                                  style: TextButton.styleFrom(
-                                    minimumSize: const Size(
-                                      0,
-                                      KZ.iconTapTargetMin,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'checkout.add_new'.tr(),
-                                    style: KZ.labelLarge.copyWith(
-                                      color: CheckoutScreen.primaryColor,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            // Payment Method Section — no "Add New" control:
+                            // there's no saved-payment-method flow to create
+                            // one for (Cash is the only method that actually
+                            // settles; see the disabled Card tile below).
+                            Text(
+                              'checkout.payment_method'.tr(),
+                              style: KZ.sectionTitle.copyWith(fontSize: 18),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 12),
-
-                            // Payment Option 0: Digital Pay / Cash
-                            InkWell(
-                              onTap: () {
-                                setState(() {
-                                  _selectedPaymentMethod = 0;
-                                });
-                              },
-                              borderRadius: BorderRadius.circular(16),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: _selectedPaymentMethod == 0
-                                        ? CheckoutScreen.primaryColor
-                                        : CheckoutScreen.primaryColor
-                                              .withValues(alpha: 0.1),
-                                    width: _selectedPaymentMethod == 0 ? 2 : 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.03,
-                                      ),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 48,
-                                          height: 48,
-                                          decoration: BoxDecoration(
-                                            color:
-                                                CheckoutScreen.onSurfaceColor,
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.payments_rounded,
-                                            color: Colors.white,
-                                            size: 24,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 14),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'checkout.cash'.tr(),
-                                              style: KZ.itemTitle.copyWith(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              'checkout.pay_upon_receipt'
-                                                  .tr()
-                                                  .toUpperCase(),
-                                              style: KZ.bodySmall.copyWith(
-                                                fontSize: 12,
-                                                color: CheckoutScreen
-                                                    .onSurfaceVariantColor,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    _selectedPaymentMethod == 0
-                                        ? Container(
-                                            width: 24,
-                                            height: 24,
-                                            decoration: const BoxDecoration(
-                                              color:
-                                                  CheckoutScreen.primaryColor,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(
-                                              Icons.check_rounded,
-                                              color: Colors.white,
-                                              size: 16,
-                                            ),
-                                          )
-                                        : Container(
-                                            width: 24,
-                                            height: 24,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: CheckoutScreen
-                                                    .outlineVariantColor,
-                                                width: 2,
-                                              ),
-                                            ),
-                                          ),
-                                  ],
-                                ),
-                              ),
+                            const SizedBox(height: KZ.sp10),
+                            _PaymentOptionTile(
+                              icon: Icons.payments_rounded,
+                              title: 'checkout.cash'.tr(),
+                              subtitle: 'checkout.pay_upon_receipt'.tr().toUpperCase(),
+                              selected: _selectedPaymentMethod == 0,
+                              enabled: true,
+                              onTap: () => setState(() => _selectedPaymentMethod = 0),
                             ),
-                            const SizedBox(height: 12),
-
-                            // Payment Option 1: Credit / Debit Card
-                            // Disabled — the backend has no working card/wallet gateway
-                            // (POST /payments/intent always returns 501 PAYMENT_PROVIDER_NOT_CONFIGURED
-                            // for CARD/WALLET; only CASH settles end-to-end). See 01_PROJECT_OVERVIEW.md.
-                            InkWell(
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'checkout.card_coming_soon_notice'.tr(),
-                                    ),
-                                  ),
-                                );
-                              },
-                              borderRadius: BorderRadius.circular(16),
-                              child: Opacity(
-                                opacity: 0.6,
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 180),
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: CheckoutScreen.surfaceContainerColor,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: CheckoutScreen.outlineVariantColor
-                                          .withValues(alpha: 0.3),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            width: 48,
-                                            height: 48,
-                                            decoration: BoxDecoration(
-                                              color: CheckoutScreen
-                                                  .outlineVariantColor
-                                                  .withValues(alpha: 0.4),
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            child: const Icon(
-                                              Icons.credit_card_rounded,
-                                              color: CheckoutScreen
-                                                  .onSurfaceVariantColor,
-                                              size: KZ.iconAction,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 14),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'checkout.card'.tr(),
-                                                style: KZ.itemTitle.copyWith(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: CheckoutScreen
-                                                      .onSurfaceVariantColor,
-                                                ),
-                                              ),
-                                              Text(
-                                                'checkout.coming_soon'
-                                                    .tr()
-                                                    .toUpperCase(),
-                                                style: KZ.bodySmall.copyWith(
-                                                  fontSize: 12,
-                                                  color: CheckoutScreen
-                                                      .onSurfaceVariantColor,
-                                                  letterSpacing: -0.2,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      Container(
-                                        width: 24,
-                                        height: 24,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: CheckoutScreen
-                                                .outlineVariantColor,
-                                            width: 2,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                            const SizedBox(height: KZ.sp10),
+                            // Disabled — the backend has no working card/wallet
+                            // gateway (POST /payments/intent always returns 501
+                            // PAYMENT_PROVIDER_NOT_CONFIGURED for CARD/WALLET;
+                            // only CASH settles end-to-end). See 01_PROJECT_OVERVIEW.md.
+                            _PaymentOptionTile(
+                              icon: Icons.credit_card_rounded,
+                              title: 'checkout.card'.tr(),
+                              subtitle: 'checkout.coming_soon'.tr().toUpperCase(),
+                              selected: false,
+                              enabled: false,
+                              onTap: () =>
+                                  _showSnack('checkout.card_coming_soon_notice'.tr()),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: KZ.sp24),
 
-                            // 3.5 Loyalty Rewards Section — mutually exclusive with an applied promo code
                             _buildLoyaltySection(
                               isGuest: isGuest,
                               pointsBalance: pointsBalance,
                               hasPromoApplied: hasPromoApplied,
                               promoCode: cart.promoCodeId,
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: KZ.sp20),
 
-                            // 4. Summary Card matching Stitch HTML
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: CheckoutScreen.surfaceContainerLowColor,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: CheckoutScreen.outlineVariantColor
-                                      .withValues(alpha: 0.5),
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'checkout.summary'.tr(),
-                                    style: KZ.sectionTitle.copyWith(
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'cart.subtotal'.tr(),
-                                        style: KZ.bodyLarge,
-                                      ),
-                                      Text(
-                                        formatCurrency(
-                                          cart.subtotal,
-                                          locale: context.locale,
-                                        ),
-                                        style: KZ.bodyLarge.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'cart.delivery_fee'.tr(),
-                                        style: KZ.bodyLarge,
-                                      ),
-                                      Text(
-                                        effectiveDeliveryFee == 0
-                                            ? 'checkout.free'.tr().toUpperCase()
-                                            : formatCurrency(
-                                                effectiveDeliveryFee,
-                                                locale: context.locale,
-                                              ),
-                                        style: effectiveDeliveryFee == 0
-                                            ? KZ.bodyLarge.copyWith(
-                                                fontWeight: FontWeight.w800,
-                                                color: CheckoutScreen
-                                                    .tertiaryColor,
-                                              )
-                                            : KZ.bodyLarge.copyWith(
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                      ),
-                                    ],
-                                  ),
-                                  if (effectiveTax > 0) ...[
-                                    const SizedBox(height: 12),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'common.tax'.tr(),
-                                          style: KZ.bodyLarge,
-                                        ),
-                                        Text(
-                                          formatCurrency(
-                                            effectiveTax,
-                                            locale: context.locale,
-                                          ),
-                                          style: KZ.bodyLarge.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                  if (totalDiscount > 0) ...[
-                                    const SizedBox(height: 12),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          effectiveRewardId != null
-                                              ? 'checkout.loyalty_reward_label'
-                                                    .tr()
-                                              : 'cart.discount'.tr(),
-                                          style: KZ.bodyLarge.copyWith(
-                                            color: CheckoutScreen.errorColor,
-                                          ),
-                                        ),
-                                        Text(
-                                          '-${formatCurrency(totalDiscount, locale: context.locale)}',
-                                          style: KZ.body.copyWith(
-                                            color: CheckoutScreen.errorColor,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                  const Padding(
-                                    padding: EdgeInsets.only(
-                                      top: 16,
-                                      bottom: 16,
-                                    ),
-                                    child: Divider(
-                                      color: CheckoutScreen.outlineVariantColor,
-                                      height: 1,
-                                    ),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        'checkout.total_label'.tr(),
-                                        style: KZ.sectionTitle.copyWith(
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                      Text(
-                                        formatCurrency(
-                                          grandTotal,
-                                          locale: context.locale,
-                                        ),
-                                        style: KZ.priceLarge.copyWith(
-                                          fontSize: 28,
-                                          color: CheckoutScreen.primaryColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                            _OrderSummaryCard(
+                              cart: cart,
+                              effectiveDeliveryFee: totals.deliveryFee,
+                              totalDiscount: totals.discount,
+                              effectiveTax: totals.tax,
+                              grandTotal: totals.grandTotal,
+                              hasPromoApplied: hasPromoApplied,
+                              effectiveRewardId: effectiveRewardId,
+                              onRemoveDiscount: () =>
+                                  _removeAppliedDiscount(hasPromoApplied),
                             ),
-                            // 5. Applied Discount Banner — reflects the real applied promo or
-                            // selected loyalty reward (mutually exclusive, at most one shown).
-                            if (hasPromoApplied ||
-                                effectiveRewardId != null) ...[
-                              const SizedBox(height: 20),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 16,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: CheckoutScreen.onSurfaceColor,
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.15,
-                                      ),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 6),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            hasPromoApplied
-                                                ? 'checkout.promo_applied_label'
-                                                      .tr()
-                                                : 'checkout.loyalty_reward_applied_label'
-                                                      .tr(),
-                                            style: KZ.label.copyWith(
-                                              color: Colors.white70,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            hasPromoApplied
-                                                ? cart.promoCodeId!
-                                                : _rewardDisplayName(
-                                                    effectiveRewardId!,
-                                                  ),
-                                            style: KZ.sectionTitle.copyWith(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        if (hasPromoApplied) {
-                                          ref
-                                              .read(cartProvider.notifier)
-                                              .removePromoCode()
-                                              .catchError((Object e) {
-                                                if (!context.mounted) return;
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      'checkout.promo_remove_failed'
-                                                          .tr(),
-                                                    ),
-                                                  ),
-                                                );
-                                              });
-                                        } else {
-                                          setState(
-                                            () => _selectedRewardId = null,
-                                          );
-                                        }
-                                      },
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.white70,
-                                        minimumSize: const Size(
-                                          0,
-                                          KZ.iconTapTargetMin,
-                                        ),
-                                      ),
-                                      child: Text('cart.remove'.tr()),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
                           ],
                         );
                       },
@@ -1498,16 +673,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             // Bottom Fixed Actions Layer (Sticky Footer CTA)
             Consumer(
               builder: (context, ref, child) {
-                final settingsAsync = ref.watch(restaurantSettingsProvider);
+                final settingsFooterAsync = ref.watch(restaurantSettingsProvider);
                 final cart = cartAsync.valueOrNull;
-                if (cart == null || cart.items.isEmpty)
+                if (cart == null || cart.items.isEmpty) {
                   return const SizedBox.shrink();
+                }
 
                 final effectiveRewardId = _effectiveRewardId(cart);
-                final grandTotal = _previewTotals(
-                  cart,
-                  quoteDeliveryFee,
-                ).grandTotal;
+                final grandTotal = _previewTotals(cart, quoteDeliveryFee).grandTotal;
                 final deliveryBlockReasonKey = _orderType == 'delivery'
                     ? _deliveryBlockReasonKey(effectiveAddress, quoteAsync)
                     : null;
@@ -1520,13 +693,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         quote == null ||
                         !quote.deliverable);
 
-                return settingsAsync.when(
+                return settingsFooterAsync.when(
                   loading: () => _CheckoutFooterShell(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Center(child: CircularProgressIndicator()),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: KZ.sp10),
                         Text(
                           'checkout.settings_loading'.tr(),
                           style: Theme.of(context).textTheme.bodyMedium,
@@ -1548,34 +721,30 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               color: CheckoutScreen.errorColor,
                               semanticLabel: 'Error',
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: KZ.sp8),
                             Expanded(
                               child: Text(
                                 'checkout.settings_error'.tr(),
                                 style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: CheckoutScreen.errorColor,
-                                    ),
+                                    ?.copyWith(color: CheckoutScreen.errorColor),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: KZ.sp10),
                         KZButton(
                           fullWidth: true,
                           pill: false,
                           variant: KZButtonVariant.secondary,
                           label: 'common.retry'.tr(),
-                          loading: settingsAsync.isLoading,
-                          onPressed: () =>
-                              ref.invalidate(restaurantSettingsProvider),
+                          loading: settingsFooterAsync.isLoading,
+                          onPressed: () => ref.invalidate(restaurantSettingsProvider),
                         ),
                       ],
                     ),
                   ),
                   data: (settings) {
-                    final isBelowMinOrder =
-                        cart.subtotal < settings.minOrderAmount;
+                    final isBelowMinOrder = cart.subtotal < settings.minOrderAmount;
                     final remaining = (settings.minOrderAmount - cart.subtotal)
                         .clamp(0.0, double.infinity);
 
@@ -1585,7 +754,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         children: [
                           if (!settings.acceptingOrders)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 10.0),
+                              padding: const EdgeInsets.only(bottom: KZ.sp10),
                               child: Text(
                                 (context.locale.languageCode == 'ar'
                                         ? settings.closedMessageAr
@@ -1595,11 +764,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                   fontWeight: FontWeight.w700,
                                   color: CheckoutScreen.errorColor,
                                 ),
+                                textAlign: TextAlign.center,
                               ),
                             )
                           else if (isBelowMinOrder)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 10.0),
+                              padding: const EdgeInsets.only(bottom: KZ.sp10),
                               child: Text(
                                 'checkout.min_order_notice'.tr(
                                   namedArgs: {
@@ -1617,17 +787,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                   fontWeight: FontWeight.w700,
                                   color: CheckoutScreen.errorColor,
                                 ),
+                                textAlign: TextAlign.center,
                               ),
                             )
                           else if (deliveryBlockReasonKey != null)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 10.0),
+                              padding: const EdgeInsets.only(bottom: KZ.sp10),
                               child: Text(
                                 deliveryBlockReasonKey.tr(),
                                 style: KZ.body.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: CheckoutScreen.errorColor,
                                 ),
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           KZButton(
@@ -1649,29 +821,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                     deliveryNotReady)
                                 ? null
                                 : () async {
-                                    final deliveryMethod =
-                                        _orderType == 'delivery'
+                                    final deliveryMethod = _orderType == 'delivery'
                                         ? FulfillmentType.delivery
                                         : FulfillmentType.pickup;
-                                    final paymentMethod =
-                                        _selectedPaymentMethod == 0
+                                    final paymentMethod = _selectedPaymentMethod == 0
                                         ? 'CASH'
                                         : 'CARD';
 
                                     Map<String, dynamic>? deliveryAddress;
-                                    if (deliveryMethod ==
-                                        FulfillmentType.delivery) {
+                                    if (deliveryMethod == FulfillmentType.delivery) {
                                       if (effectiveAddress == null) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'checkout.address_required'.tr(),
-                                            ),
-                                            backgroundColor:
-                                                CheckoutScreen.errorColor,
-                                          ),
+                                        _showSnack(
+                                          'checkout.address_required'.tr(),
+                                          isError: true,
                                         );
                                         return;
                                       }
@@ -1680,19 +842,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                       // this would fail, but coordinates and
                                       // the current quote are never trusted
                                       // implicitly right before submitting.
-                                      if (!effectiveAddress
-                                          .hasValidCoordinates) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'checkout.delivery_coordinates_required_error'
-                                                  .tr(),
-                                            ),
-                                            backgroundColor:
-                                                CheckoutScreen.errorColor,
-                                          ),
+                                      if (!effectiveAddress.hasValidCoordinates) {
+                                        _showSnack(
+                                          'checkout.delivery_coordinates_required_error'
+                                              .tr(),
+                                          isError: true,
                                         );
                                         return;
                                       }
@@ -1701,17 +855,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                           quoteAsync.hasError ||
                                           currentQuote == null ||
                                           !currentQuote.deliverable) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'checkout.address_outside_range'
-                                                  .tr(),
-                                            ),
-                                            backgroundColor:
-                                                CheckoutScreen.errorColor,
-                                          ),
+                                        _showSnack(
+                                          'checkout.address_outside_range'.tr(),
+                                          isError: true,
                                         );
                                         return;
                                       }
@@ -1723,13 +869,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         if (effectiveAddress.floor != null &&
                                             effectiveAddress.floor!.isNotEmpty)
                                           'floor': effectiveAddress.floor,
-                                        if (effectiveAddress.apartment !=
-                                                null &&
-                                            effectiveAddress
-                                                .apartment!
-                                                .isNotEmpty)
-                                          'apartment':
-                                              effectiveAddress.apartment,
+                                        if (effectiveAddress.apartment != null &&
+                                            effectiveAddress.apartment!.isNotEmpty)
+                                          'apartment': effectiveAddress.apartment,
                                         'city': effectiveAddress.city,
                                         'latitude': effectiveAddress.lat,
                                         'longitude': effectiveAddress.lng,
@@ -1749,13 +891,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         );
                                     if (order != null) {
                                       if (!context.mounted) return;
-                                      context.go(
-                                        '/orders/tracking/${order.id}',
-                                      );
+                                      context.go('/orders/tracking/${order.id}');
                                     }
                                   },
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: KZ.sp10),
                           Text(
                             'checkout.terms_agree'.tr(),
                             style: KZ.caption.copyWith(
@@ -1833,10 +973,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       if (addressState.addresses.isEmpty)
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'checkout.no_saved_addresses'.tr(),
-                            style: KZ.body,
-                          ),
+                          child: Text('checkout.no_saved_addresses'.tr(), style: KZ.body),
                         )
                       else
                         Flexible(
@@ -1846,10 +983,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             itemBuilder: (context, index) {
                               final address = addressState.addresses[index];
                               final effectiveSelectedId =
-                                  _selectedAddressId ??
-                                  addressState.defaultAddress?.id;
-                              final isSelected =
-                                  address.id == effectiveSelectedId;
+                                  _selectedAddressId ?? addressState.defaultAddress?.id;
+                              final isSelected = address.id == effectiveSelectedId;
                               return ListTile(
                                 leading: Icon(
                                   isSelected
@@ -1865,10 +1000,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                       : 'checkout.address_fallback_label'.tr(),
                                   style: KZ.itemTitle,
                                 ),
-                                subtitle: Text(
-                                  _formatAddress(address),
-                                  style: KZ.bodySmall,
-                                ),
+                                subtitle: Text(_formatAddress(address), style: KZ.bodySmall),
                                 trailing: IconButton(
                                   onPressed: () => Navigator.pop(
                                     sheetContext,
@@ -1926,10 +1058,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           if (mounted) setState(() => _selectedAddressId = null);
           break;
         case _AddressSheetAction.edit:
-          await context.push(
-            '/profile/addresses/edit',
-            extra: result.editAddress,
-          );
+          await context.push('/profile/addresses/edit', extra: result.editAddress);
           if (mounted) setState(() => _selectedAddressId = null);
           break;
       }
@@ -1964,164 +1093,38 @@ class _AddressSheetResult {
       editAddress = address;
 }
 
-/// DELIVERY-only distance-based delivery quote card
-/// (`POST /delivery/quote`). Purely advisory display — checkout always
-/// re-prices authoritatively, this never submits anything itself. Renders
-/// nothing when [address] is `null`: the address card above already covers
-/// "no address selected" via `checkout.no_address_notice`.
-class _DeliveryQuoteCard extends StatelessWidget {
-  final Address? address;
-  final AsyncValue<DeliveryQuote?> quoteAsync;
-  final VoidCallback onEditAddressLocation;
-  final VoidCallback onRetry;
+// ── Header: one clear title, back nav preserved exactly (context.pop()). ──
+class _CheckoutHeader extends StatelessWidget {
+  final VoidCallback onBack;
 
-  const _DeliveryQuoteCard({
-    required this.address,
-    required this.quoteAsync,
-    required this.onEditAddressLocation,
-    required this.onRetry,
-  });
+  const _CheckoutHeader({required this.onBack});
 
   @override
   Widget build(BuildContext context) {
-    final address = this.address;
-    if (address == null) return const SizedBox.shrink();
-
-    return KZCard(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: KZ.sp16),
+      child: Row(
         children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.local_shipping_rounded,
-                color: CheckoutScreen.primaryColor,
-                size: KZ.iconControl,
+          Semantics(
+            button: true,
+            label: 'common.back'.tr(),
+            child: InkWell(
+              onTap: onBack,
+              borderRadius: BorderRadius.circular(30),
+              child: const Padding(
+                padding: EdgeInsets.only(right: KZ.sp8),
+                child: Icon(Icons.arrow_back, color: CheckoutScreen.primaryColor, size: 24),
               ),
-              const SizedBox(width: 8),
-              Text(
-                'checkout.delivery_fee'.tr(),
-                style: KZ.itemTitle.copyWith(
-                  color: CheckoutScreen.primaryColor,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                ),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 12),
-          Builder(
-            builder: (context) {
-              if (!address.hasValidCoordinates) {
-                return _DeliveryQuoteNotice(
-                  message: 'checkout.address_missing_coordinates_error'.tr(),
-                  actionLabel: 'checkout.update_address_location'.tr(),
-                  onAction: onEditAddressLocation,
-                );
-              }
-              if (quoteAsync.isLoading) {
-                return Row(
-                  children: [
-                    const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2.5),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'checkout.calculating_delivery_fee'.tr(),
-                        style: KZ.body.copyWith(
-                          color: CheckoutScreen.onSurfaceVariantColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-              if (quoteAsync.hasError) {
-                return _DeliveryQuoteNotice(
-                  message: 'checkout.delivery_fee_calc_error'.tr(),
-                  actionLabel: 'common.retry'.tr(),
-                  onAction: onRetry,
-                );
-              }
-              final quote = quoteAsync.valueOrNull;
-              if (quote == null) {
-                return Row(
-                  children: [
-                    const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2.5),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'checkout.calculating_delivery_fee'.tr(),
-                        style: KZ.body.copyWith(
-                          color: CheckoutScreen.onSurfaceVariantColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-              if (!quote.deliverable) {
-                return _DeliveryQuoteNotice(
-                  message: 'checkout.address_outside_range'.tr(),
-                  actionLabel: 'checkout.update_address_location'.tr(),
-                  onAction: onEditAddressLocation,
-                );
-              }
-              final fee = quote.deliveryFee;
-              final distanceKm = quote.distanceKm;
-              final durationMinutes = quote.durationMinutes;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('checkout.delivery_fee'.tr(), style: KZ.bodyLarge),
-                      Text(
-                        fee != null
-                            ? formatCurrency(fee, locale: context.locale)
-                            : '—',
-                        style: KZ.bodyLarge.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: CheckoutScreen.primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (distanceKm != null) ...[
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('checkout.distance'.tr(), style: KZ.caption),
-                        Text(
-                          '${distanceKm.toStringAsFixed(2)} km',
-                          style: KZ.caption,
-                        ),
-                      ],
-                    ),
-                  ],
-                  if (durationMinutes != null) ...[
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('checkout.estimated_time'.tr(), style: KZ.caption),
-                        Text('$durationMinutes min', style: KZ.caption),
-                      ],
-                    ),
-                  ],
-                ],
-              );
-            },
+          Expanded(
+            child: Text(
+              'checkout.title'.tr(),
+              style: KZ.pageTitle.copyWith(color: CheckoutScreen.primaryColor),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
@@ -2129,7 +1132,344 @@ class _DeliveryQuoteCard extends StatelessWidget {
   }
 }
 
-/// Shared layout for the quote card's non-happy-path states — a short
+// ── Delivery / Pickup segmented toggle. ──
+class _FulfillmentToggle extends StatelessWidget {
+  final String orderType;
+  final ValueChanged<String> onChanged;
+
+  const _FulfillmentToggle({required this.orderType, required this.onChanged});
+
+  Widget _segment({
+    required bool selected,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(KZ.radiusMd),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: double.infinity,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: selected ? CheckoutScreen.primaryColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(KZ.radiusMd),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: KZ.sp8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: KZ.iconControl,
+                  color: selected ? Colors.white : CheckoutScreen.onSurfaceVariantColor,
+                ),
+                const SizedBox(width: KZ.sp8),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: KZ.labelLarge.copyWith(
+                      color: selected ? Colors.white : CheckoutScreen.onSurfaceVariantColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 52,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: CheckoutScreen.surfaceContainerLowColor,
+        borderRadius: BorderRadius.circular(KZ.radiusMd + 2),
+        border: Border.all(color: CheckoutScreen.outlineVariantColor),
+      ),
+      child: Row(
+        children: [
+          _segment(
+            selected: orderType == 'delivery',
+            icon: Icons.delivery_dining_rounded,
+            label: 'checkout.delivery'.tr(),
+            onTap: () => onChanged('delivery'),
+          ),
+          _segment(
+            selected: orderType == 'pickup',
+            icon: Icons.storefront_rounded,
+            label: 'checkout.pickup'.tr(),
+            onTap: () => onChanged('pickup'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── One coherent fulfillment card: address/pickup info + delivery fee + ETA,
+// composed together instead of three separate heavy cards. ──
+class _FulfillmentCard extends StatelessWidget {
+  final String orderType;
+  final Address? address;
+  final String displayAddress;
+  final VoidCallback onChangeAddress;
+  final AsyncValue<DeliveryQuote?> quoteAsync;
+  final VoidCallback onEditAddressLocation;
+  final VoidCallback onRetryQuote;
+  final AsyncValue<RestaurantSettings> settingsAsync;
+
+  const _FulfillmentCard({
+    required this.orderType,
+    required this.address,
+    required this.displayAddress,
+    required this.onChangeAddress,
+    required this.quoteAsync,
+    required this.onEditAddressLocation,
+    required this.onRetryQuote,
+    required this.settingsAsync,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDelivery = orderType == 'delivery';
+
+    return KZCard(
+      padding: const EdgeInsets.all(KZ.sp20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(
+                      isDelivery ? Icons.home_rounded : Icons.storefront_rounded,
+                      color: CheckoutScreen.primaryColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: KZ.sp8),
+                    Flexible(
+                      child: Text(
+                        isDelivery
+                            ? 'checkout.delivery_address'.tr()
+                            : 'checkout.pickup'.tr(),
+                        style: KZ.itemTitle.copyWith(
+                          color: CheckoutScreen.primaryColor,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isDelivery) ...[
+                const SizedBox(width: KZ.sp8),
+                TextButton(
+                  onPressed: onChangeAddress,
+                  style: TextButton.styleFrom(
+                    minimumSize: Size.zero,
+                    padding: EdgeInsets.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    'checkout.change_address'.tr(),
+                    style: KZ.labelLarge.copyWith(
+                      color: CheckoutScreen.primaryColor,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: KZ.sp10),
+          if (isDelivery)
+            Text(
+              displayAddress,
+              style: KZ.body.copyWith(color: CheckoutScreen.onSurfaceVariantColor),
+            )
+          else
+            settingsAsync.when(
+              loading: () => Text(
+                'checkout.settings_loading'.tr(),
+                style: KZ.body.copyWith(color: CheckoutScreen.onSurfaceVariantColor),
+              ),
+              error: (e, st) => const SizedBox.shrink(),
+              data: (settings) {
+                final name = context.locale.languageCode == 'ar'
+                    ? settings.restaurantNameAr
+                    : settings.restaurantNameEn;
+                final address = context.locale.languageCode == 'ar'
+                    ? settings.addressAr
+                    : settings.addressEn;
+                return Text(
+                  [
+                    name,
+                    address,
+                  ].where((s) => s.isNotEmpty).join(' — '),
+                  style: KZ.body.copyWith(color: CheckoutScreen.onSurfaceVariantColor),
+                );
+              },
+            ),
+          if (isDelivery && address != null) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: KZ.sp14),
+              child: Divider(height: 1, color: CheckoutScreen.outlineVariantColor),
+            ),
+            _DeliveryFeeEtaBody(
+              hasValidCoordinates: address!.hasValidCoordinates,
+              quoteAsync: quoteAsync,
+              onEditAddressLocation: onEditAddressLocation,
+              onRetry: onRetryQuote,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Compact delivery fee + ETA rows, nested inside [_FulfillmentCard] — only
+/// ever real data from the quote (`POST /delivery/quote`); nothing here is
+/// ever a fabricated estimate.
+class _DeliveryFeeEtaBody extends StatelessWidget {
+  final bool hasValidCoordinates;
+  final AsyncValue<DeliveryQuote?> quoteAsync;
+  final VoidCallback onEditAddressLocation;
+  final VoidCallback onRetry;
+
+  const _DeliveryFeeEtaBody({
+    required this.hasValidCoordinates,
+    required this.quoteAsync,
+    required this.onEditAddressLocation,
+    required this.onRetry,
+  });
+
+  Widget _kv(String label, String value, {Color? valueColor, bool bold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(child: Text(label, style: KZ.bodySmall)),
+          const SizedBox(width: KZ.sp8),
+          Flexible(
+            child: Text(
+              value,
+              style: KZ.bodySmall.copyWith(
+                color: valueColor ?? CheckoutScreen.onSurfaceColor,
+                fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
+              ),
+              textAlign: TextAlign.end,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!hasValidCoordinates) {
+      return _DeliveryQuoteNotice(
+        message: 'checkout.address_missing_coordinates_error'.tr(),
+        actionLabel: 'checkout.update_address_location'.tr(),
+        onAction: onEditAddressLocation,
+      );
+    }
+    if (quoteAsync.isLoading) {
+      return Row(
+        children: [
+          const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          const SizedBox(width: KZ.sp10),
+          Expanded(
+            child: Text(
+              'checkout.calculating_delivery_fee'.tr(),
+              style: KZ.bodySmall.copyWith(color: CheckoutScreen.onSurfaceVariantColor),
+            ),
+          ),
+        ],
+      );
+    }
+    if (quoteAsync.hasError) {
+      return _DeliveryQuoteNotice(
+        message: 'checkout.delivery_fee_calc_error'.tr(),
+        actionLabel: 'common.retry'.tr(),
+        onAction: onRetry,
+      );
+    }
+    final quote = quoteAsync.valueOrNull;
+    if (quote == null) {
+      return Row(
+        children: [
+          const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          const SizedBox(width: KZ.sp10),
+          Expanded(
+            child: Text(
+              'checkout.calculating_delivery_fee'.tr(),
+              style: KZ.bodySmall.copyWith(color: CheckoutScreen.onSurfaceVariantColor),
+            ),
+          ),
+        ],
+      );
+    }
+    if (!quote.deliverable) {
+      return _DeliveryQuoteNotice(
+        message: 'checkout.address_outside_range'.tr(),
+        actionLabel: 'checkout.update_address_location'.tr(),
+        onAction: onEditAddressLocation,
+      );
+    }
+
+    final fee = quote.deliveryFee;
+    final distanceKm = quote.distanceKm;
+    final durationMinutes = quote.durationMinutes;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _kv(
+          'checkout.delivery_fee'.tr(),
+          fee != null ? formatCurrency(fee, locale: context.locale) : '—',
+          valueColor: CheckoutScreen.primaryColor,
+          bold: true,
+        ),
+        // Only real values from the quote — never a fabricated ETA range.
+        if (durationMinutes != null)
+          _kv('checkout.estimated_time'.tr(), '$durationMinutes min'),
+        if (distanceKm != null)
+          _kv('checkout.distance'.tr(), '${distanceKm.toStringAsFixed(2)} km'),
+      ],
+    );
+  }
+}
+
+/// Shared layout for the fee/ETA body's non-happy-path states — a short
 /// message plus a single action (retry, or edit the address's map pin).
 class _DeliveryQuoteNotice extends StatelessWidget {
   final String message;
@@ -2147,11 +1487,8 @@ class _DeliveryQuoteNotice extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          message,
-          style: KZ.body.copyWith(color: CheckoutScreen.errorColor),
-        ),
-        const SizedBox(height: 8),
+        Text(message, style: KZ.bodySmall.copyWith(color: CheckoutScreen.errorColor)),
+        const SizedBox(height: KZ.sp6),
         TextButton(
           onPressed: onAction,
           style: TextButton.styleFrom(
@@ -2168,6 +1505,291 @@ class _DeliveryQuoteNotice extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── One payment method row. Only the selected state gets brand (primary)
+// emphasis; unselected/disabled rows stay neutral. ──
+class _PaymentOptionTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _PaymentOptionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(KZ.radiusLg),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.all(KZ.sp16),
+        decoration: BoxDecoration(
+          color: enabled ? Colors.white : CheckoutScreen.surfaceContainerLowColor,
+          borderRadius: BorderRadius.circular(KZ.radiusLg),
+          border: Border.all(
+            color: selected ? CheckoutScreen.primaryColor : CheckoutScreen.outlineVariantColor,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: enabled
+                    ? CheckoutScreen.surfaceContainerLowColor
+                    : CheckoutScreen.outlineVariantColor.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(KZ.radiusMd),
+              ),
+              child: Icon(
+                icon,
+                color: enabled
+                    ? CheckoutScreen.onSurfaceColor
+                    : CheckoutScreen.onSurfaceVariantColor,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: KZ.sp12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: KZ.itemTitle.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: enabled
+                          ? CheckoutScreen.onSurfaceColor
+                          : CheckoutScreen.onSurfaceVariantColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: KZ.bodySmall.copyWith(color: CheckoutScreen.onSurfaceVariantColor),
+                  ),
+                ],
+              ),
+            ),
+            if (selected)
+              Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: CheckoutScreen.primaryColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check_rounded, color: Colors.white, size: 16),
+              )
+            else if (!enabled)
+              const Icon(
+                Icons.lock_outline_rounded,
+                size: 18,
+                color: CheckoutScreen.onSurfaceVariantColor,
+              )
+            else
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: CheckoutScreen.outlineVariantColor, width: 2),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Order summary — existing values only. The discount/reward row folds in
+// its own "Remove" action so no separate banner card is needed below. ──
+class _OrderSummaryCard extends StatelessWidget {
+  final Cart cart;
+  final double effectiveDeliveryFee;
+  final double totalDiscount;
+  final double effectiveTax;
+  final double grandTotal;
+  final bool hasPromoApplied;
+  final String? effectiveRewardId;
+  final VoidCallback onRemoveDiscount;
+
+  const _OrderSummaryCard({
+    required this.cart,
+    required this.effectiveDeliveryFee,
+    required this.totalDiscount,
+    required this.effectiveTax,
+    required this.grandTotal,
+    required this.hasPromoApplied,
+    required this.effectiveRewardId,
+    required this.onRemoveDiscount,
+  });
+
+  Widget _row(String label, String value, {Color? color, bool bold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: KZ.sp6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Text(
+              label,
+              style: KZ.bodyLarge.copyWith(color: CheckoutScreen.onSurfaceVariantColor),
+            ),
+          ),
+          const SizedBox(width: KZ.sp8),
+          Flexible(
+            child: Text(
+              value,
+              style: KZ.bodyLarge.copyWith(
+                color: color ?? CheckoutScreen.onSurfaceColor,
+                fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+              ),
+              textAlign: TextAlign.end,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final discountLabel = effectiveRewardId != null
+        ? 'checkout.loyalty_reward_label'.tr()
+        : 'cart.discount'.tr();
+    final discountCode = hasPromoApplied
+        ? cart.promoCodeId!
+        : (effectiveRewardId != null ? _rewardDisplayName(effectiveRewardId!) : null);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(KZ.sp20),
+      decoration: KZ.sectionDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('checkout.summary'.tr(), style: KZ.sectionTitle.copyWith(fontSize: 16)),
+          const SizedBox(height: KZ.sp10),
+          _row('cart.subtotal'.tr(), formatCurrency(cart.subtotal, locale: context.locale)),
+          _row(
+            'cart.delivery_fee'.tr(),
+            effectiveDeliveryFee == 0
+                ? 'checkout.free'.tr().toUpperCase()
+                : formatCurrency(effectiveDeliveryFee, locale: context.locale),
+            color: effectiveDeliveryFee == 0 ? CheckoutScreen.tertiaryColor : null,
+            bold: effectiveDeliveryFee == 0,
+          ),
+          if (effectiveTax > 0)
+            _row('common.tax'.tr(), formatCurrency(effectiveTax, locale: context.locale)),
+          if (totalDiscount > 0) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: KZ.sp6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          discountLabel,
+                          style: KZ.bodyLarge.copyWith(
+                            color: CheckoutScreen.onSurfaceVariantColor,
+                          ),
+                        ),
+                        if (discountCode != null)
+                          Text(
+                            discountCode,
+                            style: KZ.labelLarge.copyWith(fontWeight: FontWeight.w700),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: KZ.sp8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '-${formatCurrency(totalDiscount, locale: context.locale)}',
+                        style: KZ.bodyLarge.copyWith(
+                          color: CheckoutScreen.tertiaryColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: onRemoveDiscount,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            'cart.remove'.tr(),
+                            style: KZ.caption.copyWith(color: CheckoutScreen.errorColor),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: KZ.sp12),
+            child: Divider(color: CheckoutScreen.outlineVariantColor, height: 1),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Flexible(
+                child: Text(
+                  'checkout.total_label'.tr(),
+                  style: KZ.sectionTitle.copyWith(fontSize: 18),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: KZ.sp8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Text(
+                    formatCurrency(grandTotal, locale: context.locale),
+                    style: KZ.priceLarge.copyWith(
+                      fontSize: 28,
+                      color: CheckoutScreen.primaryColor,
+                    ),
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -2191,17 +1813,15 @@ class _CheckoutFooterShell extends StatelessWidget {
           MediaQuery.of(context).padding.bottom + 16,
         ),
         decoration: BoxDecoration(
-          color: CheckoutScreen.surfaceBg.withValues(alpha: 0.95),
-          border: Border(
-            top: BorderSide(
-              color: CheckoutScreen.outlineVariantColor.withValues(alpha: 0.2),
-            ),
+          color: CheckoutScreen.surfaceBg.withValues(alpha: 0.97),
+          border: const Border(
+            top: BorderSide(color: CheckoutScreen.outlineVariantColor),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 24,
-              offset: const Offset(0, -6),
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
             ),
           ],
         ),

@@ -197,7 +197,7 @@ class _ModifierGroupDialogState extends State<_ModifierGroupDialog> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: Colors.grey),
+                    icon: const Icon(Icons.close, color: KZ.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -346,7 +346,7 @@ class _ModifierGroupDialogState extends State<_ModifierGroupDialog> {
                               style: TextStyle(
                                 fontSize: 11,
                                 color: _isRequired
-                                    ? Colors.red
+                                    ? KZ.error
                                     : Colors.green.shade700,
                               ),
                             ),
@@ -439,7 +439,7 @@ class _ModifierGroupDialogState extends State<_ModifierGroupDialog> {
                           children: const [
                             Icon(
                               Icons.add_circle_outline,
-                              color: Colors.grey,
+                              color: KZ.onSurfaceVariant,
                               size: 36,
                             ),
                             SizedBox(height: 8),
@@ -456,7 +456,7 @@ class _ModifierGroupDialogState extends State<_ModifierGroupDialog> {
                               'Click "Add Option" above or choose a quick preset.',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.grey,
+                                color: KZ.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -543,7 +543,7 @@ class _ModifierGroupDialogState extends State<_ModifierGroupDialog> {
                                 icon: const Icon(
                                   Icons.delete_outline,
                                   size: 20,
-                                  color: Colors.red,
+                                  color: KZ.error,
                                 ),
                                 onPressed: () =>
                                     setState(() => _options.removeAt(index)),
@@ -716,7 +716,11 @@ class _ModifierOptionDialogState extends State<_ModifierOptionDialog> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, size: 20, color: Colors.grey),
+                    icon: const Icon(
+                      Icons.close,
+                      size: 20,
+                      color: KZ.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),

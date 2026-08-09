@@ -15,11 +15,11 @@ import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
 /// Two-tier spacing rhythm for the whole screen: [_blockGap] between major
-/// sections (cart items / promo / summary / recommendations), [_innerGap]
-/// between elements within the same section. Kept as constants here rather
-/// than inline magic numbers so the two tiers stay visibly distinct and
-/// consistent — both pull from the existing KZ.sp* scale, nothing new.
-const double _blockGap = KZ.sp24;
+/// sections (cart items / promo / summary), [_innerGap] between elements
+/// within the same section. Kept as constants here rather than inline magic
+/// numbers so the two tiers stay visibly distinct and consistent — both pull
+/// from the existing KZ.sp* scale, nothing new.
+const double _blockGap = KZ.sp20;
 const double _innerGap = KZ.sp10;
 
 class CartScreen extends ConsumerStatefulWidget {
@@ -45,6 +45,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
   // row while its previous mutation is still in flight (rapid double-taps
   // must not fire two overlapping updateItem/removeItem calls).
   final Set<String> _pendingItemIds = {};
+  bool _promoSubmitting = false;
 
   @override
   void dispose() {
@@ -60,9 +61,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     action()
         .catchError((Object e) {
           if (!context.mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('common.something_wrong'.tr())),
-          );
+          _showSnack('common.something_wrong'.tr());
         })
         .whenComplete(() {
           if (itemId != null && mounted) {
@@ -71,9 +70,58 @@ class _CartScreenState extends ConsumerState<CartScreen> {
         });
   }
 
+  // Floating with an explicit bottom margin so a snackbar always clears the
+  // sticky checkout CTA instead of sitting underneath/behind it.
+  void _showSnack(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: isError ? KZ.error : null,
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+      ),
+    );
+  }
+
+  Future<void> _submitPromo(Cart cart) async {
+    final code = _promoController.text.trim();
+    if (code.isEmpty || _promoSubmitting) return;
+    setState(() => _promoSubmitting = true);
+    try {
+      await ref.read(cartProvider.notifier).applyPromoCode(code);
+      if (!context.mounted) return;
+      _promoController.clear();
+      _showSnack('${'cart.applied'.tr()} "$code"');
+    } catch (e) {
+      if (!context.mounted) return;
+      String errorMsg;
+      final cause = e is Failure ? e.cause : null;
+      if (cause is ApiException && cause.code == 'PROMO_ALREADY_USED') {
+        errorMsg = 'cart.promo_already_used'.tr();
+      } else if (e is Failure) {
+        errorMsg = e.message;
+      } else {
+        errorMsg = e.toString().replaceAll('Exception: ', '');
+      }
+      _showSnack(errorMsg, isError: true);
+    } finally {
+      if (mounted) setState(() => _promoSubmitting = false);
+    }
+  }
+
+  Future<void> _removePromo() async {
+    try {
+      await ref.read(cartProvider.notifier).removePromoCode();
+    } catch (e) {
+      if (!context.mounted) return;
+      _showSnack('common.something_wrong'.tr());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cartAsync = ref.watch(cartProvider);
+    final hasItems = cartAsync.valueOrNull?.items.isNotEmpty ?? false;
 
     return Scaffold(
       backgroundColor: CartScreen.surfaceBg,
@@ -84,85 +132,12 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               bottom: false,
               child: Column(
                 children: [
-                  // ── Top Bar Header matching Menu Screen level & size ──
-                  Container(
-                    height: 64,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: KZ.outlineVariant.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Semantics(
-                                button: true,
-                                label: 'common.back'.tr(),
-                                child: InkWell(
-                                  onTap: () {
-                                    if (context.canPop()) {
-                                      context.pop();
-                                    } else {
-                                      context.go('/home');
-                                    }
-                                  },
-                                  borderRadius: BorderRadius.circular(30),
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(right: 8.0),
-                                    child: Icon(
-                                      Icons.arrow_back,
-                                      color: CartScreen.primaryColor,
-                                      size: 24,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Flexible(
-                                child: Text(
-                                  'cart.title'.tr(),
-                                  style: KZ.pageTitle.copyWith(
-                                    color: CartScreen.primaryColor,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (cartAsync.valueOrNull != null &&
-                            (cartAsync.valueOrNull?.items.isNotEmpty ?? false))
-                          InkWell(
-                            onTap: () => _runCartAction(
-                              () => ref.read(cartProvider.notifier).clearCart(),
-                            ),
-                            borderRadius: BorderRadius.circular(6),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 6,
-                              ),
-                              child: Text(
-                                'cart.clear_cart'.tr().toUpperCase(),
-                                style: KZ.labelLarge.copyWith(
-                                  color: CartScreen.onSurfaceVariantColor,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
+                  _CartHeader(
+                    showClear: hasItems,
+                    onClear: () => _runCartAction(
+                      () => ref.read(cartProvider.notifier).clearCart(),
                     ),
                   ),
-
                   Expanded(
                     child: cartAsync.when(
                       loading: () => const Center(
@@ -190,9 +165,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
 
                         return ListView(
                           physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 160),
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 150),
                           children: [
-                            // Cart Items — grouped together, small gaps
+                            // Cart items — grouped together, small gaps
                             // between each card since they're one section.
                             for (final item in cart.items) ...[
                               _CartItemCard(
@@ -229,10 +204,16 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                               const SizedBox(height: _innerGap),
                             ],
 
+                            const SizedBox(height: _blockGap - _innerGap),
+                            _PromoSection(
+                              cart: cart,
+                              controller: _promoController,
+                              submitting: _promoSubmitting,
+                              onApply: () => _submitPromo(cart),
+                              onRemove: _removePromo,
+                            ),
                             const SizedBox(height: _blockGap),
-                            _buildPromoSection(cart),
-                            const SizedBox(height: _blockGap),
-                            _buildOrderSummarySection(context, cart),
+                            _OrderSummarySection(cart: cart),
                           ],
                         );
                       },
@@ -242,13 +223,12 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               ),
             ),
 
-            // ── Sticky Checkout CTA — the one floating element on the
+            // ── Sticky checkout CTA — the one floating element on the
             // page; every other surface below is intentionally flat. A
             // non-interactive fade behind it keeps scrolled-under content
             // readable without adding a second bottom bar or changing the
             // button's own position. ──
-            if (cartAsync.valueOrNull != null &&
-                (cartAsync.valueOrNull?.items.isNotEmpty ?? false)) ...[
+            if (hasItems) ...[
               Positioned(
                 left: 0,
                 right: 0,
@@ -286,310 +266,102 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       ),
     );
   }
-
-  // ── Promo Code Section ──
-  Widget _buildPromoSection(Cart cart) {
-    final hasPromo = cart.promoCodeId != null && cart.promoCodeId!.isNotEmpty;
-
-    if (hasPromo) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: CartScreen.primaryColor.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: CartScreen.primaryColor.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Row(
-          children: [
-            const Icon(
-              Icons.local_offer_rounded,
-              color: CartScreen.primaryColor,
-              size: 22,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'cart.applied'.tr(),
-                    style: KZ.caption.copyWith(
-                      color: CartScreen.onSurfaceVariantColor,
-                    ),
-                  ),
-                  Text(
-                    cart.promoCodeId!,
-                    style: KZ.itemTitle.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: CartScreen.primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            InkWell(
-              onTap: () async {
-                try {
-                  await ref.read(cartProvider.notifier).removePromoCode();
-                } catch (e) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('common.something_wrong'.tr()),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              },
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: CartScreen.errorColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'cart.remove'.tr(),
-                  style: KZ.labelLarge.copyWith(
-                    color: CartScreen.errorColor,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: CartScreen.outlineVariantColor.withValues(alpha: 0.5),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 16),
-          const Icon(
-            Icons.local_offer_outlined,
-            color: CartScreen.onSurfaceVariantColor,
-            size: 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              controller: _promoController,
-              textAlign: TextAlign.start,
-              style: KZ.bodyLarge.copyWith(fontWeight: FontWeight.w600),
-              textCapitalization: TextCapitalization.characters,
-              decoration: InputDecoration(
-                hintText: 'cart.promo_hint'.tr(),
-                hintStyle: KZ.bodyLarge.copyWith(
-                  color: CartScreen.onSurfaceVariantColor.withValues(
-                    alpha: 0.5,
-                  ),
-                ),
-                border: InputBorder.none,
-                isCollapsed: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ),
-          InkWell(
-            onTap: () async {
-              final code = _promoController.text.trim();
-              if (code.isEmpty) return;
-              try {
-                await ref.read(cartProvider.notifier).applyPromoCode(code);
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${'cart.applied'.tr()} "$code"'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              } catch (e) {
-                if (!context.mounted) return;
-                String errorMsg;
-                final cause = e is Failure ? e.cause : null;
-                if (cause is ApiException &&
-                    cause.code == 'PROMO_ALREADY_USED') {
-                  errorMsg = 'cart.promo_already_used'.tr();
-                } else if (e is Failure) {
-                  errorMsg = e.message;
-                } else {
-                  errorMsg = e.toString().replaceAll('Exception: ', '');
-                }
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(errorMsg),
-                    behavior: SnackBarBehavior.floating,
-                    backgroundColor: KZ.error,
-                  ),
-                );
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Text(
-                'cart.apply'.tr(),
-                style: KZ.labelLarge.copyWith(
-                  color: CartScreen.primaryColor,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Order Summary Section matching Stitch HTML ──
-  Widget _buildOrderSummarySection(BuildContext context, Cart cart) {
-    Widget row(String label, String value, {Color? color}) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Text(
-                label,
-                style: KZ.bodyLarge.copyWith(
-                  color: color ?? CartScreen.onSurfaceVariantColor,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                value,
-                style: KZ.bodyLarge.copyWith(
-                  color: color ?? CartScreen.onSurfaceVariantColor,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.end,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: CartScreen.surfaceContainerLowColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'cart.order_summary'.tr(),
-            style: KZ.sectionTitle.copyWith(
-              fontSize: 18,
-              color: CartScreen.onSurfaceColor,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Divider(
-            height: 1,
-            color: CartScreen.outlineVariantColor.withValues(alpha: 0.3),
-          ),
-          const SizedBox(height: 8),
-          row(
-            'cart.subtotal'.tr(),
-            formatCurrency(cart.subtotal, locale: context.locale),
-          ),
-          if (cart.discountTotal > 0)
-            row(
-              'cart.discount'.tr(),
-              '-${formatCurrency(cart.discountTotal, locale: context.locale)}',
-              color: KZ.error,
-            ),
-          row(
-            'cart.delivery_fee'.tr(),
-            // Cart-stage deliveryFee is always 0 (zone-specific pricing is
-            // resolved at checkout, not before a zone is chosen) — showing
-            // "0 SAR" here would read as "free delivery", which it isn't.
-            'cart.delivery_fee_at_checkout'.tr(),
-          ),
-          if (cart.taxTotal > 0)
-            row(
-              'common.tax'.tr(),
-              formatCurrency(cart.taxTotal, locale: context.locale),
-            ),
-          Padding(
-            padding: const EdgeInsets.only(top: 16, bottom: 16),
-            child: Divider(
-              height: 1,
-              color: CartScreen.outlineVariantColor.withValues(alpha: 0.3),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text(
-                  'cart.total'.tr(),
-                  style: KZ.sectionTitle.copyWith(
-                    fontSize: 20,
-                    color: CartScreen.onSurfaceColor,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: Text(
-                    formatCurrency(cart.grandTotal, locale: context.locale),
-                    style: KZ.priceLarge.copyWith(
-                      fontSize: 32,
-                      color: CartScreen.primaryColor,
-                    ),
-                    maxLines: 1,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // No real recommendation source exists for the Cart screen (CartRepository
-  // exposes no recommendation data, unlike item details' oftenOrderedWith).
-  // Per project rules, the section is hidden entirely rather than backed by
-  // fake/random/featured/popular fallback data.
 }
 
-// ── Cart item card ──
+// ── Header: one clear title, Clear Cart kept visually secondary so it
+// never competes with the checkout CTA below. ──
+class _CartHeader extends StatelessWidget {
+  final bool showClear;
+  final VoidCallback onClear;
+
+  const _CartHeader({required this.showClear, required this.onClear});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 64,
+      padding: const EdgeInsets.symmetric(horizontal: KZ.sp16),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: KZ.outlineVariant, width: 1),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Semantics(
+                  button: true,
+                  label: 'common.back'.tr(),
+                  child: InkWell(
+                    onTap: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/home');
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(30),
+                    child: const Padding(
+                      padding: EdgeInsets.only(right: KZ.sp8),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: CartScreen.primaryColor,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    'cart.title'.tr(),
+                    style: KZ.pageTitle.copyWith(color: CartScreen.primaryColor),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (showClear)
+            InkWell(
+              onTap: onClear,
+              borderRadius: BorderRadius.circular(KZ.radiusSm),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KZ.sp8,
+                  vertical: KZ.sp8,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.delete_outline_rounded,
+                      size: 16,
+                      color: CartScreen.onSurfaceVariantColor,
+                    ),
+                    const SizedBox(width: KZ.sp4),
+                    Text(
+                      'cart.clear_cart'.tr(),
+                      style: KZ.bodySmall.copyWith(
+                        color: CartScreen.onSurfaceVariantColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Cart item card — image, name, price and the quantity stepper carry
+// the row; Edit/Remove are compact icon affordances that never outweigh
+// them. ──
 class _CartItemCard extends StatelessWidget {
   final CartItem item;
   final bool isPending;
@@ -607,34 +379,22 @@ class _CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: CartScreen.outlineVariantColor.withValues(alpha: 0.4),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    final hasNote = item.specialInstructions.trim().isNotEmpty;
+
+    return KZCard(
+      padding: const EdgeInsets.all(KZ.sp12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 88,
-            height: 88,
+            width: 76,
+            height: 76,
             child: KZFoodImage(
               imageUrl: item.productImage,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(KZ.radiusMd),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: KZ.sp12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -646,152 +406,440 @@ class _CartItemCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         item.productName,
-                        style: KZ.itemTitle.copyWith(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: CartScreen.onSurfaceColor,
-                        ),
+                        style: KZ.itemTitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    InkWell(
+                    _RowIconAction(
+                      icon: Icons.edit_outlined,
+                      tooltip: 'common.edit'.tr(),
+                      onTap: onEdit,
+                    ),
+                    _RowIconAction(
+                      icon: Icons.close_rounded,
+                      tooltip: 'cart.remove'.tr(),
                       onTap: onRemove,
-                      customBorder: const CircleBorder(),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Icon(
-                          Icons.close_rounded,
-                          size: 20,
-                          color: CartScreen.onSurfaceVariantColor,
-                        ),
-                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  formatCurrency(item.lineTotal, locale: context.locale),
-                  style: KZ.priceLarge.copyWith(
-                    fontSize: 16,
-                    color: CartScreen.primaryColor,
-                    fontWeight: FontWeight.w800,
+                if (hasNote) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    item.specialInstructions.trim(),
+                    style: KZ.caption,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 12),
+                ],
+                const SizedBox(height: KZ.sp8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Flexible so the fixed-width quantity stepper always
-                    // keeps its full tap targets — the label shrinks/ellipsizes
-                    // first on narrow cards instead of overflowing the row.
                     Flexible(
-                      child: InkWell(
-                        onTap: onEdit,
-                        borderRadius: BorderRadius.circular(6),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 4,
-                            horizontal: 4,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.edit_rounded,
-                                size: 16,
-                                color: CartScreen.secondaryColor,
-                              ),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  'common.edit'.tr(),
-                                  style: KZ.labelLarge.copyWith(
-                                    color: CartScreen.secondaryColor,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      child: Text(
+                        formatCurrency(item.lineTotal, locale: context.locale),
+                        style: KZ.priceLarge.copyWith(fontSize: 17),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-
-                    // Quantity Stepper
-                    Container(
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: CartScreen.surfaceContainerColor,
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          KZPressableScale(
-                            enabled: !isPending,
-                            child: InkWell(
-                              onTap: isPending
-                                  ? null
-                                  : () => onQuantityChanged(item.quantity - 1),
-                              borderRadius: BorderRadius.circular(100),
-                              child: Container(
-                                width: 36,
-                                alignment: Alignment.center,
-                                child: Icon(
-                                  Icons.remove_rounded,
-                                  size: 18,
-                                  color: isPending
-                                      ? CartScreen.outlineVariantColor
-                                      : CartScreen.onSurfaceColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            constraints: const BoxConstraints(minWidth: 32),
-                            alignment: Alignment.center,
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 200),
-                              child: Text(
-                                '${item.quantity}',
-                                key: ValueKey<int>(item.quantity),
-                                style: KZ.cardTitle.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                          KZPressableScale(
-                            enabled: !isPending,
-                            child: InkWell(
-                              onTap: isPending
-                                  ? null
-                                  : () => onQuantityChanged(item.quantity + 1),
-                              borderRadius: BorderRadius.circular(100),
-                              child: Container(
-                                width: 36,
-                                alignment: Alignment.center,
-                                child: Icon(
-                                  Icons.add_rounded,
-                                  size: 18,
-                                  color: isPending
-                                      ? CartScreen.outlineVariantColor
-                                      : CartScreen.primaryColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    const SizedBox(width: KZ.sp8),
+                    _QuantityStepper(
+                      quantity: item.quantity,
+                      isPending: isPending,
+                      onChanged: onQuantityChanged,
                     ),
                   ],
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A small, muted icon affordance for a card's secondary actions (Edit,
+/// Remove) — deliberately quieter than the row's primary content so it
+/// never competes with the price/quantity stepper below it.
+class _RowIconAction extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  const _RowIconAction({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Icon(
+            icon,
+            size: 18,
+            color: CartScreen.onSurfaceVariantColor,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuantityStepper extends StatelessWidget {
+  final int quantity;
+  final bool isPending;
+  final ValueChanged<int> onChanged;
+
+  const _QuantityStepper({
+    required this.quantity,
+    required this.isPending,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 36,
+      decoration: BoxDecoration(
+        color: CartScreen.surfaceContainerColor,
+        borderRadius: BorderRadius.circular(KZ.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          KZPressableScale(
+            enabled: !isPending,
+            child: InkWell(
+              onTap: isPending ? null : () => onChanged(quantity - 1),
+              borderRadius: BorderRadius.circular(KZ.radiusFull),
+              child: Container(
+                width: 36,
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.remove_rounded,
+                  size: 18,
+                  color: isPending
+                      ? CartScreen.outlineVariantColor
+                      : CartScreen.onSurfaceColor,
+                ),
+              ),
+            ),
+          ),
+          Container(
+            constraints: const BoxConstraints(minWidth: 28),
+            alignment: Alignment.center,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Text(
+                '$quantity',
+                key: ValueKey<int>(quantity),
+                style: KZ.cardTitle.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+          KZPressableScale(
+            enabled: !isPending,
+            child: InkWell(
+              onTap: isPending ? null : () => onChanged(quantity + 1),
+              borderRadius: BorderRadius.circular(KZ.radiusFull),
+              child: Container(
+                width: 36,
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.add_rounded,
+                  size: 18,
+                  color: isPending
+                      ? CartScreen.outlineVariantColor
+                      : CartScreen.primaryColor,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Promo code — a quiet secondary utility, not a competing form. ──
+class _PromoSection extends StatelessWidget {
+  final Cart cart;
+  final TextEditingController controller;
+  final bool submitting;
+  final VoidCallback onApply;
+  final VoidCallback onRemove;
+
+  const _PromoSection({
+    required this.cart,
+    required this.controller,
+    required this.submitting,
+    required this.onApply,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasPromo = cart.promoCodeId != null && cart.promoCodeId!.isNotEmpty;
+    return hasPromo ? _appliedState() : _inputState();
+  }
+
+  Widget _appliedState() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: KZ.sp14,
+        vertical: KZ.sp12,
+      ),
+      decoration: BoxDecoration(
+        color: CartScreen.surfaceContainerLowColor,
+        borderRadius: BorderRadius.circular(KZ.radiusMd),
+        border: Border.all(color: CartScreen.outlineVariantColor),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle_rounded, color: KZ.tertiary, size: 20),
+          const SizedBox(width: KZ.sp10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'cart.applied'.tr(),
+                  style: KZ.caption.copyWith(color: KZ.tertiary),
+                ),
+                Text(
+                  cart.promoCodeId!,
+                  style: KZ.cardTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: KZ.sp8),
+          InkWell(
+            onTap: onRemove,
+            borderRadius: BorderRadius.circular(KZ.radiusSm),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: KZ.sp8,
+                vertical: KZ.sp6,
+              ),
+              child: Text(
+                'cart.remove'.tr(),
+                style: KZ.labelLarge.copyWith(color: CartScreen.errorColor),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _inputState() {
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: KZ.sp12),
+      decoration: BoxDecoration(
+        color: CartScreen.surfaceContainerLowColor,
+        borderRadius: BorderRadius.circular(KZ.radiusMd),
+        border: Border.all(color: CartScreen.outlineVariantColor),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.local_offer_outlined,
+            color: CartScreen.onSurfaceVariantColor,
+            size: 18,
+          ),
+          const SizedBox(width: KZ.sp10),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              enabled: !submitting,
+              style: KZ.body.copyWith(fontWeight: FontWeight.w600),
+              textCapitalization: TextCapitalization.characters,
+              onSubmitted: (_) => onApply(),
+              decoration: InputDecoration(
+                hintText: 'cart.promo_hint'.tr(),
+                hintStyle: KZ.body.copyWith(
+                  color: CartScreen.onSurfaceVariantColor.withValues(
+                    alpha: 0.6,
+                  ),
+                ),
+                border: InputBorder.none,
+                isCollapsed: true,
+              ),
+            ),
+          ),
+          const SizedBox(width: KZ.sp8),
+          SizedBox(
+            height: 28,
+            child: submitting
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: KZ.sp8),
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: CartScreen.primaryColor,
+                      ),
+                    ),
+                  )
+                : TextButton(
+                    onPressed: onApply,
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: KZ.sp8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      'cart.apply'.tr(),
+                      style: KZ.labelLarge.copyWith(
+                        color: CartScreen.primaryColor,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Order summary — existing values only, spacing/typography carry the
+// hierarchy before any extra decoration. ──
+class _OrderSummarySection extends StatelessWidget {
+  final Cart cart;
+
+  const _OrderSummarySection({required this.cart});
+
+  Widget _row(
+    BuildContext context,
+    String label,
+    String value, {
+    Color? color,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: KZ.sp6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Text(
+              label,
+              style: KZ.body.copyWith(
+                color: color ?? CartScreen.onSurfaceVariantColor,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: KZ.sp8),
+          Flexible(
+            child: Text(
+              value,
+              style: KZ.body.copyWith(
+                color: color ?? CartScreen.onSurfaceColor,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(KZ.sp20),
+      decoration: KZ.sectionDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'cart.order_summary'.tr(),
+            style: KZ.sectionTitle.copyWith(fontSize: 16),
+          ),
+          const SizedBox(height: KZ.sp10),
+          _row(
+            context,
+            'cart.subtotal'.tr(),
+            formatCurrency(cart.subtotal, locale: context.locale),
+          ),
+          if (cart.discountTotal > 0)
+            _row(
+              context,
+              'cart.discount'.tr(),
+              '-${formatCurrency(cart.discountTotal, locale: context.locale)}',
+              color: KZ.tertiary,
+            ),
+          _row(
+            context,
+            'cart.delivery_fee'.tr(),
+            // Cart-stage deliveryFee is always 0 (zone-specific pricing is
+            // resolved at checkout, not before a zone is chosen) — showing
+            // "0 SAR" here would read as "free delivery", which it isn't.
+            'cart.delivery_fee_at_checkout'.tr(),
+          ),
+          if (cart.taxTotal > 0)
+            _row(
+              context,
+              'common.tax'.tr(),
+              formatCurrency(cart.taxTotal, locale: context.locale),
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: KZ.sp12),
+            child: Divider(
+              height: 1,
+              color: CartScreen.outlineVariantColor.withValues(alpha: 0.6),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  'cart.total'.tr(),
+                  style: KZ.sectionTitle.copyWith(fontSize: 18),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: KZ.sp8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Text(
+                    formatCurrency(cart.grandTotal, locale: context.locale),
+                    style: KZ.priceLarge.copyWith(
+                      fontSize: 28,
+                      color: CartScreen.primaryColor,
+                    ),
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -7,6 +7,7 @@ import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/domain/models/report_models.dart';
 import 'package:kebda_zaman/features/admin/domain/models/reports_filter.dart';
@@ -728,67 +729,6 @@ class _OrdersOperationsSection extends StatelessWidget {
   }
 }
 
-IconData _statusIcon(OrderStatus status) {
-  switch (status) {
-    case OrderStatus.pending:
-      return Icons.hourglass_top_rounded;
-    case OrderStatus.confirmed:
-      return Icons.fact_check_rounded;
-    case OrderStatus.preparing:
-      return Icons.soup_kitchen_rounded;
-    case OrderStatus.outForDelivery:
-      return Icons.local_shipping_rounded;
-    case OrderStatus.delivered:
-      return Icons.check_circle_rounded;
-    case OrderStatus.readyForPickup:
-      return Icons.storefront_rounded;
-    case OrderStatus.pickedUp:
-      return Icons.check_circle_rounded;
-    case OrderStatus.cancelled:
-      return Icons.cancel_rounded;
-    case OrderStatus.unknown:
-      return Icons.help_outline_rounded;
-  }
-}
-
-Color _statusColor(OrderStatus status) {
-  switch (status) {
-    case OrderStatus.pending:
-      return KZ.error;
-    case OrderStatus.confirmed:
-      return const Color(0xFF00ACC1);
-    case OrderStatus.preparing:
-      return KZ.primaryContainer;
-    case OrderStatus.outForDelivery:
-      return Colors.blue.shade700;
-    case OrderStatus.delivered:
-      return KZ.tertiary;
-    case OrderStatus.readyForPickup:
-      return Colors.deepPurple.shade400;
-    case OrderStatus.pickedUp:
-      return KZ.tertiary;
-    case OrderStatus.cancelled:
-      return Colors.grey.shade600;
-    case OrderStatus.unknown:
-      return Colors.grey.shade500;
-  }
-}
-
-String _statusLabel(OrderStatus status) {
-  final key = switch (status) {
-    OrderStatus.pending => 'pending',
-    OrderStatus.confirmed => 'confirmed',
-    OrderStatus.preparing => 'preparing',
-    OrderStatus.outForDelivery => 'out_for_delivery',
-    OrderStatus.delivered => 'delivered',
-    OrderStatus.readyForPickup => 'ready_for_pickup',
-    OrderStatus.pickedUp => 'picked_up',
-    OrderStatus.cancelled => 'cancelled',
-    OrderStatus.unknown => 'unknown',
-  };
-  return 'orders.status.$key'.tr();
-}
-
 class _OrderStatusCard extends StatelessWidget {
   final List<EnumCount<OrderStatus>> byStatus;
   const _OrderStatusCard({required this.byStatus});
@@ -808,9 +748,9 @@ class _OrderStatusCard extends StatelessWidget {
           const SizedBox(height: KZ.sp14),
           for (final entry in byStatus) ...[
             _StatusProgressRow(
-              icon: _statusIcon(entry.key),
-              color: _statusColor(entry.key),
-              label: _statusLabel(entry.key),
+              icon: adminOrderStatusVisual(entry.key).icon,
+              color: adminOrderStatusVisual(entry.key).color,
+              label: adminOrderStatusVisual(entry.key).label,
               count: entry.count,
               maxCount: maxCount,
             ),

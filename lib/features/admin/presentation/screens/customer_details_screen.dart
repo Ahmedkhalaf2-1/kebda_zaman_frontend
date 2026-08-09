@@ -10,29 +10,7 @@ import 'package:kebda_zaman/features/admin/presentation/notifiers/customer_manag
 import 'package:kebda_zaman/features/admin/presentation/screens/admin_order_details_screen.dart'
     show paymentMethodLabel;
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
-
-Color _statusColor(OrderStatus status) {
-  switch (status) {
-    case OrderStatus.pending:
-      return KZ.error;
-    case OrderStatus.confirmed:
-      return const Color(0xFF00ACC1);
-    case OrderStatus.preparing:
-      return KZ.primaryContainer;
-    case OrderStatus.outForDelivery:
-      return Colors.blue;
-    case OrderStatus.delivered:
-      return KZ.tertiary;
-    case OrderStatus.readyForPickup:
-      return Colors.deepPurple.shade400;
-    case OrderStatus.pickedUp:
-      return KZ.tertiary;
-    case OrderStatus.cancelled:
-      return Colors.red.shade800;
-    case OrderStatus.unknown:
-      return Colors.grey.shade600;
-  }
-}
+import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 
 class CustomerDetailsScreen extends ConsumerWidget {
   final String customerId;
@@ -102,7 +80,7 @@ class CustomerDetailsScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const Icon(Icons.error_outline, size: 48, color: KZ.error),
               const SizedBox(height: 12),
               Text(
                 'common.something_wrong'.tr(),
@@ -385,17 +363,17 @@ class _RecentOrderTile extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: _statusColor(
+                        color: adminOrderStatusVisual(
                           order.status,
-                        ).withValues(alpha: 0.12),
+                        ).color.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        order.status.name.toLowerCase(),
+                        adminOrderStatusVisual(order.status).label,
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: _statusColor(order.status),
+                          color: adminOrderStatusVisual(order.status).color,
                         ),
                       ),
                     ),

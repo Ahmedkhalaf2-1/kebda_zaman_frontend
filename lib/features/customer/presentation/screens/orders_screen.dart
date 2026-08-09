@@ -14,6 +14,8 @@ import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_chip.dart';
+import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
 class OrdersScreen extends ConsumerStatefulWidget {
@@ -134,13 +136,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
                             if (data.activeOrders.isNotEmpty) ...[
                               Text(
                                 'orders.active'.tr(),
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: KZ.onSurface,
-                                ),
+                                style: KZ.sectionTitle,
                               ),
-                              const SizedBox(height: 14),
+                              const SizedBox(height: 12),
                               ...data.activeOrders.map(
                                 (o) => Padding(
                                   padding: const EdgeInsets.only(bottom: 16),
@@ -152,13 +150,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
                             if (data.previousOrders.isNotEmpty) ...[
                               Text(
                                 'orders.previous'.tr(),
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                  color: KZ.onSurface,
-                                ),
+                                style: KZ.sectionTitle,
                               ),
-                              const SizedBox(height: 14),
+                              const SizedBox(height: 12),
                               ...data.previousOrders.map(
                                 (o) => Padding(
                                   padding: const EdgeInsets.only(bottom: 16),
@@ -332,6 +326,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
   Widget build(BuildContext context) {
     final order = widget.order;
     final isActive = !order.status.isTerminal;
+    final visual = orderStatusVisual(order.status);
 
     final dateStr =
         '${order.placedAt.day}/${order.placedAt.month}/${order.placedAt.year} ${order.placedAt.hour}:${order.placedAt.minute.toString().padLeft(2, '0')}';
@@ -344,6 +339,13 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
       },
     );
 
+    final fulfillmentLabel = order.fulfillmentType == FulfillmentType.pickup
+        ? 'checkout.pickup'.tr()
+        : 'checkout.delivery'.tr();
+    final fulfillmentIcon = order.fulfillmentType == FulfillmentType.pickup
+        ? Icons.storefront_rounded
+        : Icons.delivery_dining_rounded;
+
     return KZPressableScale(
       child: Material(
         color: Colors.transparent,
@@ -351,7 +353,7 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
           onTap: () => context.push('/orders/tracking/${order.id}'),
           borderRadius: BorderRadius.circular(16),
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -361,16 +363,16 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: KZ.primary.withValues(alpha: 0.05),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
+                  color: KZ.primary.withValues(alpha: 0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Top Row: Order ID & Date on left, Pill Status Badge on right ──
+                // ── Top row: order identity (strongest scan point) + status ──
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,20 +383,28 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                         children: [
                           Text(
                             orderNumDisplay,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: KZ.onSurface,
-                            ),
+                            style: KZ.cardTitle,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            dateStr,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: KZ.onSurfaceVariant.withValues(alpha: 0.7),
-                            ),
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              Icon(
+                                fulfillmentIcon,
+                                size: 12,
+                                color: KZ.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
+                                  '$dateStr · $fulfillmentLabel',
+                                  style: KZ.caption,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -404,117 +414,60 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                       duration: KZMotion.durationFor(context, KZMotion.fast),
                       transitionBuilder: (child, animation) =>
                           FadeTransition(opacity: animation, child: child),
-                      child: _StatusPill(
+                      child: KZStatusBadge(
                         key: ValueKey(order.status),
-                        status: order.status,
+                        label: visual.label,
+                        icon: visual.icon,
+                        color: visual.color,
                       ),
                     ),
                   ],
                 ),
 
                 const SizedBox(height: 14),
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: KZ.outlineVariant.withValues(alpha: 0.3),
-                ),
-                const SizedBox(height: 14),
 
-                // ── Bottom Row: Total Price on left, Action Button on right ──
+                // ── Bottom row: total + the one action for this card ──
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'orders.total_label'.tr(),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: KZ.onSurfaceVariant,
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('orders.total_label'.tr(), style: KZ.caption),
+                          const SizedBox(height: 1),
+                          Text(
+                            formatCurrency(
+                              order.grandTotal,
+                              locale: context.locale,
+                            ),
+                            style: KZ.price.copyWith(
+                              color: isActive ? KZ.primary : KZ.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          formatCurrency(
-                            order.grandTotal,
-                            locale: context.locale,
-                          ),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: isActive ? KZ.primary : KZ.secondary,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     if (isActive)
-                      ElevatedButton(
+                      KZButton(
+                        label: 'orders.track'.tr(),
+                        pill: true,
                         onPressed: () =>
                             context.push('/orders/tracking/${order.id}'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: KZ.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 4,
-                          shadowColor: KZ.primary.withValues(alpha: 0.4),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 10,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                        ),
-                        child: Text(
-                          'orders.track'.tr(),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
                       )
                     else
-                      OutlinedButton.icon(
-                        onPressed: _isReordering
-                            ? null
-                            : () => _handleReorder(context, ref),
-                        icon: _isReordering
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: KZ.onSurface,
-                                ),
-                              )
-                            : const Icon(
-                                Icons.history_rounded,
-                                size: 18,
-                                color: KZ.onSurface,
-                              ),
-                        label: Text(
-                          'orders.reorder'.tr(),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: KZ.onSurface,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: KZ.outlineVariant,
-                            width: 2,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 10,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
+                      KZButton(
+                        label: 'orders.reorder'.tr(),
+                        icon: Icons.history_rounded,
+                        variant: KZButtonVariant.secondary,
+                        pill: false,
+                        loading: _isReordering,
+                        onPressed: () => _handleReorder(context, ref),
                       ),
                   ],
                 ),
@@ -522,100 +475,6 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _StatusPill extends StatelessWidget {
-  final OrderStatus status;
-
-  const _StatusPill({super.key, required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    Color bgColor;
-    Color textColor;
-    IconData icon;
-    String labelText;
-
-    switch (status) {
-      case OrderStatus.pending:
-        bgColor = KZ.primaryFixed.withValues(alpha: 0.4);
-        textColor = KZ.primary;
-        icon = Icons.schedule_rounded;
-        labelText = 'orders.status.pending'.tr();
-        break;
-      case OrderStatus.confirmed:
-        bgColor = KZ.primaryFixed.withValues(alpha: 0.4);
-        textColor = KZ.primary;
-        icon = Icons.task_alt_rounded;
-        labelText = 'orders.status.confirmed'.tr();
-        break;
-      case OrderStatus.preparing:
-        bgColor = KZ.primaryFixed.withValues(alpha: 0.4);
-        textColor = KZ.primary;
-        icon = Icons.soup_kitchen_rounded;
-        labelText = 'orders.status.preparing'.tr();
-        break;
-      case OrderStatus.outForDelivery:
-        bgColor = KZ.primaryFixed.withValues(alpha: 0.4);
-        textColor = KZ.primary;
-        icon = Icons.delivery_dining_rounded;
-        labelText = 'orders.status.out_for_delivery'.tr();
-        break;
-      case OrderStatus.delivered:
-        bgColor = const Color(0xFFE8F5E9); // green-50/100 tint from HTML
-        textColor = const Color(0xFF1B5E20); // green-700 from HTML
-        icon = Icons.check_circle_rounded;
-        labelText = 'orders.status.delivered'.tr();
-        break;
-      case OrderStatus.readyForPickup:
-        bgColor = KZ.primaryFixed.withValues(alpha: 0.4);
-        textColor = KZ.primary;
-        icon = Icons.storefront_rounded;
-        labelText = 'tracking.step_ready_pickup'.tr();
-        break;
-      case OrderStatus.pickedUp:
-        bgColor = const Color(0xFFE8F5E9); // green-50/100 tint from HTML
-        textColor = const Color(0xFF1B5E20); // green-700 from HTML
-        icon = Icons.check_circle_rounded;
-        labelText = 'tracking.step_picked_up'.tr();
-        break;
-      case OrderStatus.cancelled:
-        bgColor = const Color(0xFFFEE2E2);
-        textColor = KZ.error;
-        icon = Icons.cancel_rounded;
-        labelText = 'orders.status.cancelled'.tr();
-        break;
-      case OrderStatus.unknown:
-        bgColor = KZ.surfaceContainerHigh;
-        textColor = KZ.onSurfaceVariant;
-        icon = Icons.help_outline_rounded;
-        labelText = 'orders.status.unknown'.tr();
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: textColor),
-          const SizedBox(width: 4),
-          Text(
-            labelText,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: textColor,
-            ),
-          ),
-        ],
       ),
     );
   }

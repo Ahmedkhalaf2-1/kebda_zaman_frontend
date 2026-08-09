@@ -293,6 +293,7 @@ abstract class  LocaleKeys {
   static const profile_place_order_notice = 'profile.place_order_notice';
   static const profile_view_rewards = 'profile.view_rewards';
   static const profile_quick_actions = 'profile.quick_actions';
+  static const profile_account_section = 'profile.account_section';
   static const profile_my_favorites = 'profile.my_favorites';
   static const profile_order_history = 'profile.order_history';
   static const profile_addresses = 'profile.addresses';

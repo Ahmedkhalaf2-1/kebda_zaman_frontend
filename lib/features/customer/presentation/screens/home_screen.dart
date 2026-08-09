@@ -13,7 +13,6 @@ import '../notifiers/orders_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
-import 'package:kebda_zaman/features/shared/domain/models/user.dart';
 import 'package:kebda_zaman/core/responsive/responsive_breakpoints.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
@@ -21,10 +20,9 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
-import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_lottie_add_button.dart';
-import 'package:kebda_zaman/core/widgets/kz_lottie_heart_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
+import 'package:kebda_zaman/core/widgets/kz_product_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
 /// Shared elevation tier for the page's two full-bleed promotional
@@ -223,49 +221,45 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
 
-                  // ── 4. Search Bar ──
+                  // ── 4. Search Bar — same KZ.cardDecoration() treatment as
+                  // Menu's sticky search bar, instead of a one-off pill
+                  // shape unique to this screen. ──
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                       child: Semantics(
                         button: true,
                         label: 'home.search_hint'.tr(),
-                        child: GestureDetector(
-                          onTap: () => context.go('/search'),
-                          child: Container(
-                            height: 56,
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(100),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.04),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.search_rounded,
-                                  color: onSurfaceVariantColor,
-                                  size: 26,
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Text(
-                                    'home.search_hint'.tr(),
-                                    style: KZ.bodyLarge.copyWith(
-                                      color: onSurfaceVariantColor,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                        child: Material(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(KZ.radiusLg),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(KZ.radiusLg),
+                            onTap: () => context.go('/search'),
+                            child: Container(
+                              height: 50,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              decoration: KZ.cardDecoration(),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.search_rounded,
+                                    color: onSurfaceVariantColor,
+                                    size: KZ.iconControl,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'home.search_hint'.tr(),
+                                      style: KZ.bodyLarge,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -293,7 +287,7 @@ class HomeScreen extends ConsumerWidget {
                   if (data.featuredItems.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 36, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
                         child: Text(
                           'home.featured_meals'.tr(),
                           style: KZ.sectionTitle,
@@ -321,7 +315,7 @@ class HomeScreen extends ConsumerWidget {
                   // ── 8. Best Sellers Section ──
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 36, 16, 12),
+                      padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -366,32 +360,44 @@ class HomeScreen extends ConsumerWidget {
                                 itemBuilder: (context, index) {
                                   final item = bestSellers[index];
                                   final isFav = favorites.contains(item.id);
-                                  return _BestSellerCard(
-                                    item: item,
-                                    isFavorite: isFav,
-                                    onToggleFavorite: () async {
-                                      final success = await ref
-                                          .read(
-                                            customerFavoritesProvider.notifier,
-                                          )
-                                          .toggleFavorite(item.id);
-                                      if (!success && context.mounted) {
-                                        final err = ref
-                                            .read(customerFavoritesProvider)
-                                            .errorMessage;
-                                        if (err != null) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(err),
-                                              behavior:
-                                                  SnackBarBehavior.floating,
-                                            ),
-                                          );
+                                  return SizedBox(
+                                    width: 270,
+                                    child: ProductGridCard(
+                                      item: item,
+                                      isFavorite: isFav,
+                                      showDiscountPricing: true,
+                                      subtitle: item.localizedDescription(
+                                        context.locale.languageCode,
+                                      ),
+                                      onTap: () =>
+                                          context.push('/home/item/${item.id}'),
+                                      onAdd: () =>
+                                          _handleHomeAdd(context, ref, item),
+                                      onToggleFavorite: () async {
+                                        final success = await ref
+                                            .read(
+                                              customerFavoritesProvider
+                                                  .notifier,
+                                            )
+                                            .toggleFavorite(item.id);
+                                        if (!success && context.mounted) {
+                                          final err = ref
+                                              .read(customerFavoritesProvider)
+                                              .errorMessage;
+                                          if (err != null) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(err),
+                                                behavior:
+                                                    SnackBarBehavior.floating,
+                                              ),
+                                            );
+                                          }
                                         }
-                                      }
-                                    },
+                                      },
+                                    ),
                                   );
                                 },
                               ),
@@ -410,10 +416,15 @@ class HomeScreen extends ConsumerWidget {
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final item = bestSellers[index];
                           final isFav = favorites.contains(item.id);
-                          return _BestSellerCard(
+                          return ProductGridCard(
                             item: item,
                             isFavorite: isFav,
-                            isGrid: true,
+                            showDiscountPricing: true,
+                            subtitle: item.localizedDescription(
+                              context.locale.languageCode,
+                            ),
+                            onTap: () => context.push('/home/item/${item.id}'),
+                            onAdd: () => _handleHomeAdd(context, ref, item),
                             onToggleFavorite: () async {
                               final success = await ref
                                   .read(customerFavoritesProvider.notifier)
@@ -441,7 +452,7 @@ class HomeScreen extends ConsumerWidget {
                   if (data.offers.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 36, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
                         child: Text(
                           'home.featured'.tr(),
                           style: KZ.sectionTitle,
@@ -475,7 +486,7 @@ class HomeScreen extends ConsumerWidget {
                   if (recentOrderItems.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 36, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
                         child: Text(
                           'home.recently_ordered'.tr(),
                           style: KZ.sectionTitle,
@@ -502,7 +513,7 @@ class HomeScreen extends ConsumerWidget {
                   if (data.popular.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 36, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
                         child: Text(
                           'home.recommended'.tr(),
                           style: KZ.sectionTitle,
@@ -558,199 +569,47 @@ class HomeScreen extends ConsumerWidget {
 
 // ── Component Widgets matching Stitch design specs ──
 
-class _BestSellerCard extends ConsumerWidget {
-  final MenuItem item;
-  final bool isFavorite;
-  final bool isGrid;
-  final VoidCallback onToggleFavorite;
-
-  const _BestSellerCard({
-    required this.item,
-    required this.isFavorite,
-    required this.onToggleFavorite,
-    this.isGrid = false,
-  });
-
-  void _handleAdd(BuildContext context, WidgetRef ref) {
-    final hasRequired = item.modifierGroups.any((g) => g.isRequired);
-    if (hasRequired) {
-      context.push('/home/item/${item.id}');
-    } else {
-      final cartItem = CartItem(
-        id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
-        menuItemId: item.id,
-        productName: item.name,
-        productImage: item.imageUrl,
-        basePrice: item.discountPrice ?? item.basePrice,
-        quantity: 1,
-        selectedOptions: {},
-        extraQuantities: {},
-        unitPrice: item.discountPrice ?? item.basePrice,
-        lineTotal: item.discountPrice ?? item.basePrice,
-      );
-      ref.read(cartProvider.notifier).addItem(cartItem);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'home.added_to_cart'.tr(namedArgs: {'name': item.name}),
-          ),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
-    }
+// Shared by every Home product tile that can add straight to cart
+// (Best Sellers' ProductGridCard, Popular Items' _RecommendedTile) — kept
+// as one function so the same exact logic isn't duplicated per card type.
+void _handleHomeAdd(BuildContext context, WidgetRef ref, MenuItem item) {
+  if (!item.isAvailable) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('menu.item_unavailable'.tr()),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    return;
   }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final hasDiscount = item.discountPrice != null;
-
-    return SizedBox(
-      width: isGrid ? double.infinity : 270,
-      child: KZCard(
-        padding: EdgeInsets.zero,
-        onTap: () => context.push('/home/item/${item.id}'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product Image Header — fixed height regardless of card width
-            // (mobile list vs. desktop grid), matching the fixed
-            // `mainAxisExtent` the grid variant is laid out with.
-            Stack(
-              children: [
-                SizedBox(
-                  height: 165,
-                  width: double.infinity,
-                  child: KZFoodImage(imageUrl: item.imageUrl),
-                ),
-
-                // Favorite Button Overlay — 48dp tap target per KZ's own
-                // minimum-touch-target rule, glyph stays small inside it.
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: KZLottieHeartButton(
-                    isFavorite: isFavorite,
-                    onTap: onToggleFavorite,
-                    semanticsLabel: 'profile.my_favorites'.tr(),
-                    size: KZ.iconTapTargetMin,
-                    iconSize: 20,
-                  ),
-                ),
-
-                // Sale Badge (if applicable)
-                if (hasDiscount)
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: KZ.error,
-                        borderRadius: BorderRadius.circular(KZ.radiusSm),
-                      ),
-                      child: Text(
-                        'home.sale'.tr(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ),
-                if (item.badge != null)
-                  Positioned(
-                    bottom: 10,
-                    left: 12,
-                    child: MenuItemBadgeChip(badge: item.badge!),
-                  ),
-              ],
-            ),
-
-            // Product Details Body
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.localizedName(context.locale.languageCode),
-                    style: KZ.itemTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.localizedDescription(context.locale.languageCode),
-                    style: KZ.bodySmall,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (item.calories != null) ...[
-                    const SizedBox(height: 4),
-                    MenuItemCaloriesText(calories: item.calories!),
-                  ],
-                  const SizedBox(height: 14),
-
-                  // Price & Add Button Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (hasDiscount)
-                            Text(
-                              formatCurrency(
-                                item.basePrice,
-                                locale: context.locale,
-                              ),
-                              style: KZ.bodySmall.copyWith(
-                                decoration: TextDecoration.lineThrough,
-                                fontSize: 11,
-                              ),
-                            ),
-                          if (item.compareAtPrice != null &&
-                              item.compareAtPrice! > item.basePrice)
-                            MenuItemComparePriceText(
-                              compareAtPrice: item.compareAtPrice!,
-                            ),
-                          Text(
-                            formatCurrency(
-                              hasDiscount
-                                  ? item.discountPrice!
-                                  : item.basePrice,
-                              locale: context.locale,
-                            ),
-                            style: KZ.priceLarge.copyWith(fontSize: 17),
-                          ),
-                        ],
-                      ),
-                      KZLottieAddButton(
-                        onTap: () => _handleAdd(context, ref),
-                        semanticsLabel: 'home.add_to_cart'.tr(),
-                        size: KZ.iconTapTargetMin,
-                        backgroundColor: HomeScreen.primaryColor,
-                        iconColor: Colors.white,
-                        iconSize: KZ.iconControl,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+  final hasRequired = item.modifierGroups.any((g) => g.isRequired);
+  if (hasRequired) {
+    context.push('/home/item/${item.id}');
+  } else {
+    final cartItem = CartItem(
+      id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
+      menuItemId: item.id,
+      productName: item.name,
+      productImage: item.imageUrl,
+      basePrice: item.discountPrice ?? item.basePrice,
+      quantity: 1,
+      selectedOptions: {},
+      extraQuantities: {},
+      unitPrice: item.discountPrice ?? item.basePrice,
+      lineTotal: item.discountPrice ?? item.basePrice,
+    );
+    ref.read(cartProvider.notifier).addItem(cartItem);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('home.added_to_cart'.tr(namedArgs: {'name': item.name})),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
 }
+
 
 /// A large full-bleed showcase card for Featured Meals — image with a
 /// gradient overlay carrying the name and real price, editorial in feel
@@ -873,38 +732,6 @@ class _RecommendedTile extends ConsumerWidget {
 
   const _RecommendedTile({required this.item, this.isGrid = false});
 
-  void _handleAdd(BuildContext context, WidgetRef ref) {
-    final hasRequired = item.modifierGroups.any((g) => g.isRequired);
-    if (hasRequired) {
-      context.push('/home/item/${item.id}');
-    } else {
-      final cartItem = CartItem(
-        id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
-        menuItemId: item.id,
-        productName: item.name,
-        productImage: item.imageUrl,
-        basePrice: item.discountPrice ?? item.basePrice,
-        quantity: 1,
-        selectedOptions: {},
-        extraQuantities: {},
-        unitPrice: item.discountPrice ?? item.basePrice,
-        lineTotal: item.discountPrice ?? item.basePrice,
-      );
-      ref.read(cartProvider.notifier).addItem(cartItem);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'home.added_to_cart'.tr(namedArgs: {'name': item.name}),
-          ),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasDiscount = item.discountPrice != null;
@@ -1015,11 +842,14 @@ class _RecommendedTile extends ConsumerWidget {
             ),
             const SizedBox(width: 8),
             KZLottieAddButton(
-              onTap: () => _handleAdd(context, ref),
+              onTap: () => _handleHomeAdd(context, ref, item),
               semanticsLabel: 'home.add_to_cart'.tr(),
               size: KZ.iconTapTargetMin,
-              backgroundColor: HomeScreen.primaryColor.withValues(alpha: 0.12),
-              iconColor: HomeScreen.primaryColor,
+              // Solid primary / white icon — same add-action weight as
+              // Best Sellers and the Menu catalog grid, instead of the
+              // lighter tinted treatment this tile used to have.
+              backgroundColor: HomeScreen.primaryColor,
+              iconColor: Colors.white,
               iconSize: KZ.iconControl,
             ),
           ],

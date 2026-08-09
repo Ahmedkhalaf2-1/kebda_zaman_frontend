@@ -68,7 +68,7 @@ class AdminNotificationCenterScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const Icon(Icons.error_outline, size: 48, color: KZ.error),
               const SizedBox(height: 16),
               const Text(
                 'Could not load notifications',
@@ -102,21 +102,21 @@ class AdminNotificationCenterScreen extends ConsumerWidget {
                 children: [
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.6,
-                    child: Center(
+                    child: const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.notifications_none_rounded,
                             size: 64,
-                            color: Colors.grey.shade400,
+                            color: KZ.onSurfaceVariant,
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           Text(
                             'No notifications yet',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.grey.shade600,
+                              color: KZ.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                           ),

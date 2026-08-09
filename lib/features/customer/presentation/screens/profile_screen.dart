@@ -7,12 +7,10 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/loyalty_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
-import 'package:kebda_zaman/features/customer/presentation/notifiers/cart_notifier.dart';
-import 'package:kebda_zaman/features/customer/presentation/notifiers/favorites_notifier.dart';
-import 'package:kebda_zaman/features/customer/presentation/widgets/delete_account_dialog.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_settings_group.dart';
 
 final localAvatarProvider = StateNotifierProvider<LocalAvatarNotifier, String?>(
   (ref) {
@@ -49,8 +47,6 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  bool _darkMode = false;
-
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
@@ -178,24 +174,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
                           Text(
                             userName,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              color: KZ.onSurface,
-                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: KZ.display.copyWith(fontSize: 22),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 3),
                           Text(
                             userEmail,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: KZ.onSurfaceVariant,
-                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: KZ.bodySmall,
                           ),
                           if (!authState.isLoggedIn) ...[
                             const SizedBox(height: 16),
@@ -217,23 +210,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                     const SizedBox(height: 32),
 
-                    // 3. Quick Actions Section
-                    Text(
-                      'profile.quick_actions'.tr(),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: KZ.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                    // 3. Quick Actions — compact horizontal tiles instead of
+                    // tall centered-icon cards, so the section scans faster
+                    // and wastes less vertical space.
+                    Text('profile.quick_actions'.tr(), style: KZ.sectionTitle),
+                    const SizedBox(height: 12),
                     GridView.count(
                       crossAxisCount: 2,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 1.25,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 2.6,
                       children: [
                         _buildQuickActionCard(
                           icon: Icons.receipt_long_rounded,
@@ -265,102 +253,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 28),
 
-                    // 4. Settings Section
-                    Text(
-                      'profile.settings'.tr(),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: KZ.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16), // rounded-2xl
-                        border: Border.all(
-                          color: KZ.outlineVariant.withValues(alpha: 0.5),
-                          width: 1,
+                    // 4. Settings entry point — Profile stays the
+                    // high-level hub; account editing, language,
+                    // preferences, support links, and logout/delete now
+                    // all live on the dedicated Settings screen so they're
+                    // not duplicated here. Logged-in users land straight on
+                    // "Edit Profile" (Settings opens with that in view);
+                    // guests get a neutral "Settings" label since there's
+                    // nothing of theirs to edit yet, but they can still
+                    // reach language + login from there.
+                    KZSettingsGroupHeader('profile.settings'.tr()),
+                    const SizedBox(height: 8),
+                    KZSettingsGroup(
+                      rows: [
+                        KZSettingsRow(
+                          icon: authState.isLoggedIn
+                              ? Icons.edit_rounded
+                              : Icons.settings_rounded,
+                          title: authState.isLoggedIn
+                              ? 'profile.edit_profile'.tr()
+                              : 'profile.settings'.tr(),
+                          onTap: () => context.push('/profile/settings'),
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: KZ.primary.withValues(alpha: 0.05),
-                            blurRadius: 20,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Column(
-                        children: [
-                          // App Language Row
-                          _buildLanguageSettingRow(context),
-                          _buildDivider(),
-
-                          // Dark Mode Row
-                          _buildDarkModeRow(),
-                          _buildDivider(),
-
-                          // Edit Profile
-                          if (authState.isLoggedIn) ...[
-                            _buildSettingRow(
-                              icon: Icons.edit_rounded,
-                              title: 'profile.edit_profile'.tr(),
-                              onTap: () =>
-                                  _showEditProfileDialog(context, user!),
-                            ),
-                            _buildDivider(),
-                          ],
-
-                          // Dashboard
-                          _buildSettingRow(
-                            icon: Icons.dashboard_customize_rounded,
-                            title: 'nav.dashboard'.tr(),
-                            onTap: () => context.go('/admin/dashboard'),
-                          ),
-                          _buildDivider(),
-
-                          // Help & Support
-                          _buildSettingRow(
-                            icon: Icons.headset_mic_rounded,
-                            title: 'settings.help'.tr(),
-                            onTap: () {},
-                          ),
-                          _buildDivider(),
-
-                          // Privacy Policy
-                          _buildSettingRow(
-                            icon: Icons.privacy_tip_outlined,
-                            title: 'settings.privacy'.tr(),
-                            onTap: () => context.push('/legal/privacy'),
-                          ),
-                          _buildDivider(),
-
-                          // Terms of Service
-                          _buildSettingRow(
-                            icon: Icons.info_outline_rounded,
-                            title: 'settings.terms'.tr(),
-                            onTap: () => context.push('/legal/terms'),
-                          ),
-                          _buildDivider(),
-
-                          // Logout Row (red tinted)
-                          _buildLogoutRow(context),
-
-                          // Delete Account — a real, persistent account only.
-                          // Guests don't own a persistent account to delete,
-                          // so this never renders for them.
-                          if (authState.isLoggedIn &&
-                              user != null &&
-                              !user.isGuest) ...[
-                            _buildDivider(),
-                            _buildDeleteAccountRow(context),
-                          ],
-                        ],
-                      ),
+                      ],
                     ),
 
                     const SizedBox(height: 24),
@@ -371,16 +288,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return Divider(
-      height: 1,
-      thickness: 1,
-      color: KZ.outlineVariant.withValues(
-        alpha: 0.25,
-      ), // divide-orange-50 equivalent
     );
   }
 
@@ -450,8 +357,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFAA3600), Color(0xFF8C2B00)],
+              // Derived from KZ.primary (not a disconnected hardcoded pair)
+              // so the card's brand personality still traces back to the
+              // one actual brand color instead of a stale duplicate.
+              gradient: LinearGradient(
+                colors: [KZ.primary, Color.lerp(KZ.primary, Colors.black, 0.18)!],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -490,30 +400,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'profile.rewards_card'.tr(),
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white.withValues(alpha: 0.8),
-                                letterSpacing: 1.5,
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'profile.rewards_card'.tr(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                  letterSpacing: 1.5,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '$points ${'common.pts'.tr()}',
-                              style: const TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                                height: 1.1,
+                              const SizedBox(height: 4),
+                              Text(
+                                '$points ${'common.pts'.tr()}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  height: 1.1,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         Transform.rotate(
                           angle: 0.5,
                           child: Icon(
@@ -531,29 +449,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'profile.earn_rate'.tr(
-                            namedArgs: {
-                              'pts': '$ptsPerStep',
-                              'egp': step.toStringAsFixed(0),
-                            },
-                          ),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                        Flexible(
+                          child: Text(
+                            'profile.earn_rate'.tr(
+                              namedArgs: {
+                                'pts': '$ptsPerStep',
+                                'egp': step.toStringAsFixed(0),
+                              },
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                        Text(
-                          minRedemption > points
-                              ? 'profile.pts_to_redeem'.tr(
-                                  namedArgs: {'pts': '$ptsToRedeem'},
-                                )
-                              : 'profile.redeem_available'.tr(),
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white.withValues(alpha: 0.95),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            minRedemption > points
+                                ? 'profile.pts_to_redeem'.tr(
+                                    namedArgs: {'pts': '$ptsToRedeem'},
+                                  )
+                                : 'profile.redeem_available'.tr(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withValues(alpha: 0.95),
+                            ),
                           ),
                         ),
                       ],
@@ -614,6 +542,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  // Compact horizontal tile (icon left, label right) instead of a tall
+  // centered-icon card — the icon still supports recognition without
+  // dominating the tile, and the shorter fixed height (via the grid's
+  // `childAspectRatio`) removes a lot of the previous empty vertical space.
   Widget _buildQuickActionCard({
     required IconData icon,
     required String title,
@@ -623,371 +555,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16), // rounded-2xl
+        borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: KZ.outlineVariant.withValues(alpha: 0.5),
               width: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: KZ.primary.withValues(alpha: 0.06),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: KZ.primaryFixed.withValues(
-                    alpha: 0.45,
-                  ), // orange-100 tint
+                  color: KZ.primaryFixed.withValues(alpha: 0.45),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: KZ.primary, size: 24),
+                child: Icon(icon, color: KZ.primary, size: 18),
               ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: KZ.onSurface,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageSettingRow(BuildContext context) {
-    final currentLang = context.locale.languageCode;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: KZ.primaryFixed.withValues(
-                      alpha: 0.35,
-                    ), // orange-50 tint
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.language_rounded,
-                    color: KZ.primary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Flexible(
-                  child: Text(
-                    'settings.language'.tr(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: KZ.onSurface,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          // Inline Pill Switcher (matching HTML)
-          Container(
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9), // slate-100
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                  onTap: () async {
-                    if (currentLang != 'ar') {
-                      await context.setLocale(const Locale('ar'));
-                      if (ref.read(authNotifierProvider).isLoggedIn) {
-                        await ref
-                            .read(authNotifierProvider.notifier)
-                            .updateProfile(locale: 'ar');
-                      }
-                    }
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: currentLang == 'ar'
-                          ? KZ.primary
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(999),
-                      boxShadow: currentLang == 'ar'
-                          ? [
-                              BoxShadow(
-                                color: KZ.primary.withValues(alpha: 0.25),
-                                blurRadius: 4,
-                                offset: const Offset(0, 1),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Text(
-                      'العربية',
-                      style: TextStyle(
-                        // Always Arabic script regardless of active app
-                        // locale, so pin the font instead of following the
-                        // locale-driven ThemeData default.
-                        fontFamily: 'Alexandria',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: currentLang == 'ar'
-                            ? Colors.white
-                            : const Color(0xFF64748B), // slate-500
-                      ),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () async {
-                    if (currentLang != 'en') {
-                      await context.setLocale(const Locale('en'));
-                      if (ref.read(authNotifierProvider).isLoggedIn) {
-                        await ref
-                            .read(authNotifierProvider.notifier)
-                            .updateProfile(locale: 'en');
-                      }
-                    }
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: currentLang == 'en'
-                          ? KZ.primary
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(999),
-                      boxShadow: currentLang == 'en'
-                          ? [
-                              BoxShadow(
-                                color: KZ.primary.withValues(alpha: 0.25),
-                                blurRadius: 4,
-                                offset: const Offset(0, 1),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Text(
-                      'English',
-                      style: TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: currentLang == 'en'
-                            ? Colors.white
-                            : const Color(0xFF64748B), // slate-500
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDarkModeRow() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: KZ.primaryFixed.withValues(alpha: 0.35),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.dark_mode_rounded,
-                    color: KZ.primary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Flexible(
-                  child: Text(
-                    'settings.dark_mode'.tr(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: KZ.onSurface,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Switch(
-            value: _darkMode,
-            activeColor: KZ.primary,
-            onChanged: (val) {
-              setState(() {
-                _darkMode = val;
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettingRow({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: KZ.primaryFixed.withValues(alpha: 0.35),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(icon, color: KZ.primary, size: 20),
-                    ),
-                    const SizedBox(width: 14),
-                    Flexible(
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: KZ.onSurface,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: Color(0xFF94A3B8), // slate-400
-                size: 24,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLogoutRow(BuildContext context) {
-    final authState = ref.watch(authNotifierProvider);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () async {
-          if (authState.isLoggedIn) {
-            await ref.read(authNotifierProvider.notifier).logout();
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('profile.logged_out'.tr()),
-                  backgroundColor: KZ.primary,
-                ),
-              );
-              context.go('/login');
-            }
-          } else {
-            context.push('/login');
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEE2E2), // red-50 tint
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  authState.isLoggedIn
-                      ? Icons.logout_rounded
-                      : Icons.login_rounded,
-                  color: KZ.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 10),
               Flexible(
                 child: Text(
-                  authState.isLoggedIn
-                      ? 'profile.logout'.tr()
-                      : 'auth.login_btn'.tr(),
+                  title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: KZ.primary,
-                  ),
+                  style: KZ.labelLarge,
                 ),
               ),
             ],
@@ -997,120 +593,4 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildDeleteAccountRow(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _handleDeleteAccount(context),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEE2E2), // red-50 tint
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.delete_forever_rounded,
-                  color: KZ.error,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Flexible(
-                child: Text(
-                  'delete_account.tile_title'.tr(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: KZ.error,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _handleDeleteAccount(BuildContext context) async {
-    final deleted = await showDeleteAccountDialog(context);
-    if (!deleted || !context.mounted) return;
-
-    // Success cleanup: AuthNotifier.deleteAccount already cleared tokens,
-    // stored session and auth state — this invalidates the remaining
-    // user-scoped Riverpod state so nothing stale survives into the next
-    // (unauthenticated) session, mirroring what navigating away from an
-    // authenticated screen after logout already achieves for autodispose
-    // providers.
-    ref.invalidate(cartProvider);
-    ref.invalidate(customerFavoritesProvider);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('delete_account.success'.tr()),
-        backgroundColor: KZ.primary,
-      ),
-    );
-    // go() (not push()) replaces the whole stack, matching the existing
-    // logout row — the back button cannot return to authenticated Profile.
-    context.go('/login');
-  }
-
-  void _showEditProfileDialog(BuildContext context, user) {
-    final nameCtrl = TextEditingController(text: user.name);
-    final phoneCtrl = TextEditingController(text: user.phone);
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Edit Profile'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameCtrl,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: phoneCtrl,
-              decoration: const InputDecoration(labelText: 'Phone'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await ref
-                  .read(authNotifierProvider.notifier)
-                  .updateProfile(
-                    name: nameCtrl.text.trim(),
-                    phone: phoneCtrl.text.trim(),
-                  );
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Profile updated successfully!'),
-                  ),
-                );
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-  }
 }

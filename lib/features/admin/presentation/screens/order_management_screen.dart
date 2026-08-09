@@ -6,6 +6,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
+import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_notification_notifier.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/order_management_notifier.dart';
@@ -249,62 +250,6 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
   }
 }
 
-/// icon/color/translated-label for a status — the single source of truth
-/// this screen uses for both the status badge and the primary action's
-/// label, so "what state is this order in" and "what does tapping the
-/// button do" always agree.
-class _StatusMeta {
-  final IconData icon;
-  final Color color;
-  final String label;
-  const _StatusMeta(this.icon, this.color, this.label);
-}
-
-_StatusMeta _statusMeta(OrderStatus status) {
-  IconData icon;
-  Color color;
-  switch (status) {
-    case OrderStatus.pending:
-      icon = Icons.hourglass_top_rounded;
-      color = KZ.error;
-    case OrderStatus.confirmed:
-      icon = Icons.fact_check_rounded;
-      color = const Color(0xFF00ACC1);
-    case OrderStatus.preparing:
-      icon = Icons.soup_kitchen_rounded;
-      color = KZ.primaryContainer;
-    case OrderStatus.outForDelivery:
-      icon = Icons.local_shipping_rounded;
-      color = Colors.blue.shade700;
-    case OrderStatus.delivered:
-      icon = Icons.check_circle_rounded;
-      color = KZ.tertiary;
-    case OrderStatus.readyForPickup:
-      icon = Icons.storefront_rounded;
-      color = Colors.deepPurple.shade400;
-    case OrderStatus.pickedUp:
-      icon = Icons.check_circle_rounded;
-      color = KZ.tertiary;
-    case OrderStatus.cancelled:
-      icon = Icons.cancel_rounded;
-      color = Colors.grey.shade600;
-    case OrderStatus.unknown:
-      icon = Icons.help_outline_rounded;
-      color = Colors.grey.shade500;
-  }
-  final key = switch (status) {
-    OrderStatus.pending => 'pending',
-    OrderStatus.confirmed => 'confirmed',
-    OrderStatus.preparing => 'preparing',
-    OrderStatus.outForDelivery => 'out_for_delivery',
-    OrderStatus.delivered => 'delivered',
-    OrderStatus.readyForPickup => 'ready_for_pickup',
-    OrderStatus.pickedUp => 'picked_up',
-    OrderStatus.cancelled => 'cancelled',
-    OrderStatus.unknown => 'unknown',
-  };
-  return _StatusMeta(icon, color, 'orders.status.$key'.tr());
-}
 
 /// One order, redesigned for fast scanning: order number + status up top,
 /// customer/type/chevron next, then a compact price/time/payment meta line.
@@ -321,7 +266,7 @@ class _OrderCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final timeStr = formatOrderTimestamp(order.placedAt);
-    final statusMeta = _statusMeta(order.status);
+    final statusMeta = adminOrderStatusVisual(order.status);
     final allowed = order.status.allowedNextStatuses(order.fulfillmentType);
     final nextCandidates = allowed.where((s) => s != OrderStatus.cancelled);
     final nextStatus = nextCandidates.isEmpty ? null : nextCandidates.first;
@@ -439,7 +384,7 @@ class _OrderCard extends ConsumerWidget {
                   if (nextStatus != null)
                     Expanded(
                       child: _PrimaryStatusAction(
-                        label: _statusMeta(nextStatus).label,
+                        label: adminOrderStatusVisual(nextStatus).label,
                         onPressed: () => updateStatus(nextStatus),
                       ),
                     ),
@@ -460,7 +405,7 @@ class _OrderCard extends ConsumerWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  final _StatusMeta meta;
+  final OrderStatusVisual meta;
   const _StatusBadge({required this.meta});
 
   @override

@@ -816,7 +816,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
                 children: [
                   const Icon(
                     Icons.style_outlined,
-                    color: Colors.grey,
+                    color: KZ.onSurfaceVariant,
                     size: 32,
                   ),
                   const SizedBox(height: 6),
@@ -831,7 +831,10 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
                   const SizedBox(height: 2),
                   Text(
                     'form.no_modifiers_sub'.tr(),
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: KZ.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -938,7 +941,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
                               icon: const Icon(
                                 Icons.delete_outline,
                                 size: 18,
-                                color: Colors.red,
+                                color: KZ.error,
                               ),
                               onPressed: () => setState(
                                 () => _modifierGroups.removeAt(index),
@@ -1159,7 +1162,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
                       icon: const Icon(
                         Icons.close_rounded,
                         size: 18,
-                        color: Colors.red,
+                        color: KZ.error,
                       ),
                       tooltip: 'admin_catalog.remove_recommendation'.tr(),
                       onPressed: () => _removeRecommendation(index),

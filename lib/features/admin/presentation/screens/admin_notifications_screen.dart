@@ -746,7 +746,7 @@ class _AdminNotificationsScreenState
                                   ? Colors.blue
                                   : c.status == CampaignStatus.failed
                                   ? KZ.error
-                                  : Colors.grey,
+                                  : KZ.onSurfaceVariant,
                             ),
                           ),
                           DataCell(

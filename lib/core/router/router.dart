@@ -147,6 +147,10 @@ GoRouter router(Ref ref) {
                 builder: (context, state) => const ProfileScreen(),
                 routes: [
                   GoRoute(
+                    path: 'settings',
+                    builder: (context, state) => const SettingsScreen(),
+                  ),
+                  GoRoute(
                     path: 'loyalty',
                     builder: (context, state) => const LoyaltyScreen(),
                   ),
