@@ -469,18 +469,21 @@ class ApiOrderRepository implements OrderRepository {
 
   static const _validPaymentStatuses = {
     'PENDING',
+    'AUTHORIZED',
     'PAID',
+    'CAPTURED',
+    'VOIDED',
     'FAILED',
     'REFUNDED',
   };
 
-  /// Maps the backend `paymentStatus` wire value. The wire format
-  /// ('PENDING' | 'PAID' | 'FAILED' | 'REFUNDED') is preserved as-is: the
-  /// only current UI call site (admin order details) just interpolates the
-  /// raw value for display, so there is no lowercase/enum expectation to
-  /// satisfy — but a missing or unrecognized value from a live API response
-  /// is rejected rather than silently passed through, since no legacy/mock
-  /// path currently feeds JSON through this repository's mapper.
+  /// Maps the backend `paymentStatus` wire value. The wire format (uppercase
+  /// string, one of [_validPaymentStatuses]) is preserved as-is: call sites
+  /// just interpolate/switch on the raw value, so there is no
+  /// lowercase/enum expectation to satisfy — but a missing or unrecognized
+  /// value from a live API response is rejected rather than silently passed
+  /// through, since no legacy/mock path currently feeds JSON through this
+  /// repository's mapper.
   static String _mapPaymentStatus(Object? value) {
     if (value is String && _validPaymentStatuses.contains(value)) {
       return value;
@@ -563,6 +566,9 @@ class ApiOrderRepository implements OrderRepository {
       grandTotal: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
       paymentStatus: _mapPaymentStatus(json['paymentStatus']),
       paymentMethod: json['paymentMethod'],
+      paymentAuthorizedAt: json['paymentAuthorizedAt'] != null
+          ? DateTime.parse(json['paymentAuthorizedAt']).toLocal()
+          : null,
       placedAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt']).toLocal()
           : DateTime.now(),

@@ -241,14 +241,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         _buildQuickActionCard(
                           icon: Icons.account_balance_wallet_rounded,
                           title: 'profile.payments'.tr(),
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('profile.payments'.tr()),
-                                backgroundColor: KZ.primary,
-                              ),
-                            );
-                          },
+                          onTap: () =>
+                              context.push('/profile/payment-methods'),
                         ),
                       ],
                     ),

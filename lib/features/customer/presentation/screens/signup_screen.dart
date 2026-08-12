@@ -9,6 +9,7 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifi
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/widgets/kz_social_auth_buttons.dart';
 import 'package:kebda_zaman/core/widgets/kz_auth_layout.dart';
+import 'package:kebda_zaman/features/customer/presentation/widgets/biometric_onboarding_dialog.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -79,6 +80,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
+      await maybeShowBiometricOnboardingDialog(context, ref);
+      if (!mounted) return;
       context.go('/profile');
     }
   }

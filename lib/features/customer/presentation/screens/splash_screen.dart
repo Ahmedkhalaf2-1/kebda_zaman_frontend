@@ -65,10 +65,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     }
 
     _hasNavigated = true;
-    _navigateNext();
+    _navigateNext(status);
   }
 
-  Future<void> _navigateNext() async {
+  Future<void> _navigateNext(SessionBootstrapStatus status) async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     final hasSelectedLang = prefs.getBool('kz_lang_selected') ?? false;
@@ -79,6 +79,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       context.go('/language-select');
     } else if (!hasCompletedOnboarding) {
       context.go('/onboarding');
+    } else if (status == SessionBootstrapStatus.biometricRequired) {
+      // A restored session exists but is gated behind biometric login for
+      // the cached user — the refresh token has NOT been used yet. Route to
+      // Login, which auto-prompts biometrics once and falls back to the
+      // normal form on cancel/failure.
+      context.go('/login');
     } else {
       // Both authenticated and unauthenticated sessions land on the same
       // destination today — /home already supports guest browsing; this

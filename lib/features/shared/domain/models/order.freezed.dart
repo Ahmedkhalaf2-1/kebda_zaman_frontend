@@ -56,7 +56,10 @@ mixin _$Order {
   double get grandTotal => throw _privateConstructorUsedError;
   String? get paymentId => throw _privateConstructorUsedError;
   String? get paymentStatus => throw _privateConstructorUsedError;
-  String? get paymentMethod => throw _privateConstructorUsedError;
+  String? get paymentMethod =>
+      throw _privateConstructorUsedError; // Null until a card payment is actually authorized by Moyasar — never
+  // set for CASH orders or before authorization completes.
+  DateTime? get paymentAuthorizedAt => throw _privateConstructorUsedError;
   DateTime get placedAt => throw _privateConstructorUsedError;
   List<OrderStatusEntry> get statusHistory =>
       throw _privateConstructorUsedError;
@@ -105,6 +108,7 @@ abstract class $OrderCopyWith<$Res> {
     String? paymentId,
     String? paymentStatus,
     String? paymentMethod,
+    DateTime? paymentAuthorizedAt,
     DateTime placedAt,
     List<OrderStatusEntry> statusHistory,
     String? estimatedTime,
@@ -156,6 +160,7 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? paymentId = freezed,
     Object? paymentStatus = freezed,
     Object? paymentMethod = freezed,
+    Object? paymentAuthorizedAt = freezed,
     Object? placedAt = null,
     Object? statusHistory = null,
     Object? estimatedTime = freezed,
@@ -259,6 +264,10 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.paymentMethod
                 : paymentMethod // ignore: cast_nullable_to_non_nullable
                       as String?,
+            paymentAuthorizedAt: freezed == paymentAuthorizedAt
+                ? _value.paymentAuthorizedAt
+                : paymentAuthorizedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
             placedAt: null == placedAt
                 ? _value.placedAt
                 : placedAt // ignore: cast_nullable_to_non_nullable
@@ -376,6 +385,7 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     String? paymentId,
     String? paymentStatus,
     String? paymentMethod,
+    DateTime? paymentAuthorizedAt,
     DateTime placedAt,
     List<OrderStatusEntry> statusHistory,
     String? estimatedTime,
@@ -430,6 +440,7 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? paymentId = freezed,
     Object? paymentStatus = freezed,
     Object? paymentMethod = freezed,
+    Object? paymentAuthorizedAt = freezed,
     Object? placedAt = null,
     Object? statusHistory = null,
     Object? estimatedTime = freezed,
@@ -533,6 +544,10 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.paymentMethod
             : paymentMethod // ignore: cast_nullable_to_non_nullable
                   as String?,
+        paymentAuthorizedAt: freezed == paymentAuthorizedAt
+            ? _value.paymentAuthorizedAt
+            : paymentAuthorizedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         placedAt: null == placedAt
             ? _value.placedAt
             : placedAt // ignore: cast_nullable_to_non_nullable
@@ -582,6 +597,7 @@ class _$OrderImpl implements _Order {
     this.paymentId,
     this.paymentStatus,
     this.paymentMethod,
+    this.paymentAuthorizedAt,
     required this.placedAt,
     final List<OrderStatusEntry> statusHistory = const [],
     this.estimatedTime,
@@ -660,6 +676,10 @@ class _$OrderImpl implements _Order {
   final String? paymentStatus;
   @override
   final String? paymentMethod;
+  // Null until a card payment is actually authorized by Moyasar — never
+  // set for CASH orders or before authorization completes.
+  @override
+  final DateTime? paymentAuthorizedAt;
   @override
   final DateTime placedAt;
   final List<OrderStatusEntry> _statusHistory;
@@ -680,7 +700,7 @@ class _$OrderImpl implements _Order {
 
   @override
   String toString() {
-    return 'Order(id: $id, orderNumber: $orderNumber, userId: $userId, customerName: $customerName, items: $items, fulfillmentType: $fulfillmentType, addressId: $addressId, pickupLocation: $pickupLocation, deliveryAddress: $deliveryAddress, status: $status, subtotal: $subtotal, deliveryFee: $deliveryFee, deliveryDistanceMeters: $deliveryDistanceMeters, deliveryDistanceKm: $deliveryDistanceKm, deliveryDurationSeconds: $deliveryDurationSeconds, deliveryTier: $deliveryTier, deliveryZone: $deliveryZone, discountTotal: $discountTotal, loyaltyPointsUsed: $loyaltyPointsUsed, loyaltyPointsEarned: $loyaltyPointsEarned, grandTotal: $grandTotal, paymentId: $paymentId, paymentStatus: $paymentStatus, paymentMethod: $paymentMethod, placedAt: $placedAt, statusHistory: $statusHistory, estimatedTime: $estimatedTime, loyaltyRedemption: $loyaltyRedemption)';
+    return 'Order(id: $id, orderNumber: $orderNumber, userId: $userId, customerName: $customerName, items: $items, fulfillmentType: $fulfillmentType, addressId: $addressId, pickupLocation: $pickupLocation, deliveryAddress: $deliveryAddress, status: $status, subtotal: $subtotal, deliveryFee: $deliveryFee, deliveryDistanceMeters: $deliveryDistanceMeters, deliveryDistanceKm: $deliveryDistanceKm, deliveryDurationSeconds: $deliveryDurationSeconds, deliveryTier: $deliveryTier, deliveryZone: $deliveryZone, discountTotal: $discountTotal, loyaltyPointsUsed: $loyaltyPointsUsed, loyaltyPointsEarned: $loyaltyPointsEarned, grandTotal: $grandTotal, paymentId: $paymentId, paymentStatus: $paymentStatus, paymentMethod: $paymentMethod, paymentAuthorizedAt: $paymentAuthorizedAt, placedAt: $placedAt, statusHistory: $statusHistory, estimatedTime: $estimatedTime, loyaltyRedemption: $loyaltyRedemption)';
   }
 
   @override
@@ -735,6 +755,8 @@ class _$OrderImpl implements _Order {
                 other.paymentStatus == paymentStatus) &&
             (identical(other.paymentMethod, paymentMethod) ||
                 other.paymentMethod == paymentMethod) &&
+            (identical(other.paymentAuthorizedAt, paymentAuthorizedAt) ||
+                other.paymentAuthorizedAt == paymentAuthorizedAt) &&
             (identical(other.placedAt, placedAt) ||
                 other.placedAt == placedAt) &&
             const DeepCollectionEquality().equals(
@@ -775,6 +797,7 @@ class _$OrderImpl implements _Order {
     paymentId,
     paymentStatus,
     paymentMethod,
+    paymentAuthorizedAt,
     placedAt,
     const DeepCollectionEquality().hash(_statusHistory),
     estimatedTime,
@@ -821,6 +844,7 @@ abstract class _Order implements Order {
     final String? paymentId,
     final String? paymentStatus,
     final String? paymentMethod,
+    final DateTime? paymentAuthorizedAt,
     required final DateTime placedAt,
     final List<OrderStatusEntry> statusHistory,
     final String? estimatedTime,
@@ -883,7 +907,10 @@ abstract class _Order implements Order {
   @override
   String? get paymentStatus;
   @override
-  String? get paymentMethod;
+  String? get paymentMethod; // Null until a card payment is actually authorized by Moyasar — never
+  // set for CASH orders or before authorization completes.
+  @override
+  DateTime? get paymentAuthorizedAt;
   @override
   DateTime get placedAt;
   @override

@@ -627,18 +627,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               onTap: () => setState(() => _selectedPaymentMethod = 0),
                             ),
                             const SizedBox(height: KZ.sp10),
-                            // Disabled — the backend has no working card/wallet
-                            // gateway (POST /payments/intent always returns 501
-                            // PAYMENT_PROVIDER_NOT_CONFIGURED for CARD/WALLET;
-                            // only CASH settles end-to-end). See 01_PROJECT_OVERVIEW.md.
                             _PaymentOptionTile(
                               icon: Icons.credit_card_rounded,
                               title: 'checkout.card'.tr(),
-                              subtitle: 'checkout.coming_soon'.tr().toUpperCase(),
-                              selected: false,
-                              enabled: false,
-                              onTap: () =>
-                                  _showSnack('checkout.card_coming_soon_notice'.tr()),
+                              subtitle: 'checkout.pay_with_card_subtitle'.tr().toUpperCase(),
+                              selected: _selectedPaymentMethod == 1,
+                              enabled: true,
+                              onTap: () => setState(() => _selectedPaymentMethod = 1),
                             ),
                             const SizedBox(height: KZ.sp24),
 
@@ -891,7 +886,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                         );
                                     if (order != null) {
                                       if (!context.mounted) return;
-                                      context.go('/orders/tracking/${order.id}');
+                                      if (paymentMethod == 'CARD') {
+                                        // Order is created but the money is
+                                        // only authorized once the card
+                                        // payment completes — hand off to
+                                        // the card entry screen rather than
+                                        // treating the order as settled.
+                                        context.push(
+                                          '/checkout/card-payment',
+                                          extra: order,
+                                        );
+                                      } else {
+                                        context.go('/orders/tracking/${order.id}');
+                                      }
                                     }
                                   },
                           ),

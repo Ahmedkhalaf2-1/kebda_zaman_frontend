@@ -623,6 +623,15 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
     }
     switch (order.status) {
       case OrderStatus.pending:
+        // Card orders are authorize-only: the restaurant hasn't accepted
+        // the order (and the hold hasn't been captured) yet, even though
+        // the payment itself already succeeded — say so explicitly rather
+        // than the generic "order placed" copy, and never imply the order
+        // is confirmed.
+        if (order.paymentMethod == 'CARD' &&
+            order.paymentStatus == 'AUTHORIZED') {
+          return 'tracking.status_desc_pending_card_authorized'.tr();
+        }
         return 'tracking.status_desc_pending'.tr();
       case OrderStatus.confirmed:
         return 'tracking.confirmed_msg'.tr();

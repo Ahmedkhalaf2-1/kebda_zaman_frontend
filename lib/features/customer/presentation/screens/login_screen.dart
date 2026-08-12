@@ -5,9 +5,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/session_bootstrap_notifier.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/widgets/kz_social_auth_buttons.dart';
 import 'package:kebda_zaman/core/widgets/kz_auth_layout.dart';
+import 'package:kebda_zaman/core/services/biometric_service.dart';
+import 'package:kebda_zaman/features/shared/domain/models/user.dart';
+import 'package:kebda_zaman/features/customer/presentation/widgets/biometric_onboarding_dialog.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -24,11 +28,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isAdminLogin = false;
   bool _obscurePassword = true;
 
+  bool _biometricBusy = false;
+  bool _biometricAutoPromptDone = false;
+  KZBiometricKind _biometricKind = KZBiometricKind.none;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(biometricServiceProvider).availableKind().then((kind) {
+      if (mounted) setState(() => _biometricKind = kind);
+    });
+    // Fires at most once per screen visit, and only for the specific
+    // bootstrap outcome that requires it — never on a plain rebuild, and
+    // never again after the user cancels/fails (no prompt loop).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeAutoPromptBiometric();
+    });
+  }
+
   @override
   void dispose() {
     _identifierCtrl.dispose();
     _passwordCtrl.dispose();
     super.dispose();
+  }
+
+  void _navigateForUser(User? user, {bool forceAdmin = false}) {
+    if (forceAdmin || user?.role == 'ADMIN') {
+      context.go('/admin/dashboard');
+    } else if (user?.role == 'CASHIER') {
+      // Cashiers never see customer navigation — they land directly on
+      // Orders Management, the only admin section they're allowed into.
+      context.go('/admin/orders');
+    } else {
+      context.go('/home');
+    }
   }
 
   void _handleLogin() async {
@@ -50,16 +84,96 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (success && mounted) {
       final user = ref.read(authNotifierProvider).user;
-      if (_isAdminLogin || user?.role == 'ADMIN') {
-        context.go('/admin/dashboard');
-      } else if (user?.role == 'CASHIER') {
-        // Cashiers never see customer navigation — they land directly on
-        // Orders Management, the only admin section they're allowed into.
-        context.go('/admin/orders');
-      } else {
-        context.go('/home');
+      // "Normal Login" only — the admin-login toggle above is a distinct
+      // path for staff, not the customer onboarding this dialog is for.
+      if (!_isAdminLogin) {
+        await maybeShowBiometricOnboardingDialog(context, ref);
+        if (!mounted) return;
       }
+      _navigateForUser(user, forceAdmin: _isAdminLogin);
     }
+  }
+
+  Future<void> _maybeAutoPromptBiometric() async {
+    if (!mounted || _biometricAutoPromptDone) return;
+    final status = ref.read(sessionBootstrapProvider).value;
+    if (status != SessionBootstrapStatus.biometricRequired) return;
+    _biometricAutoPromptDone = true;
+    await _unlockWithBiometrics(auto: true);
+  }
+
+  Future<void> _unlockWithBiometrics({required bool auto}) async {
+    if (_biometricBusy) return;
+    setState(() => _biometricBusy = true);
+
+    final result = await ref
+        .read(biometricServiceProvider)
+        .authenticate(reasonKey: 'biometric.prompt_reason'.tr());
+
+    if (!mounted) return;
+    setState(() => _biometricBusy = false);
+
+    switch (result) {
+      case BiometricAuthSuccess():
+        await ref.read(sessionBootstrapProvider.notifier).confirmAfterBiometric();
+        if (!mounted) return;
+        final newStatus = ref.read(sessionBootstrapProvider).value;
+        if (newStatus == SessionBootstrapStatus.authenticated) {
+          _navigateForUser(ref.read(authNotifierProvider).user);
+        } else {
+          // Backend rejected the refresh token (expired/revoked) — biometric
+          // success never overrides that. Local session is already cleared
+          // by confirmAfterBiometric's underlying refresh path; fall back to
+          // the normal form already on screen.
+          _showBiometricMessage('biometric.session_expired'.tr());
+        }
+      case BiometricAuthCancelled():
+        // No message, no retry loop — the normal form is already visible.
+        break;
+      case BiometricAuthNotEnrolled():
+      case BiometricAuthUnavailable():
+        if (!auto) _showBiometricMessage('biometric.unavailable'.tr());
+      case BiometricAuthLockedOut():
+        _showBiometricMessage('biometric.locked_out'.tr());
+      case BiometricAuthPermanentlyLockedOut():
+        _showBiometricMessage('biometric.locked_out_permanent'.tr());
+      case BiometricAuthError():
+        if (!auto) _showBiometricMessage('biometric.generic_error'.tr());
+    }
+  }
+
+  void _showBiometricMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  IconData get _biometricIcon => switch (_biometricKind) {
+    KZBiometricKind.face => Icons.face_retouching_natural_rounded,
+    KZBiometricKind.fingerprint => Icons.fingerprint_rounded,
+    KZBiometricKind.generic => Icons.fingerprint_rounded,
+    KZBiometricKind.none => Icons.fingerprint_rounded,
+  };
+
+  String get _biometricLabel => switch (_biometricKind) {
+    KZBiometricKind.face => 'biometric.unlock_face'.tr(),
+    KZBiometricKind.fingerprint => 'biometric.unlock_fingerprint'.tr(),
+    _ => 'biometric.unlock_generic'.tr(),
+  };
+
+  // Secondary to the main Login CTA (KZButton's own `secondary` variant is
+  // an outline, lower visual weight than the filled primary button above
+  // it) — this is a fallback/retry action, not an alternative front door.
+  Widget _buildBiometricUnlockButton() {
+    return KZButton(
+      label: _biometricLabel,
+      icon: _biometricIcon,
+      variant: KZButtonVariant.secondary,
+      fullWidth: true,
+      loading: _biometricBusy,
+      onPressed: () => _unlockWithBiometrics(auto: false),
+    );
   }
 
   void _handleGoogleSignIn() async {
@@ -265,6 +379,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               loading: authState.isLoading,
                               onPressed: _handleLogin,
                             ),
+
+                            if (ref.watch(sessionBootstrapProvider).value ==
+                                SessionBootstrapStatus
+                                    .biometricRequired) ...[
+                              const SizedBox(height: KZ.sp12),
+                              _buildBiometricUnlockButton(),
+                            ],
                           ],
                         ),
                       ),

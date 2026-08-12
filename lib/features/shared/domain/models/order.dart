@@ -100,6 +100,9 @@ class Order with _$Order {
     String? paymentId,
     String? paymentStatus,
     String? paymentMethod,
+    // Null until a card payment is actually authorized by Moyasar — never
+    // set for CASH orders or before authorization completes.
+    DateTime? paymentAuthorizedAt,
     required DateTime placedAt,
     @Default([]) List<OrderStatusEntry> statusHistory,
     String? estimatedTime,

@@ -3,11 +3,11 @@ import 'package:kebda_zaman/features/shared/data/api_auth_repository.dart';
 import 'package:kebda_zaman/features/shared/data/fake_auth_repository.dart';
 import 'package:kebda_zaman/features/shared/data/api_menu_repository.dart';
 import 'package:kebda_zaman/features/shared/data/fake_menu_repository.dart';
-import 'package:kebda_zaman/features/shared/data/fake_payment_service.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/auth_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/menu_repository.dart';
-import 'package:kebda_zaman/features/shared/domain/repositories/payment_service.dart';
 import 'package:kebda_zaman/features/shared/data/api_cart_repository.dart';
+import 'package:kebda_zaman/features/shared/data/api_payment_repository.dart';
+import 'package:kebda_zaman/features/shared/domain/repositories/payment_repository.dart';
 import 'package:kebda_zaman/features/shared/data/fake_cart_repository.dart';
 import 'package:kebda_zaman/features/shared/data/api_order_repository.dart';
 import 'package:kebda_zaman/features/shared/data/fake_loyalty_repository.dart';
@@ -86,8 +86,8 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   );
 });
 
-final paymentServiceProvider = Provider<PaymentService>((ref) {
-  return FakePaymentService(failureRate: 0.0);
+final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
+  return ApiPaymentRepository(ref.watch(apiClientProvider));
 });
 
 final cartRepositoryProvider = Provider<CartRepository>((ref) {

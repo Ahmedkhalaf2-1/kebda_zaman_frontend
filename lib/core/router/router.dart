@@ -15,6 +15,8 @@ import '../../features/customer/presentation/screens/addresses_screen.dart';
 import '../../features/customer/presentation/screens/address_form_screen.dart';
 import '../../features/customer/presentation/screens/settings_screen.dart';
 import '../../features/customer/presentation/screens/order_success_screen.dart';
+import '../../features/customer/presentation/screens/card_payment_screen.dart';
+import '../../features/customer/presentation/screens/saved_cards_screen.dart';
 import '../../features/customer/presentation/screens/order_tracking_screen.dart';
 import '../../features/customer/presentation/screens/login_screen.dart';
 import '../../features/customer/presentation/screens/signup_screen.dart';
@@ -159,6 +161,10 @@ GoRouter router(Ref ref) {
                     builder: (context, state) => const FavoritesScreen(),
                   ),
                   GoRoute(
+                    path: 'payment-methods',
+                    builder: (context, state) => const SavedCardsScreen(),
+                  ),
+                  GoRoute(
                     path: 'addresses',
                     builder: (context, state) => const AddressesScreen(),
                     routes: [
@@ -259,6 +265,19 @@ GoRouter router(Ref ref) {
             pageBuilder: (context, state) => kzFadeSlidePage(
               state: state,
               child: OrderSuccessScreen(order: state.extra as Order),
+            ),
+            redirect: (context, state) {
+              if (state.extra == null || state.extra is! Order) {
+                return '/home';
+              }
+              return null;
+            },
+          ),
+          GoRoute(
+            path: 'card-payment',
+            pageBuilder: (context, state) => kzFadeSlidePage(
+              state: state,
+              child: CardPaymentScreen(order: state.extra as Order),
             ),
             redirect: (context, state) {
               if (state.extra == null || state.extra is! Order) {

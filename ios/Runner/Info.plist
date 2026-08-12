@@ -30,6 +30,8 @@
 	<string>Allow Kebda Zaman to use your location to select an accurate delivery address.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow Kebda Zaman to access your photo library to choose a profile photo.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Allow Kebda Zaman to use Face ID to sign you in securely.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

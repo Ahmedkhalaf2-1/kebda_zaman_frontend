@@ -9,6 +9,8 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifi
 import 'package:kebda_zaman/features/customer/presentation/notifiers/cart_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/favorites_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/widgets/delete_account_dialog.dart';
+import 'package:kebda_zaman/core/services/biometric_service.dart';
+import 'package:kebda_zaman/core/services/biometric_preference_store.dart';
 
 /// The real account-management destination — reached from Profile's
 /// "Edit Profile"/"Settings" entry point. Holds everything that used to be
@@ -27,12 +29,78 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late final TextEditingController _phoneCtrl;
   bool _isSavingProfile = false;
 
+  bool _biometricSupported = false;
+  bool _biometricEnabled = false;
+  bool _biometricBusy = false;
+  KZBiometricKind _biometricKind = KZBiometricKind.none;
+
   @override
   void initState() {
     super.initState();
     final user = ref.read(authNotifierProvider).user;
     _nameCtrl = TextEditingController(text: user?.name);
     _phoneCtrl = TextEditingController(text: user?.phone);
+    _loadBiometricState();
+  }
+
+  Future<void> _loadBiometricState() async {
+    final biometricService = ref.read(biometricServiceProvider);
+    final supported = await biometricService.hasEnrolledBiometrics();
+    final kind = supported
+        ? await biometricService.availableKind()
+        : KZBiometricKind.none;
+    final user = ref.read(authNotifierProvider).user;
+    final enabled = user != null
+        ? await BiometricPreferenceStore.isEnabledFor(user.id)
+        : false;
+    if (!mounted) return;
+    setState(() {
+      _biometricSupported = supported;
+      _biometricKind = kind;
+      _biometricEnabled = enabled;
+    });
+  }
+
+  Future<void> _handleBiometricToggle(bool wantsEnabled) async {
+    final user = ref.read(authNotifierProvider).user;
+    if (user == null || _biometricBusy) return;
+
+    if (!wantsEnabled) {
+      // Disabling never requires a biometric check, and never logs the user
+      // out — it only stops future biometric prompts/actions.
+      await BiometricPreferenceStore.disable();
+      if (!mounted) return;
+      setState(() => _biometricEnabled = false);
+      return;
+    }
+
+    setState(() => _biometricBusy = true);
+    final result = await ref
+        .read(biometricServiceProvider)
+        .authenticate(reasonKey: 'biometric.enable_reason'.tr());
+    if (!mounted) return;
+    setState(() => _biometricBusy = false);
+
+    if (result is BiometricAuthSuccess) {
+      await BiometricPreferenceStore.enableFor(user.id);
+      if (!mounted) return;
+      setState(() => _biometricEnabled = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('biometric.enabled_success'.tr()),
+          backgroundColor: KZ.primary,
+        ),
+      );
+    } else if (result is! BiometricAuthCancelled) {
+      // Cancellation is silent; every other failure gets a message. Either
+      // way the preference is left untouched (still disabled).
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('biometric.enable_failed'.tr()),
+          backgroundColor: KZ.error,
+        ),
+      );
+    }
   }
 
   @override
@@ -112,7 +180,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // Preferences
           KZSettingsGroupHeader('settings.preferences'.tr()),
           const SizedBox(height: 8),
-          KZSettingsGroup(rows: [_buildLanguageRow(currentLang)]),
+          KZSettingsGroup(
+            rows: [
+              _buildLanguageRow(currentLang),
+              // Only ever shown for a real (non-guest) logged-in account on
+              // a device that actually has enrolled biometrics — guests
+              // have no persistent password-based login to unlock later.
+              if (_biometricSupported &&
+                  isLoggedIn &&
+                  user != null &&
+                  !user.isGuest) ...[
+                const KZSettingsDivider(),
+                _buildBiometricRow(),
+              ],
+            ],
+          ),
           const SizedBox(height: 24),
 
           // Other — support/about + the existing dashboard shortcut.
@@ -239,6 +321,80 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   // Stacking removes that competition entirely instead of trimming icon
   // sizes/padding to fit, which is the "cramped controls" this section
   // wants to avoid.
+  IconData get _biometricIcon => switch (_biometricKind) {
+    KZBiometricKind.face => Icons.face_retouching_natural_rounded,
+    KZBiometricKind.fingerprint => Icons.fingerprint_rounded,
+    _ => Icons.fingerprint_rounded,
+  };
+
+  String get _biometricSubtitle => switch (_biometricKind) {
+    KZBiometricKind.face => 'settings.biometric_login_sub_face'.tr(),
+    KZBiometricKind.fingerprint => 'settings.biometric_login_sub_fingerprint'.tr(),
+    _ => 'settings.biometric_login_sub_generic'.tr(),
+  };
+
+  // Same row layout as _buildLanguageRow (icon + label, same padding), with
+  // a trailing Switch instead of a pill-switcher — compact, no extra card,
+  // consistent with the rest of this settings group.
+  Widget _buildBiometricRow() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: KZ.primaryFixed.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(_biometricIcon, color: KZ.primary, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'settings.biometric_login'.tr(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: KZ.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _biometricSubtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: KZ.bodySmall.copyWith(color: KZ.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _biometricBusy
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Transform.scale(
+                  scale: 0.85,
+                  child: Switch(
+                    value: _biometricEnabled,
+                    activeColor: KZ.primaryContainer,
+                    onChanged: _handleBiometricToggle,
+                  ),
+                ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLanguageRow(String currentLang) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

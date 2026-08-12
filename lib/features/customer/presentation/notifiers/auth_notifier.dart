@@ -10,6 +10,7 @@ import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/notifications/device_service.dart';
 import 'package:kebda_zaman/core/api/api_exceptions.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
+import 'package:kebda_zaman/core/services/biometric_preference_store.dart';
 
 class AuthState {
   final User? user;
@@ -142,6 +143,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await prefs.remove(isLoggedInKey);
       await prefs.remove(userKey);
     } catch (_) {}
+    // The refresh token behind it is already dead (this is only called
+    // after a definitive RefreshRejected) — a biometric gate pointing at a
+    // dead session must not linger.
+    await BiometricPreferenceStore.disable();
     // Local-only device token cleanup — by this point the access token has
     // already been rejected/cleared by TokenRefreshCoordinator, so an
     // authenticated DELETE /devices/token request (onBeforeLogout) is no
@@ -459,6 +464,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await prefs.remove(isLoggedInKey);
       await prefs.remove(userKey);
     } catch (_) {}
+    // Explicit logout: the refresh token is gone (step 2 above), so a
+    // lingering biometric preference could never unlock a real session
+    // again anyway — clearing it here keeps behavior simple to audit rather
+    // than leaving a dormant flag around.
+    await BiometricPreferenceStore.disable();
 
     state = const AuthState(user: null, isLoggedIn: false, isLoading: false);
   }
@@ -512,6 +522,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await prefs.remove(isLoggedInKey);
       await prefs.remove(userKey);
     } catch (_) {}
+    // Account no longer exists — any biometric-login artifact for it must
+    // go with it, including its onboarding-prompt history (a future
+    // account reusing this id, however unlikely, should be re-offered it).
+    await BiometricPreferenceStore.disable();
+    final deletedUserId = state.user?.id;
+    if (deletedUserId != null) {
+      await BiometricPreferenceStore.clearOnboardingSeenFor(deletedUserId);
+    }
 
     state = const AuthState(user: null, isLoggedIn: false, isLoading: false);
     return result;

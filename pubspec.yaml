@@ -49,6 +49,14 @@ dependencies:
   flutter_local_notifications: ^17.1.2
   dio: ^5.10.0
   flutter_secure_storage: ^10.3.1
+  # Pinned to 2.3.0, not the 3.x line: the installed Flutter/Dart toolchain
+  # here is Dart 3.8.1, and local_auth 3.0.0+ requires Dart 3.9+. 2.3.0
+  # (SDK constraint ^3.2.3) is the latest version compatible with this
+  # project's toolchain and exposes the same authenticate()/BiometricType API
+  # used here.
+  local_auth: ^2.3.0
+  local_auth_android: ^1.0.52
+  local_auth_darwin: ^1.6.0
   google_maps_flutter: ^2.9.0
   google_maps_flutter_android: ^2.18.3
   google_maps_flutter_platform_interface: ^2.14.1
@@ -56,6 +64,8 @@ dependencies:
   geocoding: ^3.0.0
   url_launcher: ^6.3.1
   lottie: ^3.1.2
+  moyasar: ^3.0.4
+  webview_flutter: ^4.13.0
 
 dev_dependencies:
   flutter_test:
