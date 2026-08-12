@@ -67,6 +67,25 @@ class SearchNotifier extends AutoDisposeNotifier<SearchState> {
     );
   }
 
+  /// Popular-search category chips filter the already-loaded menu items by
+  /// category client-side, rather than going through [updateQuery] — that
+  /// does a backend text search against item *names*, which a category
+  /// name (e.g. "Beverages") never matches, always yielding zero results.
+  void selectCategory(
+    String categoryName,
+    String categoryId,
+    List<MenuItem> allItems,
+  ) {
+    final results = allItems
+        .where((item) => item.categoryId == categoryId)
+        .toList();
+    state = state.copyWith(
+      query: categoryName,
+      results: results,
+      isLoading: false,
+    );
+  }
+
   void addRecentSearch(String search) {
     if (search.trim().isEmpty) return;
     final recents = List<String>.from(state.recentSearches);

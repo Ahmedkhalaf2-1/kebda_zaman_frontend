@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:kebda_zaman/core/responsive/responsive_breakpoints.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 
@@ -87,22 +88,22 @@ class CustomerShell extends ConsumerWidget {
                 NavigationRailDestination(
                   icon: const Icon(Icons.home_outlined),
                   selectedIcon: const Icon(Icons.home),
-                  label: Text('nav.home'.tr()),
+                  label: Text('nav.home'.tr(context: context)),
                 ),
                 NavigationRailDestination(
                   icon: const Icon(Icons.flatware_outlined),
                   selectedIcon: const Icon(Icons.flatware),
-                  label: Text('nav.menu'.tr()),
+                  label: Text('nav.menu'.tr(context: context)),
                 ),
                 NavigationRailDestination(
                   icon: const Icon(Icons.receipt_long_outlined),
                   selectedIcon: const Icon(Icons.receipt_long),
-                  label: Text('nav.orders'.tr()),
+                  label: Text('nav.orders'.tr(context: context)),
                 ),
                 NavigationRailDestination(
                   icon: const Icon(Icons.person_outline),
                   selectedIcon: const Icon(Icons.person),
-                  label: Text('nav.profile'.tr()),
+                  label: Text('nav.profile'.tr(context: context)),
                 ),
               ],
             ),
@@ -132,77 +133,56 @@ class CustomerShell extends ConsumerWidget {
             ),
           ],
         ),
-        child: BottomNavigationBar(
-          currentIndex: currentIndex,
-          onTap: (index) {
-            navigationShell.goBranch(
-              index,
-              initialLocation: index == currentIndex,
-            );
-          },
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: backgroundColor,
-          selectedItemColor: primaryColor,
-          unselectedItemColor: unselectedColor,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontFamily: 'Montserrat',
-            height: 1.4,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: GNav(
+              selectedIndex: currentIndex,
+              onTabChange: (index) {
+                navigationShell.goBranch(
+                  index,
+                  initialLocation: index == currentIndex,
+                );
+              },
+              gap: 8,
+              color: unselectedColor,
+              // Active tab reads as the same solid-primary/white treatment
+              // as the floating add-to-cart button, not a light tint —
+              // white icon+label on a solid primary pill.
+              activeColor: Colors.white,
+              iconSize: 24,
+              tabBackgroundColor: primaryColor,
+              tabBorderRadius: 100,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 10,
+              ),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Montserrat',
+                fontSize: 13,
+                color: Colors.white,
+              ),
+              tabs: [
+                GButton(
+                  icon: Icons.home_outlined,
+                  text: 'nav.home'.tr(context: context),
+                ),
+                GButton(
+                  icon: Icons.flatware_outlined,
+                  text: 'nav.menu'.tr(context: context),
+                ),
+                GButton(
+                  icon: Icons.receipt_long_outlined,
+                  text: 'nav.orders'.tr(context: context),
+                ),
+                GButton(
+                  icon: Icons.person_outline,
+                  text: 'nav.profile'.tr(context: context),
+                ),
+              ],
+            ),
           ),
-          unselectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Montserrat',
-            height: 1.4,
-          ),
-          elevation: 0,
-          items: [
-            BottomNavigationBarItem(
-              icon: const Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.home_outlined, size: 24),
-              ),
-              activeIcon: const Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.home, size: 24),
-              ),
-              label: 'nav.home'.tr(),
-            ),
-            BottomNavigationBarItem(
-              icon: const Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.flatware_outlined, size: 24),
-              ),
-              activeIcon: const Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.flatware, size: 24),
-              ),
-              label: 'nav.menu'.tr(),
-            ),
-            BottomNavigationBarItem(
-              icon: const Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.receipt_long_outlined, size: 24),
-              ),
-              activeIcon: const Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.receipt_long, size: 24),
-              ),
-              label: 'nav.orders'.tr(),
-            ),
-            BottomNavigationBarItem(
-              icon: const Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.person_outline, size: 24),
-              ),
-              activeIcon: const Padding(
-                padding: EdgeInsets.only(bottom: 4),
-                child: Icon(Icons.person, size: 24),
-              ),
-              label: 'nav.profile'.tr(),
-            ),
-          ],
         ),
       ),
     );

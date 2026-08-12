@@ -4,17 +4,72 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
-import 'package:kebda_zaman/core/utils/currency_formatter.dart';
-import 'package:kebda_zaman/core/widgets/kz_card.dart';
-import 'package:kebda_zaman/core/widgets/kz_chip.dart';
-import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
+import 'package:kebda_zaman/core/widgets/kz_product_card.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
+import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/menu_notifier.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/cart_notifier.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/favorites_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../notifiers/search_notifier.dart';
 
+import 'package:kebda_zaman/core/responsive/responsive_breakpoints.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
+
+int _searchColumnCount(BuildContext context) {
+  if (context.isDesktop) return 4;
+  if (context.isTablet) return 3;
+  return 2;
+}
+
+// Same tuning as Menu's catalog grid (menu_screen.dart's _cardExtent) — kept
+// in sync deliberately so a card looks pixel-identical whether it's reached
+// from Menu or from a Search result.
+double _searchCardExtent(BuildContext context) {
+  final w = MediaQuery.of(context).size.width;
+  if (w >= 600) return 272.0;
+  if (w >= 390) return 265.0;
+  return 260.0;
+}
+
+void _handleSearchResultAdd(BuildContext context, WidgetRef ref, MenuItem item) {
+  if (!item.isAvailable) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('menu.item_unavailable'.tr()),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    return;
+  }
+
+  final hasRequired = item.modifierGroups.any((g) => g.isRequired);
+  if (hasRequired) {
+    context.push('/menu/item/${item.id}');
+  } else {
+    final cartItem = CartItem(
+      id: 'ci_${DateTime.now().millisecondsSinceEpoch}',
+      menuItemId: item.id,
+      productName: item.name,
+      productImage: item.imageUrl,
+      basePrice: item.discountPrice ?? item.basePrice,
+      quantity: 1,
+      selectedOptions: {},
+      extraQuantities: {},
+      unitPrice: item.discountPrice ?? item.basePrice,
+      lineTotal: item.discountPrice ?? item.basePrice,
+    );
+    ref.read(cartProvider.notifier).addItem(cartItem);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('home.added_to_cart'.tr(namedArgs: {'name': item.name})),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+}
 
 class SearchScreen extends ConsumerWidget {
   const SearchScreen({super.key});
@@ -51,7 +106,7 @@ class SearchScreen extends ConsumerWidget {
       body: ResponsiveContainer(
         child: searchState.query.isEmpty
             ? _buildIdleState(context, searchState, searchNotifier, ref)
-            : _buildResultsState(context, searchState),
+            : _buildResultsState(context, ref, searchState),
       ),
     );
   }
@@ -149,7 +204,11 @@ class SearchScreen extends ConsumerWidget {
               runSpacing: 12,
               children: menuState.value!.categories.take(8).map((cat) {
                 return InkWell(
-                  onTap: () => notifier.updateQuery(cat.localizedName(lang)),
+                  onTap: () => notifier.selectCategory(
+                    cat.localizedName(lang),
+                    cat.id,
+                    menuState.value!.items,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
                     width: 80,
@@ -199,7 +258,10 @@ class SearchScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildResultsState(BuildContext context, SearchState state) {
+  // Same `ProductGridCard` grid Menu's catalog uses (see
+  // menu_screen.dart) — a search result reads identically to reaching the
+  // same item through Menu, not as a separate, bespoke list design.
+  Widget _buildResultsState(BuildContext context, WidgetRef ref, SearchState state) {
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator(color: KZ.primary));
     }
@@ -229,113 +291,46 @@ class SearchScreen extends ConsumerWidget {
                 style: KZ.sectionTitle.copyWith(fontSize: 18),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: KZ.sp8),
-              TextButton(
-                onPressed: () => context.push('/menu'),
-                child: Text(
-                  'search.browse_categories'.tr(),
-                  style: KZ.labelLarge.copyWith(color: KZ.primaryContainer),
-                ),
-              ),
             ],
           ),
         ),
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KZ.screenPadding,
-        vertical: KZ.sp16,
+    final favorites = ref.watch(customerFavoritesProvider).favoriteIds;
+    final columnCount = _searchColumnCount(context);
+    final extent = _searchCardExtent(context);
+
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(14, 16, 14, 16),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columnCount,
+        mainAxisSpacing: 14,
+        crossAxisSpacing: 14,
+        mainAxisExtent: extent,
       ),
       itemCount: state.results.length,
       itemBuilder: (context, index) {
         final item = state.results[index];
-        final hasDiscount = item.discountPrice != null;
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: KZ.sp12),
-          decoration: KZ.cardDecoration(),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () => context.push('/home/item/${item.id}'),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 90,
-                  height: 90,
-                  child: KZFoodImage(imageUrl: item.imageUrl),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(KZ.sp12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.localizedName(context.locale.languageCode),
-                          style: KZ.itemTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: KZ.sp4),
-                        Text(
-                          item.localizedDescription(
-                            context.locale.languageCode,
-                          ),
-                          style: KZ.bodySmall,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (item.badge != null || item.calories != null) ...[
-                          const SizedBox(height: KZ.sp4),
-                          Wrap(
-                            spacing: 6,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              if (item.badge != null)
-                                MenuItemBadgeChip(badge: item.badge!),
-                              if (item.calories != null)
-                                MenuItemCaloriesText(calories: item.calories!),
-                            ],
-                          ),
-                        ],
-                        const SizedBox(height: KZ.sp6),
-                        Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Text(
-                              formatCurrency(
-                                hasDiscount
-                                    ? item.discountPrice!
-                                    : item.basePrice,
-                                locale: context.locale,
-                              ),
-                              style: KZ.price,
-                            ),
-                            if (hasDiscount) ...[
-                              const SizedBox(width: KZ.sp8),
-                              MenuItemComparePriceText(
-                                compareAtPrice: item.basePrice,
-                                style: KZ.bodySmall.copyWith(color: KZ.error),
-                              ),
-                            ],
-                            if (item.compareAtPrice != null &&
-                                item.compareAtPrice! > item.basePrice) ...[
-                              const SizedBox(width: KZ.sp8),
-                              MenuItemComparePriceText(
-                                compareAtPrice: item.compareAtPrice!,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+        final isFav = favorites.contains(item.id);
+        return ProductGridCard(
+          item: item,
+          isFavorite: isFav,
+          onTap: () => context.push('/home/item/${item.id}'),
+          onAdd: () => _handleSearchResultAdd(context, ref, item),
+          onToggleFavorite: () async {
+            final success = await ref
+                .read(customerFavoritesProvider.notifier)
+                .toggleFavorite(item.id);
+            if (!success && context.mounted) {
+              final err = ref.read(customerFavoritesProvider).errorMessage;
+              if (err != null) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(err)));
+              }
+            }
+          },
         );
       },
     );

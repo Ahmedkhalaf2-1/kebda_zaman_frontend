@@ -235,7 +235,7 @@ class HomeScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(KZ.radiusLg),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(KZ.radiusLg),
-                            onTap: () => context.go('/search'),
+                            onTap: () => context.push('/search'),
                             child: Container(
                               height: 50,
                               padding: const EdgeInsets.symmetric(
@@ -528,7 +528,7 @@ class HomeScreen extends ConsumerWidget {
                       // mainAxisExtent below so both breakpoints render the
                       // row at the same height.
                       SliverFixedExtentList(
-                        itemExtent: 136,
+                        itemExtent: 148,
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final item = data.popular[index];
                           return _RecommendedTile(item: item);
@@ -543,7 +543,7 @@ class HomeScreen extends ConsumerWidget {
                                 crossAxisCount: context.isDesktop ? 3 : 2,
                                 mainAxisSpacing: 12,
                                 crossAxisSpacing: 12,
-                                mainAxisExtent: 136,
+                                mainAxisExtent: 148,
                               ),
                           delegate: SliverChildBuilderDelegate((
                             context,

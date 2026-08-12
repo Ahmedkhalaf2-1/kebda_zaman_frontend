@@ -85,64 +85,65 @@ class ProductGridCard extends StatelessWidget {
                         58,
                         6,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Name (+ optional subtitle) top-aligned so every
-                          // card in the same row starts its text at the
-                          // same vertical position; price stays anchored at
-                          // the bottom of the info slot.
-                          Expanded(
-                            child: Align(
-                              alignment: AlignmentDirectional.topStart,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    item.localizedName(lang),
-                                    style: KZ.itemTitle,
-                                    maxLines: hasSubtitle ? 1 : 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  if (hasSubtitle) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      subtitle!,
-                                      style: KZ.bodySmall,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ],
+                      // A single FittedBox around the whole name+price block
+                      // — not split into separately-flexed pieces — is the
+                      // only way to *guarantee* this info slot never trips
+                      // a RenderFlex overflow, regardless of card extent,
+                      // locale, font-scale, or which of the optional
+                      // subtitle/discount/compare-at lines are present: it
+                      // measures the block at its natural size and scales
+                      // the whole thing down to fit, rather than each
+                      // sub-piece independently claiming space that may not
+                      // add up. Top-start alignment keeps every card's name
+                      // starting at the same vertical position within a
+                      // row, same as before.
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.topStart,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              item.localizedName(lang),
+                              style: KZ.itemTitle,
+                              maxLines: hasSubtitle ? 1 : 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (hasSubtitle) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                subtitle!,
+                                style: KZ.bodySmall,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
+                            ],
+                            const SizedBox(height: 4),
+                            if (hasDiscount)
+                              MenuItemComparePriceText(
+                                compareAtPrice: item.basePrice,
+                                style: KZ.bodySmall.copyWith(
+                                  color: KZ.error,
+                                ),
+                              ),
+                            if (showDiscountPricing &&
+                                item.compareAtPrice != null &&
+                                item.compareAtPrice! > item.basePrice)
+                              MenuItemComparePriceText(
+                                compareAtPrice: item.compareAtPrice!,
+                              ),
+                            Text(
+                              formatCurrency(
+                                effectivePrice,
+                                locale: context.locale,
+                              ),
+                              style: KZ.price,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          // 2dp, not 4 — reclaims just enough headroom to
-                          // avoid a hairline sub-pixel overflow at the
-                          // narrowest supported card width (360dp phones).
-                          const SizedBox(height: 2),
-                          if (hasDiscount)
-                            MenuItemComparePriceText(
-                              compareAtPrice: item.basePrice,
-                              style: KZ.bodySmall.copyWith(color: KZ.error),
-                            ),
-                          if (showDiscountPricing &&
-                              item.compareAtPrice != null &&
-                              item.compareAtPrice! > item.basePrice)
-                            MenuItemComparePriceText(
-                              compareAtPrice: item.compareAtPrice!,
-                            ),
-                          Text(
-                            formatCurrency(
-                              effectivePrice,
-                              locale: context.locale,
-                            ),
-                            style: KZ.price,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
