@@ -11,6 +11,7 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/address_not
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/loyalty_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/delivery_quote_notifier.dart';
+import 'package:kebda_zaman/features/customer/presentation/screens/address_form_screen.dart';
 import 'package:kebda_zaman/features/shared/domain/models/address.dart';
 import 'package:kebda_zaman/features/shared/domain/models/delivery_quote.dart';
 import 'package:kebda_zaman/features/shared/domain/models/restaurant_settings.dart';
@@ -926,31 +927,33 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   /// Lets the user pick from their saved addresses, or add/edit one if they
   /// need to — the picked address becomes the one actually sent at checkout.
   /// "Update address location on map" action on the delivery-quote card's
-  /// missing-coordinates/error states — pushes the same edit route the
+  /// missing-coordinates/error states — opens the same edit form the
   /// address-picker sheet's edit action uses, then clears the explicit pick
   /// so the (now-updated) address is picked up fresh from the backend.
+  ///
+  /// Pushed on the root `Navigator` directly (not via `context.push`, which
+  /// would route through GoRouter's `/profile/addresses/edit` — a path
+  /// nested under the Profile tab's own persistent branch Navigator). Doing
+  /// that from here, while Checkout sits on top of the whole shell, made
+  /// GoRouter reconcile two declarative `Page`s for the same path whenever
+  /// the Profile branch already had one from an earlier visit, tripping the
+  /// `Navigator` duplicate-page-key assertion (red screen). An imperative
+  /// push here never touches that branch's page list at all.
   Future<void> _editAddressLocation(Address address) async {
-    await context.push('/profile/addresses/edit', extra: address);
+    await Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute(
+        builder: (_) => AddressFormScreen(existingAddress: address),
+      ),
+    );
     if (mounted) setState(() => _selectedAddressId = null);
   }
 
   void _showAddressPicker(BuildContext context) async {
-    // Guard against rapid double-taps opening a second sheet (or pushing a
-    // second follow-up route) while the first one is still in flight.
+    // Guard against rapid double-taps opening a second sheet while the first
+    // one is still in flight.
     if (_isAddressPickerBusy) return;
     _isAddressPickerBusy = true;
 
-    // Don't pop the sheet AND push the new route from inside the same tap
-    // callback — Navigator.pop() only *starts* the sheet's closing transition,
-    // it doesn't wait for the route to actually be removed. Pushing a new
-    // route immediately after (context.push) can then run while the sheet's
-    // route is still mid-removal, so GoRouter ends up briefly reconciling two
-    // page entries in the same Navigator with colliding keys, which trips the
-    // `!keyReservation.contains(key)` assertion. Instead, let the sheet pop
-    // itself with a typed result and only navigate once that pop has fully
-    // completed (i.e. after `showModalBottomSheet`'s own Future resolves),
-    // using the parent Checkout context — never the sheet's own context,
-    // which is gone by then.
     try {
       final result = await showModalBottomSheet<_AddressSheetResult>(
         context: context,
@@ -1050,22 +1053,30 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         },
       );
 
-      // Only navigate once the sheet's route has actually finished closing,
-      // and always via the parent Checkout `context` — the sheet's own
-      // `sheetContext` is no longer valid once the sheet has popped.
       if (result == null || !mounted) return;
+
+      // Add/edit open the form on the root `Navigator` directly (see
+      // `_editAddressLocation` above for why) rather than via
+      // `context.push`/GoRouter, so there's no race with the sheet's own
+      // route being removed to wait out here.
       switch (result.action) {
         case _AddressSheetAction.select:
           setState(() => _selectedAddressId = result.selectedId);
           break;
         case _AddressSheetAction.add:
-          await context.push('/profile/addresses/add');
+          await Navigator.of(context, rootNavigator: true).push(
+            MaterialPageRoute(builder: (_) => const AddressFormScreen()),
+          );
           // A new address invalidates any explicit prior pick — fall back to
           // whichever address the backend now reports as default.
           if (mounted) setState(() => _selectedAddressId = null);
           break;
         case _AddressSheetAction.edit:
-          await context.push('/profile/addresses/edit', extra: result.editAddress);
+          await Navigator.of(context, rootNavigator: true).push(
+            MaterialPageRoute(
+              builder: (_) => AddressFormScreen(existingAddress: result.editAddress),
+            ),
+          );
           if (mounted) setState(() => _selectedAddressId = null);
           break;
       }

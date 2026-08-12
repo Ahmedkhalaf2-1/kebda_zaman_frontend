@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 
@@ -151,12 +152,24 @@ class _FavoriteItemCard extends ConsumerWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
-                      formatCurrency(
-                        hasDiscount ? item.discountPrice! : item.basePrice,
-                        locale: context.locale,
-                      ),
-                      style: KZ.price,
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          formatCurrency(
+                            hasDiscount ? item.discountPrice! : item.basePrice,
+                            locale: context.locale,
+                          ),
+                          style: KZ.price,
+                        ),
+                        if (hasDiscount) ...[
+                          const SizedBox(width: 6),
+                          MenuItemComparePriceText(
+                            compareAtPrice: item.basePrice,
+                            style: KZ.bodySmall.copyWith(color: KZ.error),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),

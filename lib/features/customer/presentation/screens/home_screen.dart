@@ -691,14 +691,15 @@ class _ShowcaseTile extends StatelessWidget {
                           ),
                           if (hasDiscount) ...[
                             const SizedBox(width: KZ.sp8),
-                            Text(
-                              formatCurrency(
-                                item.basePrice,
-                                locale: context.locale,
-                              ),
+                            // KZ.primaryContainer (a lighter red tint) rather
+                            // than KZ.error here — this tile sits on a dark
+                            // photo gradient, where the darker error red
+                            // reads poorly; still a theme red token, not a
+                            // hardcoded color.
+                            MenuItemComparePriceText(
+                              compareAtPrice: item.basePrice,
                               style: KZ.bodySmall.copyWith(
-                                color: Colors.white.withValues(alpha: 0.75),
-                                decoration: TextDecoration.lineThrough,
+                                color: KZ.primaryContainer,
                               ),
                             ),
                           ],
@@ -816,14 +817,9 @@ class _RecommendedTile extends ConsumerWidget {
                           ),
                           if (hasDiscount) ...[
                             const SizedBox(width: 6),
-                            Text(
-                              formatCurrency(
-                                item.basePrice,
-                                locale: context.locale,
-                              ),
-                              style: KZ.bodySmall.copyWith(
-                                decoration: TextDecoration.lineThrough,
-                              ),
+                            MenuItemComparePriceText(
+                              compareAtPrice: item.basePrice,
+                              style: KZ.bodySmall.copyWith(color: KZ.error),
                             ),
                           ],
                           if (item.compareAtPrice != null &&

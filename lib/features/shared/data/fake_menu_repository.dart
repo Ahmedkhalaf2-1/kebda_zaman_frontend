@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
+import 'package:kebda_zaman/features/shared/domain/models/menu_offer.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/menu_repository.dart';
 
 /// Fake menu repository per md1 §14.
@@ -189,6 +190,16 @@ class FakeMenuRepository implements MenuRepository {
         .where((i) => i.isBestSeller && i.isAvailable)
         .toList();
     return Success(List.unmodifiable(items));
+  }
+
+  @override
+  Future<Result<List<MenuOffer>>> getMenuOffers() async {
+    // No fake/mock Menu Offers content — the real feature only exists via
+    // the backend, so the fake repository simply returns none rather than
+    // inventing banner data.
+    await _simulateDelay();
+    if (_shouldFail()) return const Err(NetworkFailure('Simulated failure'));
+    return const Success([]);
   }
 
   @override

@@ -33,11 +33,14 @@ import '../../features/admin/presentation/screens/menu_management_screen.dart';
 import '../../features/admin/presentation/screens/admin_food_form_screen.dart';
 import '../../features/admin/presentation/screens/admin_category_form_screen.dart';
 import '../../features/admin/presentation/screens/admin_promo_form_screen.dart';
+import '../../features/admin/presentation/screens/menu_offers_screen.dart';
+import '../../features/admin/presentation/screens/admin_menu_offer_form_screen.dart';
 import '../../features/admin/presentation/screens/order_management_screen.dart';
 import '../../features/admin/presentation/screens/offers_screen.dart';
 import '../../features/admin/presentation/screens/restaurant_profile_screen.dart';
 import '../../features/admin/presentation/screens/working_hours_screen.dart';
 import '../../features/admin/presentation/screens/order_settings_screen.dart';
+import '../../features/admin/presentation/screens/pricing_settings_screen.dart';
 import '../../features/admin/presentation/screens/admin_notifications_screen.dart';
 import '../../features/admin/presentation/screens/admin_notification_center_screen.dart';
 import '../../features/admin/presentation/screens/admin_order_details_screen.dart';
@@ -49,6 +52,7 @@ import '../../features/shared/domain/models/order.dart';
 import '../../features/shared/domain/models/menu_item.dart';
 import '../../features/shared/domain/models/category.dart';
 import '../../features/shared/domain/models/promo_code.dart';
+import '../../features/shared/domain/models/menu_offer.dart';
 import '../../features/shared/domain/models/address.dart';
 import 'kz_page_transitions.dart';
 
@@ -323,6 +327,24 @@ GoRouter router(Ref ref) {
             ],
           ),
           GoRoute(
+            path: '/admin/menu-offers',
+            pageBuilder: (context, state) =>
+                kzAdminPage(state: state, child: const MenuOffersScreen()),
+            routes: [
+              GoRoute(
+                path: 'add',
+                builder: (context, state) =>
+                    const AdminMenuOfferFormScreen(),
+              ),
+              GoRoute(
+                path: 'edit',
+                builder: (context, state) => AdminMenuOfferFormScreen(
+                  existingOffer: state.extra as MenuOffer?,
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
             path: '/admin/orders',
             pageBuilder: (context, state) =>
                 kzAdminPage(state: state, child: const OrderManagementScreen()),
@@ -384,6 +406,13 @@ GoRouter router(Ref ref) {
             path: '/admin/order-settings',
             pageBuilder: (context, state) =>
                 kzAdminPage(state: state, child: const OrderSettingsScreen()),
+          ),
+          GoRoute(
+            path: '/admin/pricing-settings',
+            pageBuilder: (context, state) => kzAdminPage(
+              state: state,
+              child: const PricingSettingsScreen(),
+            ),
           ),
           GoRoute(
             path: '/admin/staff',

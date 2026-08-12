@@ -773,13 +773,15 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                   ),
                 ),
 
-                // 2. Scrollable Content Sheet (starts at Y=260px, overlapping
-                // 40px of the hero — same overlap the original design used).
+                // 2. Scrollable Content Sheet (starts at Y=300px — flush
+                // with the bottom of the 300px hero, no overlap — so more of
+                // the product photo stays visible above the sheet than the
+                // original 40px-overlap version).
                 Positioned.fill(
                   child: CustomScrollView(
                     physics: const BouncingScrollPhysics(),
                     slivers: [
-                      const SliverToBoxAdapter(child: SizedBox(height: 260)),
+                      const SliverToBoxAdapter(child: SizedBox(height: 300)),
                       SliverToBoxAdapter(
                         child: Container(
                           decoration: const BoxDecoration(
@@ -837,7 +839,8 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                       ),
                                     ],
 
-                                    // Current price + optional compare-at
+                                    // Current price (sale price when
+                                    // discounted) + optional compare-at
                                     const SizedBox(height: 12),
                                     Wrap(
                                       crossAxisAlignment:
@@ -845,11 +848,21 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                       children: [
                                         Text(
                                           formatCurrency(
-                                            item.basePrice,
+                                            item.discountPrice ??
+                                                item.basePrice,
                                             locale: context.locale,
                                           ),
                                           style: KZ.priceLarge,
                                         ),
+                                        if (item.discountPrice != null) ...[
+                                          const SizedBox(width: 8),
+                                          MenuItemComparePriceText(
+                                            compareAtPrice: item.basePrice,
+                                            style: KZ.bodySmall.copyWith(
+                                              color: KZ.error,
+                                            ),
+                                          ),
+                                        ],
                                         if (item.compareAtPrice != null &&
                                             item.compareAtPrice! >
                                                 item.basePrice) ...[

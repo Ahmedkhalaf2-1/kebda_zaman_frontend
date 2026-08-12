@@ -5,6 +5,7 @@ import 'package:kebda_zaman/core/api/api_exceptions.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
+import 'package:kebda_zaman/features/shared/domain/models/menu_offer.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/menu_repository.dart';
 
 class ApiMenuRepository implements MenuRepository {
@@ -27,11 +28,16 @@ class ApiMenuRepository implements MenuRepository {
   static Map<String, dynamic> _buildMenuItemPayload(MenuItem item) {
     return <String, dynamic>{
       'categoryId': item.categoryId,
-      'nameAr': item.name,
-      'nameEn': item.name,
-      'descriptionAr': item.description,
-      'descriptionEn': item.description,
+      // Send the real per-language values now that the admin form captures
+      // them separately — falling back to the legacy single name/
+      // description only for items that predate that split.
+      'nameAr': item.nameAr ?? item.name,
+      'nameEn': item.nameEn ?? item.name,
+      'descriptionAr': item.descriptionAr ?? item.description,
+      'descriptionEn': item.descriptionEn ?? item.description,
       'basePrice': item.basePrice,
+      // Wire name for MenuItem.discountPrice — see that field's doc comment.
+      'salePrice': item.discountPrice,
       'imageUrl': item.imageUrl,
       'isAvailable': item.isAvailable,
       'isPopular': item.isFeatured,
@@ -201,6 +207,26 @@ class ApiMenuRepository implements MenuRepository {
       return const Err(NetworkFailure('Failed to search items'));
     } catch (e) {
       return const Err(UnknownFailure('Unknown error searching items'));
+    }
+  }
+
+  @override
+  Future<Result<List<MenuOffer>>> getMenuOffers() async {
+    try {
+      final response = await _apiClient.dio.get('/menu-offers');
+      final data = response.data as List;
+      final offers = data
+          .map((json) => _mapMenuOffer(json as Map<String, dynamic>))
+          .toList()
+        ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      return Success(offers);
+    } on DioException catch (e) {
+      if (e.error is ApiException) {
+        return Err(NetworkFailure((e.error as ApiException).message));
+      }
+      return const Err(NetworkFailure('Failed to load menu offers'));
+    } catch (e) {
+      return const Err(UnknownFailure('Unknown error loading menu offers'));
     }
   }
 
@@ -442,6 +468,8 @@ class ApiMenuRepository implements MenuRepository {
       description: json['descriptionEn'] ?? json['descriptionAr'] ?? '',
       imageUrl: json['imageUrl'] ?? '',
       basePrice: (json['basePrice'] as num?)?.toDouble() ?? 0.0,
+      // Wire name for MenuItem.discountPrice — see that field's doc comment.
+      discountPrice: (json['salePrice'] as num?)?.toDouble(),
       isAvailable: json['isAvailable'] ?? true,
       isFeatured: json['isPopular'] ?? false,
       isBestSeller: json['isPopular'] ?? false,
@@ -455,5 +483,58 @@ class ApiMenuRepository implements MenuRepository {
       descriptionAr: json['descriptionAr'] as String?,
       descriptionEn: json['descriptionEn'] as String?,
     );
+  }
+
+  // --- Menu Offers (customer, public `GET /menu-offers`) ---
+  //
+  // Deliberately a separate mapper from the admin
+  // `ApiMenuOfferRepository._mapMenuOffer` (different endpoint, different
+  // repository) even though it maps to the same shared [MenuOffer] model —
+  // this file never imports or calls into the admin repository.
+
+  static MenuOffer _mapMenuOffer(Map<String, dynamic> json) {
+    return MenuOffer(
+      id: json['id'] as String,
+      menuItemId: json['menuItemId'] as String,
+      imageUrl: json['imageUrl'] as String? ?? '',
+      title: json['title'] as String?,
+      description: json['description'] as String?,
+      isActive: json['isActive'] as bool? ?? true,
+      startAt: _parseOfferDate(json['startAt']),
+      endAt: _parseOfferDate(json['endAt']),
+      sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
+      createdAt: _parseOfferDate(json['createdAt']) ?? DateTime.now(),
+      updatedAt: _parseOfferDate(json['updatedAt']) ?? DateTime.now(),
+      menuItem: json['menuItem'] is Map<String, dynamic>
+          ? _mapMenuOfferItemSummary(json['menuItem'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+
+  static MenuOfferMenuItemSummary _mapMenuOfferItemSummary(
+    Map<String, dynamic> json,
+  ) {
+    return MenuOfferMenuItemSummary(
+      id: json['id'] as String,
+      name:
+          json['name'] as String? ??
+          json['nameEn'] as String? ??
+          json['nameAr'] as String?,
+      imageUrl: json['imageUrl'] as String?,
+      basePrice: _parseOfferDouble(json['basePrice']),
+      isAvailable: json['isAvailable'] as bool?,
+      categoryId: json['categoryId'] as String?,
+    );
+  }
+
+  static DateTime? _parseOfferDate(dynamic value) {
+    if (value is String && value.isNotEmpty) return DateTime.tryParse(value);
+    return null;
+  }
+
+  static double? _parseOfferDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
   }
 }

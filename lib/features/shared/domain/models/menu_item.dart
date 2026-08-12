@@ -85,6 +85,14 @@ class MenuItem with _$MenuItem {
     required String description,
     required String imageUrl,
     required double basePrice,
+    /// The discounted price the customer actually pays, or null when the
+    /// item has no active discount (always strictly less than [basePrice]
+    /// when set — enforced server-side). Maps to the backend's `salePrice`
+    /// JSON field (see `ApiMenuRepository._mapMenuItem`/
+    /// `_buildMenuItemPayload`) — kept as `discountPrice` here since this
+    /// field already existed under that name before the backend added
+    /// `salePrice`; do not confuse with [compareAtPrice], a separate,
+    /// purely cosmetic "was" price with opposite semantics.
     double? discountPrice,
     @Default(true) bool isAvailable,
     @Default(false) bool isFeatured,

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
-import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/shared/domain/models/address.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/address_notifier.dart';
@@ -43,24 +42,42 @@ class AddressesScreen extends ConsumerWidget {
               color: KZ.primary,
               onRefresh: () =>
                   ref.read(addressNotifierProvider.notifier).loadAddresses(),
-              child: ListView.separated(
+              child: ListView(
                 padding: const EdgeInsets.fromLTRB(
                   KZ.screenPadding,
-                  KZ.sp16,
+                  KZ.sp8,
                   KZ.screenPadding,
                   KZ.sp32 + 64,
                 ),
-                itemCount: state.addresses.length,
-                separatorBuilder: (_, __) => const SizedBox(height: KZ.sp12),
-                itemBuilder: (context, index) {
-                  final address = state.addresses[index];
-                  return _AddressCard(address: address);
-                },
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_rounded,
+                        color: KZ.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: KZ.sp8),
+                      Text(
+                        'addresses.count_label'.tr(
+                          namedArgs: {'count': '${state.addresses.length}'},
+                        ),
+                        style: KZ.sectionTitle.copyWith(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: KZ.sp16),
+                  for (final address in state.addresses) ...[
+                    _AddressCard(address: address),
+                    const SizedBox(height: KZ.sp12),
+                  ],
+                ],
               ),
             ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: KZ.primaryContainer,
+        backgroundColor: KZ.primary,
         foregroundColor: Colors.white,
+        elevation: 3,
         icon: const Icon(Icons.add_location_alt_rounded),
         label: Text(
           'addresses.add'.tr(),
@@ -77,88 +94,143 @@ class _AddressCard extends ConsumerWidget {
 
   const _AddressCard({required this.address});
 
+  bool get _isWork => address.label.toLowerCase() == 'work';
+
+  IconData get _icon => _isWork ? Icons.work_rounded : Icons.home_rounded;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(KZ.sp16),
-      decoration: KZ.cardDecoration(
-        color: address.isDefault
-            ? KZ.primaryFixed.withValues(alpha: 0.3)
-            : Colors.white,
-      ),
+      decoration: KZ.cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                address.label.toLowerCase() == 'work'
-                    ? Icons.work_rounded
-                    : Icons.home_rounded,
-                color: KZ.primary,
-                size: 20,
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: KZ.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(_icon, color: KZ.primary, size: 22),
               ),
-              const SizedBox(width: KZ.sp8),
+              const SizedBox(width: KZ.sp12),
               Expanded(
-                child: Text(
-                  address.label.isNotEmpty
-                      ? address.label
-                      : 'addresses.title'.tr(),
-                  style: KZ.itemTitle,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            address.label.isNotEmpty
+                                ? address.label
+                                : 'addresses.title'.tr(),
+                            style: KZ.itemTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (address.isDefault) ...[
+                          const SizedBox(width: KZ.sp8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: KZ.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.star_rounded,
+                                  size: 13,
+                                  color: KZ.primary,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  'addresses.default_badge'.tr(),
+                                  style: KZ.caption.copyWith(
+                                    color: KZ.primary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatAddress(address),
+                      style: KZ.body.copyWith(color: KZ.onSurfaceVariant),
+                    ),
+                    if (address.notes != null &&
+                        address.notes!.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.sticky_note_2_outlined,
+                            size: 14,
+                            color: KZ.onSurfaceVariant.withValues(alpha: 0.7),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              address.notes!,
+                              style: KZ.bodySmall.copyWith(
+                                color: KZ.onSurfaceVariant.withValues(
+                                  alpha: 0.85,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              if (address.isDefault)
-                KZStatusBadge(
-                  label: 'addresses.default_badge'.tr(),
-                  icon: Icons.star_rounded,
-                  color: KZ.primary,
-                ),
             ],
           ),
-          const SizedBox(height: KZ.sp8),
-          Text(_formatAddress(address), style: KZ.body),
-          if (address.notes != null && address.notes!.isNotEmpty) ...[
-            const SizedBox(height: KZ.sp4),
-            Text(address.notes!, style: KZ.bodySmall),
-          ],
-          const SizedBox(height: KZ.sp12),
+          const SizedBox(height: KZ.sp14),
+          const Divider(height: 1, color: KZ.outlineVariant),
+          const SizedBox(height: KZ.sp10),
           Row(
             children: [
               if (!address.isDefault)
-                TextButton.icon(
-                  onPressed: () => ref
+                _CardAction(
+                  icon: Icons.check_circle_outline_rounded,
+                  label: 'addresses.set_default'.tr(),
+                  color: KZ.primary,
+                  onTap: () => ref
                       .read(addressNotifierProvider.notifier)
                       .setDefaultAddress(address.id),
-                  icon: const Icon(
-                    Icons.check_circle_outline_rounded,
-                    size: KZ.iconInline,
-                    color: KZ.primary,
-                  ),
-                  label: Text(
-                    'addresses.set_default'.tr(),
-                    style: KZ.label.copyWith(color: KZ.primary),
-                  ),
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(0, KZ.iconTapTargetMin),
-                  ),
                 ),
               const Spacer(),
-              IconButton(
-                onPressed: () =>
+              _CardAction(
+                icon: Icons.edit_outlined,
+                label: 'common.edit'.tr(),
+                color: KZ.secondary,
+                onTap: () =>
                     context.push('/profile/addresses/edit', extra: address),
-                icon: const Icon(
-                  Icons.edit_outlined,
-                  color: KZ.secondary,
-                  size: KZ.iconControl,
-                ),
               ),
-              IconButton(
-                onPressed: () => _confirmDelete(context, ref, address),
-                icon: const Icon(
-                  Icons.delete_outline_rounded,
-                  color: KZ.error,
-                  size: KZ.iconControl,
-                ),
+              const SizedBox(width: KZ.sp16),
+              _CardAction(
+                icon: Icons.delete_outline_rounded,
+                label: 'common.delete'.tr(),
+                color: KZ.error,
+                onTap: () => _confirmDelete(context, ref, address),
               ),
             ],
           ),
@@ -193,6 +265,45 @@ class _AddressCard extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Small icon+label tap target shared by the three card actions (set
+/// default / edit / delete) — replaces the old bare `IconButton`s with a
+/// consistent, more legible row treatment.
+class _CardAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _CardAction({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(KZ.radiusSm),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: KZ.label.copyWith(color: color, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
       ),
     );
   }

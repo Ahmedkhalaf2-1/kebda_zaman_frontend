@@ -18,6 +18,8 @@ import 'package:kebda_zaman/features/shared/domain/repositories/promo_repository
 import 'package:kebda_zaman/features/shared/data/fake_promo_repository.dart';
 import 'package:kebda_zaman/features/shared/data/api_promo_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/settings_repository.dart';
+import 'package:kebda_zaman/features/admin/domain/repositories/menu_offer_repository.dart';
+import 'package:kebda_zaman/features/admin/data/api_menu_offer_repository.dart';
 import 'package:kebda_zaman/features/shared/data/api_settings_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/models/restaurant_settings.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/admin_notification_repository.dart';
@@ -157,6 +159,10 @@ final adminOrderNotificationRepositoryProvider =
 
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   return ApiSettingsRepository(ref.watch(apiClientProvider));
+});
+
+final adminMenuOfferRepositoryProvider = Provider<MenuOfferRepository>((ref) {
+  return ApiMenuOfferRepository(ref.watch(apiClientProvider));
 });
 
 final restaurantSettingsProvider = FutureProvider<RestaurantSettings>((

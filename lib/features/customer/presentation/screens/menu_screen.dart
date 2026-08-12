@@ -1,22 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../notifiers/menu_notifier.dart';
+import '../notifiers/menu_offers_notifier.dart';
 import '../notifiers/cart_notifier.dart';
 import '../notifiers/favorites_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
+import 'package:kebda_zaman/features/shared/domain/models/menu_offer.dart';
 import 'package:kebda_zaman/core/responsive/responsive_breakpoints.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_product_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
-
-// Whether the compact weekly-special strip has been dismissed this session.
-final menuHeroDismissedProvider = StateProvider<bool>((ref) => false);
 
 int _menuColumnCount(BuildContext context) {
   if (context.isDesktop) return 4;
@@ -90,7 +92,31 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   final Map<String, GlobalKey> _sectionKeys = {};
   final Map<String, GlobalKey> _tabKeys = {};
 
-  String? _selectedCategoryId;
+  // A ValueNotifier rather than a plain State field + setState(): changing
+  // the active category (on every tap AND on every section the user
+  // scrolls past) only needs the sticky header's chip highlight to update —
+  // routing it through setState() on this whole State forced a full
+  // MenuScreen.build() re-run (recomputing buildMenuSections() and
+  // re-diffing every section's sliver tree) on each change, which is real,
+  // avoidable work landing precisely while the user is mid-scroll. Only the
+  // ValueListenableBuilder wrapping the sticky header listens to this.
+  final ValueNotifier<String?> _selectedCategoryIdNotifier = ValueNotifier(
+    null,
+  );
+
+  @override
+  void dispose() {
+    _selectedCategoryIdNotifier.dispose();
+    super.dispose();
+  }
+
+  // Guards [_updateActiveSectionFromScroll] to run at most once per rendered
+  // frame. ScrollUpdateNotification fires far more often than once per frame
+  // during a drag/fling; without this, its RenderBox walk over every
+  // category section ran on every single one of those notifications, which
+  // is real, repeated CPU work competing with the scroll itself for the
+  // same frame budget.
+  bool _sectionUpdateScheduled = false;
 
   /// True while a programmatic (tap-triggered) scroll animation is in flight.
   /// Prevents the manual-scroll listener from fighting the animation by
@@ -142,7 +168,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   /// `finally` so the scroll listener is suppressed for the entire 350 ms
   /// animation regardless of how fast the Future actually resolves.
   Future<void> _scrollToCategory(String categoryId) async {
-    setState(() => _selectedCategoryId = categoryId);
+    _selectedCategoryIdNotifier.value = categoryId;
     _ensureTabVisible(categoryId);
 
     final ctx = _sectionKeys[categoryId]?.currentContext;
@@ -210,15 +236,14 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     // fade inside KZChip) — deliberately NOT calling _ensureTabVisible.
     // Forcing the horizontal chip strip to scroll/jump every time the
     // active section changes, while the user's finger is still actively
-    // dragging the vertical list, is what produced the stutter — a second
-    // scrollable's position mutating mid-gesture. The chip bar now only
-    // auto-scrolls on a deliberate tap (_scrollToCategory); while scrolling,
-    // it simply highlights whichever chip is already on screen (or doesn't,
-    // if the active one has scrolled out — no worse than before, and no
-    // more mid-scroll jumps).
-    if (activeId != null && activeId != _selectedCategoryId) {
-      final id = activeId;
-      setState(() => _selectedCategoryId = id);
+    // dragging the vertical list, produced a stutter (and, in a later
+    // attempt at this, a feedback loop via nested ScrollNotifications that
+    // made the bar briefly snap back to the previous category). The chip
+    // bar now only auto-scrolls on a deliberate tap (_scrollToCategory);
+    // while scrolling, it simply highlights whichever chip is already on
+    // screen (or doesn't, if the active one has scrolled out).
+    if (activeId != null && activeId != _selectedCategoryIdNotifier.value) {
+      _selectedCategoryIdNotifier.value = activeId;
     }
   }
 
@@ -227,7 +252,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     final menuAsync = ref.watch(menuNotifierProvider);
     final favoritesState = ref.watch(customerFavoritesProvider);
     final favorites = favoritesState.favoriteIds;
-    final heroDismissed = ref.watch(menuHeroDismissedProvider);
 
     return Scaffold(
       backgroundColor: MenuScreen.surfaceBg,
@@ -247,23 +271,48 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           final sections = buildMenuSections(data);
           final extent = _cardExtent(context);
 
-          if (_selectedCategoryId == null && sections.isNotEmpty) {
-            _selectedCategoryId = sections.first.category.id;
-          }
+          // Fallback only — never written into the notifier here (mutating
+          // it mid-build could notify a still-attached listener from the
+          // previous frame while this build is still in progress). The
+          // notifier's actual value is only ever set from the tap/scroll
+          // handlers above, converging to this same id the first time
+          // either one runs.
+          final defaultCategoryId = sections.isNotEmpty
+              ? sections.first.category.id
+              : null;
 
           return NotificationListener<ScrollNotification>(
             onNotification: (notification) {
-              if (notification is ScrollUpdateNotification) {
-                _updateActiveSectionFromScroll(sections);
+              // NotificationListener bubbles ScrollNotifications from ANY
+              // descendant Scrollable, not just this CustomScrollView's own
+              // — including the horizontal category chip list nested inside
+              // the sticky header. Without the axis check, _ensureTabVisible
+              // scrolling that chip bar fires its own notification here,
+              // re-triggering this same handler against a horizontal scroll
+              // event; recomputing the active section from that (rather
+              // than the real vertical position) is what produced the
+              // brief "snaps back to the previous category" glitch.
+              if (notification is ScrollUpdateNotification &&
+                  notification.metrics.axis == Axis.vertical &&
+                  !_sectionUpdateScheduled) {
+                _sectionUpdateScheduled = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _sectionUpdateScheduled = false;
+                  _updateActiveSectionFromScroll(sections);
+                });
               }
               return false;
             },
             child: CustomScrollView(
               // Realistic single-restaurant menus (a handful of categories,
-              // tens of items) comfortably fit within this cache extent, so
-              // every section's GlobalKey resolves for tap-to-scroll without
-              // needing an offset-estimation fallback.
-              cacheExtent: 3000,
+              // tens of items) comfortably fit a few rows ahead/behind the
+              // viewport, so tap-to-scroll's GlobalKey lookups still resolve
+              // reliably without needing an offset-estimation fallback —
+              // lowered from 3000 (12x Flutter's ~250 default), which forced
+              // ~11-12 extra rows of cards (each with two Lottie widgets +
+              // a network image) to build/layout/paint while fully
+              // offscreen, the main source of the scroll jank.
+              cacheExtent: 1000,
               slivers: [
                 // ── 1. Compact Branded Header ──
                 SliverAppBar(
@@ -351,27 +400,30 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                   ],
                 ),
 
-                // ── 2. Sticky Search + Category Selector ──
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _StickyMenuHeaderDelegate(
-                    headerKey: _stickyHeaderKey,
-                    categories: sections.map((s) => s.category).toList(),
-                    selectedCategoryId: _selectedCategoryId,
-                    onSelectCategory: _scrollToCategory,
-                    tabKeyFor: _tabKeyFor,
-                  ),
+                // ── 2. Sticky Search + Category Selector — the only part
+                // that needs to rebuild when the active category changes,
+                // via the ValueListenableBuilder rather than a screen-wide
+                // setState (see _selectedCategoryIdNotifier's doc comment).
+                ValueListenableBuilder<String?>(
+                  valueListenable: _selectedCategoryIdNotifier,
+                  builder: (context, selectedCategoryId, _) {
+                    return SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _StickyMenuHeaderDelegate(
+                        headerKey: _stickyHeaderKey,
+                        categories: sections.map((s) => s.category).toList(),
+                        selectedCategoryId:
+                            selectedCategoryId ?? defaultCategoryId,
+                        onSelectCategory: _scrollToCategory,
+                        tabKeyFor: _tabKeyFor,
+                      ),
+                    );
+                  },
                 ),
 
-                // ── 3. Compact Dismissible Weekly-Special Strip ──
-                if (!heroDismissed)
-                  SliverToBoxAdapter(
-                    child: _WeeklySpecialStrip(
-                      onDismiss: () =>
-                          ref.read(menuHeroDismissedProvider.notifier).state =
-                              true,
-                    ),
-                  ),
+                // ── 3. Menu Offers banner carousel (supplementary — never
+                //      blocks the Menu itself; collapses on empty/error) ──
+                const SliverToBoxAdapter(child: _MenuOffersCarousel()),
 
                 // ── 4. Sectioned Product Grid ──
                 if (sections.isEmpty)
@@ -567,75 +619,281 @@ class _StickyMenuHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-// ── Compact, dismissible weekly-special strip (no stock photography) ──
+// ── Menu Offers banner carousel — real backend-managed banners linked to a
+// Menu Item, replacing the previous static/mock "Weekly Special" strip. ──
 
-class _WeeklySpecialStrip extends StatelessWidget {
-  final VoidCallback onDismiss;
+/// Supplementary content: loads independently of `menuNotifierProvider` and
+/// never shows a blocking spinner or error card of its own — while loading
+/// it renders nothing (the section simply appears once data arrives), and
+/// on either an empty list or a failed fetch it collapses entirely so the
+/// Menu flows straight from the category tabs into the product grid.
+class _MenuOffersCarousel extends ConsumerWidget {
+  const _MenuOffersCarousel();
 
-  const _WeeklySpecialStrip({required this.onDismiss});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final offersAsync = ref.watch(customerMenuOffersProvider);
+
+    return offersAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (e, st) => const SizedBox.shrink(),
+      data: (offers) {
+        if (offers.isEmpty) return const SizedBox.shrink();
+        return _MenuOffersPager(offers: offers);
+      },
+    );
+  }
+}
+
+/// Owns the `PageView`/auto-advance lifecycle for the offers banner — split
+/// out from [_MenuOffersCarousel] (a plain `ConsumerWidget`) so the
+/// `PageController`/`Timer` live in a stable `State`, independent of how
+/// often the surrounding provider rebuilds.
+class _MenuOffersPager extends StatefulWidget {
+  final List<MenuOffer> offers;
+
+  const _MenuOffersPager({required this.offers});
+
+  @override
+  State<_MenuOffersPager> createState() => _MenuOffersPagerState();
+}
+
+class _MenuOffersPagerState extends State<_MenuOffersPager> {
+  static const _autoAdvanceInterval = Duration(seconds: 5);
+  static const _pageAnimationDuration = Duration(milliseconds: 400);
+  static const double _bannerHeight = 160.0;
+  static const double _horizontalPagePadding = 16.0;
+
+  late final PageController _pageController;
+  Timer? _autoAdvanceTimer;
+  int _currentPage = 0;
+
+  // True only while the user's finger is actively dragging the PageView —
+  // set/cleared via the ScrollNotification below (not onPageChanged, which
+  // also fires for the auto-advance's own animateToPage calls). The
+  // auto-advance timer checks this before moving a page so it never fights
+  // an in-progress manual swipe.
+  bool _isUserDragging = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _startAutoAdvanceIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MenuOffersPager oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.offers.length == widget.offers.length) return;
+
+    // The offer list changed shape (e.g. a background re-fetch returned a
+    // different count) — reconcile the current page back into range and
+    // restart/stop auto-advance to match the new count, rather than leaving
+    // a stale timer or an out-of-range page index.
+    _autoAdvanceTimer?.cancel();
+    if (widget.offers.isEmpty) {
+      _currentPage = 0;
+    } else if (_currentPage > widget.offers.length - 1) {
+      _currentPage = widget.offers.length - 1;
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(_currentPage);
+      }
+    }
+    _startAutoAdvanceIfNeeded();
+  }
+
+  void _startAutoAdvanceIfNeeded() {
+    if (widget.offers.length <= 1) return;
+    _autoAdvanceTimer = Timer.periodic(_autoAdvanceInterval, (_) {
+      if (!mounted || _isUserDragging || !_pageController.hasClients) return;
+      final next = (_currentPage + 1) % widget.offers.length;
+      _pageController.animateToPage(
+        next,
+        duration: _pageAnimationDuration,
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _autoAdvanceTimer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Same normal horizontal page padding the rest of this screen already
+    // uses (search bar, category chips, section headers) — the banner fills
+    // exactly the remaining content width, no peek of a neighboring page.
+    final cardWidth = screenWidth - _horizontalPagePadding * 2;
+    final showDots = widget.offers.length > 1;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: KZ.primaryFixed,
-          borderRadius: BorderRadius.circular(KZ.radiusLg),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.local_fire_department_rounded,
-                color: KZ.primary,
-                size: KZ.iconControl,
-              ),
+      padding: const EdgeInsets.fromLTRB(0, 12, 0, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text('menu.offers_title'.tr(), style: KZ.sectionTitle),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: _horizontalPagePadding,
             ),
-            const SizedBox(width: KZ.sp12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'menu.weekly_special'.tr(),
-                    style: KZ.statusLabel.copyWith(color: KZ.primary),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'menu.banner_title'.tr(),
-                    style: KZ.cardTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            Semantics(
-              button: true,
-              label: 'common.close'.tr(),
-              child: InkWell(
-                onTap: onDismiss,
-                customBorder: const CircleBorder(),
-                child: const Padding(
-                  padding: EdgeInsets.all(KZ.sp8),
-                  child: Icon(
-                    Icons.close_rounded,
-                    color: KZ.primary,
-                    size: KZ.iconControl,
+            child: SizedBox(
+              height: _bannerHeight,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification is ScrollStartNotification &&
+                      notification.dragDetails != null) {
+                    _isUserDragging = true;
+                  } else if (notification is ScrollEndNotification) {
+                    _isUserDragging = false;
+                  }
+                  return false;
+                },
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: widget.offers.length,
+                  onPageChanged: (index) =>
+                      setState(() => _currentPage = index),
+                  itemBuilder: (context, index) => _MenuOfferBanner(
+                    offer: widget.offers[index],
+                    width: cardWidth,
+                    height: _bannerHeight,
                   ),
                 ),
               ),
             ),
+          ),
+          if (showDots) ...[
+            const SizedBox(height: 10),
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < widget.offers.length; i++)
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: i == _currentPage ? 16 : 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: i == _currentPage
+                            ? KZ.primary
+                            : KZ.outlineVariant,
+                        borderRadius: BorderRadius.circular(KZ.radiusFull),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _MenuOfferBanner extends StatelessWidget {
+  final MenuOffer offer;
+  final double width;
+  final double height;
+
+  const _MenuOfferBanner({
+    required this.offer,
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final title = offer.title?.trim();
+    final description = offer.description?.trim();
+    final hasTitle = title != null && title.isNotEmpty;
+    final hasDescription = description != null && description.isNotEmpty;
+
+    return Semantics(
+      button: true,
+      label: hasTitle ? title : 'menu.offers_title'.tr(),
+      child: InkWell(
+        // Authoritative link is menuItemId — never relies on the nested
+        // menuItem summary being complete, and reuses the exact same
+        // Product Details route a normal Menu Item card pushes. An
+        // unavailable linked item still opens normally; availability is
+        // enforced there, not here.
+        onTap: () => context.push('/menu/item/${offer.menuItemId}'),
+        borderRadius: BorderRadius.circular(KZ.radiusLg),
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              KZFoodImage(
+                imageUrl: offer.imageUrl,
+                aspectRatio: width / height,
+                borderRadius: BorderRadius.circular(KZ.radiusLg),
+              ),
+              if (hasTitle || hasDescription)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(KZ.radiusLg),
+                      bottomRight: Radius.circular(KZ.radiusLg),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(14, 24, 14, 10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0),
+                            Colors.black.withValues(alpha: 0.65),
+                          ],
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (hasTitle)
+                            Text(
+                              title,
+                              style: KZ.cardTitle.copyWith(
+                                color: Colors.white,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          if (hasDescription) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              description,
+                              style: KZ.bodySmall.copyWith(
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

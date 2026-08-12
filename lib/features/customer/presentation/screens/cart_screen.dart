@@ -12,6 +12,7 @@ import '../notifiers/cart_notifier.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
+import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
 /// Two-tier spacing rhythm for the whole screen: [_blockGap] between major
@@ -437,11 +438,32 @@ class _CartItemCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(
-                      child: Text(
-                        formatCurrency(item.lineTotal, locale: context.locale),
-                        style: KZ.priceLarge.copyWith(fontSize: 17),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            formatCurrency(
+                              item.lineTotal,
+                              locale: context.locale,
+                            ),
+                            style: KZ.priceLarge.copyWith(fontSize: 17),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          // "Was" line total — the original (pre-discount)
+                          // unit price snapshot times quantity, purely
+                          // informational. `item.lineTotal` above remains
+                          // the actual, server-computed charged amount.
+                          if (item.menuItemDiscountPrice != null &&
+                              item.menuItemBasePrice != null) ...[
+                            const SizedBox(width: 6),
+                            MenuItemComparePriceText(
+                              compareAtPrice:
+                                  item.menuItemBasePrice! * item.quantity,
+                              style: KZ.bodySmall.copyWith(color: KZ.error),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                     const SizedBox(width: KZ.sp8),

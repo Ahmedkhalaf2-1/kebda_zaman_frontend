@@ -123,15 +123,9 @@ class ProductGridCard extends StatelessWidget {
                           // narrowest supported card width (360dp phones).
                           const SizedBox(height: 2),
                           if (hasDiscount)
-                            Text(
-                              formatCurrency(
-                                item.basePrice,
-                                locale: context.locale,
-                              ),
-                              style: KZ.bodySmall.copyWith(
-                                decoration: TextDecoration.lineThrough,
-                                fontSize: 11,
-                              ),
+                            MenuItemComparePriceText(
+                              compareAtPrice: item.basePrice,
+                              style: KZ.bodySmall.copyWith(color: KZ.error),
                             ),
                           if (showDiscountPricing &&
                               item.compareAtPrice != null &&

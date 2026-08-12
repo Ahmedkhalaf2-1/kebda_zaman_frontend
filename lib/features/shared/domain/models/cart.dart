@@ -42,6 +42,14 @@ class CartItem with _$CartItem {
     required double unitPrice,
     required double lineTotal,
     @Default(true) bool isAvailable,
+    // Display-only snapshot of the linked menu item's original/discounted
+    // unit price, from the cart response's nested `menuItem` object — never
+    // used to compute anything. `unitPrice`/`lineTotal` above are already
+    // the server-computed, authoritative charged amounts; these two fields
+    // exist solely so a cart line can show a struck-through "was" price
+    // when `menuItemDiscountPrice != null`.
+    double? menuItemBasePrice,
+    double? menuItemDiscountPrice,
   }) = _CartItem;
 
   String get configurationSignature {

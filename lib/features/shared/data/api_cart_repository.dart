@@ -287,6 +287,8 @@ class ApiCartRepository implements CartRepository {
       specialInstructions: json['specialInstructions'] ?? '',
       selectedOptions: selectedOptions,
       isAvailable: json['isAvailable'] ?? true,
+      menuItemBasePrice: (menuItem['basePrice'] as num?)?.toDouble(),
+      menuItemDiscountPrice: (menuItem['salePrice'] as num?)?.toDouble(),
     );
   }
 }

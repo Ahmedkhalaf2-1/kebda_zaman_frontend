@@ -1,6 +1,7 @@
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
+import 'package:kebda_zaman/features/shared/domain/models/menu_offer.dart';
 
 /// Menu repository interface per md1 §25/§31.
 /// FakeMenuRepository (Phase 1) → ApiMenuRepository (Phase 3).
@@ -21,6 +22,11 @@ abstract class MenuRepository {
   Future<Result<List<MenuItem>>> getFeaturedItems();
   Future<Result<List<MenuItem>>> getBestSellers();
   Future<Result<List<MenuItem>>> searchItems(String query);
+
+  /// Public, customer-facing: hits `GET /menu-offers`. The backend already
+  /// filters to currently-visible offers (active + in-schedule + linked item
+  /// not soft-deleted) — this never re-derives that filtering client-side.
+  Future<Result<List<MenuOffer>>> getMenuOffers();
 
   // Admin CRUD
   Future<Result<void>> createMenuItem(MenuItem item);

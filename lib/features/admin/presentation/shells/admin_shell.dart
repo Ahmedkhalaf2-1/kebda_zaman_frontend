@@ -81,6 +81,12 @@ class AdminShell extends ConsumerWidget {
           label: 'nav.working_hours'.tr(),
           path: '/admin/working-hours',
         ),
+        _AdminNavEntry(
+          icon: Icons.payments_outlined,
+          activeIcon: Icons.payments_rounded,
+          label: 'nav.pricing_settings'.tr(),
+          path: '/admin/pricing-settings',
+        ),
       ],
     ),
     _AdminNavGroup(
@@ -91,6 +97,12 @@ class AdminShell extends ConsumerWidget {
           activeIcon: Icons.restaurant_menu,
           label: 'nav.menu_items'.tr(),
           path: '/admin/menu',
+        ),
+        _AdminNavEntry(
+          icon: Icons.photo_library_outlined,
+          activeIcon: Icons.photo_library_rounded,
+          label: 'nav.menu_offers'.tr(),
+          path: '/admin/menu-offers',
         ),
       ],
     ),

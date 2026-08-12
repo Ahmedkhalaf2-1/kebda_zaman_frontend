@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:easy_localization/easy_localization.dart';
+// `hide TextDirection` — easy_localization re-exports intl's TextDirection
+// (LTR/RTL/UNKNOWN), which otherwise shadows dart:ui's TextDirection
+// (ltr/rtl) used below for the Arabic input fields.
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
@@ -30,7 +33,9 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _nameCtrl;
+  late TextEditingController _nameArCtrl;
   late TextEditingController _descCtrl;
+  late TextEditingController _descArCtrl;
   late TextEditingController _priceCtrl;
   late TextEditingController _discountCtrl;
   late TextEditingController _prepTimeCtrl;
@@ -55,9 +60,24 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
   @override
   void initState() {
     super.initState();
-    _nameCtrl = TextEditingController(text: widget.existingItem?.name ?? '');
+    // English is the canonical name/description field on MenuItem, so it
+    // falls back to nameEn, then the legacy single `name` (for items saved
+    // before this screen split English/Arabic). Arabic has no such legacy
+    // fallback — it was never captured separately before.
+    _nameCtrl = TextEditingController(
+      text: widget.existingItem?.nameEn ?? widget.existingItem?.name ?? '',
+    );
+    _nameArCtrl = TextEditingController(
+      text: widget.existingItem?.nameAr ?? '',
+    );
     _descCtrl = TextEditingController(
-      text: widget.existingItem?.description ?? '',
+      text:
+          widget.existingItem?.descriptionEn ??
+          widget.existingItem?.description ??
+          '',
+    );
+    _descArCtrl = TextEditingController(
+      text: widget.existingItem?.descriptionAr ?? '',
     );
     _priceCtrl = TextEditingController(
       text: widget.existingItem?.basePrice.toString() ?? '',
@@ -111,7 +131,9 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
+    _nameArCtrl.dispose();
     _descCtrl.dispose();
+    _descArCtrl.dispose();
     _priceCtrl.dispose();
     _discountCtrl.dispose();
     _prepTimeCtrl.dispose();
@@ -167,10 +189,24 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
         ? null
         : double.tryParse(_compareAtPriceCtrl.text.trim());
 
+    final nameEn = _nameCtrl.text.trim();
+    final nameAr = _nameArCtrl.text.trim();
+    final descEn = _descCtrl.text.trim();
+    final descAr = _descArCtrl.text.trim();
+
     final item = MenuItem(
       id: widget.existingItem?.id ?? const Uuid().v4(),
-      name: _nameCtrl.text,
-      description: _descCtrl.text,
+      // `name`/`description` stay the canonical/English values — every
+      // caller that doesn't care about locale (search, cart, etc.) reads
+      // these two; `nameAr`/`nameEn`/`descriptionAr`/`descriptionEn` below
+      // are what `MenuItemLocalization.localizedName/-Description` actually
+      // display per the customer's chosen app language.
+      name: nameEn,
+      description: descEn,
+      nameAr: nameAr,
+      nameEn: nameEn,
+      descriptionAr: descAr,
+      descriptionEn: descEn,
       basePrice: basePrice,
       discountPrice: discountPrice,
       imageUrl: _imageCtrl.text,
@@ -379,9 +415,11 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Product Name
+          // Product Name — English & Arabic captured separately so each
+          // customer sees the name in their own app language instead of
+          // both languages silently showing whatever was typed once.
           Text(
-            'form.product_name'.tr(),
+            'form.product_name_en'.tr(),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -392,6 +430,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
           TextFormField(
             key: const Key('product_name_field'),
             controller: _nameCtrl,
+            textDirection: TextDirection.ltr,
             decoration: InputDecoration(
               hintText: 'form.product_name_hint'.tr(),
               filled: true,
@@ -409,9 +448,39 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
           ),
           const SizedBox(height: 14),
 
-          // Description
           Text(
-            'form.description'.tr(),
+            'form.product_name_ar'.tr(),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: KZ.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 6),
+          TextFormField(
+            key: const Key('product_name_ar_field'),
+            controller: _nameArCtrl,
+            textDirection: TextDirection.rtl,
+            decoration: InputDecoration(
+              hintText: 'form.product_name_ar_hint'.tr(),
+              filled: true,
+              fillColor: KZ.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: KZ.outlineVariant.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+            validator: (v) => v == null || v.isEmpty
+                ? 'form.product_name_ar_required'.tr()
+                : null,
+          ),
+          const SizedBox(height: 14),
+
+          // Description — English & Arabic, same reasoning as above.
+          Text(
+            'form.description_en'.tr(),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -423,6 +492,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
             key: const Key('product_description_field'),
             controller: _descCtrl,
             maxLines: 3,
+            textDirection: TextDirection.ltr,
             decoration: InputDecoration(
               hintText: 'form.description_hint'.tr(),
               filled: true,
@@ -436,6 +506,37 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
             ),
             validator: (v) => v == null || v.isEmpty
                 ? 'form.description_required'.tr()
+                : null,
+          ),
+          const SizedBox(height: 14),
+
+          Text(
+            'form.description_ar'.tr(),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: KZ.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 6),
+          TextFormField(
+            key: const Key('product_description_ar_field'),
+            controller: _descArCtrl,
+            maxLines: 3,
+            textDirection: TextDirection.rtl,
+            decoration: InputDecoration(
+              hintText: 'form.description_ar_hint'.tr(),
+              filled: true,
+              fillColor: KZ.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: KZ.outlineVariant.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+            validator: (v) => v == null || v.isEmpty
+                ? 'form.description_ar_required'.tr()
                 : null,
           ),
           const SizedBox(height: 14),
@@ -546,6 +647,66 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 14),
+
+          // Sale Price — optional discount. Distinct from Compare-at Price
+          // (a separate, purely cosmetic "was" price): this is the real
+          // amount charged when set, sent to the backend as `salePrice`.
+          Text(
+            'form.sale_price'.tr(),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: KZ.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 6),
+          TextFormField(
+            key: const Key('sale_price_field'),
+            controller: _discountCtrl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              hintText: 'form.sale_price_hint'.tr(),
+              prefixIcon: const Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Text(
+                  '£',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: KZ.primary,
+                  ),
+                ),
+              ),
+              filled: true,
+              fillColor: KZ.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: KZ.outlineVariant.withValues(alpha: 0.5),
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+            ),
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) return null;
+              final parsed = double.tryParse(v.trim());
+              // Backend requires strictly positive (@IsPositive() — 0 is
+              // rejected with a 400), so reject it here too rather than
+              // letting an admin hit a raw server error.
+              if (parsed == null || parsed <= 0) {
+                return 'form.sale_price_invalid'.tr();
+              }
+              final basePrice = double.tryParse(_priceCtrl.text.trim()) ?? 0.0;
+              if (parsed >= basePrice) {
+                return 'form.sale_price_invalid'.tr();
+              }
+              return null;
+            },
           ),
         ],
       ),

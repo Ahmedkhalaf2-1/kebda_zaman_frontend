@@ -441,8 +441,16 @@ class _ItemCard extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                         style: KZ.caption,
                       ),
+                      if (item.discountPrice != null)
+                        MenuItemComparePriceText(
+                          compareAtPrice: item.basePrice,
+                          style: KZ.bodySmall.copyWith(color: KZ.error),
+                        ),
                       Text(
-                        formatCurrency(item.basePrice, locale: context.locale),
+                        formatCurrency(
+                          item.discountPrice ?? item.basePrice,
+                          locale: context.locale,
+                        ),
                         style: KZ.price.copyWith(color: KZ.primary),
                       ),
                     ],

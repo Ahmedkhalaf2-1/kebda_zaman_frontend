@@ -35,50 +35,51 @@ Map<String, dynamic> _$$CartImplToJson(_$CartImpl instance) =>
       'grandTotal': instance.grandTotal,
     };
 
-_$CartItemImpl _$$CartItemImplFromJson(Map<String, dynamic> json) =>
-    _$CartItemImpl(
-      id: json['id'] as String,
-      menuItemId: json['menuItemId'] as String,
-      productName: json['productName'] as String,
-      productImage: json['productImage'] as String,
-      basePrice: (json['basePrice'] as num).toDouble(),
-      quantity: (json['quantity'] as num).toInt(),
-      selectedOptions:
-          (json['selectedOptions'] as Map<String, dynamic>?)?.map(
+_$CartItemImpl _$$CartItemImplFromJson(
+  Map<String, dynamic> json,
+) => _$CartItemImpl(
+  id: json['id'] as String,
+  menuItemId: json['menuItemId'] as String,
+  productName: json['productName'] as String,
+  productImage: json['productImage'] as String,
+  basePrice: (json['basePrice'] as num).toDouble(),
+  quantity: (json['quantity'] as num).toInt(),
+  selectedOptions:
+      (json['selectedOptions'] as Map<String, dynamic>?)?.map(
+        (k, e) =>
+            MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
+      ) ??
+      const {},
+  nestedSelections:
+      (json['nestedSelections'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+          k,
+          (e as Map<String, dynamic>).map(
             (k, e) => MapEntry(
               k,
               (e as List<dynamic>).map((e) => e as String).toList(),
             ),
-          ) ??
-          const {},
-      nestedSelections:
-          (json['nestedSelections'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(
-              k,
-              (e as Map<String, dynamic>).map(
-                (k, e) => MapEntry(
-                  k,
-                  (e as List<dynamic>).map((e) => e as String).toList(),
-                ),
-              ),
-            ),
-          ) ??
-          const {},
-      extraQuantities:
-          (json['extraQuantities'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, (e as num).toInt()),
-          ) ??
-          const {},
-      removedIngredients:
-          (json['removedIngredients'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      specialInstructions: json['specialInstructions'] as String? ?? '',
-      unitPrice: (json['unitPrice'] as num).toDouble(),
-      lineTotal: (json['lineTotal'] as num).toDouble(),
-      isAvailable: json['isAvailable'] as bool? ?? true,
-    );
+          ),
+        ),
+      ) ??
+      const {},
+  extraQuantities:
+      (json['extraQuantities'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, (e as num).toInt()),
+      ) ??
+      const {},
+  removedIngredients:
+      (json['removedIngredients'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  specialInstructions: json['specialInstructions'] as String? ?? '',
+  unitPrice: (json['unitPrice'] as num).toDouble(),
+  lineTotal: (json['lineTotal'] as num).toDouble(),
+  isAvailable: json['isAvailable'] as bool? ?? true,
+  menuItemBasePrice: (json['menuItemBasePrice'] as num?)?.toDouble(),
+  menuItemDiscountPrice: (json['menuItemDiscountPrice'] as num?)?.toDouble(),
+);
 
 Map<String, dynamic> _$$CartItemImplToJson(_$CartItemImpl instance) =>
     <String, dynamic>{
@@ -96,4 +97,6 @@ Map<String, dynamic> _$$CartItemImplToJson(_$CartItemImpl instance) =>
       'unitPrice': instance.unitPrice,
       'lineTotal': instance.lineTotal,
       'isAvailable': instance.isAvailable,
+      'menuItemBasePrice': instance.menuItemBasePrice,
+      'menuItemDiscountPrice': instance.menuItemDiscountPrice,
     };

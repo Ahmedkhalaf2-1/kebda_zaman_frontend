@@ -41,6 +41,58 @@ bool hasValidCoordinateInputs(String latText, String lngText) {
       lng <= 180;
 }
 
+/// Shared pricing-fields validity check for the raw text fields — same
+/// validate-before-submit role as [hasValidCoordinateInputs], so an
+/// obviously-invalid tax rate/minimum never reaches the full-replace
+/// `PUT /admin/settings` call only to bounce off the backend's 400.
+/// `deliveryFee` isn't included: real delivery pricing is distance-based
+/// (Google Maps zone quote via `POST /delivery/quote`), so this flat
+/// contract field is left untouched rather than exposed as editable here.
+bool hasValidPricingInputs(
+  String taxRateText,
+  String minOrderAmountText,
+  String currencyText,
+) {
+  final taxRate = double.tryParse(taxRateText.trim());
+  final minOrderAmount = double.tryParse(minOrderAmountText.trim());
+  return taxRate != null &&
+      taxRate.isFinite &&
+      taxRate >= 0 &&
+      taxRate <= 100 &&
+      minOrderAmount != null &&
+      minOrderAmount.isFinite &&
+      minOrderAmount >= 0 &&
+      currencyText.trim().isNotEmpty &&
+      currencyText.trim().length <= 10;
+}
+
+final RegExp _hhmmPattern = RegExp(r'^([01]\d|2[0-3]):[0-5]\d$');
+
+/// Shared `workingHours` validity check — same validate-before-submit role
+/// as [hasValidCoordinateInputs]/[hasValidPricingInputs]. The contract
+/// requires exactly 7 entries, one per `dayOfWeek` 0-6 with no duplicates,
+/// and a well-formed `"HH:MM"` `openTime`/`closeTime` pair whenever a day is
+/// open (`null` only allowed when closed) — the backend already rejects a
+/// malformed list with a 400, this just gives an admin a clear reason
+/// instead of a raw validation error.
+bool hasValidWorkingHours(List<DayWorkingHours> hours) {
+  if (hours.length != 7) return false;
+  final days = hours.map((h) => h.dayOfWeek).toSet();
+  if (days.length != 7 || !days.containsAll(const [0, 1, 2, 3, 4, 5, 6])) {
+    return false;
+  }
+  for (final day in hours) {
+    if (!day.isOpen) continue;
+    final open = day.openTime;
+    final close = day.closeTime;
+    if (open == null || close == null) return false;
+    if (!_hhmmPattern.hasMatch(open) || !_hhmmPattern.hasMatch(close)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /// Every Restaurant/Operations settings form is capped at this width and
 /// centered, so text fields read comfortably instead of stretching across
 /// a wide desktop window.
@@ -519,6 +571,15 @@ class AdminSettingsHoursSection extends StatelessWidget {
             ),
           ),
 
+          if (!hasValidWorkingHours(workingHours))
+            Padding(
+              padding: const EdgeInsets.only(top: KZ.sp10),
+              child: Text(
+                'admin_settings.invalid_working_hours_error'.tr(),
+                style: KZ.caption.copyWith(color: KZ.error),
+              ),
+            ),
+
           const SizedBox(height: KZ.sp24),
           KZButton(
             label: 'admin.save_settings'.tr(),
@@ -770,6 +831,110 @@ class AdminSettingsAcceptanceSection extends StatelessWidget {
             fullWidth: true,
             loading: isSaving,
             onPressed: onSaveMessages,
+          ),
+          const SizedBox(height: KZ.sp32),
+        ],
+      ),
+    );
+  }
+}
+
+/// Pricing section: tax rate, minimum order amount, and currency — the
+/// order-economics fields every checkout total is computed from. Delivery
+/// fee is deliberately not editable here: it's distance-based (Google Maps
+/// zone quote via `POST /delivery/quote`), not this flat settings value.
+/// Used by PricingSettingsScreen.
+class AdminSettingsPricingSection extends StatelessWidget {
+  final TextEditingController taxRatePercentCtrl;
+  final TextEditingController minOrderAmountCtrl;
+  final TextEditingController currencyCtrl;
+  final bool isSaving;
+  final VoidCallback onSave;
+
+  const AdminSettingsPricingSection({
+    super.key,
+    required this.taxRatePercentCtrl,
+    required this.minOrderAmountCtrl,
+    required this.currencyCtrl,
+    required this.isSaving,
+    required this.onSave,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return adminSettingsFormWrap(
+      ListView(
+        padding: const EdgeInsets.all(KZ.screenPadding),
+        children: [
+          AdminSettingsSectionHeading('admin_settings.section_pricing'.tr()),
+          const SizedBox(height: KZ.sp8),
+          Text('admin_settings.pricing_hint'.tr(), style: KZ.bodySmall),
+          const SizedBox(height: KZ.sp16),
+          TextFormField(
+            controller: taxRatePercentCtrl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: KZ.inputDecoration(
+              label: 'admin_settings.tax_rate_percent'.tr(),
+              prefixIcon: const Icon(
+                Icons.percent_rounded,
+                color: KZ.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: KZ.sp12),
+          TextFormField(
+            controller: minOrderAmountCtrl,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: KZ.inputDecoration(
+              label: 'admin_settings.min_order_amount'.tr(),
+              prefixIcon: const Icon(
+                Icons.shopping_bag_outlined,
+                color: KZ.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: KZ.sp12),
+          TextFormField(
+            controller: currencyCtrl,
+            textCapitalization: TextCapitalization.characters,
+            decoration: KZ.inputDecoration(
+              label: 'admin_settings.currency'.tr(),
+              hint: 'SAR',
+              prefixIcon: const Icon(
+                Icons.attach_money_rounded,
+                color: KZ.onSurfaceVariant,
+              ),
+            ),
+          ),
+          ListenableBuilder(
+            listenable: Listenable.merge([
+              taxRatePercentCtrl,
+              minOrderAmountCtrl,
+              currencyCtrl,
+            ]),
+            builder: (context, _) {
+              final isValid = hasValidPricingInputs(
+                taxRatePercentCtrl.text,
+                minOrderAmountCtrl.text,
+                currencyCtrl.text,
+              );
+              if (isValid) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(top: KZ.sp8),
+                child: Text(
+                  'admin_settings.invalid_pricing_error'.tr(),
+                  style: KZ.caption.copyWith(color: KZ.error),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: KZ.sp24),
+          KZButton(
+            label: 'admin.save_settings'.tr(),
+            icon: Icons.save_rounded,
+            fullWidth: true,
+            loading: isSaving,
+            onPressed: onSave,
           ),
           const SizedBox(height: KZ.sp32),
         ],

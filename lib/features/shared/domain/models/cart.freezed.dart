@@ -384,7 +384,15 @@ mixin _$CartItem {
   String get specialInstructions => throw _privateConstructorUsedError;
   double get unitPrice => throw _privateConstructorUsedError;
   double get lineTotal => throw _privateConstructorUsedError;
-  bool get isAvailable => throw _privateConstructorUsedError;
+  bool get isAvailable =>
+      throw _privateConstructorUsedError; // Display-only snapshot of the linked menu item's original/discounted
+  // unit price, from the cart response's nested `menuItem` object — never
+  // used to compute anything. `unitPrice`/`lineTotal` above are already
+  // the server-computed, authoritative charged amounts; these two fields
+  // exist solely so a cart line can show a struck-through "was" price
+  // when `menuItemDiscountPrice != null`.
+  double? get menuItemBasePrice => throw _privateConstructorUsedError;
+  double? get menuItemDiscountPrice => throw _privateConstructorUsedError;
 
   /// Serializes this CartItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -416,6 +424,8 @@ abstract class $CartItemCopyWith<$Res> {
     double unitPrice,
     double lineTotal,
     bool isAvailable,
+    double? menuItemBasePrice,
+    double? menuItemDiscountPrice,
   });
 }
 
@@ -448,6 +458,8 @@ class _$CartItemCopyWithImpl<$Res, $Val extends CartItem>
     Object? unitPrice = null,
     Object? lineTotal = null,
     Object? isAvailable = null,
+    Object? menuItemBasePrice = freezed,
+    Object? menuItemDiscountPrice = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -507,6 +519,14 @@ class _$CartItemCopyWithImpl<$Res, $Val extends CartItem>
                 ? _value.isAvailable
                 : isAvailable // ignore: cast_nullable_to_non_nullable
                       as bool,
+            menuItemBasePrice: freezed == menuItemBasePrice
+                ? _value.menuItemBasePrice
+                : menuItemBasePrice // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            menuItemDiscountPrice: freezed == menuItemDiscountPrice
+                ? _value.menuItemDiscountPrice
+                : menuItemDiscountPrice // ignore: cast_nullable_to_non_nullable
+                      as double?,
           )
           as $Val,
     );
@@ -537,6 +557,8 @@ abstract class _$$CartItemImplCopyWith<$Res>
     double unitPrice,
     double lineTotal,
     bool isAvailable,
+    double? menuItemBasePrice,
+    double? menuItemDiscountPrice,
   });
 }
 
@@ -568,6 +590,8 @@ class __$$CartItemImplCopyWithImpl<$Res>
     Object? unitPrice = null,
     Object? lineTotal = null,
     Object? isAvailable = null,
+    Object? menuItemBasePrice = freezed,
+    Object? menuItemDiscountPrice = freezed,
   }) {
     return _then(
       _$CartItemImpl(
@@ -627,6 +651,14 @@ class __$$CartItemImplCopyWithImpl<$Res>
             ? _value.isAvailable
             : isAvailable // ignore: cast_nullable_to_non_nullable
                   as bool,
+        menuItemBasePrice: freezed == menuItemBasePrice
+            ? _value.menuItemBasePrice
+            : menuItemBasePrice // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        menuItemDiscountPrice: freezed == menuItemDiscountPrice
+            ? _value.menuItemDiscountPrice
+            : menuItemDiscountPrice // ignore: cast_nullable_to_non_nullable
+                  as double?,
       ),
     );
   }
@@ -650,6 +682,8 @@ class _$CartItemImpl extends _CartItem {
     required this.unitPrice,
     required this.lineTotal,
     this.isAvailable = true,
+    this.menuItemBasePrice,
+    this.menuItemDiscountPrice,
   }) : _selectedOptions = selectedOptions,
        _nestedSelections = nestedSelections,
        _extraQuantities = extraQuantities,
@@ -724,10 +758,20 @@ class _$CartItemImpl extends _CartItem {
   @override
   @JsonKey()
   final bool isAvailable;
+  // Display-only snapshot of the linked menu item's original/discounted
+  // unit price, from the cart response's nested `menuItem` object — never
+  // used to compute anything. `unitPrice`/`lineTotal` above are already
+  // the server-computed, authoritative charged amounts; these two fields
+  // exist solely so a cart line can show a struck-through "was" price
+  // when `menuItemDiscountPrice != null`.
+  @override
+  final double? menuItemBasePrice;
+  @override
+  final double? menuItemDiscountPrice;
 
   @override
   String toString() {
-    return 'CartItem(id: $id, menuItemId: $menuItemId, productName: $productName, productImage: $productImage, basePrice: $basePrice, quantity: $quantity, selectedOptions: $selectedOptions, nestedSelections: $nestedSelections, extraQuantities: $extraQuantities, removedIngredients: $removedIngredients, specialInstructions: $specialInstructions, unitPrice: $unitPrice, lineTotal: $lineTotal, isAvailable: $isAvailable)';
+    return 'CartItem(id: $id, menuItemId: $menuItemId, productName: $productName, productImage: $productImage, basePrice: $basePrice, quantity: $quantity, selectedOptions: $selectedOptions, nestedSelections: $nestedSelections, extraQuantities: $extraQuantities, removedIngredients: $removedIngredients, specialInstructions: $specialInstructions, unitPrice: $unitPrice, lineTotal: $lineTotal, isAvailable: $isAvailable, menuItemBasePrice: $menuItemBasePrice, menuItemDiscountPrice: $menuItemDiscountPrice)';
   }
 
   @override
@@ -769,7 +813,11 @@ class _$CartItemImpl extends _CartItem {
             (identical(other.lineTotal, lineTotal) ||
                 other.lineTotal == lineTotal) &&
             (identical(other.isAvailable, isAvailable) ||
-                other.isAvailable == isAvailable));
+                other.isAvailable == isAvailable) &&
+            (identical(other.menuItemBasePrice, menuItemBasePrice) ||
+                other.menuItemBasePrice == menuItemBasePrice) &&
+            (identical(other.menuItemDiscountPrice, menuItemDiscountPrice) ||
+                other.menuItemDiscountPrice == menuItemDiscountPrice));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -790,6 +838,8 @@ class _$CartItemImpl extends _CartItem {
     unitPrice,
     lineTotal,
     isAvailable,
+    menuItemBasePrice,
+    menuItemDiscountPrice,
   );
 
   /// Create a copy of CartItem
@@ -822,6 +872,8 @@ abstract class _CartItem extends CartItem {
     required final double unitPrice,
     required final double lineTotal,
     final bool isAvailable,
+    final double? menuItemBasePrice,
+    final double? menuItemDiscountPrice,
   }) = _$CartItemImpl;
   const _CartItem._() : super._();
 
@@ -855,7 +907,16 @@ abstract class _CartItem extends CartItem {
   @override
   double get lineTotal;
   @override
-  bool get isAvailable;
+  bool get isAvailable; // Display-only snapshot of the linked menu item's original/discounted
+  // unit price, from the cart response's nested `menuItem` object — never
+  // used to compute anything. `unitPrice`/`lineTotal` above are already
+  // the server-computed, authoritative charged amounts; these two fields
+  // exist solely so a cart line can show a struck-through "was" price
+  // when `menuItemDiscountPrice != null`.
+  @override
+  double? get menuItemBasePrice;
+  @override
+  double? get menuItemDiscountPrice;
 
   /// Create a copy of CartItem
   /// with the given fields replaced by the non-null parameter values.

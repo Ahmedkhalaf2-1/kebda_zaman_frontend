@@ -27,6 +27,15 @@ mixin _$MenuItem {
   String get description => throw _privateConstructorUsedError;
   String get imageUrl => throw _privateConstructorUsedError;
   double get basePrice => throw _privateConstructorUsedError;
+
+  /// The discounted price the customer actually pays, or null when the
+  /// item has no active discount (always strictly less than [basePrice]
+  /// when set — enforced server-side). Maps to the backend's `salePrice`
+  /// JSON field (see `ApiMenuRepository._mapMenuItem`/
+  /// `_buildMenuItemPayload`) — kept as `discountPrice` here since this
+  /// field already existed under that name before the backend added
+  /// `salePrice`; do not confuse with [compareAtPrice], a separate,
+  /// purely cosmetic "was" price with opposite semantics.
   double? get discountPrice => throw _privateConstructorUsedError;
   bool get isAvailable => throw _privateConstructorUsedError;
   bool get isFeatured => throw _privateConstructorUsedError;
@@ -416,6 +425,15 @@ class _$MenuItemImpl implements _MenuItem {
   final String imageUrl;
   @override
   final double basePrice;
+
+  /// The discounted price the customer actually pays, or null when the
+  /// item has no active discount (always strictly less than [basePrice]
+  /// when set — enforced server-side). Maps to the backend's `salePrice`
+  /// JSON field (see `ApiMenuRepository._mapMenuItem`/
+  /// `_buildMenuItemPayload`) — kept as `discountPrice` here since this
+  /// field already existed under that name before the backend added
+  /// `salePrice`; do not confuse with [compareAtPrice], a separate,
+  /// purely cosmetic "was" price with opposite semantics.
   @override
   final double? discountPrice;
   @override
@@ -601,6 +619,15 @@ abstract class _MenuItem implements MenuItem {
   String get imageUrl;
   @override
   double get basePrice;
+
+  /// The discounted price the customer actually pays, or null when the
+  /// item has no active discount (always strictly less than [basePrice]
+  /// when set — enforced server-side). Maps to the backend's `salePrice`
+  /// JSON field (see `ApiMenuRepository._mapMenuItem`/
+  /// `_buildMenuItemPayload`) — kept as `discountPrice` here since this
+  /// field already existed under that name before the backend added
+  /// `salePrice`; do not confuse with [compareAtPrice], a separate,
+  /// purely cosmetic "was" price with opposite semantics.
   @override
   double? get discountPrice;
   @override

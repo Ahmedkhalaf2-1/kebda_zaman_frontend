@@ -315,14 +315,9 @@ class SearchScreen extends ConsumerWidget {
                             ),
                             if (hasDiscount) ...[
                               const SizedBox(width: KZ.sp8),
-                              Text(
-                                formatCurrency(
-                                  item.basePrice,
-                                  locale: context.locale,
-                                ),
-                                style: KZ.bodySmall.copyWith(
-                                  decoration: TextDecoration.lineThrough,
-                                ),
+                              MenuItemComparePriceText(
+                                compareAtPrice: item.basePrice,
+                                style: KZ.bodySmall.copyWith(color: KZ.error),
                               ),
                             ],
                             if (item.compareAtPrice != null &&
