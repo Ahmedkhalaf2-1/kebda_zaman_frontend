@@ -9,6 +9,7 @@ import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
+import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
@@ -17,6 +18,39 @@ import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
+
+/// Rebuilds a reorder's `selectedOptions` (`groupId -> [optionId, ...]`)
+/// from [item]'s `variantRefId`/`addonRefIds` against [menuItem]'s *current*
+/// modifier groups. The order response only carries each variant/addon's
+/// own live id, not which group it belongs to, so that has to be
+/// re-derived here rather than replayed from the order. A `refId` that no
+/// longer matches any option on the live item (variant/addon since
+/// discontinued or removed) is silently dropped, never surfaced as an
+/// error — the reordered item still gets added, just without that one
+/// customization. Only top-level groups are searched: the order response
+/// doesn't expose refs for nested modifiers.
+Map<String, List<String>> _reconstructSelectedOptions(
+  MenuItem menuItem,
+  OrderItem item,
+) {
+  String? groupIdFor(String optionId) {
+    for (final group in menuItem.modifierGroups) {
+      for (final option in group.options) {
+        if (option.id == optionId) return group.id;
+      }
+    }
+    return null;
+  }
+
+  final selected = <String, List<String>>{};
+  for (final refId in [item.variantRefId, ...item.addonRefIds]) {
+    if (refId == null) continue;
+    final groupId = groupIdFor(refId);
+    if (groupId == null) continue;
+    selected.putIfAbsent(groupId, () => []).add(refId);
+  }
+  return selected;
+}
 
 class OrdersScreen extends ConsumerStatefulWidget {
   const OrdersScreen({super.key});
@@ -235,7 +269,16 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
 
     try {
       for (final item in widget.order.items) {
-        final res = await menuRepo.getMenuItemById(item.menuItemId);
+        // No live catalog id to look up — either this order predates the
+        // backend exposing `menuItemId`, or the item was hard-deleted
+        // since. Same treatment as a 404 below: unavailable, skip it.
+        final menuItemId = item.menuItemId;
+        if (menuItemId == null || menuItemId.isEmpty) {
+          unavailableCount++;
+          continue;
+        }
+
+        final res = await menuRepo.getMenuItemById(menuItemId);
         await res.fold(
           (f) async {
             unavailableCount++;
@@ -249,19 +292,24 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
             final basePrice = menuItem.discountPrice ?? menuItem.basePrice;
 
             final cartItem = CartItem(
-              id: 'ci_${DateTime.now().millisecondsSinceEpoch}_${item.menuItemId}',
-              menuItemId: item.menuItemId,
+              id: 'ci_${DateTime.now().millisecondsSinceEpoch}_$menuItemId',
+              menuItemId: menuItemId,
               productName: menuItem.name,
               productImage: menuItem.imageUrl,
               basePrice: basePrice,
               quantity: item.quantity,
-              selectedOptions: item.selectedOptions,
-              nestedSelections: item.nestedSelections,
-              extraQuantities: item.extraQuantities,
-              removedIngredients: item.removedIngredients,
-              // Reuse the original item's own authoritative instructions —
-              // never inject a fabricated system note into the customer's
-              // special instructions.
+              // Reconstructed fresh against the live menu item rather than
+              // carried over from the order: the order response only gives
+              // each variant/addon's own live id (`refId`), not which
+              // modifier group it belongs to, so the group has to be
+              // looked up here. A `refId` that no longer matches any
+              // current group/option (variant discontinued, addon removed)
+              // is silently dropped — the item itself still gets added,
+              // just without that customization, rather than failing the
+              // whole reorder. Nested-modifier selections aren't
+              // reconstructed: the order response doesn't expose refs for
+              // those, only top-level variant/addon.
+              selectedOptions: _reconstructSelectedOptions(menuItem, item),
               specialInstructions: item.specialInstructions,
               unitPrice: item.unitPrice,
               lineTotal: item.unitPrice * item.quantity,

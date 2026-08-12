@@ -195,7 +195,13 @@ Map<String, dynamic> _$$LoyaltyRedemptionInfoImplToJson(
 
 _$OrderItemImpl _$$OrderItemImplFromJson(Map<String, dynamic> json) =>
     _$OrderItemImpl(
-      menuItemId: json['menuItemId'] as String,
+      menuItemId: json['menuItemId'] as String?,
+      variantRefId: json['variantRefId'] as String?,
+      addonRefIds:
+          (json['addonRefIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       name: json['name'] as String,
       imageUrl: json['imageUrl'] as String,
       basePrice: (json['basePrice'] as num).toDouble(),
@@ -240,6 +246,8 @@ _$OrderItemImpl _$$OrderItemImplFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$$OrderItemImplToJson(_$OrderItemImpl instance) =>
     <String, dynamic>{
       'menuItemId': instance.menuItemId,
+      'variantRefId': instance.variantRefId,
+      'addonRefIds': instance.addonRefIds,
       'name': instance.name,
       'imageUrl': instance.imageUrl,
       'basePrice': instance.basePrice,

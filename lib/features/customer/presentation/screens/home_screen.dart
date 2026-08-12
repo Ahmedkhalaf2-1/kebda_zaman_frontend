@@ -81,7 +81,14 @@ class HomeScreen extends ConsumerWidget {
               for (final order in d.previousOrders) {
                 for (final item in order.items) {
                   if (result.length >= 8) break;
-                  if (seen.add(item.menuItemId)) result.add(item);
+                  // A null/empty menuItemId means this order predates the
+                  // backend exposing it, or the item was hard-deleted
+                  // since — nothing to tap through to, so it's skipped
+                  // rather than shown with a dead item-detail link.
+                  final id = item.menuItemId;
+                  if (id != null && id.isNotEmpty && seen.add(id)) {
+                    result.add(item);
+                  }
                 }
                 if (result.length >= 8) break;
               }

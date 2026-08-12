@@ -589,8 +589,20 @@ class ApiOrderRepository implements OrderRepository {
 
   static OrderItem _mapOrderItem(Map<String, dynamic> json) {
     final menuItem = json['menuItem'] ?? {};
+    final selectedVariant = json['selectedVariant'] as Map<String, dynamic>?;
+    final selectedAddons = (json['selectedAddons'] as List?) ?? const [];
     return OrderItem(
-      menuItemId: json['id'] ?? '',
+      // `menuItemId`/variant-addon `refId`s are the live catalog ids this
+      // item was placed against — `null` for orders predating this field
+      // or if the referenced item/variant/addon was hard-deleted since.
+      // Never fall back to `json['id']`, which is only the order-item
+      // row's own id, not a menu item id (see OrderItem's doc comment).
+      menuItemId: json['menuItemId'] as String?,
+      variantRefId: selectedVariant?['refId'] as String?,
+      addonRefIds: selectedAddons
+          .map((a) => (a as Map<String, dynamic>?)?['refId'] as String?)
+          .whereType<String>()
+          .toList(),
       name: menuItem['nameEn'] ?? menuItem['nameAr'] ?? 'Unknown',
       imageUrl: menuItem['imageUrl'] ?? '',
       basePrice: (json['unitPrice'] as num?)?.toDouble() ?? 0.0,

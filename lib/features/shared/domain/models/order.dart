@@ -277,7 +277,21 @@ class LoyaltyRedemptionInfo with _$LoyaltyRedemptionInfo {
 @freezed
 class OrderItem with _$OrderItem {
   const factory OrderItem({
-    required String menuItemId,
+    // Live `MenuItem.id` this order item was placed against — `null` for
+    // orders placed before the backend exposed this field, or if the item
+    // was hard-deleted since. Reordering must treat `null` as "unavailable,
+    // skip it," the same as a 404 from `GET /menu/items/:id` (see
+    // orders_screen.dart's `_handleReorder`) — never fall back to `id`
+    // above, which is the order-item row's own id, not a menu item id.
+    String? menuItemId,
+    // Live `MenuItemVariant`/`MenuItemAddon` ids this order item's
+    // customization snapshot pointed to at order time — `null`/empty the
+    // same way `menuItemId` can be, and for the same reasons. Only
+    // top-level variant/addon selections; the backend doesn't expose
+    // nested-modifier refs, so `nestedSelections` below stays empty on a
+    // reorder-reconstructed item.
+    String? variantRefId,
+    @Default([]) List<String> addonRefIds,
     required String name,
     required String imageUrl,
     required double basePrice,

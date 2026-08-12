@@ -1908,7 +1908,21 @@ OrderItem _$OrderItemFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$OrderItem {
-  String get menuItemId => throw _privateConstructorUsedError;
+  // Live `MenuItem.id` this order item was placed against — `null` for
+  // orders placed before the backend exposed this field, or if the item
+  // was hard-deleted since. Reordering must treat `null` as "unavailable,
+  // skip it," the same as a 404 from `GET /menu/items/:id` (see
+  // orders_screen.dart's `_handleReorder`) — never fall back to `id`
+  // above, which is the order-item row's own id, not a menu item id.
+  String? get menuItemId =>
+      throw _privateConstructorUsedError; // Live `MenuItemVariant`/`MenuItemAddon` ids this order item's
+  // customization snapshot pointed to at order time — `null`/empty the
+  // same way `menuItemId` can be, and for the same reasons. Only
+  // top-level variant/addon selections; the backend doesn't expose
+  // nested-modifier refs, so `nestedSelections` below stays empty on a
+  // reorder-reconstructed item.
+  String? get variantRefId => throw _privateConstructorUsedError;
+  List<String> get addonRefIds => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get imageUrl => throw _privateConstructorUsedError;
   double get basePrice => throw _privateConstructorUsedError;
@@ -1941,7 +1955,9 @@ abstract class $OrderItemCopyWith<$Res> {
       _$OrderItemCopyWithImpl<$Res, OrderItem>;
   @useResult
   $Res call({
-    String menuItemId,
+    String? menuItemId,
+    String? variantRefId,
+    List<String> addonRefIds,
     String name,
     String imageUrl,
     double basePrice,
@@ -1972,7 +1988,9 @@ class _$OrderItemCopyWithImpl<$Res, $Val extends OrderItem>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? menuItemId = null,
+    Object? menuItemId = freezed,
+    Object? variantRefId = freezed,
+    Object? addonRefIds = null,
     Object? name = null,
     Object? imageUrl = null,
     Object? basePrice = null,
@@ -1988,10 +2006,18 @@ class _$OrderItemCopyWithImpl<$Res, $Val extends OrderItem>
   }) {
     return _then(
       _value.copyWith(
-            menuItemId: null == menuItemId
+            menuItemId: freezed == menuItemId
                 ? _value.menuItemId
                 : menuItemId // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
+            variantRefId: freezed == variantRefId
+                ? _value.variantRefId
+                : variantRefId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            addonRefIds: null == addonRefIds
+                ? _value.addonRefIds
+                : addonRefIds // ignore: cast_nullable_to_non_nullable
+                      as List<String>,
             name: null == name
                 ? _value.name
                 : name // ignore: cast_nullable_to_non_nullable
@@ -2056,7 +2082,9 @@ abstract class _$$OrderItemImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    String menuItemId,
+    String? menuItemId,
+    String? variantRefId,
+    List<String> addonRefIds,
     String name,
     String imageUrl,
     double basePrice,
@@ -2086,7 +2114,9 @@ class __$$OrderItemImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? menuItemId = null,
+    Object? menuItemId = freezed,
+    Object? variantRefId = freezed,
+    Object? addonRefIds = null,
     Object? name = null,
     Object? imageUrl = null,
     Object? basePrice = null,
@@ -2102,10 +2132,18 @@ class __$$OrderItemImplCopyWithImpl<$Res>
   }) {
     return _then(
       _$OrderItemImpl(
-        menuItemId: null == menuItemId
+        menuItemId: freezed == menuItemId
             ? _value.menuItemId
             : menuItemId // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
+        variantRefId: freezed == variantRefId
+            ? _value.variantRefId
+            : variantRefId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        addonRefIds: null == addonRefIds
+            ? _value._addonRefIds
+            : addonRefIds // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
         name: null == name
             ? _value.name
             : name // ignore: cast_nullable_to_non_nullable
@@ -2163,7 +2201,9 @@ class __$$OrderItemImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$OrderItemImpl implements _OrderItem {
   const _$OrderItemImpl({
-    required this.menuItemId,
+    this.menuItemId,
+    this.variantRefId,
+    final List<String> addonRefIds = const [],
     required this.name,
     required this.imageUrl,
     required this.basePrice,
@@ -2176,7 +2216,8 @@ class _$OrderItemImpl implements _OrderItem {
     this.specialInstructions = '',
     this.formattedConfiguration = '',
     required this.lineTotal,
-  }) : _selectedOptions = selectedOptions,
+  }) : _addonRefIds = addonRefIds,
+       _selectedOptions = selectedOptions,
        _nestedSelections = nestedSelections,
        _extraQuantities = extraQuantities,
        _removedIngredients = removedIngredients;
@@ -2184,8 +2225,31 @@ class _$OrderItemImpl implements _OrderItem {
   factory _$OrderItemImpl.fromJson(Map<String, dynamic> json) =>
       _$$OrderItemImplFromJson(json);
 
+  // Live `MenuItem.id` this order item was placed against — `null` for
+  // orders placed before the backend exposed this field, or if the item
+  // was hard-deleted since. Reordering must treat `null` as "unavailable,
+  // skip it," the same as a 404 from `GET /menu/items/:id` (see
+  // orders_screen.dart's `_handleReorder`) — never fall back to `id`
+  // above, which is the order-item row's own id, not a menu item id.
   @override
-  final String menuItemId;
+  final String? menuItemId;
+  // Live `MenuItemVariant`/`MenuItemAddon` ids this order item's
+  // customization snapshot pointed to at order time — `null`/empty the
+  // same way `menuItemId` can be, and for the same reasons. Only
+  // top-level variant/addon selections; the backend doesn't expose
+  // nested-modifier refs, so `nestedSelections` below stays empty on a
+  // reorder-reconstructed item.
+  @override
+  final String? variantRefId;
+  final List<String> _addonRefIds;
+  @override
+  @JsonKey()
+  List<String> get addonRefIds {
+    if (_addonRefIds is EqualUnmodifiableListView) return _addonRefIds;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_addonRefIds);
+  }
+
   @override
   final String name;
   @override
@@ -2250,7 +2314,7 @@ class _$OrderItemImpl implements _OrderItem {
 
   @override
   String toString() {
-    return 'OrderItem(menuItemId: $menuItemId, name: $name, imageUrl: $imageUrl, basePrice: $basePrice, unitPrice: $unitPrice, quantity: $quantity, selectedOptions: $selectedOptions, nestedSelections: $nestedSelections, extraQuantities: $extraQuantities, removedIngredients: $removedIngredients, specialInstructions: $specialInstructions, formattedConfiguration: $formattedConfiguration, lineTotal: $lineTotal)';
+    return 'OrderItem(menuItemId: $menuItemId, variantRefId: $variantRefId, addonRefIds: $addonRefIds, name: $name, imageUrl: $imageUrl, basePrice: $basePrice, unitPrice: $unitPrice, quantity: $quantity, selectedOptions: $selectedOptions, nestedSelections: $nestedSelections, extraQuantities: $extraQuantities, removedIngredients: $removedIngredients, specialInstructions: $specialInstructions, formattedConfiguration: $formattedConfiguration, lineTotal: $lineTotal)';
   }
 
   @override
@@ -2260,6 +2324,12 @@ class _$OrderItemImpl implements _OrderItem {
             other is _$OrderItemImpl &&
             (identical(other.menuItemId, menuItemId) ||
                 other.menuItemId == menuItemId) &&
+            (identical(other.variantRefId, variantRefId) ||
+                other.variantRefId == variantRefId) &&
+            const DeepCollectionEquality().equals(
+              other._addonRefIds,
+              _addonRefIds,
+            ) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
@@ -2298,6 +2368,8 @@ class _$OrderItemImpl implements _OrderItem {
   int get hashCode => Object.hash(
     runtimeType,
     menuItemId,
+    variantRefId,
+    const DeepCollectionEquality().hash(_addonRefIds),
     name,
     imageUrl,
     basePrice,
@@ -2328,7 +2400,9 @@ class _$OrderItemImpl implements _OrderItem {
 
 abstract class _OrderItem implements OrderItem {
   const factory _OrderItem({
-    required final String menuItemId,
+    final String? menuItemId,
+    final String? variantRefId,
+    final List<String> addonRefIds,
     required final String name,
     required final String imageUrl,
     required final double basePrice,
@@ -2346,8 +2420,23 @@ abstract class _OrderItem implements OrderItem {
   factory _OrderItem.fromJson(Map<String, dynamic> json) =
       _$OrderItemImpl.fromJson;
 
+  // Live `MenuItem.id` this order item was placed against — `null` for
+  // orders placed before the backend exposed this field, or if the item
+  // was hard-deleted since. Reordering must treat `null` as "unavailable,
+  // skip it," the same as a 404 from `GET /menu/items/:id` (see
+  // orders_screen.dart's `_handleReorder`) — never fall back to `id`
+  // above, which is the order-item row's own id, not a menu item id.
   @override
-  String get menuItemId;
+  String? get menuItemId; // Live `MenuItemVariant`/`MenuItemAddon` ids this order item's
+  // customization snapshot pointed to at order time — `null`/empty the
+  // same way `menuItemId` can be, and for the same reasons. Only
+  // top-level variant/addon selections; the backend doesn't expose
+  // nested-modifier refs, so `nestedSelections` below stays empty on a
+  // reorder-reconstructed item.
+  @override
+  String? get variantRefId;
+  @override
+  List<String> get addonRefIds;
   @override
   String get name;
   @override
