@@ -1,43 +1,156 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_brand_logo.dart';
 
-/// The shared Login/Signup header: brand mark + title + subtitle. Kept
-/// deliberately compact (64dp mark, tight spacing) so the form — the actual
-/// purpose of the screen — starts well within the first viewport on short
-/// phones instead of the logo pushing it below the fold.
-class KZAuthHeader extends StatelessWidget {
-  final String title;
-  final String subtitle;
+/// Cuts a shallow upward-bulging arc out of the top edge — the shape used
+/// by [KZAuthHeroScaffold]'s white panel so the solid-color hero behind it
+/// shows through as a "wave" rather than a straight or simply-rounded
+/// edge. A single quadratic Bezier from `(0, waveDepth)` through
+/// `(width/2, 0)` to `(width, waveDepth)` is enough for a smooth
+/// symmetric hump — no need for a multi-segment path.
+class _AuthWaveClipper extends CustomClipper<Path> {
+  const _AuthWaveClipper();
 
-  const KZAuthHeader({super.key, required this.title, required this.subtitle});
+  static const double waveDepth = 40;
+
+  @override
+  Path getClip(Size size) {
+    return Path()
+      ..lineTo(0, waveDepth)
+      ..quadraticBezierTo(size.width / 2, 0, size.width, waveDepth)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+/// The Login/Signup page chrome: a solid-[KZ.primary] hero (brand mark +
+/// app name + [heroSubtitle]) with a wave-topped white panel laid over its
+/// lower portion, holding [child] (the actual form) directly — no card
+/// heading, the form fields are the first thing in the panel. Both screens
+/// share this exact shell — only their form content and copy differ — so a
+/// redesign of the shell only ever needs to happen once.
+///
+/// The hero's tagline reuses each screen's own `auth.*_subtitle` copy
+/// (already translated, screen-specific) rather than inventing a new
+/// shared tagline string.
+class KZAuthHeroScaffold extends StatelessWidget {
+  final String heroSubtitle;
+  final Widget child;
+  final bool showBackButton;
+  final VoidCallback? onBack;
+
+  const KZAuthHeroScaffold({
+    super.key,
+    required this.heroSubtitle,
+    required this.child,
+    this.showBackButton = false,
+    this.onBack,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(KZ.radiusXl),
-            border: Border.all(color: KZ.outlineVariant, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
+    return Scaffold(
+      // The wave clipper only ever reveals this color behind its cut —
+      // matches KZ.primary exactly so there's never a seam.
+      backgroundColor: KZ.primary,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: ColoredBox(color: KZ.primary)),
+          SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 40,
+                  child: showBackButton
+                      ? Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                            ),
+                            tooltip: 'common.back'.tr(),
+                            splashRadius: 22,
+                            onPressed: onBack,
+                          ),
+                        )
+                      : null,
+                ),
+                Padding(
+                  // Bottom inset grows the hero itself (pushing the wave —
+                  // and everything in the card below it — further down the
+                  // screen) rather than adding empty padding inside the
+                  // white card, which would just be dead space above the
+                  // first field.
+                  padding: const EdgeInsets.fromLTRB(
+                    KZ.sp24,
+                    KZ.sp4,
+                    KZ.sp24,
+                    KZ.sp48,
+                  ),
+                  child: Column(
+                    children: [
+                      // Full-color brand mark, no backing plate — directly
+                      // on the solid-primary hero.
+                      const KZBrandLogo(width: 96, height: 96),
+                      const SizedBox(height: KZ.sp12),
+                      Text(
+                        'app_name'.tr(),
+                        textAlign: TextAlign.center,
+                        style: KZ.display.copyWith(color: Colors.white),
+                      ),
+                      const SizedBox(height: KZ.sp6),
+                      Text(
+                        heroSubtitle,
+                        textAlign: TextAlign.center,
+                        style: KZ.body.copyWith(
+                          color: Colors.white.withValues(alpha: 0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ClipPath(
+                    clipper: const _AuthWaveClipper(),
+                    child: ColoredBox(
+                      color: KZ.surface,
+                      child: SafeArea(
+                        top: false,
+                        child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          child: ResponsiveContainer(
+                            maxWidth: 448,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: KZ.screenPadding,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                0,
+                                KZ.sp48,
+                                0,
+                                KZ.sp20,
+                              ),
+                              child: child,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: const Center(child: KZBrandLogo(width: 40, height: 40)),
-        ),
-        const SizedBox(height: KZ.sp16),
-        Text(title, textAlign: TextAlign.center, style: KZ.pageTitle),
-        const SizedBox(height: KZ.sp6),
-        Text(subtitle, textAlign: TextAlign.center, style: KZ.bodySmall),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -100,9 +213,29 @@ class KZAuthFooterLink extends StatelessWidget {
   }
 }
 
+/// Re-rounds every border state of a [KZ.inputDecoration] to a full pill
+/// (matching [KZButton]'s default pill shape), without touching
+/// [KZ.inputDecoration] itself — that token is shared by every form field
+/// across the whole app, not just auth, so the pill treatment stays scoped
+/// to [KZAuthTextField] rather than becoming a global redesign.
+InputDecoration _pillBorders(InputDecoration base) {
+  OutlineInputBorder pill(OutlineInputBorder b) =>
+      b.copyWith(borderRadius: BorderRadius.circular(KZ.radiusFull));
+  return base.copyWith(
+    border: pill(base.border as OutlineInputBorder),
+    enabledBorder: pill(base.enabledBorder as OutlineInputBorder),
+    focusedBorder: pill(base.focusedBorder as OutlineInputBorder),
+    disabledBorder: pill(base.disabledBorder as OutlineInputBorder),
+    errorBorder: pill(base.errorBorder as OutlineInputBorder),
+    focusedErrorBorder: pill(base.focusedErrorBorder as OutlineInputBorder),
+  );
+}
+
 /// A Login/Signup form field, wrapping the shared [KZ.inputDecoration] token
-/// so both screens use one input language (height, radius, focus state)
-/// instead of each hand-rolling its own decoration.
+/// (re-rounded to a pill via [_pillBorders], matching the primary button's
+/// shape on these two screens) so both screens use one input language
+/// (height, radius, focus state) instead of each hand-rolling its own
+/// decoration.
 class KZAuthTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -136,15 +269,17 @@ class KZAuthTextField extends StatelessWidget {
       textCapitalization: textCapitalization,
       style: KZ.body.copyWith(fontSize: 15),
       validator: validator,
-      decoration: KZ.inputDecoration(
-        label: label,
-        hint: hint,
-        prefixIcon: Icon(
-          prefixIcon,
-          color: KZ.onSurfaceVariant,
-          size: KZ.iconControl,
+      decoration: _pillBorders(
+        KZ.inputDecoration(
+          label: label,
+          hint: hint,
+          prefixIcon: Icon(
+            prefixIcon,
+            color: KZ.onSurfaceVariant,
+            size: KZ.iconControl,
+          ),
+          suffixIcon: suffixIcon,
         ),
-        suffixIcon: suffixIcon,
       ),
     );
   }
