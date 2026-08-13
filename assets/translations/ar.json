@@ -19,6 +19,17 @@
     "order_settings": "إعدادات الطلبات",
     "pricing_settings": "التسعير"
   },
+  "kitchen": {
+    "queue_title": "قائمة المطبخ",
+    "ticket_title": "التذكرة",
+    "items_section": "الأصناف",
+    "item_count": "{count} صنف",
+    "empty_title": "لا توجد تذاكر نشطة",
+    "empty_sub": "ستظهر هنا الطلبات المؤكدة وقيد التحضير.",
+    "variant": "الحجم/النوع",
+    "addons": "الإضافات",
+    "special_instructions": "تعليمات خاصة"
+  },
   "nav_group": {
     "overview": "نظرة عامة",
     "orders_operations": "الطلبات والعمليات",
@@ -29,7 +40,7 @@
     "operations": "العمليات"
   },
   "home": {
-    "tagline": "أصيل طعم الشارع المصري",
+    "tagline": "أصل طعم الشارع المصري",
     "search_hint": "عايز تاكل إيه؟",
     "categories": "الأقسام",
     "best_sellers": "الأكثر مبيعاً",
@@ -48,7 +59,7 @@
     "location_home": "المنزل • مصر الجديدة",
     "limited_time": "لفترة محدودة",
     "hero_title": "خصم 20% على أول طلب",
-    "claim_now": "احجز الآن",
+    "claim_now": "اطلب الآن",
     "sale": "تخفيض",
     "added_to_cart": "تمت إضافة {name} للسلة!",
     "greeting_morning": "صباح الخير",
@@ -551,10 +562,14 @@
     "more_options": "خيارات إضافية"
   },
   "staff": {
-    "title": "الكاشير",
-    "empty": "لا يوجد حسابات كاشير بعد.",
-    "add_cashier": "إضافة كاشير",
-    "edit_cashier": "تعديل الكاشير",
+    "title": "الموظفون",
+    "empty": "لا يوجد حسابات موظفين بعد.",
+    "add_staff": "إضافة موظف",
+    "edit_staff": "تعديل الموظف",
+    "role": "الدور",
+    "role_cashier": "كاشير",
+    "role_kitchen": "المطبخ",
+    "filter_all": "الكل",
     "name": "الاسم",
     "email": "البريد الإلكتروني",
     "phone": "رقم الهاتف",
@@ -801,9 +816,7 @@
     "login_success": "أهلاً بك مجدداً! تم تسجيل الدخول بنجاح.",
     "signup_success": "تم إنشاء حسابك بنجاح! مرحباً بك في كبدة زمان.",
     "fill_all_fields": "الرجاء ملء جميع الحقول المطلوبة",
-    "invalid_credentials": "اسم المستخدم أو كلمة السر غير صحيحة",
-    "switch_to_customer_login": "دخول العملاء",
-    "switch_to_admin_login": "دخول الإدارة"
+    "invalid_credentials": "اسم المستخدم أو كلمة السر غير صحيحة"
   },
   "onboarding": {
     "select_language": "اختر لغة التطبيق",

@@ -35,6 +35,17 @@ class CodegenLoader extends AssetLoader{
     "order_settings": "إعدادات الطلبات",
     "pricing_settings": "التسعير"
   },
+  "kitchen": {
+    "queue_title": "قائمة المطبخ",
+    "ticket_title": "التذكرة",
+    "items_section": "الأصناف",
+    "item_count": "{count} صنف",
+    "empty_title": "لا توجد تذاكر نشطة",
+    "empty_sub": "ستظهر هنا الطلبات المؤكدة وقيد التحضير.",
+    "variant": "الحجم/النوع",
+    "addons": "الإضافات",
+    "special_instructions": "تعليمات خاصة"
+  },
   "nav_group": {
     "overview": "نظرة عامة",
     "orders_operations": "الطلبات والعمليات",
@@ -45,7 +56,7 @@ class CodegenLoader extends AssetLoader{
     "operations": "العمليات"
   },
   "home": {
-    "tagline": "أصيل طعم الشارع المصري",
+    "tagline": "أصل طعم الشارع المصري",
     "search_hint": "عايز تاكل إيه؟",
     "categories": "الأقسام",
     "best_sellers": "الأكثر مبيعاً",
@@ -64,7 +75,7 @@ class CodegenLoader extends AssetLoader{
     "location_home": "المنزل • مصر الجديدة",
     "limited_time": "لفترة محدودة",
     "hero_title": "خصم 20% على أول طلب",
-    "claim_now": "احجز الآن",
+    "claim_now": "اطلب الآن",
     "sale": "تخفيض",
     "added_to_cart": "تمت إضافة {name} للسلة!",
     "greeting_morning": "صباح الخير",
@@ -567,10 +578,14 @@ class CodegenLoader extends AssetLoader{
     "more_options": "خيارات إضافية"
   },
   "staff": {
-    "title": "الكاشير",
-    "empty": "لا يوجد حسابات كاشير بعد.",
-    "add_cashier": "إضافة كاشير",
-    "edit_cashier": "تعديل الكاشير",
+    "title": "الموظفون",
+    "empty": "لا يوجد حسابات موظفين بعد.",
+    "add_staff": "إضافة موظف",
+    "edit_staff": "تعديل الموظف",
+    "role": "الدور",
+    "role_cashier": "كاشير",
+    "role_kitchen": "المطبخ",
+    "filter_all": "الكل",
     "name": "الاسم",
     "email": "البريد الإلكتروني",
     "phone": "رقم الهاتف",
@@ -817,9 +832,7 @@ class CodegenLoader extends AssetLoader{
     "login_success": "أهلاً بك مجدداً! تم تسجيل الدخول بنجاح.",
     "signup_success": "تم إنشاء حسابك بنجاح! مرحباً بك في كبدة زمان.",
     "fill_all_fields": "الرجاء ملء جميع الحقول المطلوبة",
-    "invalid_credentials": "اسم المستخدم أو كلمة السر غير صحيحة",
-    "switch_to_customer_login": "دخول العملاء",
-    "switch_to_admin_login": "دخول الإدارة"
+    "invalid_credentials": "اسم المستخدم أو كلمة السر غير صحيحة"
   },
   "onboarding": {
     "select_language": "اختر لغة التطبيق",
@@ -1108,6 +1121,17 @@ static const Map<String,dynamic> _en = {
     "working_hours": "Working Hours",
     "order_settings": "Order Settings",
     "pricing_settings": "Pricing"
+  },
+  "kitchen": {
+    "queue_title": "Kitchen Queue",
+    "ticket_title": "Ticket",
+    "items_section": "Items",
+    "item_count": "{count} items",
+    "empty_title": "No active tickets",
+    "empty_sub": "Confirmed and preparing orders will show up here.",
+    "variant": "Variant",
+    "addons": "Add-ons",
+    "special_instructions": "Special Instructions"
   },
   "nav_group": {
     "overview": "Overview",
@@ -1641,10 +1665,14 @@ static const Map<String,dynamic> _en = {
     "more_options": "More options"
   },
   "staff": {
-    "title": "Cashiers",
-    "empty": "No cashier accounts yet.",
-    "add_cashier": "Add Cashier",
-    "edit_cashier": "Edit Cashier",
+    "title": "Staff",
+    "empty": "No staff accounts yet.",
+    "add_staff": "Add Staff",
+    "edit_staff": "Edit Staff",
+    "role": "Role",
+    "role_cashier": "Cashier",
+    "role_kitchen": "Kitchen",
+    "filter_all": "All",
     "name": "Name",
     "email": "Email",
     "phone": "Phone",
@@ -1891,9 +1919,7 @@ static const Map<String,dynamic> _en = {
     "login_success": "Welcome back! Logged in successfully.",
     "signup_success": "Account created successfully! Welcome to Kebda Zaman.",
     "fill_all_fields": "Please fill in all required fields",
-    "invalid_credentials": "Invalid email/username or password",
-    "switch_to_customer_login": "Customer Login",
-    "switch_to_admin_login": "Admin Login"
+    "invalid_credentials": "Invalid email/username or password"
   },
   "onboarding": {
     "select_language": "Choose App Language",

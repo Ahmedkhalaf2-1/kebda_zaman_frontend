@@ -19,6 +19,17 @@
     "order_settings": "Order Settings",
     "pricing_settings": "Pricing"
   },
+  "kitchen": {
+    "queue_title": "Kitchen Queue",
+    "ticket_title": "Ticket",
+    "items_section": "Items",
+    "item_count": "{count} items",
+    "empty_title": "No active tickets",
+    "empty_sub": "Confirmed and preparing orders will show up here.",
+    "variant": "Variant",
+    "addons": "Add-ons",
+    "special_instructions": "Special Instructions"
+  },
   "nav_group": {
     "overview": "Overview",
     "orders_operations": "Orders & Operations",
@@ -551,10 +562,14 @@
     "more_options": "More options"
   },
   "staff": {
-    "title": "Cashiers",
-    "empty": "No cashier accounts yet.",
-    "add_cashier": "Add Cashier",
-    "edit_cashier": "Edit Cashier",
+    "title": "Staff",
+    "empty": "No staff accounts yet.",
+    "add_staff": "Add Staff",
+    "edit_staff": "Edit Staff",
+    "role": "Role",
+    "role_cashier": "Cashier",
+    "role_kitchen": "Kitchen",
+    "filter_all": "All",
     "name": "Name",
     "email": "Email",
     "phone": "Phone",
@@ -801,9 +816,7 @@
     "login_success": "Welcome back! Logged in successfully.",
     "signup_success": "Account created successfully! Welcome to Kebda Zaman.",
     "fill_all_fields": "Please fill in all required fields",
-    "invalid_credentials": "Invalid email/username or password",
-    "switch_to_customer_login": "Customer Login",
-    "switch_to_admin_login": "Admin Login"
+    "invalid_credentials": "Invalid email/username or password"
   },
   "onboarding": {
     "select_language": "Choose App Language",
