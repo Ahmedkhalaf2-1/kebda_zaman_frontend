@@ -46,12 +46,14 @@ class ApiStaffRepository implements StaffRepository {
     required String name,
     required String email,
     required String password,
+    required String role,
     String? phone,
   }) async {
     try {
       final response = await _apiClient.dio.post(
         '/admin/staff',
         data: {
+          'role': role,
           'name': name,
           'email': email,
           'password': password,

@@ -9,6 +9,7 @@ abstract class StaffRepository {
     required String name,
     required String email,
     required String password,
+    required String role,
     String? phone,
   });
 

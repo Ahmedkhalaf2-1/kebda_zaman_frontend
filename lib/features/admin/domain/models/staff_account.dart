@@ -10,6 +10,9 @@ class StaffAccount with _$StaffAccount {
     required String name,
     String? email,
     String? phone,
+    // 'CASHIER' | 'KITCHEN' — fixed at creation, not editable via
+    // PATCH /admin/staff/:id.
+    required String role,
     required bool isActive,
     required DateTime createdAt,
   }) = _StaffAccount;

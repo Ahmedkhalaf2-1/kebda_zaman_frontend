@@ -24,7 +24,10 @@ mixin _$StaffAccount {
   String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
-  String? get phone => throw _privateConstructorUsedError;
+  String? get phone =>
+      throw _privateConstructorUsedError; // 'CASHIER' | 'KITCHEN' — fixed at creation, not editable via
+  // PATCH /admin/staff/:id.
+  String get role => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
@@ -50,6 +53,7 @@ abstract class $StaffAccountCopyWith<$Res> {
     String name,
     String? email,
     String? phone,
+    String role,
     bool isActive,
     DateTime createdAt,
   });
@@ -74,6 +78,7 @@ class _$StaffAccountCopyWithImpl<$Res, $Val extends StaffAccount>
     Object? name = null,
     Object? email = freezed,
     Object? phone = freezed,
+    Object? role = null,
     Object? isActive = null,
     Object? createdAt = null,
   }) {
@@ -95,6 +100,10 @@ class _$StaffAccountCopyWithImpl<$Res, $Val extends StaffAccount>
                 ? _value.phone
                 : phone // ignore: cast_nullable_to_non_nullable
                       as String?,
+            role: null == role
+                ? _value.role
+                : role // ignore: cast_nullable_to_non_nullable
+                      as String,
             isActive: null == isActive
                 ? _value.isActive
                 : isActive // ignore: cast_nullable_to_non_nullable
@@ -123,6 +132,7 @@ abstract class _$$StaffAccountImplCopyWith<$Res>
     String name,
     String? email,
     String? phone,
+    String role,
     bool isActive,
     DateTime createdAt,
   });
@@ -146,6 +156,7 @@ class __$$StaffAccountImplCopyWithImpl<$Res>
     Object? name = null,
     Object? email = freezed,
     Object? phone = freezed,
+    Object? role = null,
     Object? isActive = null,
     Object? createdAt = null,
   }) {
@@ -167,6 +178,10 @@ class __$$StaffAccountImplCopyWithImpl<$Res>
             ? _value.phone
             : phone // ignore: cast_nullable_to_non_nullable
                   as String?,
+        role: null == role
+            ? _value.role
+            : role // ignore: cast_nullable_to_non_nullable
+                  as String,
         isActive: null == isActive
             ? _value.isActive
             : isActive // ignore: cast_nullable_to_non_nullable
@@ -188,6 +203,7 @@ class _$StaffAccountImpl implements _StaffAccount {
     required this.name,
     this.email,
     this.phone,
+    required this.role,
     required this.isActive,
     required this.createdAt,
   });
@@ -203,6 +219,10 @@ class _$StaffAccountImpl implements _StaffAccount {
   final String? email;
   @override
   final String? phone;
+  // 'CASHIER' | 'KITCHEN' — fixed at creation, not editable via
+  // PATCH /admin/staff/:id.
+  @override
+  final String role;
   @override
   final bool isActive;
   @override
@@ -210,7 +230,7 @@ class _$StaffAccountImpl implements _StaffAccount {
 
   @override
   String toString() {
-    return 'StaffAccount(id: $id, name: $name, email: $email, phone: $phone, isActive: $isActive, createdAt: $createdAt)';
+    return 'StaffAccount(id: $id, name: $name, email: $email, phone: $phone, role: $role, isActive: $isActive, createdAt: $createdAt)';
   }
 
   @override
@@ -222,6 +242,7 @@ class _$StaffAccountImpl implements _StaffAccount {
             (identical(other.name, name) || other.name == name) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.phone, phone) || other.phone == phone) &&
+            (identical(other.role, role) || other.role == role) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             (identical(other.createdAt, createdAt) ||
@@ -230,8 +251,16 @@ class _$StaffAccountImpl implements _StaffAccount {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, name, email, phone, isActive, createdAt);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    name,
+    email,
+    phone,
+    role,
+    isActive,
+    createdAt,
+  );
 
   /// Create a copy of StaffAccount
   /// with the given fields replaced by the non-null parameter values.
@@ -253,6 +282,7 @@ abstract class _StaffAccount implements StaffAccount {
     required final String name,
     final String? email,
     final String? phone,
+    required final String role,
     required final bool isActive,
     required final DateTime createdAt,
   }) = _$StaffAccountImpl;
@@ -267,7 +297,10 @@ abstract class _StaffAccount implements StaffAccount {
   @override
   String? get email;
   @override
-  String? get phone;
+  String? get phone; // 'CASHIER' | 'KITCHEN' — fixed at creation, not editable via
+  // PATCH /admin/staff/:id.
+  @override
+  String get role;
   @override
   bool get isActive;
   @override

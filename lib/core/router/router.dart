@@ -44,6 +44,8 @@ import '../../features/admin/presentation/screens/pricing_settings_screen.dart';
 import '../../features/admin/presentation/screens/admin_notifications_screen.dart';
 import '../../features/admin/presentation/screens/admin_notification_center_screen.dart';
 import '../../features/admin/presentation/screens/admin_order_details_screen.dart';
+import '../../features/admin/presentation/screens/kitchen_queue_screen.dart';
+import '../../features/admin/presentation/screens/kitchen_ticket_screen.dart';
 import '../../features/admin/presentation/screens/staff_management_screen.dart';
 import '../../features/admin/presentation/screens/customer_management_screen.dart';
 import '../../features/admin/presentation/screens/customer_details_screen.dart';
@@ -80,6 +82,12 @@ GoRouter router(Ref ref) {
       // staff, etc.) redirects back there even on a direct/manual navigation.
       if (role == 'CASHIER') {
         return path.startsWith('/admin/orders') ? null : '/admin/orders';
+      }
+
+      // Kitchen staff are pure ticket-viewers — confined to their own
+      // queue/detail routes, same pattern as CASHIER above.
+      if (role == 'KITCHEN') {
+        return path.startsWith('/admin/kitchen') ? null : '/admin/kitchen';
       }
 
       // Any other authenticated role (CUSTOMER, incl. guest) is not admin
@@ -352,6 +360,19 @@ GoRouter router(Ref ref) {
               GoRoute(
                 path: ':id',
                 builder: (context, state) => AdminOrderDetailsScreen(
+                  orderId: state.pathParameters['id']!,
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/admin/kitchen',
+            pageBuilder: (context, state) =>
+                kzAdminPage(state: state, child: const KitchenQueueScreen()),
+            routes: [
+              GoRoute(
+                path: ':id',
+                builder: (context, state) => KitchenTicketScreen(
                   orderId: state.pathParameters['id']!,
                 ),
               ),

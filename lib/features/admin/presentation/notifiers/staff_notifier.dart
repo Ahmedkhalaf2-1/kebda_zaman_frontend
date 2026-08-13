@@ -15,6 +15,7 @@ class StaffNotifier extends AutoDisposeAsyncNotifier<List<StaffAccount>> {
     required String name,
     required String email,
     required String password,
+    required String role,
     String? phone,
   }) async {
     final repo = ref.read(staffRepositoryProvider);
@@ -22,6 +23,7 @@ class StaffNotifier extends AutoDisposeAsyncNotifier<List<StaffAccount>> {
       name: name,
       email: email,
       password: password,
+      role: role,
       phone: phone,
     );
     return result.fold((f) => f, (staff) {

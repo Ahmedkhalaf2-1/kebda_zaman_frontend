@@ -29,6 +29,8 @@ import 'package:kebda_zaman/features/admin/domain/repositories/admin_order_notif
 import 'package:kebda_zaman/features/admin/data/api_admin_order_notification_repository.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/staff_repository.dart';
 import 'package:kebda_zaman/features/admin/data/api_staff_repository.dart';
+import 'package:kebda_zaman/features/admin/domain/repositories/kitchen_repository.dart';
+import 'package:kebda_zaman/features/admin/data/api_kitchen_repository.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/customer_repository.dart';
 import 'package:kebda_zaman/features/admin/data/api_customer_repository.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/reports_repository.dart';
@@ -136,6 +138,10 @@ final adminNotificationRepositoryProvider =
 
 final staffRepositoryProvider = Provider<StaffRepository>((ref) {
   return ApiStaffRepository(ref.watch(apiClientProvider));
+});
+
+final kitchenRepositoryProvider = Provider<KitchenRepository>((ref) {
+  return ApiKitchenRepository(ref.watch(apiClientProvider));
 });
 
 final customerRepositoryProvider = Provider<CustomerRepository>((ref) {

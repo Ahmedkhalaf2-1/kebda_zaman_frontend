@@ -12,6 +12,7 @@ _$StaffAccountImpl _$$StaffAccountImplFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       email: json['email'] as String?,
       phone: json['phone'] as String?,
+      role: json['role'] as String,
       isActive: json['isActive'] as bool,
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
@@ -22,6 +23,7 @@ Map<String, dynamic> _$$StaffAccountImplToJson(_$StaffAccountImpl instance) =>
       'name': instance.name,
       'email': instance.email,
       'phone': instance.phone,
+      'role': instance.role,
       'isActive': instance.isActive,
       'createdAt': instance.createdAt.toIso8601String(),
     };

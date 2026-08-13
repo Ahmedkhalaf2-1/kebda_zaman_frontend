@@ -159,6 +159,7 @@ class AdminShell extends ConsumerWidget {
     final isMobile = MediaQuery.of(context).size.width < 600;
     final role = ref.watch(authNotifierProvider).user?.role;
     final isCashier = role == 'CASHIER';
+    final isKitchen = role == 'KITCHEN';
 
     Future<void> onLogout() async {
       await ref.read(authNotifierProvider.notifier).logout();
@@ -170,6 +171,14 @@ class AdminShell extends ConsumerWidget {
     // router-level redirect guard that blocks a manual navigation to them.
     if (isCashier) {
       return _CashierShell(onLogout: onLogout, child: child);
+    }
+
+    // KITCHEN has exactly one destination (the queue) with no other nav to
+    // choose between — the queue/ticket screens are already fully
+    // self-contained Scaffolds with their own AppBar and logout action, so
+    // there's no shell chrome to add here, unlike CASHIER above.
+    if (isKitchen) {
+      return child;
     }
 
     final groups = _adminGroups();
