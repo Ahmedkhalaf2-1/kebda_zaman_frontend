@@ -36,7 +36,7 @@ class MenuItemBadgeChip extends StatelessWidget {
         menuItemBadgeLabel(badge),
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 10,
+          fontSize: 12,
           fontWeight: FontWeight.w800,
         ),
         maxLines: 1,

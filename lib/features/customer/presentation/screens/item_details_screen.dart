@@ -335,9 +335,6 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected
-              ? ItemDetailsScreen.primaryColor.withValues(alpha: 0.06)
-              : Colors.transparent,
           border: Border(
             left: BorderSide(
               color: isSelected

@@ -1059,8 +1059,8 @@ class _PromoHero extends StatelessWidget {
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                         colors: [
-                          KZ.primary.withValues(alpha: 0.92),
-                          KZ.primary.withValues(alpha: 0.65),
+                          Colors.black.withValues(alpha: 0.55),
+                          Colors.black.withValues(alpha: 0.35),
                           Colors.transparent,
                         ],
                         stops: const [0.0, 0.55, 1.0],
