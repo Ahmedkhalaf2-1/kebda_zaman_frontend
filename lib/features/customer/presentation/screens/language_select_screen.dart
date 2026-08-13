@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 
@@ -74,22 +73,18 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
 
               const SizedBox(height: 36),
 
-              // Arabic Option Card (KSA Flag 🇸🇦)
+              // Arabic Option Card
               _buildLangCard(
                 langCode: 'ar',
-                flag: '🇸🇦',
-                imageUrl: 'https://flagcdn.com/w320/sa.png',
                 title: 'العربية',
                 subtitle: 'أصيل طعم الشارع المصري',
               ),
 
               const SizedBox(height: 16),
 
-              // English Option Card (USA Flag 🇺🇸)
+              // English Option Card
               _buildLangCard(
                 langCode: 'en',
-                flag: '🇺🇸',
-                imageUrl: 'https://flagcdn.com/w320/us.png',
                 title: 'English',
                 subtitle: 'Authentic Egyptian Street Food',
               ),
@@ -115,8 +110,6 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
 
   Widget _buildLangCard({
     required String langCode,
-    required String flag,
-    required String imageUrl,
     required String title,
     required String subtitle,
   }) {
@@ -154,29 +147,6 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
         ),
         child: Row(
           children: [
-            // Flag Image Box (w-14 h-10 / 56x40)
-            Container(
-              width: 56,
-              height: 40,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: KZ.outlineVariant.withValues(alpha: 0.4),
-                ),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Center(
-                  child: Text(flag, style: const TextStyle(fontSize: 24)),
-                ),
-                errorWidget: (context, url, err) => Center(
-                  child: Text(flag, style: const TextStyle(fontSize: 24)),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

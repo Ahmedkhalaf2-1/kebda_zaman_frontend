@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:lottie/lottie.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
@@ -18,32 +17,29 @@ import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 class _OnboardingPageData {
   final String titleKey;
   final String subKey;
-  final String? imageUrl;
+  final String? imageAsset;
   final String? lottieAsset;
   final List<({IconData? icon, String labelKey})> chips;
 
   const _OnboardingPageData({
     required this.titleKey,
     required this.subKey,
-    this.imageUrl,
+    this.imageAsset,
     this.lottieAsset,
     this.chips = const [],
   });
 }
 
-// TODO: replace with approved Kebda Zaman photography.
 const List<_OnboardingPageData> _kOnboardingPages = [
   _OnboardingPageData(
     titleKey: 'onboarding.page1_title',
     subKey: 'onboarding.page1_sub',
-    imageUrl:
-        'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',
+    imageAsset: 'assets/images/onboarding_page1.jpg',
   ),
   _OnboardingPageData(
     titleKey: 'onboarding.page2_title',
     subKey: 'onboarding.page2_sub',
-    imageUrl:
-        'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
+    imageAsset: 'assets/images/onboarding_page2.jpg',
     chips: [
       (
         icon: Icons.local_fire_department_rounded,
@@ -283,7 +279,7 @@ class _OnboardingPageViewState extends State<_OnboardingPageView> {
                     children: [
                       _HeroImageCard(
                         pageIndex: widget.pageIndex,
-                        imageUrl: data.imageUrl,
+                        imageAsset: data.imageAsset,
                         lottieAsset: data.lottieAsset,
                       ),
                       if (data.chips.isNotEmpty) ...[
@@ -339,12 +335,12 @@ class _OnboardingPageViewState extends State<_OnboardingPageView> {
 /// semantics tree; the page's title/subtitle already carry the meaning.
 class _HeroImageCard extends StatelessWidget {
   final int pageIndex;
-  final String? imageUrl;
+  final String? imageAsset;
   final String? lottieAsset;
 
   const _HeroImageCard({
     required this.pageIndex,
-    this.imageUrl,
+    this.imageAsset,
     this.lottieAsset,
   });
 
@@ -435,23 +431,10 @@ class _HeroImageCard extends StatelessWidget {
                     clipBehavior: Clip.antiAlias,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(KZ.radiusXl),
-                      child: CachedNetworkImage(
-                        imageUrl: imageUrl!,
+                      child: Image.asset(
+                        imageAsset!,
                         fit: BoxFit.cover,
-                        fadeInDuration: KZMotion.durationFor(
-                          context,
-                          KZMotion.standard,
-                        ),
-                        placeholder: (context, url) => Container(
-                          color: KZ.surfaceContainerLow,
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              color: KZ.primary,
-                              strokeWidth: 2.5,
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, err) => Container(
+                        errorBuilder: (context, error, stackTrace) => Container(
                           color: KZ.surfaceContainerLow,
                           child: const Center(
                             child: Icon(

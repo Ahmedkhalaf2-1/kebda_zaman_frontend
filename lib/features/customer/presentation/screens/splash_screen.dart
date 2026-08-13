@@ -17,8 +17,9 @@ class SplashScreen extends ConsumerStatefulWidget {
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnim;
+  late Animation<double> _logoScaleAnim;
   late Animation<double> _fadeAnim;
+  late Animation<double> _textSlideAnim;
 
   bool _minDurationElapsed = false;
   bool _hasNavigated = false;
@@ -28,21 +29,28 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: const Duration(milliseconds: 1600),
     );
 
-    _scaleAnim = CurvedAnimation(
+    _logoScaleAnim = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeOutBack,
+      curve: const Interval(0.0, 0.65, curve: Curves.easeOutBack),
     );
-    _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _fadeAnim = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+    );
+    _textSlideAnim = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.35, 1.0, curve: Curves.easeOutCubic),
+    );
 
     _controller.forward();
     _waitMinDuration();
   }
 
   Future<void> _waitMinDuration() async {
-    await Future.delayed(const Duration(milliseconds: 2400));
+    await Future.delayed(const Duration(milliseconds: 3000));
     if (!mounted) return;
     _minDurationElapsed = true;
     _maybeNavigate();
@@ -117,118 +125,102 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         bootstrapAsync.value == SessionBootstrapStatus.recoverableError;
 
     return Scaffold(
-      backgroundColor: KZ.surface,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [KZ.surface, KZ.primaryFixed],
-          ),
-        ),
-        child: Center(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return FadeTransition(
-                opacity: _fadeAnim,
-                child: ScaleTransition(
-                  scale: _scaleAnim,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Restaurant Emblem
-                      Container(
-                        width: 110,
-                        height: 110,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: KZ.primaryContainer,
-                            width: 3.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: KZ.primary.withOpacity(0.25),
-                              blurRadius: 24,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: const Center(
-                          child: KZBrandLogo(width: 72, height: 72),
-                        ),
-                      ),
-                      const SizedBox(height: KZ.sp24),
-
-                      const Text(
-                        'كبدة زمان',
-                        style: TextStyle(
-                          fontSize: 34,
-                          fontWeight: FontWeight.w900,
-                          color: KZ.primary,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: KZ.sp6),
-
-                      Text(
-                        'home.tagline'.tr(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: KZ.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: KZ.sp32),
-
-                      if (showRetry) ...[
-                        const Icon(
-                          Icons.wifi_off_rounded,
-                          size: 24,
-                          color: KZ.onSurfaceVariant,
-                        ),
-                        const SizedBox(height: KZ.sp12),
-                        const Text(
-                          'Could not reach the server',
-                          style: TextStyle(
-                            fontSize: 13,
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: ColoredBox(color: Colors.white)),
+          Center(
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _PulsingRingLogo(scaleAnim: _logoScaleAnim),
+                    const SizedBox(height: KZ.sp24),
+                    FadeTransition(
+                      opacity: _textSlideAnim,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.25),
+                          end: Offset.zero,
+                        ).animate(_textSlideAnim),
+                        child: Text(
+                          'home.tagline'.tr(),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                             color: KZ.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: KZ.sp12),
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: KZ.primary,
-                            foregroundColor: Colors.white,
-                            shape: const StadiumBorder(),
-                          ),
-                          onPressed: () => ref
-                              .read(sessionBootstrapProvider.notifier)
-                              .retry(),
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Retry'),
-                        ),
-                      ] else
-                        const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: KZ.primary,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                      ),
+                    ),
+                    const SizedBox(height: KZ.sp32),
+                    FadeTransition(
+                      opacity: _fadeAnim,
+                      child: showRetry
+                          ? Column(
+                              children: [
+                                const Icon(
+                                  Icons.wifi_off_rounded,
+                                  size: 24,
+                                  color: KZ.onSurfaceVariant,
+                                ),
+                                const SizedBox(height: KZ.sp12),
+                                const Text(
+                                  'Could not reach the server',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: KZ.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: KZ.sp12),
+                                ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: KZ.primary,
+                                    foregroundColor: Colors.white,
+                                    shape: const StadiumBorder(),
+                                  ),
+                                  onPressed: () => ref
+                                      .read(sessionBootstrapProvider.notifier)
+                                      .retry(),
+                                  icon: const Icon(Icons.refresh),
+                                  label: const Text('Retry'),
+                                ),
+                              ],
+                            )
+                          : const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: KZ.primary,
+                              ),
+                            ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
-        ),
+        ],
       ),
+    );
+  }
+}
+
+/// The brand mark, plain — no ring, no backing plate, just a scale-in
+/// entrance directly on the white splash background.
+class _PulsingRingLogo extends StatelessWidget {
+  final Animation<double> scaleAnim;
+
+  const _PulsingRingLogo({required this.scaleAnim});
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: scaleAnim,
+      child: const KZBrandLogo(width: 148, height: 148),
     );
   }
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches KZ.primary (lib/core/theme/kz_design_system.dart) so the
+         native pre-Flutter launch screen and the Flutter SplashScreen widget
+         read as one continuous red screen instead of a white/black flash
+         followed by a color change. -->
+    <color name="kz_primary">#FFE53935</color>
+</resources>
