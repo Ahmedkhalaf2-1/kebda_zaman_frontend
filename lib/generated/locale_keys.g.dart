@@ -882,7 +882,7 @@ abstract class  LocaleKeys {
   static const offers_delete_title = 'offers.delete_title';
   static const offers_delete_body = 'offers.delete_body';
   static const offers = 'offers';
-  static const menu_offers_title = 'menu_offers.title';
+  // static const menu_offers_title = 'menu_offers.title';
   static const menu_offers_add_offer = 'menu_offers.add_offer';
   static const menu_offers_edit_offer = 'menu_offers.edit_offer';
   static const menu_offers_create_offer = 'menu_offers.create_offer';
