@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +18,8 @@ import 'package:kebda_zaman/features/shared/domain/models/payment.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/saved_cards_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/screens/saved_card_3ds_screen.dart';
+
+const String _kApplePayMerchantId = 'merchant.com.kebdtzamanapp.app';
 
 /// Card checkout: creates the Moyasar payment intent for [order], hands it
 /// to the Moyasar SDK's card widget (which handles 3DS in-app when needed),
@@ -426,6 +430,14 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
         // the restaurant must accept the order before anything is captured.
         manual: providerData.manual,
       ),
+      applePay: moyasar.ApplePayConfig(
+        merchantId: _kApplePayMerchantId,
+        label: 'Kebda Zaman',
+        // Same authorize-only intent as the card path above — the
+        // restaurant still has to accept the order before capture.
+        manual: providerData.manual,
+        saveCard: false,
+      ),
     );
 
     final authState = ref.watch(authNotifierProvider);
@@ -476,6 +488,33 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
           const SizedBox(height: KZ.sp8),
         ] else
           const SizedBox(height: KZ.sp28),
+        if (!kIsWeb && Platform.isIOS) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: moyasar.ApplePay(
+              config: config,
+              onPaymentResult: _onPaymentResult,
+            ),
+          ),
+          const SizedBox(height: KZ.sp16),
+          Row(
+            children: [
+              Expanded(child: Divider(color: KZ.outlineVariant.withValues(alpha: 0.6))),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: KZ.sp10),
+                child: Text(
+                  'checkout.card_payment_or_new_card'.tr(),
+                  style: KZ.bodySmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+              Expanded(child: Divider(color: KZ.outlineVariant.withValues(alpha: 0.6))),
+            ],
+          ),
+          const SizedBox(height: KZ.sp16),
+        ],
         _SectionHeader(
           icon: Icons.credit_card_rounded,
           label: 'checkout.card_payment_new_card_title'.tr(),
