@@ -95,6 +95,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
               Container(
                 height: 64,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
+                alignment: AlignmentDirectional.centerStart,
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
@@ -103,34 +104,11 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
                     ),
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'nav.orders'.tr(),
-                      style: KZ.pageTitle.copyWith(
-                        color: KZ.primary, // #8c2b00
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () => context.go('/profile'),
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: KZ.primaryFixed.withValues(alpha: 0.3),
-                          border: Border.all(color: KZ.primary, width: 2),
-                        ),
-                        child: const Icon(
-                          Icons.person_rounded,
-                          color: KZ.primary,
-                          size: 22,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  'nav.orders'.tr(),
+                  style: KZ.pageTitle.copyWith(
+                    color: KZ.primary, // #8c2b00
+                  ),
                 ),
               ),
 

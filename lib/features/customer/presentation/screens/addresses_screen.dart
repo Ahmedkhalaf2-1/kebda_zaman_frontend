@@ -74,17 +74,22 @@ class AddressesScreen extends ConsumerWidget {
                 ],
               ),
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: KZ.primary,
-        foregroundColor: Colors.white,
-        elevation: 3,
-        icon: const Icon(Icons.add_location_alt_rounded),
-        label: Text(
-          'addresses.add'.tr(),
-          style: KZ.buttonLabel.copyWith(color: Colors.white),
-        ),
-        onPressed: () => context.push('/profile/addresses/add'),
-      ),
+      // Only shown once there's already a list to scroll through — the
+      // empty state above has its own inline "Add Address" action, so a
+      // second one floating over it would just be a redundant duplicate.
+      floatingActionButton: state.addresses.isEmpty
+          ? null
+          : FloatingActionButton.extended(
+              backgroundColor: KZ.primary,
+              foregroundColor: Colors.white,
+              elevation: 3,
+              icon: const Icon(Icons.add_location_alt_rounded),
+              label: Text(
+                'addresses.add'.tr(),
+                style: KZ.buttonLabel.copyWith(color: Colors.white),
+              ),
+              onPressed: () => context.push('/profile/addresses/add'),
+            ),
     );
   }
 }
