@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
-import 'kz_button.dart';
 
 /// A static placeholder block for skeleton loading layouts. Deliberately
 /// has no shimmer/pulse animation — Sprint 2 excludes decorative motion by
@@ -71,34 +70,10 @@ class KZEmptyState extends StatelessWidget {
                 ),
               )
             else
-              Container(
-                width: 110,
-                height: 110,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: KZ.primaryFixed.withValues(
-                    alpha: 0.4,
-                  ), // soft brand orange-100 tint
-                  border: Border.all(
-                    color: KZ.primary.withValues(alpha: 0.3),
-                    width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: KZ.primary.withValues(alpha: 0.08),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Icon(
-                    icon,
-                    size: 52,
-                    color:
-                        KZ.primary, // #8c2b00 (our signature terracotta primary!)
-                  ),
-                ),
+              Icon(
+                icon,
+                size: 64,
+                color: KZ.primary, // #8c2b00 (our signature terracotta primary!)
               ),
             const SizedBox(height: 24),
             Text(

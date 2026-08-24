@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
-import 'package:kebda_zaman/core/widgets/kz_brand_logo.dart';
 
 /// Cuts a shallow upward-bulging arc out of the top edge — the shape used
 /// by [KZAuthHeroScaffold]'s white panel so the solid-color hero behind it
@@ -97,14 +96,14 @@ class KZAuthHeroScaffold extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // Full-color brand mark, no backing plate — directly
-                      // on the solid-primary hero.
-                      const KZBrandLogo(width: 96, height: 96),
-                      const SizedBox(height: KZ.sp12),
-                      Text(
-                        'app_name'.tr(),
-                        textAlign: TextAlign.center,
-                        style: KZ.display.copyWith(color: Colors.white),
+                      // Full brand lockup (mark + app name + tagline already
+                      // baked into the artwork) — directly on the
+                      // solid-primary hero, no separate logo/text widgets.
+                      Image.asset(
+                        'assets/photos/auth_hero.png',
+                        height: 160,
+                        fit: BoxFit.contain,
+                        semanticLabel: 'app_name'.tr(),
                       ),
                       const SizedBox(height: KZ.sp6),
                       Text(

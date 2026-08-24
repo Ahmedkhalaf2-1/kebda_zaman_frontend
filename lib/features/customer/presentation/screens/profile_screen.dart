@@ -562,15 +562,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           child: Row(
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: KZ.primaryFixed.withValues(alpha: 0.45),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: KZ.primary, size: 18),
-              ),
+              Icon(icon, color: KZ.primary, size: 22),
               const SizedBox(width: 10),
               Flexible(
                 child: Text(

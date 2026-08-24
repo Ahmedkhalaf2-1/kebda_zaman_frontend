@@ -67,13 +67,12 @@ class KZSettingsDivider extends StatelessWidget {
   }
 }
 
-/// One navigable/tappable settings row: icon-in-circle, title, chevron.
+/// One navigable/tappable settings row: bare icon, title, chevron.
 class KZSettingsRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback onTap;
   final Color? iconColor;
-  final Color? iconBackground;
   final Color? titleColor;
   // Terminal actions (logout, delete account) aren't a drill-down to
   // another screen, so they don't get the chevron that implies one.
@@ -85,7 +84,6 @@ class KZSettingsRow extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.iconColor,
-    this.iconBackground,
     this.titleColor,
     this.showChevron = true,
   });
@@ -104,21 +102,7 @@ class KZSettingsRow extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color:
-                            iconBackground ??
-                            KZ.primaryFixed.withValues(alpha: 0.35),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        icon,
-                        color: iconColor ?? KZ.primary,
-                        size: 20,
-                      ),
-                    ),
+                    Icon(icon, color: iconColor ?? KZ.primary, size: 24),
                     const SizedBox(width: 14),
                     Flexible(
                       child: Text(

@@ -244,7 +244,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           KZSettingsRow(
             icon: isLoggedIn ? Icons.logout_rounded : Icons.login_rounded,
             title: isLoggedIn ? 'profile.logout'.tr() : 'auth.login_btn'.tr(),
-            iconBackground: const Color(0xFFFEE2E2),
             iconColor: KZ.primary,
             titleColor: KZ.primary,
             showChevron: false,
@@ -271,7 +270,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             KZSettingsRow(
               icon: Icons.delete_forever_rounded,
               title: 'delete_account.tile_title'.tr(),
-              iconBackground: const Color(0xFFFEE2E2),
               iconColor: KZ.error,
               titleColor: KZ.error,
               showChevron: false,
@@ -341,15 +339,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: KZ.primaryFixed.withValues(alpha: 0.35),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(_biometricIcon, color: KZ.primary, size: 20),
-          ),
+          Icon(_biometricIcon, color: KZ.primary, size: 24),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -403,19 +393,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         children: [
           Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: KZ.primaryFixed.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.language_rounded,
-                  color: KZ.primary,
-                  size: 20,
-                ),
-              ),
+              const Icon(Icons.language_rounded, color: KZ.primary, size: 24),
               const SizedBox(width: 14),
               Flexible(
                 child: Text(
