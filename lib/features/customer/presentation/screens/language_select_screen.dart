@@ -135,15 +135,6 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
                 : KZ.outlineVariant.withValues(alpha: 0.35),
             width: isSelected ? 2.0 : 1.0,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: isSelected
-                  ? KZ.primary.withValues(alpha: 0.12)
-                  : Colors.black.withValues(alpha: 0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Row(
           children: [
@@ -251,15 +242,6 @@ class _PulseEmblemState extends State<_PulseEmblem>
                   color: Colors.white,
                   shape: BoxShape.circle,
                   border: Border.all(color: KZ.primary, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: KZ.primary.withValues(
-                        alpha: 0.1 + (0.12 * _controller.value),
-                      ),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
                 child: const Center(
                   child: Icon(
