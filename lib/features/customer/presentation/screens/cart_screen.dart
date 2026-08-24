@@ -505,8 +505,9 @@ class _RowIconAction extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
-        child: Padding(
-          padding: const EdgeInsets.all(6),
+        child: SizedBox(
+          width: KZ.iconTapTargetMin,
+          height: KZ.iconTapTargetMin,
           child: Icon(
             icon,
             size: 18,

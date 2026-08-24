@@ -59,6 +59,14 @@ class ProductGridCard extends StatelessWidget {
           // finite and bounded, so division is safe.
           final cardH = constraints.maxHeight;
           final imageH = cardH * 0.70;
+          // Real available width for the name/price block, matching the
+          // 12/58 horizontal padding below. FittedBox measures its child
+          // unconstrained, so without this the block's "natural" width
+          // is dictated by whichever line is longest when laid out on one
+          // line — typically the description — which drags the shrink
+          // factor (and therefore every line's on-screen size, including
+          // the title and price) down far more than actually needed.
+          final infoW = constraints.maxWidth - 12 - 58;
 
           return Stack(
             children: [
@@ -100,49 +108,50 @@ class ProductGridCard extends StatelessWidget {
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: AlignmentDirectional.topStart,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              item.localizedName(lang),
-                              style: KZ.itemTitle,
-                              maxLines: hasSubtitle ? 1 : 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (hasSubtitle) ...[
-                              const SizedBox(height: 2),
+                        child: SizedBox(
+                          width: infoW,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
                               Text(
-                                subtitle!,
-                                style: KZ.bodySmall,
+                                item.localizedName(lang),
+                                style: KZ.itemTitle,
+                                maxLines: hasSubtitle ? 1 : 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (hasSubtitle) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  subtitle!,
+                                  style: KZ.bodySmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                              const SizedBox(height: 4),
+                              if (hasDiscount)
+                                MenuItemComparePriceText(
+                                  compareAtPrice: item.basePrice,
+                                  style: KZ.bodySmall.copyWith(color: KZ.error),
+                                ),
+                              if (showDiscountPricing &&
+                                  item.compareAtPrice != null &&
+                                  item.compareAtPrice! > item.basePrice)
+                                MenuItemComparePriceText(
+                                  compareAtPrice: item.compareAtPrice!,
+                                ),
+                              Text(
+                                formatCurrency(
+                                  effectivePrice,
+                                  locale: context.locale,
+                                ),
+                                style: KZ.price,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ],
-                            const SizedBox(height: 4),
-                            if (hasDiscount)
-                              MenuItemComparePriceText(
-                                compareAtPrice: item.basePrice,
-                                style: KZ.bodySmall.copyWith(
-                                  color: KZ.error,
-                                ),
-                              ),
-                            if (showDiscountPricing &&
-                                item.compareAtPrice != null &&
-                                item.compareAtPrice! > item.basePrice)
-                              MenuItemComparePriceText(
-                                compareAtPrice: item.compareAtPrice!,
-                              ),
-                            Text(
-                              formatCurrency(
-                                effectivePrice,
-                                locale: context.locale,
-                              ),
-                              style: KZ.price,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),

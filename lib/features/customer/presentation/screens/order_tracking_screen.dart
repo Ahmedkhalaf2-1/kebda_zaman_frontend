@@ -484,6 +484,8 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                           children: [
                             Text(
                               item.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
