@@ -86,6 +86,14 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
+  # Force CocoaPods-only iOS/macOS dependency integration. Some plugins used
+  # here (flutter_local_notifications, google_maps_flutter_ios) don't support
+  # Swift Package Manager yet, and this project's Xcode target isn't wired
+  # for SPM package references, so mixing the two leaves SPM-capable plugins
+  # (e.g. firebase_auth) unlinked, causing "Module 'X' not found" in Xcode.
+  config:
+    enable-swift-package-manager: false
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

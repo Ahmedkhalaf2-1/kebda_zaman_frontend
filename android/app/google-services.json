@@ -31,10 +31,10 @@
               "client_type": 3
             },
             {
-              "client_id": "168591231387-ljkisv2knf0a1cmgv1v5l75o7lgae1br.apps.googleusercontent.com",
+              "client_id": "168591231387-7su05cc20ro9ui0ig7c784a15cv5220k.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.kebdaZaman"
+                "bundle_id": "com.kebdtzaman.app"
               }
             }
           ]
@@ -50,11 +50,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "168591231387-vm7jpemmmtg9tpgumijisqkr932ve4go.apps.googleusercontent.com",
+          "client_id": "168591231387-19s8dnivb230ac57gs5mmo5lq7le70ie.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.kebdtzaman.app",
-            "certificate_hash": "df316ebe6c2ffa05a92351642b8b55dbad938521"
+            "certificate_hash": "3f0f22126656d9e4b5e8584f9edb6eadf794ee51"
           }
         },
         {
@@ -75,10 +75,10 @@
               "client_type": 3
             },
             {
-              "client_id": "168591231387-ljkisv2knf0a1cmgv1v5l75o7lgae1br.apps.googleusercontent.com",
+              "client_id": "168591231387-7su05cc20ro9ui0ig7c784a15cv5220k.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.kebdaZaman"
+                "bundle_id": "com.kebdtzaman.app"
               }
             }
           ]

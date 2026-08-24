@@ -59,11 +59,11 @@ class DefaultFirebaseOptions {
   );
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDxFTS2dJy5HX3lpnpRQQ6NXwvY2KnedGw',
-    appId: '1:168591231387:ios:ceb4fe71d1511a7542793e',
+    appId: '1:168591231387:ios:ac1e9497760e974a42793e',
     messagingSenderId: '168591231387',
     projectId: 'keebda-zaman',
     storageBucket: 'keebda-zaman.firebasestorage.app',
-    iosBundleId: 'com.kebdtzaman.app',
+    iosBundleId: 'com.kebdtzamanapp.app',
   );
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyDxFTS2dJy5HX3lpnpRQQ6NXwvY2KnedGw',
