@@ -10,6 +10,7 @@ import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/admin/presentation/screens/admin_food_form_screen.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
+import 'package:kebda_zaman/features/shared/domain/models/menu_offer.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/menu_repository.dart';
 import 'package:kebda_zaman/generated/codegen_loader.g.dart';
 
@@ -54,6 +55,9 @@ class _SpyMenuRepository implements MenuRepository {
 
   @override
   Future<Result<void>> deleteMenuItem(String id) async =>
+      throw UnimplementedError();
+  @override
+  Future<Result<List<MenuOffer>>> getMenuOffers() async =>
       throw UnimplementedError();
   @override
   Future<Result<void>> createCategory(Category category) async =>
