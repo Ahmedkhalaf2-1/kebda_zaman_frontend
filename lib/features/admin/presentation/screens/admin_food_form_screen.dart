@@ -560,6 +560,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       value: _selectedCategory,
+                      isExpanded: true,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: KZ.surface,
@@ -882,6 +883,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
           DropdownButtonFormField<MenuItemBadge?>(
             key: const Key('badge_dropdown'),
             value: _selectedBadge,
+            isExpanded: true,
             decoration: InputDecoration(
               filled: true,
               fillColor: KZ.surface,

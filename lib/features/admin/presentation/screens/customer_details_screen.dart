@@ -348,12 +348,16 @@ class _RecentOrderTile extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      '#${order.orderNumber}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: KZ.onSurface,
+                    Flexible(
+                      child: Text(
+                        '#${order.orderNumber}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: KZ.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 8),
