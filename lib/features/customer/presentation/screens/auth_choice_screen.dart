@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/widgets/kz_brand_logo.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 
@@ -39,38 +40,8 @@ class AuthChoiceScreen extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Brand Logo Section (w-32 h-32 / 128x128 white box with subtle peach border and shadow)
-                      Container(
-                        width: 128,
-                        height: 128,
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: const Color(0xFFFEF2E0),
-                            width: 1.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: KZ.primary.withValues(alpha: 0.12),
-                              blurRadius: 25,
-                              offset: const Offset(0, 10),
-                            ),
-                            BoxShadow(
-                              color: KZ.primary.withValues(alpha: 0.08),
-                              blurRadius: 10,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: CustomPaint(
-                            size: const Size(64, 64),
-                            painter: _KebdaLogoPainter(),
-                          ),
-                        ),
-                      ),
+                      // Brand Logo Section — the shared full-color mark, no plate/shadow behind it.
+                      const KZBrandLogo(width: 128, height: 128),
 
                       const SizedBox(height: 56),
 
@@ -163,54 +134,4 @@ class AuthChoiceScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// Renders the exact SVG heritage food / cloche house icon from the HTML design.
-class _KebdaLogoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = KZ
-          .primary // #8c2b00
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final fillPaint = Paint()
-      ..color = KZ.primary
-      ..style = PaintingStyle.fill;
-
-    // The original SVG viewBox is 0 0 24 24.
-    // We scale it to fit the container size (e.g., 64x64).
-    final scale = size.width / 24.0;
-    canvas.save();
-    canvas.scale(scale, scale);
-
-    final path = Path()
-      ..moveTo(17, 2)
-      ..lineTo(10, 9)
-      ..moveTo(17, 2)
-      ..cubicTo(18.6569, 2, 20, 3.34315, 20, 5)
-      ..cubicTo(20, 6.65685, 18.6569, 8, 17, 8)
-      ..lineTo(10, 9)
-      ..moveTo(17, 2)
-      ..lineTo(17, 5)
-      ..moveTo(10, 9)
-      ..lineTo(4, 15)
-      ..lineTo(4, 21)
-      ..lineTo(7, 21)
-      ..lineTo(10, 18)
-      ..lineTo(13, 21)
-      ..lineTo(16, 21)
-      ..lineTo(16, 15)
-      ..lineTo(10, 9);
-
-    canvas.drawPath(path, paint);
-    canvas.drawCircle(const Offset(7, 11), 2.0, fillPaint);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

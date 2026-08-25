@@ -125,9 +125,7 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected
-              ? KZ.primaryContainer.withValues(alpha: 0.1)
-              : Colors.white,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isSelected
