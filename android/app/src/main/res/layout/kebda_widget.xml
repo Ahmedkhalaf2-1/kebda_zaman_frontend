@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Kebda Zaman home-screen widget.
+  content_area holds two mutually-exclusive sections toggled from Kotlin:
+    - order_section: status headline, ETA, 4-node sequence tracker.
+    - loyalty_section: points balance, shown when there is no active order.
+  Both sit inside a weighted, vertically-centered container so whichever one
+  is visible reads as centered in the available space (loyalty especially —
+  its number is intentionally large since it has no other content to share
+  the widget with). The bottom action pill's label switches between
+  "Track Order" and "Order Now" based on mode.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/kebda_widget_background"
+    android:padding="14dp">
+
+    <!-- Header: logo + name -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:src="@mipmap/ic_launcher" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Kebda Zaman"
+            android:textColor="@color/kz_on_surface"
+            android:textStyle="bold"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Shared, vertically-centered content area -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <!-- Order section -->
+        <LinearLayout
+            android:id="@+id/order_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/order_status_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/kz_on_surface"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:src="@drawable/ic_widget_clock" />
+
+                <TextView
+                    android:id="@+id/order_eta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:textColor="@color/kz_on_surface_variant"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- 4-node sequence tracker: circle-line-circle-line-circle-line-
+                 circle, each node/segment individually recolored from
+                 Kotlin based on how far the order has progressed, matching
+                 the reference design's step line (not a single fill bar). -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/step_node_0"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp" />
+
+                    <TextView
+                        android:id="@+id/step_line_0"
+                        android:layout_width="0dp"
+                        android:layout_height="2dp"
+                        android:layout_weight="1" />
+
+                    <ImageView
+                        android:id="@+id/step_node_1"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp" />
+
+                    <TextView
+                        android:id="@+id/step_line_1"
+                        android:layout_width="0dp"
+                        android:layout_height="2dp"
+                        android:layout_weight="1" />
+
+                    <ImageView
+                        android:id="@+id/step_node_2"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp" />
+
+                    <TextView
+                        android:id="@+id/step_line_2"
+                        android:layout_width="0dp"
+                        android:layout_height="2dp"
+                        android:layout_weight="1" />
+
+                    <ImageView
+                        android:id="@+id/step_node_3"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/step_percent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/kebda_widget_percent_chip"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:textColor="@color/kz_primary"
+                    android:textStyle="bold"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/step_label_0"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:textSize="9sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/step_label_1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textSize="9sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/step_label_2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textSize="9sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/step_label_3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textSize="9sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Loyalty section: the only content when there's no active order,
+             so it's set large and centered rather than reusing the smaller
+             inline treatment from the order section. -->
+        <LinearLayout
+            android:id="@+id/loyalty_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/loyalty_points"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/kz_primary"
+                android:textStyle="bold"
+                android:textSize="36sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Loyalty Points"
+                android:textColor="@color/kz_on_surface_variant"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/order_now_button"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="@drawable/kebda_widget_button"
+        android:gravity="center"
+        android:textAllCaps="false"
+        android:textColor="@color/kz_surface"
+        android:textStyle="bold"
+        android:textSize="13sp" />
+
+</LinearLayout>

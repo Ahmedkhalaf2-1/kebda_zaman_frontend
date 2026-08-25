@@ -5,4 +5,12 @@
          read as one continuous red screen instead of a white/black flash
          followed by a color change. -->
     <color name="kz_primary">#FFE53935</color>
+    <!-- Widget-only additions, mirrored from KZ design tokens
+         (lib/core/theme/kz_design_system.dart) for the home-screen widget. -->
+    <color name="kz_primary_container">#FFEF5350</color>
+    <color name="kz_surface">#FFFFFFFF</color>
+    <color name="kz_surface_container_low">#FFF4F4F0</color>
+    <color name="kz_on_surface">#FF1B1C1A</color>
+    <color name="kz_on_surface_variant">#FF594139</color>
+    <color name="kz_outline_variant">#FFE1BFB5</color>
 </resources>

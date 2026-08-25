@@ -35,6 +35,13 @@ class KZBrandLogo extends StatelessWidget {
   /// Padding between the optional background edge and the image.
   final EdgeInsetsGeometry padding;
 
+  /// Optional flat tint for the mark itself (e.g. `Colors.white` on a solid
+  /// hero background) — recolors every opaque pixel to this color via
+  /// [BlendMode.srcIn], collapsing the source PNG's own colors. Leave
+  /// `null` (the default, used everywhere except the auth hero) to render
+  /// the logo in its normal full color.
+  final Color? color;
+
   const KZBrandLogo({
     super.key,
     this.width,
@@ -44,6 +51,7 @@ class KZBrandLogo extends StatelessWidget {
     this.circular = false,
     this.borderRadius,
     this.padding = EdgeInsets.zero,
+    this.color,
   });
 
   @override
@@ -53,6 +61,8 @@ class KZBrandLogo extends StatelessWidget {
       width: width,
       height: height,
       fit: BoxFit.contain,
+      color: color,
+      colorBlendMode: color == null ? null : BlendMode.srcIn,
       semanticLabel: semanticLabel ?? 'app_name'.tr(),
     );
 

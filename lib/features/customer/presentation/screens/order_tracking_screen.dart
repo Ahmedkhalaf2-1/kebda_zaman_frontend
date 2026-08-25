@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
+import 'package:kebda_zaman/core/home_widget/home_widget_service.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
@@ -98,6 +99,12 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
       final nextStatus = next.valueOrNull?.status;
       if (nextStatus != null && nextStatus != previousStatus) {
         ref.invalidate(ordersProvider);
+      }
+      // Keeps the home-screen widget's ETA/progress current every ~10s
+      // while this screen is open, rather than only on status changes.
+      final nextOrder = next.valueOrNull;
+      if (nextOrder != null && !nextOrder.status.isTerminal) {
+        HomeWidgetService.instance.syncOrder(nextOrder);
       }
     });
 

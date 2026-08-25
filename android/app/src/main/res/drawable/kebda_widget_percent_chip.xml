@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tinted chip behind the tracker's percent-complete label. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/kz_surface_container_low" />
+    <corners android:radius="999dp" />
+</shape>

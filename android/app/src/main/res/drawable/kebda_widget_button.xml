@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pill button, matches KZ.filledButtonTheme (app.dart): primary fill, full radius. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/kz_primary" />
+    <corners android:radius="999dp" />
+</shape>

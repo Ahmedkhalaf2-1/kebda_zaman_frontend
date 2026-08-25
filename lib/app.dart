@@ -1,22 +1,55 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
+import 'package:home_widget/home_widget.dart';
 import 'core/router/router.dart';
 import 'core/theme/kz_design_system.dart';
 import 'core/widgets/kz_responsive_wrapper.dart';
 import 'core/di/providers.dart';
 import 'core/session/session_coordinator.dart';
+import 'core/home_widget/home_widget_service.dart';
+import 'core/home_widget/home_widget_sync_provider.dart';
 import 'features/customer/presentation/notifiers/session_bootstrap_notifier.dart';
 
 import 'core/notifications/notification_navigation_service.dart';
 import 'core/notifications/notification_service.dart';
 
-class KebdaZamanApp extends ConsumerWidget {
+class KebdaZamanApp extends ConsumerStatefulWidget {
   const KebdaZamanApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<KebdaZamanApp> createState() => _KebdaZamanAppState();
+}
+
+class _KebdaZamanAppState extends ConsumerState<KebdaZamanApp> {
+  StreamSubscription<Uri?>? _widgetClickSub;
+
+  /// Routes a tap on the home-screen widget (or the app's cold-start-from-
+  /// widget launch) to the target screen, mirroring how push-notification
+  /// taps are handled by NotificationNavigationService.
+  void _listenForWidgetTaps(GoRouter router) {
+    _widgetClickSub ??= HomeWidget.widgetClicked.listen(
+      (uri) => HomeWidgetService.instance.handleWidgetUri(uri, router),
+    );
+    HomeWidget.initiallyLaunchedFromHomeWidget().then(
+      (uri) => HomeWidgetService.instance.handleWidgetUri(uri, router),
+    );
+  }
+
+  @override
+  void dispose() {
+    _widgetClickSub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final goRouter = ref.watch(routerProvider);
+    ref.watch(homeWidgetSyncProvider);
+    _listenForWidgetTaps(goRouter);
     // Locale-driven type system: Arabic renders in Alexandria, everything
     // else in Plus Jakarta Sans. Applying it via ThemeData.fontFamily lets
     // every TextTheme role (and any KZ.* style that leaves fontFamily unset)

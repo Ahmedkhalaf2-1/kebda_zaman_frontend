@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget card surface, matches KZ.cardDecoration (kz_design_system.dart). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/kz_surface" />
+    <corners android:radius="20dp" />
+</shape>

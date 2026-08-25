@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  30 minutes is the Android-enforced minimum for updatePeriodMillis; this is
+  only a passive fallback refresh. Real-time updates are pushed from Flutter
+  via HomeWidget.updateWidget() whenever order status or loyalty points
+  change while the app is open (see home_widget_service.dart).
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/kebda_widget"
+    android:previewLayout="@layout/kebda_widget"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" />
