@@ -75,7 +75,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await prefs.setBool('kz_onboarding_completed', true);
 
     if (mounted) {
-      context.go('/auth-choice');
+      context.go('/home');
     }
   }
 
