@@ -96,14 +96,42 @@ class _OrderReviewBody extends StatelessWidget {
           const SizedBox(height: KZ.sp12),
         ],
         const SizedBox(height: KZ.sp16),
-        Text('reviews.overall_experience'.tr(), style: KZ.sectionTitle),
-        const SizedBox(height: 4),
-        Text(
-          'reviews.overall_experience_sub'.tr(),
-          style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
+        Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: KZ.sp16,
+            horizontal: KZ.sp16,
+          ),
+          decoration: BoxDecoration(
+            color: KZ.primary.withValues(alpha: 0.04), // Very subtle background
+            borderRadius: BorderRadius.circular(KZ.radiusLg),
+            border: Border.all(color: KZ.primary.withValues(alpha: 0.1)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.stars_rounded, color: KZ.primary, size: 24),
+                  const SizedBox(width: 8),
+                  Text(
+                    'reviews.overall_experience'.tr(),
+                    style: KZ.sectionTitle,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'reviews.overall_experience_sub'.tr(),
+                style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
+              ),
+              const SizedBox(height: KZ.sp16),
+              _OrderFeedbackCard(
+                orderId: orderId,
+                existing: data.orderFeedback,
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: KZ.sp12),
-        _OrderFeedbackCard(orderId: orderId, existing: data.orderFeedback),
       ],
     );
   }
@@ -229,34 +257,82 @@ class _ItemReviewCardState extends ConsumerState<_ItemReviewCard> {
             ],
           ),
           const SizedBox(height: KZ.sp12),
-          Text('reviews.your_rating'.tr(), style: KZ.label),
-          const SizedBox(height: 4),
-          KZStarRating(
-            rating: _rating,
-            onChanged: (value) => setState(() => _rating = value),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('reviews.your_rating'.tr(), style: KZ.label),
+                  const SizedBox(height: 6),
+                  KZStarRating(
+                    rating: _rating,
+                    onChanged: (value) => setState(() => _rating = value),
+                  ),
+                ],
+              ),
+              if (_hasExistingReview)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: KZ.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(KZ.radiusSm),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        size: 14,
+                        color: KZ.primary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'reviews.saved'.tr(),
+                        style: KZ.caption.copyWith(
+                          color: KZ.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(height: KZ.sp12),
+          const SizedBox(height: KZ.sp16),
           TextField(
             controller: _commentController,
-            maxLines: 3,
+            minLines: 1,
+            maxLines: 4,
             decoration: InputDecoration(
               labelText:
                   '${'reviews.tell_us_about_food'.tr()} (${'reviews.optional'.tr()})',
+              alignLabelWithHint: true,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(KZ.radiusMd),
               ),
+              filled: true,
+              fillColor: KZ.surfaceContainerLow,
             ),
           ),
-          const SizedBox(height: KZ.sp12),
+          const SizedBox(height: KZ.sp16),
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: KZButton(
               label: _hasExistingReview
-                  ? 'reviews.save_changes'.tr()
+                  ? 'reviews.update_review'
+                        .tr() // More accurate than save_changes?
                   : 'reviews.submit_review'.tr(),
               loading: _isSubmitting,
               onPressed: _rating < 1 ? null : _submit,
-              pill: false,
+              variant: _hasExistingReview
+                  ? KZButtonVariant.secondary
+                  : KZButtonVariant.primary,
+              pill: true,
             ),
           ),
         ],
@@ -348,33 +424,74 @@ class _OrderFeedbackCardState extends ConsumerState<_OrderFeedbackCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          KZStarRating(
-            rating: _rating,
-            onChanged: (value) => setState(() => _rating = value),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              KZStarRating(
+                rating: _rating,
+                onChanged: (value) => setState(() => _rating = value),
+              ),
+              if (_hasExisting)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: KZ.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(KZ.radiusSm),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        size: 14,
+                        color: KZ.primary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'reviews.saved'.tr(),
+                        style: KZ.caption.copyWith(
+                          color: KZ.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(height: KZ.sp12),
+          const SizedBox(height: KZ.sp16),
           TextField(
             controller: _commentController,
-            maxLines: 3,
+            minLines: 1,
+            maxLines: 4,
             decoration: InputDecoration(
               labelText:
                   '${'reviews.overall_comment_hint'.tr()} (${'reviews.optional'.tr()})',
+              alignLabelWithHint: true,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(KZ.radiusMd),
               ),
+              filled: true,
+              fillColor: KZ.surfaceContainerLow,
             ),
           ),
-          const SizedBox(height: KZ.sp12),
+          const SizedBox(height: KZ.sp16),
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: KZButton(
               label: _hasExisting
-                  ? 'reviews.save_changes'.tr()
+                  ? 'reviews.update_review'.tr()
                   : 'reviews.submit_review'.tr(),
               loading: _isSubmitting,
               onPressed: _rating < 1 ? null : _submit,
-              variant: KZButtonVariant.secondary,
-              pill: false,
+              variant: _hasExisting
+                  ? KZButtonVariant.secondary
+                  : KZButtonVariant.primary,
+              pill: true,
             ),
           ),
         ],

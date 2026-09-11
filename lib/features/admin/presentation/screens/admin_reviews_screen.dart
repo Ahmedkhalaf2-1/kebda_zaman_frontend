@@ -141,28 +141,38 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return KZCard(
+      padding: const EdgeInsets.all(KZ.sp16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: KZ.primary, size: KZ.iconControl),
-          const SizedBox(height: KZ.sp8),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(value, style: KZ.sectionTitle),
-              const SizedBox(width: 4),
+              Icon(icon, color: KZ.primary, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: KZ.label.copyWith(color: KZ.onSurfaceVariant),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: KZ.sp12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(value, style: KZ.display.copyWith(fontSize: 32)),
+              const SizedBox(width: 6),
               const Icon(
                 Icons.star_rounded,
-                size: 16,
+                size: 24,
                 color: Color(0xFFF6A609),
               ),
             ],
           ),
-          Text(
-            label,
-            style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
-            maxLines: 2,
-          ),
+          const SizedBox(height: 4),
           Text(subValue, style: KZ.caption),
         ],
       ),
@@ -214,25 +224,29 @@ class _DistributionRow extends StatelessWidget {
     final fraction = maxCount <= 0 ? 0.0 : count / maxCount;
     return Row(
       children: [
-        Text('$star', style: KZ.bodySmall),
+        Text('$star', style: KZ.body.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(width: 4),
-        const Icon(Icons.star_rounded, size: 12, color: Color(0xFFF6A609)),
-        const SizedBox(width: 8),
+        const Icon(Icons.star_rounded, size: 14, color: Color(0xFFF6A609)),
+        const SizedBox(width: 12),
         Expanded(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(KZ.radiusSm),
             child: LinearProgressIndicator(
               value: fraction,
-              minHeight: 8,
-              backgroundColor: KZ.surfaceContainer,
+              minHeight: 10,
+              backgroundColor: KZ.surfaceContainer, // or highest
               color: KZ.primary,
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 12),
         SizedBox(
-          width: 28,
-          child: Text('$count', style: KZ.bodySmall, textAlign: TextAlign.end),
+          width: 32,
+          child: Text(
+            '$count',
+            style: KZ.bodySmall.copyWith(color: KZ.onSurfaceVariant),
+            textAlign: TextAlign.end,
+          ),
         ),
       ],
     );
@@ -273,14 +287,33 @@ class _TopRatedRow extends StatelessWidget {
                 name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: KZ.body,
+                style: KZ.body.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
-            const Icon(Icons.star_rounded, size: 16, color: Color(0xFFF6A609)),
-            const SizedBox(width: 4),
-            Text(
-              '${item.averageRating.toStringAsFixed(1)} (${item.reviewCount})',
-              style: KZ.bodySmall,
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.star_rounded,
+                      size: 16,
+                      color: Color(0xFFF6A609),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      item.averageRating.toStringAsFixed(1),
+                      style: KZ.body.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+                Text(
+                  '(${item.reviewCount})',
+                  style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
+                ),
+              ],
             ),
           ],
         ),
@@ -313,23 +346,46 @@ class _RecentReviewRow extends StatelessWidget {
                     style: KZ.body.copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
-                KZStarRating(rating: review.rating, size: 16),
+                KZStarRating(rating: review.rating, size: 18),
               ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              'admin_reviews.order_ref'.tr(
-                namedArgs: {
-                  'orderNumber': review.order.orderNumber,
-                  'customerName': review.customer.fullName,
-                },
-              ),
-              style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'admin_reviews.order_ref'.tr(
+                    namedArgs: {
+                      'orderNumber': review.order.orderNumber,
+                      'customerName': review.customer.fullName,
+                    },
+                  ),
+                  style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
+                ),
+                Text(
+                  DateFormat.yMMMd(
+                    context.locale.languageCode,
+                  ).add_jm().format(review.createdAt),
+                  style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
+                ),
+              ],
             ),
             if (review.comment != null &&
                 review.comment!.trim().isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(review.comment!, style: KZ.bodySmall),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: KZ.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(KZ.radiusSm),
+                  border: Border.all(color: KZ.outline.withOpacity(0.3)),
+                ),
+                child: Text(
+                  review.comment!,
+                  style: KZ.bodySmall.copyWith(fontStyle: FontStyle.italic),
+                ),
+              ),
             ],
           ],
         ),

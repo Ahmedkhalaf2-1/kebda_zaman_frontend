@@ -16,7 +16,7 @@ class KZStarRating extends StatelessWidget {
     super.key,
     required this.rating,
     this.onChanged,
-    this.size = 28,
+    this.size = 32, // slightly larger default size for better interaction
   });
 
   @override
@@ -27,16 +27,36 @@ class KZStarRating extends StatelessWidget {
       children: List.generate(5, (i) {
         final starValue = i + 1;
         final filled = starValue <= rating;
-        final icon = Icon(
-          filled ? Icons.star_rounded : Icons.star_outline_rounded,
-          size: size,
-          color: filled ? _kStarColor : KZ.outline,
+
+        final icon = AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: (child, animation) {
+            return ScaleTransition(
+              scale: Tween<double>(begin: 0.8, end: 1.0).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+              ),
+              child: child,
+            );
+          },
+          child: Icon(
+            filled ? Icons.star_rounded : Icons.star_outline_rounded,
+            key: ValueKey<bool>(filled),
+            size: size,
+            color: filled
+                ? _kStarColor
+                : KZ.outline.withValues(alpha: 0.5), // Lighter unselected
+          ),
         );
+
         if (!interactive) return icon;
+
         return InkWell(
           customBorder: const CircleBorder(),
           onTap: () => onChanged!(starValue),
-          child: Padding(padding: const EdgeInsets.all(2), child: icon),
+          child: Padding(
+            padding: const EdgeInsets.all(6), // Better touch target
+            child: icon,
+          ),
         );
       }),
     );
@@ -65,19 +85,23 @@ class KZMenuItemRatingBadge extends StatelessWidget {
     if (reviewCount <= 0) {
       return Text(
         noRatingsLabel,
-        style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
+        style: KZ.bodySmall.copyWith(
+          color: KZ.onSurfaceVariant,
+          fontStyle: FontStyle.italic,
+        ),
       );
     }
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Icon(Icons.star_rounded, size: 16, color: _kStarColor),
-        const SizedBox(width: 2),
+        const Icon(Icons.star_rounded, size: 18, color: _kStarColor),
+        const SizedBox(width: 4),
         Text(
           ratedLabelBuilder(averageRating, reviewCount),
-          style: KZ.caption.copyWith(
+          style: KZ.body.copyWith(
             color: KZ.onSurface,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700, // Make it pop a bit more
           ),
         ),
       ],

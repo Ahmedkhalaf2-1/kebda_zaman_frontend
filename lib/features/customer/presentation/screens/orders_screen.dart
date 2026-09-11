@@ -502,8 +502,9 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                           if (canReview)
                             KZButton(
                               label: 'orders.rate_order'.tr(),
-                              icon: Icons.star_outline_rounded,
-                              variant: KZButtonVariant.tertiary,
+                              icon: Icons.stars_rounded,
+                              variant: KZButtonVariant
+                                  .secondary, // More visible than tertiary
                               pill: false,
                               onPressed: () =>
                                   context.push('/orders/review/${order.id}'),
