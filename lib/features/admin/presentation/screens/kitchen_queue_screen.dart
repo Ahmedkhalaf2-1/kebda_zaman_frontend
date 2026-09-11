@@ -49,7 +49,8 @@ class KitchenQueueScreen extends ConsumerWidget {
             Expanded(
               child: RefreshIndicator(
                 color: KZ.primary,
-                onRefresh: () => ref.refresh(kitchenQueueProvider.future),
+                onRefresh: () =>
+                    ref.read(kitchenQueueProvider.notifier).refresh(),
                 child: queueAsync.when(
                   loading: () => const Center(
                     child: CircularProgressIndicator(color: KZ.primary),

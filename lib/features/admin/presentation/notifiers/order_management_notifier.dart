@@ -1,17 +1,32 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/errors/result.dart';
+import 'package:kebda_zaman/core/providers/polling_notifier_mixin.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 
-class OrderManagementNotifier extends AutoDisposeAsyncNotifier<List<Order>> {
+class OrderManagementNotifier extends AutoDisposeAsyncNotifier<List<Order>>
+    with PollingNotifierMixin<List<Order>> {
   final Set<String> _updatingOrders = {};
 
   @override
   Future<List<Order>> build() async {
+    final orders = await fetchLatest();
+    startPolling();
+    return orders;
+  }
+
+  @override
+  Future<List<Order>> fetchLatest() async {
     final repo = ref.read(orderRepositoryProvider);
     final result = await repo.getAllOrders();
     return result.fold((l) => throw l, (r) => r);
   }
+
+  // Skip applying a background poll tick while a status update is in
+  // flight — its optimistic/pending state must win over a same-moment poll
+  // that could still be carrying pre-mutation data.
+  @override
+  bool get skipNextPollApply => _updatingOrders.isNotEmpty;
 
   /// Re-fetches the order list, e.g. for pull-to-refresh, so newly created
   /// orders show up without having to leave and re-enter the screen.
@@ -48,7 +63,9 @@ class OrderManagementNotifier extends AutoDisposeAsyncNotifier<List<Order>> {
 
       // Optimistic update
       state = AsyncData(
-        currentOrders.map((o) => o.id == orderId ? optimisticOrder : o).toList(),
+        currentOrders
+            .map((o) => o.id == orderId ? optimisticOrder : o)
+            .toList(),
       );
 
       final Result<Order> result = await repo.updateOrderStatus(
