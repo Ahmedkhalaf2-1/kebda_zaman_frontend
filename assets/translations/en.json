@@ -5,7 +5,6 @@
     "menu": "Menu",
     "cart": "Cart",
     "orders": "Orders",
-    "reviews": "Reviews",
     "profile": "Profile",
     "search": "Search",
     "dashboard": "Dashboard",
@@ -928,7 +927,10 @@
     "top_selling_items": "Top-Selling Items",
     "quantity_sold": "sold",
     "no_analytics_data": "No analytics data",
-    "failed_to_load": "Failed to load dashboard data"
+    "failed_to_load": "Failed to load dashboard data",
+    "operations_snapshot": "Operations Snapshot",
+    "manage_reviews": "Manage Reviews & Ratings",
+    "view_all": "View All"
   },
   "offers": {
     "title": "Promo Codes",
@@ -952,7 +954,7 @@
     "delete_body": "Delete {code}? This cannot be undone."
   },
   "menu_offers": {
-    "title": "Menu Offers",
+    "page_title": "Menu Offers",
     "add_offer": "Add Menu Offer",
     "edit_offer": "Edit Menu Offer",
     "create_offer": "Create Offer",
@@ -1122,5 +1124,21 @@
     "error_active_order": "Your account can't be deleted while you have an active order. Please wait until it's completed, picked up, or cancelled, then try again.",
     "error_firebase": "We couldn't complete the deletion due to a service error. Please try again.",
     "error_generic": "Something went wrong while deleting your account. Please try again."
+  },
+  "reviews": {
+    "no_ratings_yet": "☆ No ratings yet",
+    "rating_compact": "★ {rating} ({count})"
+  },
+  "admin_reviews": {
+    "title": "Ratings & Reviews",
+    "item_reviews_average": "Item Reviews Average",
+    "review_count": "Based on {count} reviews",
+    "order_feedback_average": "Order Feedback Average",
+    "rating_distribution": "Rating Distribution",
+    "top_rated": "Top Rated Items",
+    "lowest_rated": "Lowest Rated Items",
+    "recent_reviews": "Recent Reviews",
+    "no_data": "No data available",
+    "unknown_item": "Unknown Item"
   }
 }

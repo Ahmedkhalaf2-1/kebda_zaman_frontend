@@ -6,6 +6,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_star_rating.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_reviews_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/review.dart';
 
@@ -49,76 +50,96 @@ class _AdminReviewsContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncRecent = ref.watch(adminItemReviewsProvider);
 
-    return ListView(
-      padding: const EdgeInsets.all(KZ.screenPadding),
+    return Column(
       children: [
-        Text('admin_reviews.title'.tr(), style: KZ.pageTitle),
-        const SizedBox(height: KZ.sp16),
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                label: 'admin_reviews.item_reviews_average'.tr(),
-                value: summary.itemReviews.averageRating.toStringAsFixed(1),
-                subValue: 'admin_reviews.review_count'.tr(
-                  namedArgs: {'count': '${summary.itemReviews.reviewCount}'},
-                ),
-                icon: Icons.rate_review_rounded,
+        AdminPageHeader(title: 'admin_reviews.title'.tr()),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.all(KZ.screenPadding),
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _MetricCard(
+                      label: 'admin_reviews.item_reviews_average'.tr(),
+                      value: summary.itemReviews.averageRating.toStringAsFixed(
+                        1,
+                      ),
+                      subValue: 'admin_reviews.review_count'.tr(
+                        namedArgs: {
+                          'count': '${summary.itemReviews.reviewCount}',
+                        },
+                      ),
+                      icon: Icons.rate_review_rounded,
+                    ),
+                  ),
+                  const SizedBox(width: KZ.sp12),
+                  Expanded(
+                    child: _MetricCard(
+                      label: 'admin_reviews.order_feedback_average'.tr(),
+                      value: summary.orderFeedback.averageRating
+                          .toStringAsFixed(1),
+                      subValue: 'admin_reviews.review_count'.tr(
+                        namedArgs: {
+                          'count': '${summary.orderFeedback.reviewCount}',
+                        },
+                      ),
+                      icon: Icons.reviews_rounded,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: KZ.sp12),
-            Expanded(
-              child: _MetricCard(
-                label: 'admin_reviews.order_feedback_average'.tr(),
-                value: summary.orderFeedback.averageRating.toStringAsFixed(1),
-                subValue: 'admin_reviews.review_count'.tr(
-                  namedArgs: {'count': '${summary.orderFeedback.reviewCount}'},
-                ),
-                icon: Icons.reviews_rounded,
+              const SizedBox(height: KZ.sp24),
+              Text(
+                'admin_reviews.rating_distribution'.tr(),
+                style: KZ.sectionTitle,
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: KZ.sp24),
-        Text('admin_reviews.rating_distribution'.tr(), style: KZ.sectionTitle),
-        const SizedBox(height: KZ.sp12),
-        _RatingDistributionBars(distribution: summary.ratingDistribution),
-        const SizedBox(height: KZ.sp24),
-        Text('admin_reviews.top_rated'.tr(), style: KZ.sectionTitle),
-        const SizedBox(height: KZ.sp12),
-        if (summary.topRatedItems.isEmpty)
-          _EmptyRow(text: 'admin_reviews.no_data'.tr())
-        else
-          for (final item in summary.topRatedItems) _TopRatedRow(item: item),
-        const SizedBox(height: KZ.sp24),
-        Text('admin_reviews.lowest_rated'.tr(), style: KZ.sectionTitle),
-        const SizedBox(height: KZ.sp12),
-        if (summary.lowestRatedItems.isEmpty)
-          _EmptyRow(text: 'admin_reviews.no_data'.tr())
-        else
-          for (final item in summary.lowestRatedItems) _TopRatedRow(item: item),
-        const SizedBox(height: KZ.sp24),
-        Text('admin_reviews.recent_reviews'.tr(), style: KZ.sectionTitle),
-        const SizedBox(height: KZ.sp12),
-        asyncRecent.when(
-          data: (reviews) {
-            final recent = [...reviews]
-              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            final top = recent.take(10).toList();
-            if (top.isEmpty) {
-              return _EmptyRow(text: 'admin_reviews.no_data'.tr());
-            }
-            return Column(
-              children: [
-                for (final review in top) _RecentReviewRow(review: review),
-              ],
-            );
-          },
-          loading: () => const Padding(
-            padding: EdgeInsets.symmetric(vertical: KZ.sp16),
-            child: Center(child: CircularProgressIndicator(color: KZ.primary)),
+              const SizedBox(height: KZ.sp12),
+              _RatingDistributionBars(distribution: summary.ratingDistribution),
+              const SizedBox(height: KZ.sp24),
+              Text('admin_reviews.top_rated'.tr(), style: KZ.sectionTitle),
+              const SizedBox(height: KZ.sp12),
+              if (summary.topRatedItems.isEmpty)
+                _EmptyRow(text: 'admin_reviews.no_data'.tr())
+              else
+                for (final item in summary.topRatedItems)
+                  _TopRatedRow(item: item),
+              const SizedBox(height: KZ.sp24),
+              Text('admin_reviews.lowest_rated'.tr(), style: KZ.sectionTitle),
+              const SizedBox(height: KZ.sp12),
+              if (summary.lowestRatedItems.isEmpty)
+                _EmptyRow(text: 'admin_reviews.no_data'.tr())
+              else
+                for (final item in summary.lowestRatedItems)
+                  _TopRatedRow(item: item),
+              const SizedBox(height: KZ.sp24),
+              Text('admin_reviews.recent_reviews'.tr(), style: KZ.sectionTitle),
+              const SizedBox(height: KZ.sp12),
+              asyncRecent.when(
+                data: (reviews) {
+                  final recent = [...reviews]
+                    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                  final top = recent.take(10).toList();
+                  if (top.isEmpty) {
+                    return _EmptyRow(text: 'admin_reviews.no_data'.tr());
+                  }
+                  return Column(
+                    children: [
+                      for (final review in top)
+                        _RecentReviewRow(review: review),
+                    ],
+                  );
+                },
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: KZ.sp16),
+                  child: Center(
+                    child: CircularProgressIndicator(color: KZ.primary),
+                  ),
+                ),
+                error: (_, __) => _EmptyRow(text: 'admin_reviews.no_data'.tr()),
+              ),
+            ],
           ),
-          error: (_, __) => _EmptyRow(text: 'admin_reviews.no_data'.tr()),
         ),
       ],
     );
@@ -379,7 +400,7 @@ class _RecentReviewRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: KZ.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(KZ.radiusSm),
-                  border: Border.all(color: KZ.outline.withOpacity(0.3)),
+                  border: Border.all(color: KZ.outline.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   review.comment!,

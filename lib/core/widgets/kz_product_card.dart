@@ -6,6 +6,7 @@ import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_lottie_add_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_lottie_heart_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
+import 'package:kebda_zaman/core/widgets/kz_star_rating.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 
 /// The one shared product grid card — used by both Home's Best Sellers and
@@ -129,6 +130,19 @@ class ProductGridCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ],
+                              const SizedBox(height: 4),
+                              KZMenuItemRatingBadge(
+                                averageRating: item.averageRating,
+                                reviewCount: item.reviewCount,
+                                noRatingsLabel: 'reviews.no_ratings_yet'.tr(),
+                                ratedLabelBuilder: (rating, count) =>
+                                    'reviews.rating_compact'.tr(
+                                      namedArgs: {
+                                        'rating': rating.toStringAsFixed(1),
+                                        'count': count.toString(),
+                                      },
+                                    ),
+                              ),
                               const SizedBox(height: 4),
                               if (hasDiscount)
                                 MenuItemComparePriceText(

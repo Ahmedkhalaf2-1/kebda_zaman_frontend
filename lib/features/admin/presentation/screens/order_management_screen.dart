@@ -11,6 +11,7 @@ import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_notification_notifier.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/order_management_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/screens/admin_order_details_screen.dart'
     show paymentMethodLabel;
 
@@ -48,8 +49,12 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
       backgroundColor: KZ.surfaceContainerLow,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
+            AdminPageHeader(
+              title: 'admin.orders'.tr(),
+              trailingActions: [_NotificationAction()],
+            ),
             _buildTabs(),
             Expanded(
               child: stateAsync.when(
@@ -105,90 +110,6 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Quick Order creation modal')),
-          );
-        },
-        backgroundColor: KZ.primaryContainer,
-        elevation: 6,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
-      ),
-    );
-  }
-
-  /// Page title only — the Kebda Zaman brand mark already lives in the
-  /// admin shell's sidebar/drawer, so repeating it here was redundant.
-  /// Notification access stays, but visually secondary (plain muted icon,
-  /// no filled circular chrome) rather than competing with the page title.
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 12, 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              'admin.orders'.tr(),
-              style: KZ.pageTitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              IconButton(
-                onPressed: () => context.push('/admin/order-notifications'),
-                icon: const Icon(
-                  Icons.notifications_none_rounded,
-                  color: KZ.onSurfaceVariant,
-                  size: 22,
-                ),
-              ),
-              Positioned(
-                top: 6,
-                right: 6,
-                child: Consumer(
-                  builder: (context, ref, _) {
-                    final unreadCount =
-                        ref
-                            .watch(adminUnreadNotificationCountProvider)
-                            .valueOrNull ??
-                        0;
-                    if (unreadCount <= 0) return const SizedBox.shrink();
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 1,
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: KZ.error,
-                        borderRadius: BorderRadius.circular(KZ.radiusFull),
-                        border: Border.all(color: KZ.surfaceContainerLow, width: 1.5),
-                      ),
-                      child: Text(
-                        unreadCount > 99 ? '99+' : '$unreadCount',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -250,6 +171,54 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
   }
 }
 
+class _NotificationAction extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconButton(
+          onPressed: () => context.push('/admin/order-notifications'),
+          icon: const Icon(
+            Icons.notifications_none_rounded,
+            color: KZ.onSurfaceVariant,
+            size: 22,
+          ),
+        ),
+        Positioned(
+          top: 6,
+          right: 6,
+          child: Consumer(
+            builder: (context, ref, _) {
+              final unreadCount =
+                  ref.watch(adminUnreadNotificationCountProvider).valueOrNull ??
+                  0;
+              if (unreadCount <= 0) return const SizedBox.shrink();
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                decoration: BoxDecoration(
+                  color: KZ.error,
+                  borderRadius: BorderRadius.circular(KZ.radiusFull),
+                  border: Border.all(color: KZ.surfaceContainerLow, width: 1.5),
+                ),
+                child: Text(
+                  unreadCount > 99 ? '99+' : '$unreadCount',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 /// One order, redesigned for fast scanning: order number + status up top,
 /// customer/type/chevron next, then a compact price/time/payment meta line.
@@ -353,7 +322,10 @@ class _OrderCard extends ConsumerWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        formatCurrency(order.grandTotal, locale: context.locale),
+                        formatCurrency(
+                          order.grandTotal,
+                          locale: context.locale,
+                        ),
                         style: KZ.price,
                       ),
                       Text(timeStr, style: KZ.bodySmall),

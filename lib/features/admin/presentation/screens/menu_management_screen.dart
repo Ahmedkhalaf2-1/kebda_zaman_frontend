@@ -10,6 +10,7 @@ import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 
 const double _kTabletBreakpoint = 700;
 const double _kDesktopBreakpoint = 1200;
@@ -121,90 +122,75 @@ class _MenuManagementScreenState extends ConsumerState<MenuManagementScreen> {
   /// they never compete with it. No brand logo/name block: the admin shell's
   /// sidebar/drawer already carries that.
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              'admin.menu'.tr(),
-              style: KZ.pageTitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+    return AdminPageHeader(
+      title: 'admin.menu'.tr(),
+      trailingActions: [
+        IconButton(
+          onPressed: () {
+            setState(() {
+              _isSearching = !_isSearching;
+              if (!_isSearching) _searchQuery = '';
+            });
+          },
+          icon: Icon(
+            _isSearching ? Icons.close_rounded : Icons.search_rounded,
+            color: KZ.onSurfaceVariant,
+            size: 22,
           ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) _searchQuery = '';
-              });
-            },
-            icon: Icon(
-              _isSearching ? Icons.close_rounded : Icons.search_rounded,
-              color: KZ.onSurfaceVariant,
-              size: 22,
-            ),
+        ),
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert_rounded, color: KZ.onSurfaceVariant),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(KZ.radiusMd),
           ),
-          PopupMenuButton<String>(
-            icon: const Icon(
-              Icons.more_vert_rounded,
-              color: KZ.onSurfaceVariant,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(KZ.radiusMd),
-            ),
-            onSelected: (val) async {
-              if (val == 'clear') {
-                final confirm = await showDialog<bool>(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: Text('admin.clear_menu_title'.tr()),
-                    content: Text('admin.clear_menu_body'.tr()),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: Text('common.cancel'.tr()),
-                      ),
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: KZ.error,
-                        ),
-                        onPressed: () => Navigator.pop(ctx, true),
-                        child: Text('admin.clear_all'.tr()),
-                      ),
-                    ],
-                  ),
-                );
-                if (confirm == true) {
-                  await ref.read(menuAdminProvider.notifier).clearAllMenuData();
-                }
-              }
-            },
-            itemBuilder: (ctx) => [
-              PopupMenuItem(
-                value: 'clear',
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.delete_sweep_rounded,
-                      color: KZ.error,
-                      size: 20,
+          onSelected: (val) async {
+            if (val == 'clear') {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: Text('admin.clear_menu_title'.tr()),
+                  content: Text('admin.clear_menu_body'.tr()),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: Text('common.cancel'.tr()),
                     ),
-                    const SizedBox(width: KZ.sp8),
-                    Text(
-                      'admin.clear_all'.tr(),
-                      style: const TextStyle(color: KZ.error),
+                    FilledButton(
+                      style: FilledButton.styleFrom(backgroundColor: KZ.error),
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: Text('admin.clear_all'.tr()),
                     ),
                   ],
                 ),
+              );
+              if (confirm == true) {
+                await ref.read(menuAdminProvider.notifier).clearAllMenuData();
+              }
+            }
+          },
+          itemBuilder: (ctx) => [
+            PopupMenuItem(
+              value: 'clear',
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.delete_sweep_rounded,
+                    color: KZ.error,
+                    size: 20,
+                  ),
+                  const SizedBox(width: KZ.sp8),
+                  Text(
+                    'admin.clear_all'.tr(),
+                    style: const TextStyle(color: KZ.error),
+                  ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(width: KZ.sp4),
-          _AddItemButton(onPressed: () => context.push('/admin/menu/add')),
-        ],
-      ),
+            ),
+          ],
+        ),
+        const SizedBox(width: KZ.sp4),
+        _AddItemButton(onPressed: () => context.push('/admin/menu/add')),
+      ],
     );
   }
 
@@ -388,7 +374,8 @@ class _ItemCard extends ConsumerWidget {
     final isAvailable = item.isAvailable;
     final hasMeta =
         item.badge != null ||
-        (item.compareAtPrice != null && item.compareAtPrice! > item.basePrice) ||
+        (item.compareAtPrice != null &&
+            item.compareAtPrice! > item.basePrice) ||
         item.calories != null;
 
     return Container(
@@ -485,7 +472,7 @@ class _ItemCard extends ConsumerWidget {
                   scale: 0.8,
                   child: Switch(
                     value: item.isAvailable,
-                    activeColor: KZ.tertiary,
+                    activeThumbColor: KZ.tertiary,
                     onChanged: (val) {
                       ref
                           .read(menuAdminProvider.notifier)

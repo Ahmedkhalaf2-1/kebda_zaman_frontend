@@ -7,6 +7,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/menu_offers_admin_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/admin_person_card.dart'
     show AdminStatusPill;
 import 'package:kebda_zaman/features/shared/domain/models/menu_offer.dart';
@@ -20,60 +21,65 @@ class MenuOffersScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: KZ.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: KZ.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: Text('menu_offers.title'.tr(), style: KZ.pageTitle),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: KZ.sp16),
-            child: _AddOfferButton(
-              onPressed: () => context.push('/admin/menu-offers/add'),
-            ),
-          ),
-        ],
-      ),
-      body: stateAsync.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator(color: KZ.primary)),
-        error: (e, st) => KZErrorState(
-          message: 'offers.load_error'.tr(),
-          retryLabel: 'common.retry'.tr(),
-          onRetry: () => ref.invalidate(menuOffersAdminProvider),
-        ),
-        data: (offers) {
-          if (offers.isEmpty) {
-            return KZEmptyState(
-              icon: Icons.local_offer_outlined,
-              title: 'menu_offers.empty_title'.tr(),
-              message: 'menu_offers.empty_message'.tr(),
-              actionLabel: 'menu_offers.add_offer'.tr(),
-              onAction: () => context.push('/admin/menu-offers/add'),
-            );
-          }
-          final sorted = [...offers]
-            ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-          return RefreshIndicator(
-            color: KZ.primary,
-            onRefresh: () async => ref.invalidate(menuOffersAdminProvider),
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              itemCount: sorted.length,
-              itemBuilder: (context, index) => _OfferCard(
-                offer: sorted[index],
-                onEdit: () => context.push(
-                  '/admin/menu-offers/edit',
-                  extra: sorted[index],
+      body: SafeArea(
+        child: Column(
+          children: [
+            AdminPageHeader(
+              title: 'menu_offers.page_title'.tr(),
+              trailingActions: [
+                _AddOfferButton(
+                  onPressed: () => context.push('/admin/menu-offers/add'),
                 ),
-                onToggle: () => ref
-                    .read(menuOffersAdminProvider.notifier)
-                    .toggleOfferActive(sorted[index]),
-                onDelete: () => _confirmDelete(context, ref, sorted[index]),
+              ],
+            ),
+            Expanded(
+              child: stateAsync.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: KZ.primary),
+                ),
+                error: (e, st) => KZErrorState(
+                  message: 'offers.load_error'.tr(),
+                  retryLabel: 'common.retry'.tr(),
+                  onRetry: () => ref.invalidate(menuOffersAdminProvider),
+                ),
+                data: (offers) {
+                  if (offers.isEmpty) {
+                    return KZEmptyState(
+                      icon: Icons.local_offer_outlined,
+                      title: 'menu_offers.empty_title'.tr(),
+                      message: 'menu_offers.empty_message'.tr(),
+                      actionLabel: 'menu_offers.add_offer'.tr(),
+                      onAction: () => context.push('/admin/menu-offers/add'),
+                    );
+                  }
+                  final sorted = [...offers]
+                    ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+                  return RefreshIndicator(
+                    color: KZ.primary,
+                    onRefresh: () async =>
+                        ref.invalidate(menuOffersAdminProvider),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                      itemCount: sorted.length,
+                      itemBuilder: (context, index) => _OfferCard(
+                        offer: sorted[index],
+                        onEdit: () => context.push(
+                          '/admin/menu-offers/edit',
+                          extra: sorted[index],
+                        ),
+                        onToggle: () => ref
+                            .read(menuOffersAdminProvider.notifier)
+                            .toggleOfferActive(sorted[index]),
+                        onDelete: () =>
+                            _confirmDelete(context, ref, sorted[index]),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
@@ -84,9 +90,7 @@ class MenuOffersScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('menu_offers.delete_title'.tr()),
-        content: Text(
-          'menu_offers.delete_body'.tr(namedArgs: {'name': label}),
-        ),
+        content: Text('menu_offers.delete_body'.tr(namedArgs: {'name': label})),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -188,10 +192,7 @@ class _OfferCard extends StatelessWidget {
     final (statusLabel, statusColor) = switch (status) {
       MenuOfferStatus.active => ('offers.active'.tr(), KZ.tertiary),
       MenuOfferStatus.inactive => ('offers.inactive'.tr(), KZ.secondary),
-      MenuOfferStatus.scheduled => (
-        'menu_offers.scheduled'.tr(),
-        KZ.primary,
-      ),
+      MenuOfferStatus.scheduled => ('menu_offers.scheduled'.tr(), KZ.primary),
       MenuOfferStatus.expired => ('offers.expired'.tr(), KZ.secondary),
     };
 

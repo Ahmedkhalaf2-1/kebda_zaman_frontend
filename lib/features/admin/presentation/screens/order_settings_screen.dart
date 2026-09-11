@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_settings_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/admin_settings_sections.dart';
 import 'package:kebda_zaman/features/shared/domain/models/restaurant_settings.dart';
 
@@ -50,7 +51,10 @@ class _OrderSettingsScreenState extends ConsumerState<OrderSettingsScreen> {
     _initialized = true;
   }
 
-  Future<void> _save(RestaurantSettings current, {bool? overrideAccepting}) async {
+  Future<void> _save(
+    RestaurantSettings current, {
+    bool? overrideAccepting,
+  }) async {
     setState(() => _isSaving = true);
     try {
       final updated = current.copyWith(
@@ -117,31 +121,35 @@ class _OrderSettingsScreenState extends ConsumerState<OrderSettingsScreen> {
 
     return Scaffold(
       backgroundColor: KZ.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: KZ.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: Text('nav.order_settings'.tr(), style: KZ.pageTitle),
-      ),
-      body: stateAsync.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator(color: KZ.primary)),
-        error: (e, st) => KZErrorState(
-          message: 'common.something_wrong'.tr(),
-          retryLabel: 'common.retry'.tr(),
-          onRetry: () => ref.invalidate(adminSettingsProvider),
+      body: SafeArea(
+        child: Column(
+          children: [
+            AdminPageHeader(title: 'nav.order_settings'.tr()),
+            Expanded(
+              child: stateAsync.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: KZ.primary),
+                ),
+                error: (e, st) => KZErrorState(
+                  message: 'common.something_wrong'.tr(),
+                  retryLabel: 'common.retry'.tr(),
+                  onRetry: () => ref.invalidate(adminSettingsProvider),
+                ),
+                data: (settings) {
+                  _initFields(settings);
+                  return AdminSettingsAcceptanceSection(
+                    acceptingOrders: _acceptingOrders,
+                    closedMessageArCtrl: _closedMessageArCtrl,
+                    closedMessageEnCtrl: _closedMessageEnCtrl,
+                    isSaving: _isSaving,
+                    onToggle: (v) => _confirmAndSaveAcceptance(settings, v),
+                    onSaveMessages: () => _save(settings),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
-        data: (settings) {
-          _initFields(settings);
-          return AdminSettingsAcceptanceSection(
-            acceptingOrders: _acceptingOrders,
-            closedMessageArCtrl: _closedMessageArCtrl,
-            closedMessageEnCtrl: _closedMessageEnCtrl,
-            isSaving: _isSaving,
-            onToggle: (v) => _confirmAndSaveAcceptance(settings, v),
-            onSaveMessages: () => _save(settings),
-          );
-        },
       ),
     );
   }

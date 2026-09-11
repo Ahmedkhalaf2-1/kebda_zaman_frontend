@@ -5,7 +5,6 @@
     "menu": "المنيو",
     "cart": "السلة",
     "orders": "طلباتي",
-    "reviews": "التقييمات",
     "profile": "حسابي",
     "search": "بحث",
     "dashboard": "لوحة التحكم",
@@ -928,7 +927,10 @@
     "top_selling_items": "الأصناف الأكثر مبيعاً",
     "quantity_sold": "مباع",
     "no_analytics_data": "لا توجد بيانات تحليلية",
-    "failed_to_load": "تعذر تحميل بيانات اللوحة"
+    "failed_to_load": "تعذر تحميل بيانات اللوحة",
+    "operations_snapshot": "نظرة عامة على العمليات",
+    "manage_reviews": "إدارة التقييمات والمراجعات",
+    "view_all": "عرض الكل"
   },
   "offers": {
     "title": "أكواد الخصم",
@@ -952,7 +954,7 @@
     "delete_body": "حذف {code}؟ لا يمكن التراجع عن هذا الإجراء."
   },
   "menu_offers": {
-    "title": "عروض المنيو",
+    "page_title": "عروض المنيو",
     "add_offer": "إضافة عرض منيو",
     "edit_offer": "تعديل عرض المنيو",
     "create_offer": "إنشاء العرض",
@@ -1122,5 +1124,21 @@
     "error_active_order": "لا يمكن حذف حسابك أثناء وجود طلب نشط. يرجى الانتظار حتى يكتمل الطلب أو يتم استلامه أو إلغاؤه، ثم المحاولة مرة أخرى.",
     "error_firebase": "تعذر إتمام الحذف بسبب خطأ في الخدمة. يرجى المحاولة مرة أخرى.",
     "error_generic": "حدث خطأ ما أثناء حذف حسابك. يرجى المحاولة مرة أخرى."
+  },
+  "reviews": {
+    "no_ratings_yet": "☆ لا توجد تقييمات",
+    "rating_compact": "★ {rating} ({count})"
+  },
+  "admin_reviews": {
+    "title": "التقييمات والمراجعات",
+    "item_reviews_average": "متوسط تقييمات الأصناف",
+    "review_count": "بناءً على {count} تقييمات",
+    "order_feedback_average": "متوسط ملاحظات الطلبات",
+    "rating_distribution": "توزيع التقييمات",
+    "top_rated": "الأصناف الأعلى تقييماً",
+    "lowest_rated": "الأصناف الأقل تقييماً",
+    "recent_reviews": "أحدث التقييمات",
+    "no_data": "لا تتوفر بيانات",
+    "unknown_item": "صنف غير معروف"
   }
 }

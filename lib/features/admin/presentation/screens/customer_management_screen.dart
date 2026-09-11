@@ -10,6 +10,7 @@ import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/domain/models/customer_summary.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/customer_management_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/admin_person_card.dart';
 
 class CustomerManagementScreen extends ConsumerStatefulWidget {
@@ -58,110 +59,107 @@ class _CustomerManagementScreenState
 
     return Scaffold(
       backgroundColor: KZ.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: KZ.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: Text('customers.title'.tr(), style: KZ.pageTitle),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
-            child: TextField(
-              controller: _searchCtrl,
-              onChanged: _onSearchChanged,
-              decoration: KZ.searchInputDecoration(
-                hint: 'customers.search_hint'.tr(),
+      body: SafeArea(
+        child: Column(
+          children: [
+            AdminPageHeader(title: 'customers.title'.tr()),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
+              child: TextField(
+                controller: _searchCtrl,
+                onChanged: _onSearchChanged,
+                decoration: KZ.searchInputDecoration(
+                  hint: 'customers.search_hint'.tr(),
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Wrap(
-              spacing: KZ.sp8,
-              runSpacing: KZ.sp8,
-              children: [
-                KZChip(
-                  label: 'customers.filter_all'.tr(),
-                  selected: listAsync.valueOrNull?.isActiveFilter == null,
-                  onTap: () => ref
-                      .read(customerListProvider.notifier)
-                      .setActiveFilter(null),
-                ),
-                KZChip(
-                  label: 'customers.active'.tr(),
-                  selected: listAsync.valueOrNull?.isActiveFilter == true,
-                  onTap: () => ref
-                      .read(customerListProvider.notifier)
-                      .setActiveFilter(true),
-                ),
-                KZChip(
-                  label: 'customers.inactive'.tr(),
-                  selected: listAsync.valueOrNull?.isActiveFilter == false,
-                  onTap: () => ref
-                      .read(customerListProvider.notifier)
-                      .setActiveFilter(false),
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Wrap(
+                spacing: KZ.sp8,
+                runSpacing: KZ.sp8,
+                children: [
+                  KZChip(
+                    label: 'customers.filter_all'.tr(),
+                    selected: listAsync.valueOrNull?.isActiveFilter == null,
+                    onTap: () => ref
+                        .read(customerListProvider.notifier)
+                        .setActiveFilter(null),
+                  ),
+                  KZChip(
+                    label: 'customers.active'.tr(),
+                    selected: listAsync.valueOrNull?.isActiveFilter == true,
+                    onTap: () => ref
+                        .read(customerListProvider.notifier)
+                        .setActiveFilter(true),
+                  ),
+                  KZChip(
+                    label: 'customers.inactive'.tr(),
+                    selected: listAsync.valueOrNull?.isActiveFilter == false,
+                    onTap: () => ref
+                        .read(customerListProvider.notifier)
+                        .setActiveFilter(false),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: KZ.sp8),
-          Expanded(
-            child: listAsync.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(color: KZ.primary),
-              ),
-              error: (e, st) => KZErrorState(
-                message: 'common.something_wrong'.tr(),
-                retryLabel: 'common.retry'.tr(),
-                onRetry: () => ref.invalidate(customerListProvider),
-              ),
-              data: (listState) {
-                if (listState.customers.isEmpty) {
-                  return KZEmptyState(
-                    icon: Icons.groups_outlined,
-                    title: 'customers.empty'.tr(),
-                  );
-                }
-                return RefreshIndicator(
-                  color: KZ.primary,
-                  onRefresh: () => ref.refresh(customerListProvider.future),
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                    itemCount:
-                        listState.customers.length +
-                        (listState.isLoadingMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index >= listState.customers.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: KZ.primary,
+            const SizedBox(height: KZ.sp8),
+            Expanded(
+              child: listAsync.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: KZ.primary),
+                ),
+                error: (e, st) => KZErrorState(
+                  message: 'common.something_wrong'.tr(),
+                  retryLabel: 'common.retry'.tr(),
+                  onRetry: () => ref.invalidate(customerListProvider),
+                ),
+                data: (listState) {
+                  if (listState.customers.isEmpty) {
+                    return KZEmptyState(
+                      icon: Icons.groups_outlined,
+                      title: 'customers.empty'.tr(),
+                    );
+                  }
+                  return RefreshIndicator(
+                    color: KZ.primary,
+                    onRefresh: () => ref.refresh(customerListProvider.future),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                      itemCount:
+                          listState.customers.length +
+                          (listState.isLoadingMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index >= listState.customers.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: KZ.primary,
+                                ),
                               ),
                             ),
-                          ),
+                          );
+                        }
+                        final customer = listState.customers[index];
+                        return _CustomerCard(
+                          customer: customer,
+                          onTap: () =>
+                              context.push('/admin/customers/${customer.id}'),
                         );
-                      }
-                      final customer = listState.customers[index];
-                      return _CustomerCard(
-                        customer: customer,
-                        onTap: () =>
-                            context.push('/admin/customers/${customer.id}'),
-                      );
-                    },
-                  ),
-                );
-              },
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -185,10 +183,7 @@ class _CustomerCard extends StatelessWidget {
       onTap: onTap,
       badges: [
         if (customer.isGuest)
-          AdminStatusPill(
-            label: 'customers.guest'.tr(),
-            color: KZ.secondary,
-          ),
+          AdminStatusPill(label: 'customers.guest'.tr(), color: KZ.secondary),
         AdminStatusPill(
           label: customer.isActive
               ? 'customers.active'.tr()
@@ -204,10 +199,7 @@ class _CustomerCard extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: KZ.label,
       ),
-      trailing: const Icon(
-        Icons.chevron_right_rounded,
-        color: KZ.outline,
-      ),
+      trailing: const Icon(Icons.chevron_right_rounded, color: KZ.outline),
     );
   }
 }

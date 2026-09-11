@@ -7,6 +7,7 @@ import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/offers_admin_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/admin_person_card.dart';
 import 'package:kebda_zaman/features/shared/domain/models/promo_code.dart';
 
@@ -19,57 +20,61 @@ class OffersManagementScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: KZ.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: KZ.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: Text('offers.title'.tr(), style: KZ.pageTitle),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: KZ.sp16),
-            child: _AddPromoButton(
-              onPressed: () => context.push('/admin/offers/add'),
-            ),
-          ),
-        ],
-      ),
-      body: stateAsync.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator(color: KZ.primary)),
-        error: (e, st) => KZErrorState(
-          message: 'offers.load_error'.tr(),
-          retryLabel: 'common.retry'.tr(),
-          onRetry: () => ref.invalidate(offersAdminProvider),
-        ),
-        data: (promos) {
-          if (promos.isEmpty) {
-            return KZEmptyState(
-              icon: Icons.local_offer_outlined,
-              title: 'offers.empty'.tr(),
-              actionLabel: 'offers.add_promo'.tr(),
-              onAction: () => context.push('/admin/offers/add'),
-            );
-          }
-          return RefreshIndicator(
-            color: KZ.primary,
-            onRefresh: () async => ref.invalidate(offersAdminProvider),
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              itemCount: promos.length,
-              itemBuilder: (context, index) => _PromoCard(
-                promo: promos[index],
-                onEdit: () => context.push(
-                  '/admin/offers/edit',
-                  extra: promos[index],
+      body: SafeArea(
+        child: Column(
+          children: [
+            AdminPageHeader(
+              title: 'offers.title'.tr(),
+              trailingActions: [
+                _AddPromoButton(
+                  onPressed: () => context.push('/admin/offers/add'),
                 ),
-                onToggle: () => ref
-                    .read(offersAdminProvider.notifier)
-                    .togglePromoAvailability(promos[index]),
-                onDelete: () => _confirmDelete(context, ref, promos[index]),
+              ],
+            ),
+            Expanded(
+              child: stateAsync.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: KZ.primary),
+                ),
+                error: (e, st) => KZErrorState(
+                  message: 'offers.load_error'.tr(),
+                  retryLabel: 'common.retry'.tr(),
+                  onRetry: () => ref.invalidate(offersAdminProvider),
+                ),
+                data: (promos) {
+                  if (promos.isEmpty) {
+                    return KZEmptyState(
+                      icon: Icons.local_offer_outlined,
+                      title: 'offers.empty'.tr(),
+                      actionLabel: 'offers.add_promo'.tr(),
+                      onAction: () => context.push('/admin/offers/add'),
+                    );
+                  }
+                  return RefreshIndicator(
+                    color: KZ.primary,
+                    onRefresh: () async => ref.invalidate(offersAdminProvider),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                      itemCount: promos.length,
+                      itemBuilder: (context, index) => _PromoCard(
+                        promo: promos[index],
+                        onEdit: () => context.push(
+                          '/admin/offers/edit',
+                          extra: promos[index],
+                        ),
+                        onToggle: () => ref
+                            .read(offersAdminProvider.notifier)
+                            .togglePromoAvailability(promos[index]),
+                        onDelete: () =>
+                            _confirmDelete(context, ref, promos[index]),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/domain/models/kitchen_order.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/kitchen_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
@@ -26,64 +27,74 @@ class KitchenQueueScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: KZ.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: KZ.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: Text('kitchen.queue_title'.tr(), style: KZ.pageTitle),
-        actions: [
-          IconButton(
-            tooltip: 'profile.logout'.tr(),
-            icon: const Icon(Icons.logout_rounded, color: KZ.onSurfaceVariant),
-            onPressed: () async {
-              await ref.read(authNotifierProvider.notifier).logout();
-              if (context.mounted) context.go('/login');
-            },
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        color: KZ.primary,
-        onRefresh: () => ref.refresh(kitchenQueueProvider.future),
-        child: queueAsync.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(color: KZ.primary),
-          ),
-          error: (e, st) => KZErrorState(
-            message: 'common.something_wrong'.tr(),
-            retryLabel: 'common.retry'.tr(),
-            onRetry: () => ref.invalidate(kitchenQueueProvider),
-          ),
-          data: (orders) {
-            if (orders.isEmpty) {
-              return LayoutBuilder(
-                builder: (context, constraints) => SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: KZEmptyState(
-                      icon: Icons.soup_kitchen_outlined,
-                      title: 'kitchen.empty_title'.tr(),
-                      message: 'kitchen.empty_sub'.tr(),
-                    ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            AdminPageHeader(
+              title: 'kitchen.queue_title'.tr(),
+              trailingActions: [
+                IconButton(
+                  tooltip: 'profile.logout'.tr(),
+                  icon: const Icon(
+                    Icons.logout_rounded,
+                    color: KZ.onSurfaceVariant,
                   ),
+                  onPressed: () async {
+                    await ref.read(authNotifierProvider.notifier).logout();
+                    if (context.mounted) context.go('/login');
+                  },
                 ),
-              );
-            }
-            return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              itemCount: orders.length,
-              itemBuilder: (context, index) {
-                final order = orders[index];
-                return _TicketCard(
-                  order: order,
-                  onTap: () => context.push('/admin/kitchen/${order.id}'),
-                );
-              },
-            );
-          },
+              ],
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                color: KZ.primary,
+                onRefresh: () => ref.refresh(kitchenQueueProvider.future),
+                child: queueAsync.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(color: KZ.primary),
+                  ),
+                  error: (e, st) => KZErrorState(
+                    message: 'common.something_wrong'.tr(),
+                    retryLabel: 'common.retry'.tr(),
+                    onRetry: () => ref.invalidate(kitchenQueueProvider),
+                  ),
+                  data: (orders) {
+                    if (orders.isEmpty) {
+                      return LayoutBuilder(
+                        builder: (context, constraints) =>
+                            SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight: constraints.maxHeight,
+                                ),
+                                child: KZEmptyState(
+                                  icon: Icons.soup_kitchen_outlined,
+                                  title: 'kitchen.empty_title'.tr(),
+                                  message: 'kitchen.empty_sub'.tr(),
+                                ),
+                              ),
+                            ),
+                      );
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                      itemCount: orders.length,
+                      itemBuilder: (context, index) {
+                        final order = orders[index];
+                        return _TicketCard(
+                          order: order,
+                          onTap: () =>
+                              context.push('/admin/kitchen/${order.id}'),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -187,18 +198,31 @@ class _TicketCard extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(KZ.radiusSm),
                       child: SizedBox(
-                        width: 36,
-                        height: 36,
+                        width: 48,
+                        height: 48,
                         child: KZFoodImage(imageUrl: item.imageUrl ?? ''),
                       ),
                     ),
-                    const SizedBox(width: KZ.sp8),
+                    const SizedBox(width: KZ.sp12),
                     Expanded(
-                      child: Text(
-                        '${item.quantity}× ${item.localizedName(lang)}',
-                        style: KZ.bodySmall.copyWith(color: KZ.onSurface),
-                        maxLines: 1,
+                      child: RichText(
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '${item.quantity}× ',
+                              style: KZ.body.copyWith(
+                                color: KZ.onSurface,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            TextSpan(
+                              text: item.localizedName(lang),
+                              style: KZ.body.copyWith(color: KZ.onSurface),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

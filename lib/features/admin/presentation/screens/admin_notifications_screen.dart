@@ -7,6 +7,7 @@ import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/notifications/notification_model.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/domain/models/notification_campaign.dart';
 
 final adminCampaignsProvider = FutureProvider<List<NotificationCampaign>>((
@@ -171,55 +172,68 @@ class _AdminNotificationsScreenState
 
     return Scaffold(
       backgroundColor: KZ.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: KZ.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: Text(
-          'admin_notifications.title'.tr(),
-          style: KZ.pageTitle.copyWith(fontSize: 19),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: KZ.onSurfaceVariant),
-            tooltip: 'home.retry'.tr(),
-            onPressed: () => ref.invalidate(adminCampaignsProvider),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(KZ.screenPadding),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: _kMaxContentWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isDesktop = constraints.maxWidth > _kDesktopBreakpoint;
-                    if (isDesktop) {
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: _buildForm(includeInlinePreview: false),
-                          ),
-                          const SizedBox(width: KZ.sp32),
-                          Expanded(flex: 2, child: _buildLivePreviewCard()),
-                        ],
-                      );
-                    }
-                    return _buildForm(includeInlinePreview: true);
-                  },
+      body: SafeArea(
+        child: Column(
+          children: [
+            AdminPageHeader(
+              title: 'admin_notifications.title'.tr(),
+              trailingActions: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.refresh_rounded,
+                    color: KZ.onSurfaceVariant,
+                  ),
+                  tooltip: 'home.retry'.tr(),
+                  onPressed: () => ref.invalidate(adminCampaignsProvider),
                 ),
-                const SizedBox(height: KZ.sp32),
-                _buildCampaignHistorySection(campaignsAsync),
-                const SizedBox(height: KZ.sp24),
               ],
             ),
-          ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(KZ.screenPadding),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: _kMaxContentWidth,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isDesktop =
+                                constraints.maxWidth > _kDesktopBreakpoint;
+                            if (isDesktop) {
+                              return Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: _buildForm(
+                                      includeInlinePreview: false,
+                                    ),
+                                  ),
+                                  const SizedBox(width: KZ.sp32),
+                                  Expanded(
+                                    flex: 2,
+                                    child: _buildLivePreviewCard(),
+                                  ),
+                                ],
+                              );
+                            }
+                            return _buildForm(includeInlinePreview: true);
+                          },
+                        ),
+                        const SizedBox(height: KZ.sp32),
+                        _buildCampaignHistorySection(campaignsAsync),
+                        const SizedBox(height: KZ.sp24),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -236,7 +250,9 @@ class _AdminNotificationsScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionHeader(title: 'admin_notifications.section_campaign_details'.tr()),
+          _SectionHeader(
+            title: 'admin_notifications.section_campaign_details'.tr(),
+          ),
           const SizedBox(height: KZ.sp12),
           TextFormField(
             controller: _campaignNameCtrl,
@@ -253,7 +269,7 @@ class _AdminNotificationsScreenState
           ),
           const SizedBox(height: KZ.sp14),
           DropdownButtonFormField<NotificationType>(
-            value: _selectedType,
+            initialValue: _selectedType,
             isExpanded: true,
             decoration: KZ.inputDecoration(
               label: 'admin_notifications.notification_type'.tr(),
@@ -348,7 +364,7 @@ class _AdminNotificationsScreenState
           _SectionHeader(title: 'admin_notifications.section_destination'.tr()),
           const SizedBox(height: KZ.sp12),
           DropdownButtonFormField<String>(
-            value: _destinationOptions.contains(_selectedDestination)
+            initialValue: _destinationOptions.contains(_selectedDestination)
                 ? _selectedDestination
                 : _destinationOptions.first,
             isExpanded: true,

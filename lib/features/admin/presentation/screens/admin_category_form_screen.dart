@@ -9,6 +9,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_image_picker.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 
 class AdminCategoryFormScreen extends ConsumerStatefulWidget {
@@ -97,7 +98,12 @@ class _AdminCategoryFormScreenState
         child: Column(
           children: [
             // Top AppBar
-            _buildAppBar(context),
+            AdminPageHeader(
+              title: widget.existingCategory == null
+                  ? 'admin.add_category'.tr()
+                  : 'admin.edit_category'.tr(),
+              showBackButton: true,
+            ),
 
             // Form Body Scrollable
             Expanded(
@@ -122,41 +128,6 @@ class _AdminCategoryFormScreenState
             _buildBottomActionBar(),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildAppBar(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KZ.sp16,
-        vertical: KZ.sp12,
-      ),
-      color: KZ.surface,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              IconButton(
-                onPressed: () => context.pop(),
-                icon: const Icon(
-                  Icons.arrow_back_rounded,
-                  color: KZ.primary,
-                  size: 26,
-                ),
-              ),
-              const SizedBox(width: KZ.sp4),
-              Text(
-                widget.existingCategory == null
-                    ? 'admin.add_category'.tr()
-                    : 'admin.edit_category'.tr(),
-                style: KZ.pageTitle,
-              ),
-            ],
-          ),
-          const SizedBox(width: 40),
-        ],
       ),
     );
   }

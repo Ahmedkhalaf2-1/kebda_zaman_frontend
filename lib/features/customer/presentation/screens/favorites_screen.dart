@@ -8,6 +8,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
+import 'package:kebda_zaman/core/widgets/kz_star_rating.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 
@@ -151,6 +152,19 @@ class _FavoriteItemCard extends ConsumerWidget {
                       style: KZ.cardTitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    KZMenuItemRatingBadge(
+                      averageRating: item.averageRating,
+                      reviewCount: item.reviewCount,
+                      noRatingsLabel: 'reviews.no_ratings_yet'.tr(),
+                      ratedLabelBuilder: (rating, count) =>
+                          'reviews.rating_compact'.tr(
+                            namedArgs: {
+                              'rating': rating.toStringAsFixed(1),
+                              'count': count.toString(),
+                            },
+                          ),
                     ),
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,

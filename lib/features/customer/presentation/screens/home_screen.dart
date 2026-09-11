@@ -23,6 +23,7 @@ import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_lottie_add_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import 'package:kebda_zaman/core/widgets/kz_product_card.dart';
+import 'package:kebda_zaman/core/widgets/kz_star_rating.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
 /// Shared elevation tier for the page's two full-bleed promotional
@@ -617,7 +618,6 @@ void _handleHomeAdd(BuildContext context, WidgetRef ref, MenuItem item) {
   }
 }
 
-
 /// A large full-bleed showcase card for Featured Meals — image with a
 /// gradient overlay carrying the name and real price, editorial in feel
 /// rather than another product-grid card, so the section reads as a
@@ -806,6 +806,19 @@ class _RecommendedTile extends ConsumerWidget {
                       ],
                     ),
                   ],
+                  const SizedBox(height: 4),
+                  KZMenuItemRatingBadge(
+                    averageRating: item.averageRating,
+                    reviewCount: item.reviewCount,
+                    noRatingsLabel: 'reviews.no_ratings_yet'.tr(),
+                    ratedLabelBuilder: (rating, count) =>
+                        'reviews.rating_compact'.tr(
+                          namedArgs: {
+                            'rating': rating.toStringAsFixed(1),
+                            'count': count.toString(),
+                          },
+                        ),
+                  ),
                   const SizedBox(height: 8),
                   Flexible(
                     child: FittedBox(

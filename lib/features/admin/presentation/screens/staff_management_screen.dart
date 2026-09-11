@@ -6,6 +6,7 @@ import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/domain/models/staff_account.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/staff_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/admin_person_card.dart';
 
 /// Local-only filter over the already-fetched staff list — the backend's
@@ -31,114 +32,116 @@ class _StaffManagementScreenState
 
     return Scaffold(
       backgroundColor: KZ.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: KZ.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: Text('staff.title'.tr(), style: KZ.pageTitle),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: KZ.sp16),
-            child: _AddStaffButton(
-              onPressed: () => _showStaffForm(context, ref),
-            ),
-          ),
-        ],
-      ),
-      body: staffAsync.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator(color: KZ.primary)),
-        error: (e, st) => KZErrorState(
-          message: 'common.something_wrong'.tr(),
-          retryLabel: 'common.retry'.tr(),
-          onRetry: () => ref.invalidate(staffProvider),
-        ),
-        data: (staffList) {
-          if (staffList.isEmpty) {
-            return KZEmptyState(
-              icon: Icons.badge_outlined,
-              title: 'staff.empty'.tr(),
-            );
-          }
-          final filtered = staffList.where((s) {
-            switch (_filter) {
-              case _StaffRoleFilter.all:
-                return true;
-              case _StaffRoleFilter.cashier:
-                return s.role == 'CASHIER';
-              case _StaffRoleFilter.kitchen:
-                return s.role == 'KITCHEN';
-            }
-          }).toList();
-
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: Row(
-                  children: [
-                    _RoleFilterChip(
-                      label: 'staff.filter_all'.tr(),
-                      selected: _filter == _StaffRoleFilter.all,
-                      onTap: () =>
-                          setState(() => _filter = _StaffRoleFilter.all),
-                    ),
-                    const SizedBox(width: KZ.sp8),
-                    _RoleFilterChip(
-                      label: 'staff.role_cashier'.tr(),
-                      selected: _filter == _StaffRoleFilter.cashier,
-                      onTap: () =>
-                          setState(() => _filter = _StaffRoleFilter.cashier),
-                    ),
-                    const SizedBox(width: KZ.sp8),
-                    _RoleFilterChip(
-                      label: 'staff.role_kitchen'.tr(),
-                      selected: _filter == _StaffRoleFilter.kitchen,
-                      onTap: () =>
-                          setState(() => _filter = _StaffRoleFilter.kitchen),
-                    ),
-                  ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            AdminPageHeader(
+              title: 'staff.title'.tr(),
+              trailingActions: [
+                _AddStaffButton(
+                  onPressed: () => _showStaffForm(context, ref),
                 ),
-              ),
-              Expanded(
-                child: filtered.isEmpty
-                    ? KZEmptyState(
-                        icon: Icons.badge_outlined,
-                        title: 'staff.empty'.tr(),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                        itemCount: filtered.length,
-                        itemBuilder: (context, index) {
-                          final staff = filtered[index];
-                          return _StaffCard(
-                            staff: staff,
-                            onEdit: () =>
-                                _showStaffForm(context, ref, staff: staff),
-                            onToggleActive: () async {
-                              final failure = await ref
-                                  .read(staffProvider.notifier)
-                                  .updateStaff(
-                                    staff.id,
-                                    isActive: !staff.isActive,
-                                  );
-                              if (failure != null && context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'staff.error_generic'.tr(),
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                          );
-                        },
+              ],
+            ),
+            Expanded(
+              child: staffAsync.when(
+                loading: () =>
+                    const Center(child: CircularProgressIndicator(color: KZ.primary)),
+                error: (e, st) => KZErrorState(
+                  message: 'common.something_wrong'.tr(),
+                  retryLabel: 'common.retry'.tr(),
+                  onRetry: () => ref.invalidate(staffProvider),
+                ),
+                data: (staffList) {
+                  if (staffList.isEmpty) {
+                    return KZEmptyState(
+                      icon: Icons.badge_outlined,
+                      title: 'staff.empty'.tr(),
+                    );
+                  }
+                  final filtered = staffList.where((s) {
+                    switch (_filter) {
+                      case _StaffRoleFilter.all:
+                        return true;
+                      case _StaffRoleFilter.cashier:
+                        return s.role == 'CASHIER';
+                      case _StaffRoleFilter.kitchen:
+                        return s.role == 'KITCHEN';
+                    }
+                  }).toList();
+
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                        child: Row(
+                          children: [
+                            _RoleFilterChip(
+                              label: 'staff.filter_all'.tr(),
+                              selected: _filter == _StaffRoleFilter.all,
+                              onTap: () =>
+                                  setState(() => _filter = _StaffRoleFilter.all),
+                            ),
+                            const SizedBox(width: KZ.sp8),
+                            _RoleFilterChip(
+                              label: 'staff.role_cashier'.tr(),
+                              selected: _filter == _StaffRoleFilter.cashier,
+                              onTap: () =>
+                                  setState(() => _filter = _StaffRoleFilter.cashier),
+                            ),
+                            const SizedBox(width: KZ.sp8),
+                            _RoleFilterChip(
+                              label: 'staff.role_kitchen'.tr(),
+                              selected: _filter == _StaffRoleFilter.kitchen,
+                              onTap: () =>
+                                  setState(() => _filter = _StaffRoleFilter.kitchen),
+                            ),
+                          ],
+                        ),
                       ),
+                      Expanded(
+                        child: filtered.isEmpty
+                            ? KZEmptyState(
+                                icon: Icons.badge_outlined,
+                                title: 'staff.empty'.tr(),
+                              )
+                            : ListView.builder(
+                                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                                itemCount: filtered.length,
+                                itemBuilder: (context, index) {
+                                  final staff = filtered[index];
+                                  return _StaffCard(
+                                    staff: staff,
+                                    onEdit: () =>
+                                        _showStaffForm(context, ref, staff: staff),
+                                    onToggleActive: () async {
+                                      final failure = await ref
+                                          .read(staffProvider.notifier)
+                                          .updateStaff(
+                                            staff.id,
+                                            isActive: !staff.isActive,
+                                          );
+                                      if (failure != null && context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'staff.error_generic'.tr(),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  );
+                },
               ),
-            ],
-          );
-        },
+            ),
+          ],
+        ),
       ),
     );
   }

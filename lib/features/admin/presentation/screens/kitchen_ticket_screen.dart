@@ -6,6 +6,7 @@ import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/domain/models/kitchen_order.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/kitchen_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 
@@ -25,26 +26,30 @@ class KitchenTicketScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: KZ.surfaceContainerLow,
-      appBar: AppBar(
-        backgroundColor: KZ.surface,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        title: Text('kitchen.ticket_title'.tr(), style: KZ.pageTitle),
-      ),
-      body: RefreshIndicator(
-        color: KZ.primary,
-        onRefresh: () =>
-            ref.refresh(kitchenOrderProvider(orderId).future),
-        child: orderAsync.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(color: KZ.primary),
-          ),
-          error: (e, st) => KZErrorState(
-            message: 'common.something_wrong'.tr(),
-            retryLabel: 'common.retry'.tr(),
-            onRetry: () => ref.invalidate(kitchenOrderProvider(orderId)),
-          ),
-          data: (order) => _TicketDetail(order: order),
+      body: SafeArea(
+        child: Column(
+          children: [
+            AdminPageHeader(title: 'kitchen.ticket_title'.tr()),
+            Expanded(
+              child: RefreshIndicator(
+                color: KZ.primary,
+                onRefresh: () =>
+                    ref.refresh(kitchenOrderProvider(orderId).future),
+                child: orderAsync.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(color: KZ.primary),
+                  ),
+                  error: (e, st) => KZErrorState(
+                    message: 'common.something_wrong'.tr(),
+                    retryLabel: 'common.retry'.tr(),
+                    onRetry: () =>
+                        ref.invalidate(kitchenOrderProvider(orderId)),
+                  ),
+                  data: (order) => _TicketDetail(order: order),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -170,8 +175,8 @@ class _TicketItemCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 56,
-              height: 56,
+              width: 64,
+              height: 64,
               child: KZFoodImage(
                 imageUrl: item.imageUrl ?? '',
                 borderRadius: BorderRadius.circular(KZ.radiusMd),
@@ -365,15 +370,10 @@ class _ItemDetailSheet extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: KZ.surfaceContainerLow,
-                            borderRadius: BorderRadius.circular(
-                              KZ.radiusFull,
-                            ),
+                            borderRadius: BorderRadius.circular(KZ.radiusFull),
                             border: Border.all(color: KZ.outlineVariant),
                           ),
-                          child: Text(
-                            a.localizedName(lang),
-                            style: KZ.body,
-                          ),
+                          child: Text(a.localizedName(lang), style: KZ.body),
                         ),
                       )
                       .toList(),

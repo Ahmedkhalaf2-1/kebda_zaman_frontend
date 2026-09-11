@@ -15,6 +15,7 @@ import 'package:kebda_zaman/core/widgets/kz_image_picker.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/admin/presentation/screens/admin_modifier_dialogs.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/screens/admin_recommendation_picker_dialog.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/menu_admin_notifier.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
@@ -166,7 +167,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text((result as Err).error.message ?? 'Upload failed'),
+              content: Text((result as Err).error.message),
               backgroundColor: KZ.error,
             ),
           );
@@ -246,9 +247,9 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: KZ.surface,
-        body: const Center(child: CircularProgressIndicator()),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -257,7 +258,21 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildAppBar(context),
+            AdminPageHeader(
+              title: widget.existingItem == null
+                  ? 'admin.add_item'.tr()
+                  : 'admin.edit_item'.tr(),
+              showBackButton: true,
+              trailingActions: [
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.more_vert_rounded,
+                    color: KZ.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
             Expanded(
               child: Form(
                 key: _formKey,
@@ -290,53 +305,6 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KZ.sp16,
-        vertical: KZ.sp12,
-      ),
-      color: KZ.surface,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: () => context.pop(),
-                  icon: const Icon(
-                    Icons.arrow_back_rounded,
-                    color: KZ.primary,
-                    size: 26,
-                  ),
-                ),
-                const SizedBox(width: KZ.sp4),
-                Flexible(
-                  child: Text(
-                    widget.existingItem == null
-                        ? 'admin.add_item'.tr()
-                        : 'admin.edit_item'.tr(),
-                    style: KZ.headingStyle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.more_vert_rounded,
-              color: KZ.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildImageSection() {
     return KZImagePickerWidget(
       currentImageUrl: _imageCtrl.text.trim().isNotEmpty
@@ -357,25 +325,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
     );
   }
 
-  Widget _buildPresetChip(String label, String url) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ActionChip(
-        label: Text(
-          label,
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.white,
-        side: BorderSide(color: KZ.outlineVariant.withValues(alpha: 0.5)),
-        onPressed: () {
-          setState(() {
-            _imageCtrl.text = url;
-            _pickedImageFile = null;
-          });
-        },
-      ),
-    );
-  }
+
 
   Widget _buildBasicInfoCard() {
     return Container(
@@ -559,7 +509,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
                     ),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
-                      value: _selectedCategory,
+                      initialValue: _selectedCategory,
                       isExpanded: true,
                       decoration: InputDecoration(
                         filled: true,
@@ -882,7 +832,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
           const SizedBox(height: 6),
           DropdownButtonFormField<MenuItemBadge?>(
             key: const Key('badge_dropdown'),
-            value: _selectedBadge,
+            initialValue: _selectedBadge,
             isExpanded: true,
             decoration: InputDecoration(
               filled: true,
@@ -1441,7 +1391,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
                 ),
                 Switch(
                   value: _isAvailable,
-                  activeColor: KZ.primary,
+                  activeThumbColor: KZ.primary,
                   onChanged: (v) => setState(() => _isAvailable = v),
                 ),
               ],
@@ -1498,7 +1448,7 @@ class _AdminFoodFormScreenState extends ConsumerState<AdminFoodFormScreen> {
                 ),
                 Switch(
                   value: _isBestSeller,
-                  activeColor: KZ.primary,
+                  activeThumbColor: KZ.primary,
                   onChanged: (v) => setState(() => _isBestSeller = v),
                 ),
               ],

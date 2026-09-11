@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
@@ -12,6 +13,7 @@ import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/domain/models/report_models.dart';
 import 'package:kebda_zaman/features/admin/domain/models/reports_filter.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/reports_dashboard_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/kz_sales_chart.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 
@@ -88,30 +90,45 @@ class _DashboardContent extends ConsumerWidget {
       color: KZ.primary,
       onRefresh: () => ref.read(reportsDashboardProvider.notifier).refresh(),
       child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.only(bottom: 24),
         children: [
           _DashboardHeader(isRefreshing: isRefreshing),
-          const SizedBox(height: KZ.sp16),
-          _FilterBar(filter: filter),
-          const SizedBox(height: KZ.sp20),
-          _KpiSection(overview: data.overview),
-          const SizedBox(height: KZ.sp28),
-          _SectionHeading('dashboard.sales_performance'.tr()),
-          const SizedBox(height: KZ.sp12),
-          _SalesPerformanceCard(sales: data.sales, groupBy: filter.groupBy),
-          const SizedBox(height: KZ.sp24),
-          _SectionHeading('dashboard.orders_operations'.tr()),
-          const SizedBox(height: KZ.sp12),
-          _OrdersOperationsSection(breakdown: data.ordersBreakdown),
-          const SizedBox(height: KZ.sp24),
-          _SectionHeading('dashboard.customer_insights'.tr()),
-          const SizedBox(height: KZ.sp12),
-          _CustomerInsightsCard(overview: data.overview),
-          const SizedBox(height: KZ.sp24),
-          _SectionHeading('dashboard.top_selling_items'.tr()),
-          const SizedBox(height: KZ.sp12),
-          _TopItemsSection(items: data.topItems),
-          const SizedBox(height: KZ.sp24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _FilterBar(filter: filter),
+                const SizedBox(height: KZ.sp16),
+                _OperationsSnapshotStrip(breakdown: data.ordersBreakdown),
+                const SizedBox(height: KZ.sp20),
+                _OperationalAttentionCards(breakdown: data.ordersBreakdown),
+                const SizedBox(height: KZ.sp28),
+                _KpiSection(overview: data.overview),
+                const SizedBox(height: KZ.sp28),
+                _SectionHeading('dashboard.sales_performance'.tr()),
+                const SizedBox(height: KZ.sp12),
+                _SalesPerformanceCard(
+                  sales: data.sales,
+                  groupBy: filter.groupBy,
+                ),
+                const SizedBox(height: KZ.sp24),
+                _SectionHeading('dashboard.operations_mix'.tr()),
+                const SizedBox(height: KZ.sp12),
+                _OperationsMixCard(breakdown: data.ordersBreakdown),
+                const SizedBox(height: KZ.sp24),
+                _SectionHeading('dashboard.customer_insights'.tr()),
+                const SizedBox(height: KZ.sp12),
+                _CustomerInsightsCard(overview: data.overview),
+                const SizedBox(height: KZ.sp24),
+                _SectionHeading('dashboard.top_selling_items'.tr()),
+                const SizedBox(height: KZ.sp12),
+                _TopItemsSection(items: data.topItems),
+                const SizedBox(height: KZ.sp24),
+                const _ReviewsShortcutCard(),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -154,32 +171,11 @@ class _DashboardHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('dashboard.title'.tr(), style: KZ.pageTitle),
-              const SizedBox(height: 2),
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      'dashboard.subtitle'.tr(),
-                      style: KZ.bodySmall,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: KZ.sp8),
-                  const _PeriodPill(),
-                ],
-              ),
-            ],
-          ),
-        ),
+    return AdminPageHeader(
+      title: 'dashboard.title'.tr(),
+      subtitle: 'dashboard.subtitle'.tr(),
+      trailingActions: [
+        const _PeriodPill(),
         AnimatedSwitcher(
           duration: KZMotion.durationFor(context, KZMotion.fast),
           transitionBuilder: (child, animation) =>
@@ -367,7 +363,221 @@ class _FilterBar extends ConsumerWidget {
   }
 }
 
-// ─── 3. Primary KPI cards ─────────────────────────────────────────────────
+// ─── 3. Operations Snapshot ──────────────────────────────────────────────────
+
+class _OperationsSnapshotStrip extends StatelessWidget {
+  final OrdersBreakdown breakdown;
+  const _OperationsSnapshotStrip({required this.breakdown});
+
+  int _countFor(OrderStatus status) {
+    return breakdown.byStatus
+        .where((e) => e.key == status)
+        .fold(0, (a, b) => a + b.count);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = _countFor(OrderStatus.pending);
+    final preparing = _countFor(OrderStatus.preparing);
+    final ready = _countFor(OrderStatus.readyForPickup);
+
+    return Wrap(
+      spacing: KZ.sp12,
+      runSpacing: KZ.sp8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          'dashboard.operations_snapshot'.tr(),
+          style: KZ.label.copyWith(color: KZ.onSurfaceVariant),
+        ),
+        _SnapshotPill(
+          label: 'admin.status_pending'.tr(),
+          count: pending,
+          color: KZ.secondary,
+        ),
+        _SnapshotPill(
+          label: 'admin.status_preparing'.tr(),
+          count: preparing,
+          color: const Color(0xFF00ACC1),
+        ),
+        _SnapshotPill(
+          label: 'admin.status_ready_for_pickup'.tr(),
+          count: ready,
+          color: KZ.tertiary,
+        ),
+      ],
+    );
+  }
+}
+
+class _SnapshotPill extends StatelessWidget {
+  final String label;
+  final int count;
+  final Color color;
+
+  const _SnapshotPill({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(KZ.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '$count $label',
+            style: KZ.label.copyWith(color: color, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OperationalAttentionCards extends StatelessWidget {
+  final OrdersBreakdown breakdown;
+  const _OperationalAttentionCards({required this.breakdown});
+
+  int _countFor(OrderStatus status) {
+    return breakdown.byStatus
+        .where((e) => e.key == status)
+        .fold(0, (a, b) => a + b.count);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = _countFor(OrderStatus.pending);
+    final preparing = _countFor(OrderStatus.preparing);
+    final ready = _countFor(OrderStatus.readyForPickup);
+    final cancelled = _countFor(OrderStatus.cancelled);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final columns = width >= _kDesktopBreakpoint
+            ? 4
+            : width >= _kMobileBreakpoint
+            ? 2
+            : 2; // Always at least 2 for compact operational cards
+
+        return _ResponsiveCardGrid(
+          columns: columns,
+          children: [
+            _AttentionCard(
+              title: 'admin.status_pending'.tr(),
+              count: pending,
+              icon: adminOrderStatusVisual(OrderStatus.pending).icon,
+              color: KZ.secondary,
+              isAlert: pending > 0,
+            ),
+            _AttentionCard(
+              title: 'admin.status_preparing'.tr(),
+              count: preparing,
+              icon: adminOrderStatusVisual(OrderStatus.preparing).icon,
+              color: const Color(0xFF00ACC1),
+              isAlert: false,
+            ),
+            _AttentionCard(
+              title: 'admin.status_ready_for_pickup'.tr(),
+              count: ready,
+              icon: adminOrderStatusVisual(OrderStatus.readyForPickup).icon,
+              color: KZ.tertiary,
+              isAlert: false,
+            ),
+            _AttentionCard(
+              title: 'admin.status_cancelled'.tr(),
+              count: cancelled,
+              icon: adminOrderStatusVisual(OrderStatus.cancelled).icon,
+              color: KZ.error,
+              isAlert: cancelled > 0,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _AttentionCard extends StatelessWidget {
+  final String title;
+  final int count;
+  final IconData icon;
+  final Color color;
+  final bool isAlert;
+
+  const _AttentionCard({
+    required this.title,
+    required this.count,
+    required this.icon,
+    required this.color,
+    required this.isAlert,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return KZCard(
+      color: isAlert ? color.withValues(alpha: 0.05) : null,
+      padding: const EdgeInsets.all(KZ.sp16),
+      onTap: () => context.go('/admin/orders'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                size: KZ.iconControl,
+                color: isAlert ? color : KZ.onSurfaceVariant,
+              ),
+              const Spacer(),
+              if (isAlert)
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: KZ.sp12),
+          Text(
+            '$count',
+            style: KZ.display.copyWith(
+              fontSize: 28,
+              color: isAlert ? color : KZ.onSurface,
+            ),
+          ),
+          Text(
+            title,
+            style: KZ.label.copyWith(
+              color: isAlert ? color : KZ.onSurfaceVariant,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── 4. Primary KPI cards ─────────────────────────────────────────────────
 
 class _KpiSpec {
   final String label;
@@ -448,9 +658,7 @@ class _KpiSection extends StatelessWidget {
           children: [
             _ResponsiveCardGrid(
               columns: columns,
-              children: [
-                for (final spec in primary) _KpiCard(spec: spec),
-              ],
+              children: [for (final spec in primary) _KpiCard(spec: spec)],
             ),
             const SizedBox(height: KZ.sp10),
             _ResponsiveCardGrid(
@@ -490,9 +698,6 @@ class _ResponsiveCardGrid extends StatelessWidget {
   }
 }
 
-/// Primary-tier KPI card — the 4 headline operational numbers. A colored
-/// left accent strip plus a matching icon chip give each metric a clear,
-/// premium visual identity without filling the whole card in color.
 class _KpiCard extends StatelessWidget {
   final _KpiSpec spec;
   const _KpiCard({required this.spec});
@@ -504,52 +709,36 @@ class _KpiCard extends StatelessWidget {
         color: KZ.surface,
         borderRadius: BorderRadius.circular(KZ.radiusLg),
         border: Border.all(color: KZ.outlineVariant.withValues(alpha: 0.35)),
-        boxShadow: KZ.cardShadow,
       ),
       clipBehavior: Clip.antiAlias,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Padding(
+        padding: const EdgeInsets.all(KZ.sp16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(width: 4, color: spec.color),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  KZ.sp12,
-                  KZ.sp14,
-                  KZ.sp14,
-                  KZ.sp14,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: spec.color.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(KZ.radiusSm),
-                      ),
-                      child: Icon(spec.icon, color: spec.color, size: 17),
-                    ),
-                    const SizedBox(height: KZ.sp10),
-                    Text(
-                      spec.label,
-                      style: KZ.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      spec.value,
-                      style: KZ.display.copyWith(fontSize: 23),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+            Container(
+              width: 36,
+              height: 36,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: spec.color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(KZ.radiusSm),
               ),
+              child: Icon(spec.icon, color: spec.color, size: 20),
+            ),
+            const SizedBox(height: KZ.sp16),
+            Text(
+              spec.label,
+              style: KZ.bodySmall.copyWith(color: KZ.onSurfaceVariant),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              spec.value,
+              style: KZ.display.copyWith(fontSize: 26, color: KZ.onSurface),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -558,9 +747,6 @@ class _KpiCard extends StatelessWidget {
   }
 }
 
-/// Secondary-tier KPI card — compact, single-row layout for the supporting
-/// stats, visibly lighter-weight than the primary tier so the hierarchy
-/// between "headline" and "supporting" numbers is immediate.
 class _KpiCardCompact extends StatelessWidget {
   final _KpiSpec spec;
   const _KpiCardCompact({required this.spec});
@@ -569,22 +755,22 @@ class _KpiCardCompact extends StatelessWidget {
   Widget build(BuildContext context) {
     return KZCard(
       padding: const EdgeInsets.symmetric(
-        horizontal: KZ.sp12,
-        vertical: KZ.sp10,
+        horizontal: KZ.sp16,
+        vertical: KZ.sp12,
       ),
       child: Row(
         children: [
           Container(
-            width: 26,
-            height: 26,
+            width: 32,
+            height: 32,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: spec.color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(KZ.radiusSm),
             ),
-            child: Icon(spec.icon, color: spec.color, size: 15),
+            child: Icon(spec.icon, color: spec.color, size: 18),
           ),
-          const SizedBox(width: KZ.sp10),
+          const SizedBox(width: KZ.sp12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -592,10 +778,11 @@ class _KpiCardCompact extends StatelessWidget {
               children: [
                 Text(
                   spec.value,
-                  style: KZ.itemTitle.copyWith(fontSize: 16),
+                  style: KZ.itemTitle.copyWith(fontSize: 18),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 2),
                 Text(
                   spec.label,
                   style: KZ.caption,
@@ -692,75 +879,6 @@ class _InlineEmpty extends StatelessWidget {
 }
 
 // ─── 5. Orders & operations ────────────────────────────────────────────────
-
-class _OrdersOperationsSection extends StatelessWidget {
-  final OrdersBreakdown breakdown;
-  const _OrdersOperationsSection({required this.breakdown});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= _kMobileBreakpoint;
-        final left = _OrderStatusCard(byStatus: breakdown.byStatus);
-        final right = _OperationsMixCard(breakdown: breakdown);
-
-        if (!isWide) {
-          return Column(
-            children: [
-              left,
-              const SizedBox(height: KZ.sp16),
-              right,
-            ],
-          );
-        }
-        return IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: left),
-              const SizedBox(width: KZ.sp16),
-              Expanded(child: right),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _OrderStatusCard extends StatelessWidget {
-  final List<EnumCount<OrderStatus>> byStatus;
-  const _OrderStatusCard({required this.byStatus});
-
-  @override
-  Widget build(BuildContext context) {
-    final maxCount = byStatus
-        .map((e) => e.count)
-        .fold<int>(0, (a, b) => a > b ? a : b);
-
-    return KZCard(
-      padding: const EdgeInsets.all(KZ.sp16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('dashboard.order_status_breakdown'.tr(), style: KZ.cardTitle),
-          const SizedBox(height: KZ.sp14),
-          for (final entry in byStatus) ...[
-            _StatusProgressRow(
-              icon: adminOrderStatusVisual(entry.key).icon,
-              color: adminOrderStatusVisual(entry.key).color,
-              label: adminOrderStatusVisual(entry.key).label,
-              count: entry.count,
-              maxCount: maxCount,
-            ),
-            const SizedBox(height: KZ.sp10),
-          ],
-        ],
-      ),
-    );
-  }
-}
 
 class _StatusProgressRow extends StatelessWidget {
   final IconData icon;
@@ -957,6 +1075,7 @@ class _CustomerInsightsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return KZCard(
       padding: const EdgeInsets.all(KZ.sp16),
+      onTap: () => context.go('/admin/customers'),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth >= _kMobileBreakpoint;
@@ -1208,6 +1327,54 @@ class _TopItemRow extends StatelessWidget {
             formatCurrency(item.revenue, locale: context.locale),
             style: KZ.price,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── 8. Reviews Shortcut ─────────────────────────────────────────────────────
+
+class _ReviewsShortcutCard extends StatelessWidget {
+  const _ReviewsShortcutCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return KZCard(
+      padding: const EdgeInsets.all(KZ.sp16),
+      onTap: () => context.go('/admin/reviews'),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF6A609).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(KZ.radiusMd),
+            ),
+            child: const Icon(
+              Icons.star_rounded,
+              color: Color(0xFFF6A609),
+              size: KZ.iconControl,
+            ),
+          ),
+          const SizedBox(width: KZ.sp16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('dashboard.manage_reviews'.tr(), style: KZ.cardTitle),
+                const SizedBox(height: 2),
+                Text(
+                  'admin_reviews.title'
+                      .tr(), // Fallback descriptive subtitle using existing key
+                  style: KZ.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: KZ.outline),
         ],
       ),
     );
