@@ -317,8 +317,8 @@
     "saved": "تم الحفظ",
     "update_review": "تحديث التقييم",
     "thank_you": "شكرًا لتقييمك!",
-    "no_ratings_yet": "لا توجد تقييمات بعد",
-    "rating_compact": "{rating} ({count})",
+    "no_ratings_yet": "☆ لا توجد تقييمات",
+    "rating_compact": "★ {rating} ({count})",
     "rated_by": "قيّمه {count} عميل",
     "submit_error": "تعذر إرسال تقييمك، حاول مرة أخرى.",
     "load_error": "تعذر تحميل تقييمات هذا الطلب الآن.",
@@ -329,15 +329,15 @@
   "admin_reviews": {
     "title": "التقييمات والمراجعات",
     "item_reviews_average": "متوسط تقييمات الأصناف",
-    "order_feedback_average": "متوسط تقييمات الطلبات",
-    "review_count": "{count} تقييم",
+    "order_feedback_average": "متوسط ملاحظات الطلبات",
+    "review_count": "بناءً على {count} تقييمات",
     "rating_distribution": "توزيع التقييمات",
-    "top_rated": "الأصناف الأعلى تقييمًا",
-    "lowest_rated": "الأصناف الأقل تقييمًا",
-    "recent_reviews": "أحدث تقييمات الأصناف",
+    "top_rated": "الأصناف الأعلى تقييماً",
+    "lowest_rated": "الأصناف الأقل تقييماً",
+    "recent_reviews": "أحدث التقييمات",
     "order_ref": "طلب #{orderNumber} · {customerName}",
     "unknown_item": "صنف غير معروف",
-    "no_data": "لا توجد بيانات بعد"
+    "no_data": "لا تتوفر بيانات"
   },
   "tracking": {
     "title": "تتبع طلب رقم #{id}",

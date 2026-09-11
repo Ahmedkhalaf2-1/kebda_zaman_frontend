@@ -317,8 +317,8 @@
     "saved": "Saved",
     "update_review": "Update review",
     "thank_you": "Thank you for your feedback!",
-    "no_ratings_yet": "No ratings yet",
-    "rating_compact": "{rating} ({count})",
+    "no_ratings_yet": "☆ No ratings yet",
+    "rating_compact": "★ {rating} ({count})",
     "rated_by": "Rated by {count} customers",
     "submit_error": "We couldn't submit your review. Please try again.",
     "load_error": "We couldn't load this order's reviews right now.",
@@ -327,17 +327,17 @@
     "guest_blocked": "Please sign in to leave a review."
   },
   "admin_reviews": {
-    "title": "Reviews & Ratings",
-    "item_reviews_average": "Item reviews average",
-    "order_feedback_average": "Order feedback average",
-    "review_count": "{count} reviews",
-    "rating_distribution": "Rating distribution",
-    "top_rated": "Top-rated items",
-    "lowest_rated": "Lowest-rated items",
-    "recent_reviews": "Recent item reviews",
+    "title": "Ratings & Reviews",
+    "item_reviews_average": "Item Reviews Average",
+    "order_feedback_average": "Order Feedback Average",
+    "review_count": "Based on {count} reviews",
+    "rating_distribution": "Rating Distribution",
+    "top_rated": "Top Rated Items",
+    "lowest_rated": "Lowest Rated Items",
+    "recent_reviews": "Recent Reviews",
     "order_ref": "Order #{orderNumber} · {customerName}",
-    "unknown_item": "Unknown item",
-    "no_data": "No data yet"
+    "unknown_item": "Unknown Item",
+    "no_data": "No data available"
   },
   "tracking": {
     "title": "Track Order #{id}",
