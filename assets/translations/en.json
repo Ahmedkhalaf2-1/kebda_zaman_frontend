@@ -301,6 +301,8 @@
     "optional": "Optional",
     "submit_review": "Submit review",
     "save_changes": "Save changes",
+    "saved": "Saved",
+    "update_review": "Update review",
     "thank_you": "Thank you for your feedback!",
     "no_ratings_yet": "No ratings yet",
     "rating_compact": "{rating} ({count})",

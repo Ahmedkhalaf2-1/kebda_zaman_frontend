@@ -301,6 +301,8 @@
     "optional": "اختياري",
     "submit_review": "إرسال التقييم",
     "save_changes": "حفظ التعديلات",
+    "saved": "تم الحفظ",
+    "update_review": "تحديث التقييم",
     "thank_you": "شكرًا لتقييمك!",
     "no_ratings_yet": "لا توجد تقييمات بعد",
     "rating_compact": "{rating} ({count})",
