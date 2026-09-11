@@ -334,4 +334,8 @@ class _FakeKitchenRepository implements KitchenRepository {
   @override
   Future<Result<KitchenOrder>> getOrder(String id) =>
       throw UnimplementedError();
+
+  @override
+  Future<Result<KitchenOrder>> setPreparationTime(String orderId, int minutes) =>
+      throw UnimplementedError();
 }

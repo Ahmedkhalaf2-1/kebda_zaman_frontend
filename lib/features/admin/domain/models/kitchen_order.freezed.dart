@@ -27,6 +27,8 @@ mixin _$KitchenOrder {
   FulfillmentType get deliveryMethod => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   List<KitchenOrderItem> get items => throw _privateConstructorUsedError;
+  int? get preparationTimeMinutes => throw _privateConstructorUsedError;
+  String? get estimatedDeliveryTime => throw _privateConstructorUsedError;
 
   /// Serializes this KitchenOrder to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -52,6 +54,8 @@ abstract class $KitchenOrderCopyWith<$Res> {
     FulfillmentType deliveryMethod,
     DateTime createdAt,
     List<KitchenOrderItem> items,
+    int? preparationTimeMinutes,
+    String? estimatedDeliveryTime,
   });
 }
 
@@ -76,6 +80,8 @@ class _$KitchenOrderCopyWithImpl<$Res, $Val extends KitchenOrder>
     Object? deliveryMethod = null,
     Object? createdAt = null,
     Object? items = null,
+    Object? preparationTimeMinutes = freezed,
+    Object? estimatedDeliveryTime = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -103,6 +109,14 @@ class _$KitchenOrderCopyWithImpl<$Res, $Val extends KitchenOrder>
                 ? _value.items
                 : items // ignore: cast_nullable_to_non_nullable
                       as List<KitchenOrderItem>,
+            preparationTimeMinutes: freezed == preparationTimeMinutes
+                ? _value.preparationTimeMinutes
+                : preparationTimeMinutes // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            estimatedDeliveryTime: freezed == estimatedDeliveryTime
+                ? _value.estimatedDeliveryTime
+                : estimatedDeliveryTime // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -125,6 +139,8 @@ abstract class _$$KitchenOrderImplCopyWith<$Res>
     FulfillmentType deliveryMethod,
     DateTime createdAt,
     List<KitchenOrderItem> items,
+    int? preparationTimeMinutes,
+    String? estimatedDeliveryTime,
   });
 }
 
@@ -148,6 +164,8 @@ class __$$KitchenOrderImplCopyWithImpl<$Res>
     Object? deliveryMethod = null,
     Object? createdAt = null,
     Object? items = null,
+    Object? preparationTimeMinutes = freezed,
+    Object? estimatedDeliveryTime = freezed,
   }) {
     return _then(
       _$KitchenOrderImpl(
@@ -175,6 +193,14 @@ class __$$KitchenOrderImplCopyWithImpl<$Res>
             ? _value._items
             : items // ignore: cast_nullable_to_non_nullable
                   as List<KitchenOrderItem>,
+        preparationTimeMinutes: freezed == preparationTimeMinutes
+            ? _value.preparationTimeMinutes
+            : preparationTimeMinutes // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        estimatedDeliveryTime: freezed == estimatedDeliveryTime
+            ? _value.estimatedDeliveryTime
+            : estimatedDeliveryTime // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -190,6 +216,8 @@ class _$KitchenOrderImpl implements _KitchenOrder {
     required this.deliveryMethod,
     required this.createdAt,
     required final List<KitchenOrderItem> items,
+    this.preparationTimeMinutes,
+    this.estimatedDeliveryTime,
   }) : _items = items;
 
   factory _$KitchenOrderImpl.fromJson(Map<String, dynamic> json) =>
@@ -214,8 +242,13 @@ class _$KitchenOrderImpl implements _KitchenOrder {
   }
 
   @override
+  final int? preparationTimeMinutes;
+  @override
+  final String? estimatedDeliveryTime;
+
+  @override
   String toString() {
-    return 'KitchenOrder(id: $id, orderNumber: $orderNumber, status: $status, deliveryMethod: $deliveryMethod, createdAt: $createdAt, items: $items)';
+    return 'KitchenOrder(id: $id, orderNumber: $orderNumber, status: $status, deliveryMethod: $deliveryMethod, createdAt: $createdAt, items: $items, preparationTimeMinutes: $preparationTimeMinutes, estimatedDeliveryTime: $estimatedDeliveryTime)';
   }
 
   @override
@@ -231,7 +264,11 @@ class _$KitchenOrderImpl implements _KitchenOrder {
                 other.deliveryMethod == deliveryMethod) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
-            const DeepCollectionEquality().equals(other._items, _items));
+            const DeepCollectionEquality().equals(other._items, _items) &&
+            (identical(other.preparationTimeMinutes, preparationTimeMinutes) ||
+                other.preparationTimeMinutes == preparationTimeMinutes) &&
+            (identical(other.estimatedDeliveryTime, estimatedDeliveryTime) ||
+                other.estimatedDeliveryTime == estimatedDeliveryTime));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -244,6 +281,8 @@ class _$KitchenOrderImpl implements _KitchenOrder {
     deliveryMethod,
     createdAt,
     const DeepCollectionEquality().hash(_items),
+    preparationTimeMinutes,
+    estimatedDeliveryTime,
   );
 
   /// Create a copy of KitchenOrder
@@ -268,6 +307,8 @@ abstract class _KitchenOrder implements KitchenOrder {
     required final FulfillmentType deliveryMethod,
     required final DateTime createdAt,
     required final List<KitchenOrderItem> items,
+    final int? preparationTimeMinutes,
+    final String? estimatedDeliveryTime,
   }) = _$KitchenOrderImpl;
 
   factory _KitchenOrder.fromJson(Map<String, dynamic> json) =
@@ -285,6 +326,10 @@ abstract class _KitchenOrder implements KitchenOrder {
   DateTime get createdAt;
   @override
   List<KitchenOrderItem> get items;
+  @override
+  int? get preparationTimeMinutes;
+  @override
+  String? get estimatedDeliveryTime;
 
   /// Create a copy of KitchenOrder
   /// with the given fields replaced by the non-null parameter values.

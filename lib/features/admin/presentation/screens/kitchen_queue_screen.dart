@@ -6,6 +6,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
+import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/domain/models/kitchen_order.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/kitchen_notifier.dart';
@@ -108,6 +109,18 @@ class _TicketCard extends StatelessWidget {
 
   const _TicketCard({required this.order, required this.onTap});
 
+  /// e.g. "20 min · ETA 8:35 PM" — omits the ETA half entirely if it's not
+  /// yet available/malformed, rather than showing a placeholder.
+  String _prepSummary(KitchenOrder order) {
+    final minutesText = 'kitchen.prep_time_minutes_value'.tr(
+      namedArgs: {'minutes': '${order.preparationTimeMinutes}'},
+    );
+    final eta = formatEtaClockTime(order.estimatedDeliveryTime);
+    return eta == null
+        ? minutesText
+        : '$minutesText · ${'kitchen.queue_eta_prefix'.tr()} $eta';
+  }
+
   @override
   Widget build(BuildContext context) {
     final visual = adminOrderStatusVisual(order.status);
@@ -188,6 +201,16 @@ class _TicketCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (order.preparationTimeMinutes != null) ...[
+              const SizedBox(height: KZ.sp8),
+              Text(
+                _prepSummary(order),
+                style: KZ.bodySmall.copyWith(
+                  color: KZ.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
             const SizedBox(height: KZ.sp10),
             const Divider(height: 1, color: KZ.outlineVariant),
             const SizedBox(height: KZ.sp10),

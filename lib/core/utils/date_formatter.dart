@@ -49,6 +49,25 @@ String formatOrderTimestamp(DateTime dateTime) {
 String formatShortDate(DateTime date) =>
     '${date.day} ${_kMonthAbbreviations[date.month - 1]}';
 
+/// Formats a backend ISO ETA timestamp (UTC) as a human-readable local
+/// clock time, e.g. "8:35 PM" — never the raw ISO string. Used everywhere
+/// an `estimatedDeliveryTime`/`estimatedTime` field is shown (Kitchen
+/// Ticket/Queue, Admin Order Details, Customer Order Tracking, Home
+/// Widget), so the parsing/formatting rule lives in exactly one place.
+///
+/// Returns `null` for a null/empty/malformed input rather than throwing —
+/// callers are expected to fall back to their own "unavailable" copy.
+String? formatEtaClockTime(String? isoString) {
+  if (isoString == null || isoString.trim().isEmpty) return null;
+  final parsed = DateTime.tryParse(isoString);
+  if (parsed == null) return null;
+  final local = parsed.toLocal();
+  final hour12 = local.hour % 12 == 0 ? 12 : local.hour % 12;
+  final minute = local.minute.toString().padLeft(2, '0');
+  final period = local.hour >= 12 ? 'PM' : 'AM';
+  return '$hour12:$minute $period';
+}
+
 /// Formats a timestamp as a short relative string, e.g. "Just now",
 /// "5 mins ago", "3 hrs ago", "2 days ago" — for compact contexts like a
 /// notification list. [dateTime] must already be in local time (see

@@ -584,6 +584,7 @@ class ApiOrderRepository implements OrderRepository {
       statusHistory:
           [], // If we got status history from /orders/:id/status, it would go here. But /orders/:id doesn't return history.
       estimatedTime: json['estimatedDeliveryTime'],
+      preparationTimeMinutes: _toIntField(json['preparationTimeMinutes']),
     );
   }
 

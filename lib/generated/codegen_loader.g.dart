@@ -33,7 +33,8 @@ class CodegenLoader extends AssetLoader{
     "restaurant_profile": "بيانات المطعم",
     "working_hours": "ساعات العمل",
     "order_settings": "إعدادات الطلبات",
-    "pricing_settings": "التسعير"
+    "pricing_settings": "التسعير",
+    "reviews": "التقييمات والمراجعات"
   },
   "kitchen": {
     "queue_title": "قائمة المطبخ",
@@ -44,7 +45,20 @@ class CodegenLoader extends AssetLoader{
     "empty_sub": "ستظهر هنا الطلبات المؤكدة وقيد التحضير.",
     "variant": "الحجم/النوع",
     "addons": "الإضافات",
-    "special_instructions": "تعليمات خاصة"
+    "special_instructions": "تعليمات خاصة",
+    "prep_time_title": "وقت التحضير",
+    "prep_time_set": "تحديد وقت التحضير",
+    "prep_time_change": "تغيير وقت التحضير",
+    "prep_time_custom": "مخصص",
+    "prep_time_minutes_label": "الدقائق",
+    "prep_time_minutes_value": "{minutes} دقيقة",
+    "prep_time_ready": "وقت الجاهزية المتوقع",
+    "prep_time_arrival": "الوصول المتوقع",
+    "prep_time_enter": "أدخل وقت التحضير",
+    "prep_time_range_error": "يجب أن يكون وقت التحضير بين 1 و180 دقيقة",
+    "prep_time_update_failed": "فشل تحديث وقت التحضير",
+    "prep_time_updated": "تم تحديث وقت التحضير",
+    "queue_eta_prefix": "الوصول المتوقع"
   },
   "nav_group": {
     "overview": "نظرة عامة",
@@ -292,6 +306,7 @@ class CodegenLoader extends AssetLoader{
     "reorder_note_failed": "{count} فشل",
     "reorder_failed": "تعذرت إضافة العناصر إلى السلة، حاول مرة أخرى.",
     "reorder_none_available": "لا توجد عناصر متاحة لإعادة الطلب.",
+    "rate_order": "قيّم الطلب",
     "status": {
       "pending": "في انتظار التأكيد",
       "confirmed": "تم التأكيد",
@@ -303,6 +318,42 @@ class CodegenLoader extends AssetLoader{
       "cancelled": "ملغي",
       "unknown": "غير معروف"
     }
+  },
+  "reviews": {
+    "title": "التقييمات",
+    "rate_items_heading": "قيّم الأصناف",
+    "your_rating": "تقييمك",
+    "tell_us_about_food": "أخبرنا رأيك في الطعام",
+    "overall_experience": "التجربة العامة",
+    "overall_experience_sub": "التغليف، الخدمة، وطلبك ككل",
+    "overall_comment_hint": "أي ملاحظات أخرى",
+    "optional": "اختياري",
+    "submit_review": "إرسال التقييم",
+    "save_changes": "حفظ التعديلات",
+    "saved": "تم الحفظ",
+    "update_review": "تحديث التقييم",
+    "thank_you": "شكرًا لتقييمك!",
+    "no_ratings_yet": "لا توجد تقييمات بعد",
+    "rating_compact": "{rating} ({count})",
+    "rated_by": "قيّمه {count} عميل",
+    "submit_error": "تعذر إرسال تقييمك، حاول مرة أخرى.",
+    "load_error": "تعذر تحميل تقييمات هذا الطلب الآن.",
+    "not_eligible": "هذا الطلب غير قابل للتقييم",
+    "not_eligible_sub": "يمكن تقييم الطلبات المسلَّمة أو المستلَمة فقط.",
+    "guest_blocked": "يرجى تسجيل الدخول لإضافة تقييم."
+  },
+  "admin_reviews": {
+    "title": "التقييمات والمراجعات",
+    "item_reviews_average": "متوسط تقييمات الأصناف",
+    "order_feedback_average": "متوسط تقييمات الطلبات",
+    "review_count": "{count} تقييم",
+    "rating_distribution": "توزيع التقييمات",
+    "top_rated": "الأصناف الأعلى تقييمًا",
+    "lowest_rated": "الأصناف الأقل تقييمًا",
+    "recent_reviews": "أحدث تقييمات الأصناف",
+    "order_ref": "طلب #{orderNumber} · {customerName}",
+    "unknown_item": "صنف غير معروف",
+    "no_data": "لا توجد بيانات بعد"
   },
   "tracking": {
     "title": "تتبع طلب رقم #{id}",
@@ -321,6 +372,7 @@ class CodegenLoader extends AssetLoader{
     "order_summary": "تفاصيل الطلب",
     "confirmed_msg": "تم تأكيد الطلب من كبدة زمان!",
     "estimated_arrival": "الوصول المتوقع",
+    "estimated_ready": "وقت الجاهزية المتوقع",
     "view_details": "عرض التفاصيل",
     "tracking_status_title": "حالة التتبع",
     "item_quantity": "الكمية: {qty}",
@@ -905,7 +957,10 @@ class CodegenLoader extends AssetLoader{
     "top_selling_items": "الأصناف الأكثر مبيعاً",
     "quantity_sold": "مباع",
     "no_analytics_data": "لا توجد بيانات تحليلية",
-    "failed_to_load": "تعذر تحميل بيانات اللوحة"
+    "failed_to_load": "تعذر تحميل بيانات اللوحة",
+    "operations_snapshot": "نظرة عامة على العمليات",
+    "manage_reviews": "إدارة التقييمات والمراجعات",
+    "view_all": "عرض الكل"
   },
   "offers": {
     "title": "أكواد الخصم",
@@ -929,7 +984,7 @@ class CodegenLoader extends AssetLoader{
     "delete_body": "حذف {code}؟ لا يمكن التراجع عن هذا الإجراء."
   },
   "menu_offers": {
-    "title": "عروض المنيو",
+    "page_title": "عروض المنيو",
     "add_offer": "إضافة عرض منيو",
     "edit_offer": "تعديل عرض المنيو",
     "create_offer": "إنشاء العرض",
@@ -1120,7 +1175,8 @@ static const Map<String,dynamic> _en = {
     "restaurant_profile": "Restaurant Profile",
     "working_hours": "Working Hours",
     "order_settings": "Order Settings",
-    "pricing_settings": "Pricing"
+    "pricing_settings": "Pricing",
+    "reviews": "Reviews & Ratings"
   },
   "kitchen": {
     "queue_title": "Kitchen Queue",
@@ -1131,7 +1187,20 @@ static const Map<String,dynamic> _en = {
     "empty_sub": "Confirmed and preparing orders will show up here.",
     "variant": "Variant",
     "addons": "Add-ons",
-    "special_instructions": "Special Instructions"
+    "special_instructions": "Special Instructions",
+    "prep_time_title": "Preparation Time",
+    "prep_time_set": "Set preparation time",
+    "prep_time_change": "Change preparation time",
+    "prep_time_custom": "Custom",
+    "prep_time_minutes_label": "Minutes",
+    "prep_time_minutes_value": "{minutes} min",
+    "prep_time_ready": "Estimated ready time",
+    "prep_time_arrival": "Estimated arrival",
+    "prep_time_enter": "Enter preparation time",
+    "prep_time_range_error": "Preparation time must be between 1 and 180 minutes",
+    "prep_time_update_failed": "Failed to update preparation time",
+    "prep_time_updated": "Preparation time updated",
+    "queue_eta_prefix": "ETA"
   },
   "nav_group": {
     "overview": "Overview",
@@ -1379,6 +1448,7 @@ static const Map<String,dynamic> _en = {
     "reorder_note_failed": "{count} failed",
     "reorder_failed": "Could not add items to cart, please try again.",
     "reorder_none_available": "No items were available for reorder.",
+    "rate_order": "Rate Order",
     "status": {
       "pending": "Pending Confirmation",
       "confirmed": "Confirmed",
@@ -1390,6 +1460,42 @@ static const Map<String,dynamic> _en = {
       "cancelled": "Cancelled",
       "unknown": "Unknown"
     }
+  },
+  "reviews": {
+    "title": "Reviews",
+    "rate_items_heading": "Rate the food",
+    "your_rating": "Your rating",
+    "tell_us_about_food": "Tell us about the food",
+    "overall_experience": "Overall experience",
+    "overall_experience_sub": "Packaging, service, and your order as a whole",
+    "overall_comment_hint": "Any other comments",
+    "optional": "Optional",
+    "submit_review": "Submit review",
+    "save_changes": "Save changes",
+    "saved": "Saved",
+    "update_review": "Update review",
+    "thank_you": "Thank you for your feedback!",
+    "no_ratings_yet": "No ratings yet",
+    "rating_compact": "{rating} ({count})",
+    "rated_by": "Rated by {count} customers",
+    "submit_error": "We couldn't submit your review. Please try again.",
+    "load_error": "We couldn't load this order's reviews right now.",
+    "not_eligible": "This order isn't reviewable",
+    "not_eligible_sub": "Only delivered or picked-up orders can be reviewed.",
+    "guest_blocked": "Please sign in to leave a review."
+  },
+  "admin_reviews": {
+    "title": "Reviews & Ratings",
+    "item_reviews_average": "Item reviews average",
+    "order_feedback_average": "Order feedback average",
+    "review_count": "{count} reviews",
+    "rating_distribution": "Rating distribution",
+    "top_rated": "Top-rated items",
+    "lowest_rated": "Lowest-rated items",
+    "recent_reviews": "Recent item reviews",
+    "order_ref": "Order #{orderNumber} · {customerName}",
+    "unknown_item": "Unknown item",
+    "no_data": "No data yet"
   },
   "tracking": {
     "title": "Track Order #{id}",
@@ -1408,6 +1514,7 @@ static const Map<String,dynamic> _en = {
     "order_summary": "Order Details",
     "confirmed_msg": "Order confirmed by Kebda Zaman!",
     "estimated_arrival": "ESTIMATED ARRIVAL",
+    "estimated_ready": "ESTIMATED READY TIME",
     "view_details": "View Details",
     "tracking_status_title": "Tracking Status",
     "item_quantity": "Quantity: {qty}",
@@ -1992,7 +2099,10 @@ static const Map<String,dynamic> _en = {
     "top_selling_items": "Top-Selling Items",
     "quantity_sold": "sold",
     "no_analytics_data": "No analytics data",
-    "failed_to_load": "Failed to load dashboard data"
+    "failed_to_load": "Failed to load dashboard data",
+    "operations_snapshot": "Operations Snapshot",
+    "manage_reviews": "Manage Reviews & Ratings",
+    "view_all": "View All"
   },
   "offers": {
     "title": "Promo Codes",
@@ -2016,7 +2126,7 @@ static const Map<String,dynamic> _en = {
     "delete_body": "Delete {code}? This cannot be undone."
   },
   "menu_offers": {
-    "title": "Menu Offers",
+    "page_title": "Menu Offers",
     "add_offer": "Add Menu Offer",
     "edit_offer": "Edit Menu Offer",
     "create_offer": "Create Offer",

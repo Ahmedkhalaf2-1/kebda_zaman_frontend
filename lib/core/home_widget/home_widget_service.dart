@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 
@@ -57,7 +58,9 @@ class HomeWidgetService {
     final sequence = order.fulfillmentType.statusSequence;
     final stepIndex = sequence.indexOf(order.status);
     final progress = stepIndex < 0 ? 0 : stepIndex;
-    final eta = order.estimatedTime?.trim() ?? '';
+    // Never store the raw ISO timestamp — the widget has no locale/parsing
+    // logic of its own, so it must already be a human-readable local time.
+    final eta = formatEtaClockTime(order.estimatedTime) ?? '';
 
     await HomeWidget.saveWidgetData<String>(_keyMode, 'order');
     await HomeWidget.saveWidgetData<String>(_keyOrderId, order.id);

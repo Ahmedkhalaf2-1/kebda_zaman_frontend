@@ -19,6 +19,8 @@ _$KitchenOrderImpl _$$KitchenOrderImplFromJson(Map<String, dynamic> json) =>
       items: (json['items'] as List<dynamic>)
           .map((e) => KitchenOrderItem.fromJson(e as Map<String, dynamic>))
           .toList(),
+      preparationTimeMinutes: (json['preparationTimeMinutes'] as num?)?.toInt(),
+      estimatedDeliveryTime: json['estimatedDeliveryTime'] as String?,
     );
 
 Map<String, dynamic> _$$KitchenOrderImplToJson(_$KitchenOrderImpl instance) =>
@@ -29,6 +31,8 @@ Map<String, dynamic> _$$KitchenOrderImplToJson(_$KitchenOrderImpl instance) =>
       'deliveryMethod': _$FulfillmentTypeEnumMap[instance.deliveryMethod]!,
       'createdAt': instance.createdAt.toIso8601String(),
       'items': instance.items,
+      'preparationTimeMinutes': instance.preparationTimeMinutes,
+      'estimatedDeliveryTime': instance.estimatedDeliveryTime,
     };
 
 const _$OrderStatusEnumMap = {

@@ -46,6 +46,24 @@ class ApiKitchenRepository implements KitchenRepository {
     }
   }
 
+  @override
+  Future<Result<KitchenOrder>> setPreparationTime(
+    String orderId,
+    int minutes,
+  ) async {
+    try {
+      final response = await _apiClient.dio.patch(
+        '/kitchen/orders/$orderId/preparation-time',
+        data: {'minutes': minutes},
+      );
+      return Success(
+        _mapKitchenOrder(response.data as Map<String, dynamic>),
+      );
+    } catch (e) {
+      return Err(_handleError(e, 'Failed to update preparation time'));
+    }
+  }
+
   static OrderStatus _mapStatus(Object? value) => OrderStatus.values
       .firstWhere((s) => s.name == value, orElse: () => OrderStatus.unknown);
 
@@ -76,6 +94,9 @@ class ApiKitchenRepository implements KitchenRepository {
       items: itemsList
           .map((i) => _mapKitchenOrderItem(i as Map<String, dynamic>))
           .toList(),
+      preparationTimeMinutes: (json['preparationTimeMinutes'] as num?)
+          ?.toInt(),
+      estimatedDeliveryTime: json['estimatedDeliveryTime'] as String?,
     );
   }
 

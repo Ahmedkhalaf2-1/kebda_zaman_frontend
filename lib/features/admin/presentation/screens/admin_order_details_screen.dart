@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_details_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/preparation_time_section.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/utils/maps_launcher.dart';
@@ -159,6 +162,8 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
         ],
+
+        _AdminPreparationTimeSection(order: order),
 
         _buildSectionCard(
           title: 'Items',
@@ -393,6 +398,86 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           child,
         ],
+      ),
+    );
+  }
+}
+
+/// Admin-only override of the preparation time Kitchen already owns —
+/// same `PATCH /kitchen/orders/:id/preparation-time` endpoint/repository
+/// method as [PreparationTimeSection]'s primary use on KitchenTicketScreen,
+/// just gated to ADMIN and only while the order is CONFIRMED/PREPARING.
+/// CASHIER also reaches this screen (`/admin/orders` is shared, see
+/// router.dart) so the role check here is required, not just cosmetic — the
+/// backend would 403 CASHIER anyway, but the control must never be shown to
+/// tap in the first place.
+///
+/// The mutation endpoint returns a [KitchenOrder]-shaped response (a much
+/// smaller shape than the full admin [Order]), so a successful PATCH is
+/// reflected via local override state rather than by touching
+/// [adminOrderDetailsProvider]'s cached [Order] — the next natural refetch
+/// (pull-to-refresh / re-entering the screen) reconciles fully.
+class _AdminPreparationTimeSection extends ConsumerStatefulWidget {
+  final Order order;
+
+  const _AdminPreparationTimeSection({required this.order});
+
+  @override
+  ConsumerState<_AdminPreparationTimeSection> createState() =>
+      _AdminPreparationTimeSectionState();
+}
+
+class _AdminPreparationTimeSectionState
+    extends ConsumerState<_AdminPreparationTimeSection> {
+  bool _submitting = false;
+  int? _minutesOverride;
+  String? _etaOverride;
+
+  Future<void> _setMinutes(int minutes) async {
+    if (_submitting) return;
+    setState(() => _submitting = true);
+    final repo = ref.read(kitchenRepositoryProvider);
+    final result = await repo.setPreparationTime(widget.order.id, minutes);
+    if (!mounted) return;
+    result.fold(
+      (failure) {
+        setState(() => _submitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('kitchen.prep_time_update_failed'.tr())),
+        );
+      },
+      (updated) {
+        setState(() {
+          _submitting = false;
+          _minutesOverride = updated.preparationTimeMinutes;
+          _etaOverride = updated.estimatedDeliveryTime;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('kitchen.prep_time_updated'.tr())),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final order = widget.order;
+    if (!isPreparationTimeEditableStatus(order.status)) {
+      return const SizedBox.shrink();
+    }
+    final role = ref.watch(authNotifierProvider).user?.role;
+    if (role != 'ADMIN') return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: PreparationTimeSection(
+        preparationTimeMinutes:
+            _minutesOverride ?? order.preparationTimeMinutes,
+        estimatedDeliveryTime: _etaOverride ?? order.estimatedTime,
+        deliveryMethod: order.fulfillmentType,
+        editable: true,
+        submitting: _submitting,
+        onSetMinutes: _setMinutes,
       ),
     );
   }

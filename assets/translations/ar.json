@@ -29,7 +29,20 @@
     "empty_sub": "ستظهر هنا الطلبات المؤكدة وقيد التحضير.",
     "variant": "الحجم/النوع",
     "addons": "الإضافات",
-    "special_instructions": "تعليمات خاصة"
+    "special_instructions": "تعليمات خاصة",
+    "prep_time_title": "وقت التحضير",
+    "prep_time_set": "تحديد وقت التحضير",
+    "prep_time_change": "تغيير وقت التحضير",
+    "prep_time_custom": "مخصص",
+    "prep_time_minutes_label": "الدقائق",
+    "prep_time_minutes_value": "{minutes} دقيقة",
+    "prep_time_ready": "وقت الجاهزية المتوقع",
+    "prep_time_arrival": "الوصول المتوقع",
+    "prep_time_enter": "أدخل وقت التحضير",
+    "prep_time_range_error": "يجب أن يكون وقت التحضير بين 1 و180 دقيقة",
+    "prep_time_update_failed": "فشل تحديث وقت التحضير",
+    "prep_time_updated": "تم تحديث وقت التحضير",
+    "queue_eta_prefix": "الوصول المتوقع"
   },
   "nav_group": {
     "overview": "نظرة عامة",
@@ -343,6 +356,7 @@
     "order_summary": "تفاصيل الطلب",
     "confirmed_msg": "تم تأكيد الطلب من كبدة زمان!",
     "estimated_arrival": "الوصول المتوقع",
+    "estimated_ready": "وقت الجاهزية المتوقع",
     "view_details": "عرض التفاصيل",
     "tracking_status_title": "حالة التتبع",
     "item_quantity": "الكمية: {qty}",
@@ -1124,21 +1138,5 @@
     "error_active_order": "لا يمكن حذف حسابك أثناء وجود طلب نشط. يرجى الانتظار حتى يكتمل الطلب أو يتم استلامه أو إلغاؤه، ثم المحاولة مرة أخرى.",
     "error_firebase": "تعذر إتمام الحذف بسبب خطأ في الخدمة. يرجى المحاولة مرة أخرى.",
     "error_generic": "حدث خطأ ما أثناء حذف حسابك. يرجى المحاولة مرة أخرى."
-  },
-  "reviews": {
-    "no_ratings_yet": "☆ لا توجد تقييمات",
-    "rating_compact": "★ {rating} ({count})"
-  },
-  "admin_reviews": {
-    "title": "التقييمات والمراجعات",
-    "item_reviews_average": "متوسط تقييمات الأصناف",
-    "review_count": "بناءً على {count} تقييمات",
-    "order_feedback_average": "متوسط ملاحظات الطلبات",
-    "rating_distribution": "توزيع التقييمات",
-    "top_rated": "الأصناف الأعلى تقييماً",
-    "lowest_rated": "الأصناف الأقل تقييماً",
-    "recent_reviews": "أحدث التقييمات",
-    "no_data": "لا تتوفر بيانات",
-    "unknown_item": "صنف غير معروف"
   }
 }

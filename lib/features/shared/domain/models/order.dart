@@ -114,6 +114,11 @@ class Order with _$Order {
     required DateTime placedAt,
     @Default([]) List<OrderStatusEntry> statusHistory,
     String? estimatedTime,
+    // Kitchen-set minutes-remaining snapshot, mirroring
+    // KitchenOrder.preparationTimeMinutes — null until kitchen/admin sets
+    // one, or if this order response doesn't carry it. Never computed
+    // client-side.
+    int? preparationTimeMinutes,
     // Additive field on the checkout response only (03_DTO_REFERENCE.md) — null
     // when no loyalty reward was redeemed for this order (the normal case).
     LoyaltyRedemptionInfo? loyaltyRedemption,

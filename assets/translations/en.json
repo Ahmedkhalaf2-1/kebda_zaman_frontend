@@ -29,7 +29,20 @@
     "empty_sub": "Confirmed and preparing orders will show up here.",
     "variant": "Variant",
     "addons": "Add-ons",
-    "special_instructions": "Special Instructions"
+    "special_instructions": "Special Instructions",
+    "prep_time_title": "Preparation Time",
+    "prep_time_set": "Set preparation time",
+    "prep_time_change": "Change preparation time",
+    "prep_time_custom": "Custom",
+    "prep_time_minutes_label": "Minutes",
+    "prep_time_minutes_value": "{minutes} min",
+    "prep_time_ready": "Estimated ready time",
+    "prep_time_arrival": "Estimated arrival",
+    "prep_time_enter": "Enter preparation time",
+    "prep_time_range_error": "Preparation time must be between 1 and 180 minutes",
+    "prep_time_update_failed": "Failed to update preparation time",
+    "prep_time_updated": "Preparation time updated",
+    "queue_eta_prefix": "ETA"
   },
   "nav_group": {
     "overview": "Overview",
@@ -343,6 +356,7 @@
     "order_summary": "Order Details",
     "confirmed_msg": "Order confirmed by Kebda Zaman!",
     "estimated_arrival": "ESTIMATED ARRIVAL",
+    "estimated_ready": "ESTIMATED READY TIME",
     "view_details": "View Details",
     "tracking_status_title": "Tracking Status",
     "item_quantity": "Quantity: {qty}",
@@ -1124,21 +1138,5 @@
     "error_active_order": "Your account can't be deleted while you have an active order. Please wait until it's completed, picked up, or cancelled, then try again.",
     "error_firebase": "We couldn't complete the deletion due to a service error. Please try again.",
     "error_generic": "Something went wrong while deleting your account. Please try again."
-  },
-  "reviews": {
-    "no_ratings_yet": "☆ No ratings yet",
-    "rating_compact": "★ {rating} ({count})"
-  },
-  "admin_reviews": {
-    "title": "Ratings & Reviews",
-    "item_reviews_average": "Item Reviews Average",
-    "review_count": "Based on {count} reviews",
-    "order_feedback_average": "Order Feedback Average",
-    "rating_distribution": "Rating Distribution",
-    "top_rated": "Top Rated Items",
-    "lowest_rated": "Lowest Rated Items",
-    "recent_reviews": "Recent Reviews",
-    "no_data": "No data available",
-    "unknown_item": "Unknown Item"
   }
 }

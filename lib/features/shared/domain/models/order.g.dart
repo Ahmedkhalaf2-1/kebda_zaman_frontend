@@ -58,6 +58,7 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
           .toList() ??
       const [],
   estimatedTime: json['estimatedTime'] as String?,
+  preparationTimeMinutes: (json['preparationTimeMinutes'] as num?)?.toInt(),
   loyaltyRedemption: json['loyaltyRedemption'] == null
       ? null
       : LoyaltyRedemptionInfo.fromJson(
@@ -95,6 +96,7 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'placedAt': instance.placedAt.toIso8601String(),
       'statusHistory': instance.statusHistory,
       'estimatedTime': instance.estimatedTime,
+      'preparationTimeMinutes': instance.preparationTimeMinutes,
       'loyaltyRedemption': instance.loyaltyRedemption,
     };
 

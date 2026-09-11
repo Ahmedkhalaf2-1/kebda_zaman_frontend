@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/home_widget/home_widget_service.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
+import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 import 'package:kebda_zaman/core/responsive/responsive_container.dart';
 import '../notifiers/orders_notifier.dart';
@@ -1075,9 +1076,12 @@ class _StatusBannerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final estimatedArrival = order.estimatedTime?.trim().isNotEmpty == true
-        ? order.estimatedTime!.trim()
-        : null;
+    // The backend timestamp is authoritative — never recomputed here, only
+    // formatted for display. `null` (missing/malformed) falls back to the
+    // existing "estimate unavailable" copy rather than a raw ISO string or
+    // a fabricated time.
+    final estimatedArrival = formatEtaClockTime(order.estimatedTime);
+    final isPickup = order.fulfillmentType == FulfillmentType.pickup;
 
     // A single flat, compact brand-colored row — progress (the timeline
     // below) is the actual focus of this screen; this card's job is just
@@ -1114,7 +1118,10 @@ class _StatusBannerCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'tracking.estimated_arrival'.tr(),
+                  (isPickup
+                          ? 'tracking.estimated_ready'
+                          : 'tracking.estimated_arrival')
+                      .tr(),
                   style: KZ.caption.copyWith(
                     color: Colors.white.withValues(alpha: 0.85),
                   ),

@@ -21,6 +21,16 @@ class KitchenOrder with _$KitchenOrder {
     required FulfillmentType deliveryMethod,
     required DateTime createdAt,
     required List<KitchenOrderItem> items,
+    // Set via PATCH /kitchen/orders/:id/preparation-time (KITCHEN/ADMIN
+    // only) — null until kitchen staff (or an admin override) sets it.
+    // Kept as minutes-remaining, never an absolute clock time: the backend
+    // is the only source of truth for [estimatedDeliveryTime].
+    int? preparationTimeMinutes,
+    // Backend-computed ISO timestamp — server now + preparationTimeMinutes
+    // (+ stored deliveryDurationSeconds for DELIVERY orders). Never
+    // recomputed client-side. Kept as String? (not DateTime) to match the
+    // existing Order.estimatedTime convention and minimize blast radius.
+    String? estimatedDeliveryTime,
   }) = _KitchenOrder;
 
   factory KitchenOrder.fromJson(Map<String, dynamic> json) =>

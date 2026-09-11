@@ -66,6 +66,7 @@ mixin _$Order {
   String? get estimatedTime =>
       throw _privateConstructorUsedError; // Additive field on the checkout response only (03_DTO_REFERENCE.md) — null
   // when no loyalty reward was redeemed for this order (the normal case).
+  int? get preparationTimeMinutes => throw _privateConstructorUsedError;
   LoyaltyRedemptionInfo? get loyaltyRedemption =>
       throw _privateConstructorUsedError;
 
@@ -112,6 +113,7 @@ abstract class $OrderCopyWith<$Res> {
     DateTime placedAt,
     List<OrderStatusEntry> statusHistory,
     String? estimatedTime,
+    int? preparationTimeMinutes,
     LoyaltyRedemptionInfo? loyaltyRedemption,
   });
 
@@ -164,6 +166,7 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? placedAt = null,
     Object? statusHistory = null,
     Object? estimatedTime = freezed,
+    Object? preparationTimeMinutes = freezed,
     Object? loyaltyRedemption = freezed,
   }) {
     return _then(
@@ -280,6 +283,10 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.estimatedTime
                 : estimatedTime // ignore: cast_nullable_to_non_nullable
                       as String?,
+            preparationTimeMinutes: freezed == preparationTimeMinutes
+                ? _value.preparationTimeMinutes
+                : preparationTimeMinutes // ignore: cast_nullable_to_non_nullable
+                      as int?,
             loyaltyRedemption: freezed == loyaltyRedemption
                 ? _value.loyaltyRedemption
                 : loyaltyRedemption // ignore: cast_nullable_to_non_nullable
@@ -389,6 +396,7 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     DateTime placedAt,
     List<OrderStatusEntry> statusHistory,
     String? estimatedTime,
+    int? preparationTimeMinutes,
     LoyaltyRedemptionInfo? loyaltyRedemption,
   });
 
@@ -444,6 +452,7 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? placedAt = null,
     Object? statusHistory = null,
     Object? estimatedTime = freezed,
+    Object? preparationTimeMinutes = freezed,
     Object? loyaltyRedemption = freezed,
   }) {
     return _then(
@@ -560,6 +569,10 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value.estimatedTime
             : estimatedTime // ignore: cast_nullable_to_non_nullable
                   as String?,
+        preparationTimeMinutes: freezed == preparationTimeMinutes
+            ? _value.preparationTimeMinutes
+            : preparationTimeMinutes // ignore: cast_nullable_to_non_nullable
+                  as int?,
         loyaltyRedemption: freezed == loyaltyRedemption
             ? _value.loyaltyRedemption
             : loyaltyRedemption // ignore: cast_nullable_to_non_nullable
@@ -601,6 +614,7 @@ class _$OrderImpl implements _Order {
     required this.placedAt,
     final List<OrderStatusEntry> statusHistory = const [],
     this.estimatedTime,
+    this.preparationTimeMinutes,
     this.loyaltyRedemption,
   }) : _items = items,
        _statusHistory = statusHistory;
@@ -693,6 +707,12 @@ class _$OrderImpl implements _Order {
 
   @override
   final String? estimatedTime;
+  // Kitchen-set minutes-remaining snapshot, mirroring
+  // KitchenOrder.preparationTimeMinutes — null until kitchen/admin sets
+  // one, or if this order response doesn't carry it. Never computed
+  // client-side.
+  @override
+  final int? preparationTimeMinutes;
   // Additive field on the checkout response only (03_DTO_REFERENCE.md) — null
   // when no loyalty reward was redeemed for this order (the normal case).
   @override
@@ -700,7 +720,7 @@ class _$OrderImpl implements _Order {
 
   @override
   String toString() {
-    return 'Order(id: $id, orderNumber: $orderNumber, userId: $userId, customerName: $customerName, items: $items, fulfillmentType: $fulfillmentType, addressId: $addressId, pickupLocation: $pickupLocation, deliveryAddress: $deliveryAddress, status: $status, subtotal: $subtotal, deliveryFee: $deliveryFee, deliveryDistanceMeters: $deliveryDistanceMeters, deliveryDistanceKm: $deliveryDistanceKm, deliveryDurationSeconds: $deliveryDurationSeconds, deliveryTier: $deliveryTier, deliveryZone: $deliveryZone, discountTotal: $discountTotal, loyaltyPointsUsed: $loyaltyPointsUsed, loyaltyPointsEarned: $loyaltyPointsEarned, grandTotal: $grandTotal, paymentId: $paymentId, paymentStatus: $paymentStatus, paymentMethod: $paymentMethod, paymentAuthorizedAt: $paymentAuthorizedAt, placedAt: $placedAt, statusHistory: $statusHistory, estimatedTime: $estimatedTime, loyaltyRedemption: $loyaltyRedemption)';
+    return 'Order(id: $id, orderNumber: $orderNumber, userId: $userId, customerName: $customerName, items: $items, fulfillmentType: $fulfillmentType, addressId: $addressId, pickupLocation: $pickupLocation, deliveryAddress: $deliveryAddress, status: $status, subtotal: $subtotal, deliveryFee: $deliveryFee, deliveryDistanceMeters: $deliveryDistanceMeters, deliveryDistanceKm: $deliveryDistanceKm, deliveryDurationSeconds: $deliveryDurationSeconds, deliveryTier: $deliveryTier, deliveryZone: $deliveryZone, discountTotal: $discountTotal, loyaltyPointsUsed: $loyaltyPointsUsed, loyaltyPointsEarned: $loyaltyPointsEarned, grandTotal: $grandTotal, paymentId: $paymentId, paymentStatus: $paymentStatus, paymentMethod: $paymentMethod, paymentAuthorizedAt: $paymentAuthorizedAt, placedAt: $placedAt, statusHistory: $statusHistory, estimatedTime: $estimatedTime, preparationTimeMinutes: $preparationTimeMinutes, loyaltyRedemption: $loyaltyRedemption)';
   }
 
   @override
@@ -765,6 +785,8 @@ class _$OrderImpl implements _Order {
             ) &&
             (identical(other.estimatedTime, estimatedTime) ||
                 other.estimatedTime == estimatedTime) &&
+            (identical(other.preparationTimeMinutes, preparationTimeMinutes) ||
+                other.preparationTimeMinutes == preparationTimeMinutes) &&
             (identical(other.loyaltyRedemption, loyaltyRedemption) ||
                 other.loyaltyRedemption == loyaltyRedemption));
   }
@@ -801,6 +823,7 @@ class _$OrderImpl implements _Order {
     placedAt,
     const DeepCollectionEquality().hash(_statusHistory),
     estimatedTime,
+    preparationTimeMinutes,
     loyaltyRedemption,
   ]);
 
@@ -848,6 +871,7 @@ abstract class _Order implements Order {
     required final DateTime placedAt,
     final List<OrderStatusEntry> statusHistory,
     final String? estimatedTime,
+    final int? preparationTimeMinutes,
     final LoyaltyRedemptionInfo? loyaltyRedemption,
   }) = _$OrderImpl;
 
@@ -918,6 +942,8 @@ abstract class _Order implements Order {
   @override
   String? get estimatedTime; // Additive field on the checkout response only (03_DTO_REFERENCE.md) — null
   // when no loyalty reward was redeemed for this order (the normal case).
+  @override
+  int? get preparationTimeMinutes;
   @override
   LoyaltyRedemptionInfo? get loyaltyRedemption;
 

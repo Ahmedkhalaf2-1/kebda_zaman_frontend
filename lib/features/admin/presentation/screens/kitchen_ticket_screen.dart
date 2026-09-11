@@ -7,6 +7,7 @@ import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/domain/models/kitchen_order.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/preparation_time_section.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/kitchen_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 
@@ -45,7 +46,8 @@ class KitchenTicketScreen extends ConsumerWidget {
                     onRetry: () =>
                         ref.invalidate(kitchenOrderProvider(orderId)),
                   ),
-                  data: (order) => _TicketDetail(order: order),
+                  data: (order) =>
+                      _TicketDetail(orderId: orderId, order: order),
                 ),
               ),
             ),
@@ -56,13 +58,41 @@ class KitchenTicketScreen extends ConsumerWidget {
   }
 }
 
-class _TicketDetail extends StatelessWidget {
+class _TicketDetail extends ConsumerStatefulWidget {
+  final String orderId;
   final KitchenOrder order;
 
-  const _TicketDetail({required this.order});
+  const _TicketDetail({required this.orderId, required this.order});
+
+  @override
+  ConsumerState<_TicketDetail> createState() => _TicketDetailState();
+}
+
+class _TicketDetailState extends ConsumerState<_TicketDetail> {
+  bool _submitting = false;
+
+  Future<void> _setPreparationTime(int minutes) async {
+    if (_submitting) return;
+    setState(() => _submitting = true);
+    final error = await ref
+        .read(kitchenOrderProvider(widget.orderId).notifier)
+        .setPreparationTime(minutes);
+    if (!mounted) return;
+    setState(() => _submitting = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          error == null
+              ? 'kitchen.prep_time_updated'.tr()
+              : 'kitchen.prep_time_update_failed'.tr(),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final order = widget.order;
     final visual = adminOrderStatusVisual(order.status);
     final lang = context.locale.languageCode;
 
@@ -127,6 +157,18 @@ class _TicketDetail extends StatelessWidget {
             ],
           ),
         ),
+        if (isPreparationTimeEditableStatus(order.status) ||
+            order.preparationTimeMinutes != null) ...[
+          const SizedBox(height: KZ.sp16),
+          PreparationTimeSection(
+            preparationTimeMinutes: order.preparationTimeMinutes,
+            estimatedDeliveryTime: order.estimatedDeliveryTime,
+            deliveryMethod: order.deliveryMethod,
+            editable: isPreparationTimeEditableStatus(order.status),
+            submitting: _submitting,
+            onSetMinutes: _setPreparationTime,
+          ),
+        ],
         const SizedBox(height: KZ.sp16),
         Text('kitchen.items_section'.tr(), style: KZ.sectionTitle),
         const SizedBox(height: KZ.sp10),
