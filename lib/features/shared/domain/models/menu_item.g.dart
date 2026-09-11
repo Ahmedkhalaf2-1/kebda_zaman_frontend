@@ -37,6 +37,8 @@ _$MenuItemImpl _$$MenuItemImplFromJson(Map<String, dynamic> json) =>
       nameEn: json['nameEn'] as String?,
       descriptionAr: json['descriptionAr'] as String?,
       descriptionEn: json['descriptionEn'] as String?,
+      averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0.0,
+      reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$$MenuItemImplToJson(_$MenuItemImpl instance) =>
@@ -62,6 +64,8 @@ Map<String, dynamic> _$$MenuItemImplToJson(_$MenuItemImpl instance) =>
       'nameEn': instance.nameEn,
       'descriptionAr': instance.descriptionAr,
       'descriptionEn': instance.descriptionEn,
+      'averageRating': instance.averageRating,
+      'reviewCount': instance.reviewCount,
     };
 
 const _$MenuItemBadgeEnumMap = {

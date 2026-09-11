@@ -76,6 +76,26 @@ double? menuItemCompareAtPriceFromApi(dynamic value) {
   return null;
 }
 
+/// Parses the backend's `averageRating` field, which may be an int, a
+/// double, a numeric string, or null/absent. Negative or invalid values
+/// fall back to `0.0` (no ratings yet) rather than breaking menu parsing.
+double menuItemAverageRatingFromApi(dynamic value) {
+  if (value is num) {
+    return value >= 0 ? value.toDouble() : 0.0;
+  }
+  if (value is String) {
+    final parsed = double.tryParse(value);
+    if (parsed != null && parsed >= 0) return parsed;
+  }
+  return 0.0;
+}
+
+/// Parses the backend's `reviewCount` field the same tolerant way as
+/// [menuItemCaloriesFromApi], defaulting to `0` for absent/invalid values.
+int menuItemReviewCountFromApi(dynamic value) {
+  return menuItemCaloriesFromApi(value) ?? 0;
+}
+
 @freezed
 class MenuItem with _$MenuItem {
   const factory MenuItem({
@@ -85,6 +105,7 @@ class MenuItem with _$MenuItem {
     required String description,
     required String imageUrl,
     required double basePrice,
+
     /// The discounted price the customer actually pays, or null when the
     /// item has no active discount (always strictly less than [basePrice]
     /// when set — enforced server-side). Maps to the backend's `salePrice`
@@ -108,6 +129,11 @@ class MenuItem with _$MenuItem {
     String? nameEn,
     String? descriptionAr,
     String? descriptionEn,
+    // Ratings & Reviews (RATINGS_REVIEWS_API_CONTRACT.md) — catalog responses
+    // now include these on every menu item. Defaults keep older/mock/test
+    // JSON that predates this contract parsing cleanly as "no ratings yet".
+    @Default(0.0) double averageRating,
+    @Default(0) int reviewCount,
   }) = _MenuItem;
 
   factory MenuItem.fromJson(Map<String, dynamic> json) =>

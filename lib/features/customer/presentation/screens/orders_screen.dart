@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../notifiers/orders_notifier.dart';
 import '../notifiers/cart_notifier.dart';
+import '../notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
@@ -353,6 +354,11 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
     final order = widget.order;
     final isActive = !order.status.isTerminal;
     final visual = orderStatusVisual(order.status);
+    // Guest sessions never get review submission UI — same canonical guest
+    // check used elsewhere (checkout, loyalty, addresses).
+    final authState = ref.watch(authNotifierProvider);
+    final isGuest = !authState.isLoggedIn || (authState.user?.isGuest ?? true);
+    final canReview = !isGuest && order.status.isReviewable;
 
     final dateStr =
         '${order.placedAt.day}/${order.placedAt.month}/${order.placedAt.year} ${order.placedAt.hour}:${order.placedAt.minute.toString().padLeft(2, '0')}';
@@ -487,13 +493,30 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                             context.push('/orders/tracking/${order.id}'),
                       )
                     else
-                      KZButton(
-                        label: 'orders.reorder'.tr(),
-                        icon: Icons.history_rounded,
-                        variant: KZButtonVariant.secondary,
-                        pill: false,
-                        loading: _isReordering,
-                        onPressed: () => _handleReorder(context, ref),
+                      Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          if (canReview)
+                            KZButton(
+                              label: 'orders.rate_order'.tr(),
+                              icon: Icons.star_outline_rounded,
+                              variant: KZButtonVariant.tertiary,
+                              pill: false,
+                              onPressed: () =>
+                                  context.push('/orders/review/${order.id}'),
+                            ),
+                          KZButton(
+                            label: 'orders.reorder'.tr(),
+                            icon: Icons.history_rounded,
+                            variant: KZButtonVariant.secondary,
+                            pill: false,
+                            loading: _isReordering,
+                            onPressed: () => _handleReorder(context, ref),
+                          ),
+                        ],
                       ),
                   ],
                 ),

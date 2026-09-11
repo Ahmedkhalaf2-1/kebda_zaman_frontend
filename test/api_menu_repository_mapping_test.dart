@@ -307,6 +307,53 @@ void main() {
     );
   });
 
+  group('rating fields (RATINGS_REVIEWS_API_CONTRACT.md)', () {
+    test('numeric averageRating/reviewCount parse', () {
+      final json = baseItemJson();
+      json['averageRating'] = 4.8;
+      json['reviewCount'] = 327;
+      final item = ApiMenuRepository.mapMenuItemForTesting(json);
+      expect(item.averageRating, 4.8);
+      expect(item.reviewCount, 327);
+    });
+
+    test('integer averageRating parses to double', () {
+      final json = baseItemJson();
+      json['averageRating'] = 5;
+      final item = ApiMenuRepository.mapMenuItemForTesting(json);
+      expect(item.averageRating, 5.0);
+    });
+
+    test('numeric string averageRating parses', () {
+      final json = baseItemJson();
+      json['averageRating'] = '4.5';
+      json['reviewCount'] = '10';
+      final item = ApiMenuRepository.mapMenuItemForTesting(json);
+      expect(item.averageRating, 4.5);
+      expect(item.reviewCount, 10);
+    });
+
+    test('absent rating fields default to zero (older/mock JSON)', () {
+      final item = ApiMenuRepository.mapMenuItemForTesting(baseItemJson());
+      expect(item.averageRating, 0.0);
+      expect(item.reviewCount, 0);
+    });
+
+    test('negative averageRating falls back to zero', () {
+      final json = baseItemJson();
+      json['averageRating'] = -1.0;
+      final item = ApiMenuRepository.mapMenuItemForTesting(json);
+      expect(item.averageRating, 0.0);
+    });
+
+    test('invalid averageRating string falls back to zero', () {
+      final json = baseItemJson();
+      json['averageRating'] = 'abc';
+      final item = ApiMenuRepository.mapMenuItemForTesting(json);
+      expect(item.averageRating, 0.0);
+    });
+  });
+
   group('compatibility', () {
     test('old-format backend payload without new fields still parses', () {
       final oldFormatJson = {

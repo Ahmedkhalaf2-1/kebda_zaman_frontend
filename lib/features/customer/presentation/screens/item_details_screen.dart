@@ -19,6 +19,7 @@ import 'package:kebda_zaman/core/widgets/kz_lottie_add_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_lottie_heart_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
 import 'package:kebda_zaman/core/widgets/kz_quantity_stepper.dart';
+import 'package:kebda_zaman/core/widgets/kz_star_rating.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
 class ItemDetailsScreen extends ConsumerStatefulWidget {
@@ -186,7 +187,9 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
             child: Text(
               dense ? title : title.toUpperCase(),
               style: dense
-                  ? KZ.labelLarge.copyWith(color: ItemDetailsScreen.onSurfaceColor)
+                  ? KZ.labelLarge.copyWith(
+                      color: ItemDetailsScreen.onSurfaceColor,
+                    )
                   : KZ.sectionTitle.copyWith(fontSize: 16),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -252,7 +255,8 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
   }) {
     final nestedChildren = <Widget>[];
     for (final opt in group.options) {
-      if (_isOptionSelected(group, opt) && opt.nestedModifierGroups.isNotEmpty) {
+      if (_isOptionSelected(group, opt) &&
+          opt.nestedModifierGroups.isNotEmpty) {
         for (final nested in opt.nestedModifierGroups) {
           nestedChildren.add(const SizedBox(height: 16));
           nestedChildren.add(
@@ -282,7 +286,9 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border.all(color: ItemDetailsScreen.outlineVariantColor),
+                border: Border.all(
+                  color: ItemDetailsScreen.outlineVariantColor,
+                ),
               ),
               child: Column(
                 children: [
@@ -291,8 +297,9 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                       Divider(
                         height: 1,
                         thickness: 1,
-                        color: ItemDetailsScreen.outlineVariantColor
-                            .withValues(alpha: 0.5),
+                        color: ItemDetailsScreen.outlineVariantColor.withValues(
+                          alpha: 0.5,
+                        ),
                       ),
                     _buildOptionRow(context, group, group.options[i]),
                   ],
@@ -820,6 +827,27 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                     ),
                                     const SizedBox(height: 6),
 
+                                    // Rating (backend-authoritative
+                                    // averageRating/reviewCount; hidden as a
+                                    // neutral label when nobody has rated
+                                    // yet — never a fake value).
+                                    KZMenuItemRatingBadge(
+                                      averageRating: item.averageRating,
+                                      reviewCount: item.reviewCount,
+                                      noRatingsLabel: 'reviews.no_ratings_yet'
+                                          .tr(),
+                                      ratedLabelBuilder: (rating, count) =>
+                                          'reviews.rating_compact'.tr(
+                                            namedArgs: {
+                                              'rating': rating.toStringAsFixed(
+                                                1,
+                                              ),
+                                              'count': '$count',
+                                            },
+                                          ),
+                                    ),
+                                    const SizedBox(height: 6),
+
                                     // Description
                                     Text(
                                       item.localizedDescription(
@@ -1325,8 +1353,9 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                               Container(
                                                 width: 1,
                                                 height: 16,
-                                                color: Colors.white
-                                                    .withValues(alpha: 0.4),
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.4,
+                                                ),
                                               ),
                                               const SizedBox(width: 8),
                                               Text(

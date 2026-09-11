@@ -18,6 +18,7 @@ import '../../features/customer/presentation/screens/order_success_screen.dart';
 import '../../features/customer/presentation/screens/card_payment_screen.dart';
 import '../../features/customer/presentation/screens/saved_cards_screen.dart';
 import '../../features/customer/presentation/screens/order_tracking_screen.dart';
+import '../../features/customer/presentation/screens/order_review_screen.dart';
 import '../../features/customer/presentation/screens/login_screen.dart';
 import '../../features/customer/presentation/screens/signup_screen.dart';
 import '../../features/customer/presentation/screens/splash_screen.dart';
@@ -49,6 +50,7 @@ import '../../features/admin/presentation/screens/kitchen_ticket_screen.dart';
 import '../../features/admin/presentation/screens/staff_management_screen.dart';
 import '../../features/admin/presentation/screens/customer_management_screen.dart';
 import '../../features/admin/presentation/screens/customer_details_screen.dart';
+import '../../features/admin/presentation/screens/admin_reviews_screen.dart';
 import '../../features/customer/presentation/notifiers/auth_notifier.dart';
 import '../../features/shared/domain/models/order.dart';
 import '../../features/shared/domain/models/menu_item.dart';
@@ -149,6 +151,11 @@ GoRouter router(Ref ref) {
                     builder: (context, state) => OrderTrackingScreen(
                       orderId: state.pathParameters['id']!,
                     ),
+                  ),
+                  GoRoute(
+                    path: 'review/:id',
+                    builder: (context, state) =>
+                        OrderReviewScreen(orderId: state.pathParameters['id']!),
                   ),
                 ],
               ),
@@ -341,8 +348,7 @@ GoRouter router(Ref ref) {
             routes: [
               GoRoute(
                 path: 'add',
-                builder: (context, state) =>
-                    const AdminMenuOfferFormScreen(),
+                builder: (context, state) => const AdminMenuOfferFormScreen(),
               ),
               GoRoute(
                 path: 'edit',
@@ -366,15 +372,19 @@ GoRouter router(Ref ref) {
             ],
           ),
           GoRoute(
+            path: '/admin/reviews',
+            pageBuilder: (context, state) =>
+                kzAdminPage(state: state, child: const AdminReviewsScreen()),
+          ),
+          GoRoute(
             path: '/admin/kitchen',
             pageBuilder: (context, state) =>
                 kzAdminPage(state: state, child: const KitchenQueueScreen()),
             routes: [
               GoRoute(
                 path: ':id',
-                builder: (context, state) => KitchenTicketScreen(
-                  orderId: state.pathParameters['id']!,
-                ),
+                builder: (context, state) =>
+                    KitchenTicketScreen(orderId: state.pathParameters['id']!),
               ),
             ],
           ),
@@ -430,10 +440,8 @@ GoRouter router(Ref ref) {
           ),
           GoRoute(
             path: '/admin/pricing-settings',
-            pageBuilder: (context, state) => kzAdminPage(
-              state: state,
-              child: const PricingSettingsScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                kzAdminPage(state: state, child: const PricingSettingsScreen()),
           ),
           GoRoute(
             path: '/admin/staff',

@@ -51,6 +51,8 @@ mixin _$MenuItem {
   String? get nameEn => throw _privateConstructorUsedError;
   String? get descriptionAr => throw _privateConstructorUsedError;
   String? get descriptionEn => throw _privateConstructorUsedError;
+  double get averageRating => throw _privateConstructorUsedError;
+  int get reviewCount => throw _privateConstructorUsedError;
 
   /// Serializes this MenuItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -89,6 +91,8 @@ abstract class $MenuItemCopyWith<$Res> {
     String? nameEn,
     String? descriptionAr,
     String? descriptionEn,
+    double averageRating,
+    int reviewCount,
   });
 }
 
@@ -128,6 +132,8 @@ class _$MenuItemCopyWithImpl<$Res, $Val extends MenuItem>
     Object? nameEn = freezed,
     Object? descriptionAr = freezed,
     Object? descriptionEn = freezed,
+    Object? averageRating = null,
+    Object? reviewCount = null,
   }) {
     return _then(
       _value.copyWith(
@@ -215,6 +221,14 @@ class _$MenuItemCopyWithImpl<$Res, $Val extends MenuItem>
                 ? _value.descriptionEn
                 : descriptionEn // ignore: cast_nullable_to_non_nullable
                       as String?,
+            averageRating: null == averageRating
+                ? _value.averageRating
+                : averageRating // ignore: cast_nullable_to_non_nullable
+                      as double,
+            reviewCount: null == reviewCount
+                ? _value.reviewCount
+                : reviewCount // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -252,6 +266,8 @@ abstract class _$$MenuItemImplCopyWith<$Res>
     String? nameEn,
     String? descriptionAr,
     String? descriptionEn,
+    double averageRating,
+    int reviewCount,
   });
 }
 
@@ -290,6 +306,8 @@ class __$$MenuItemImplCopyWithImpl<$Res>
     Object? nameEn = freezed,
     Object? descriptionAr = freezed,
     Object? descriptionEn = freezed,
+    Object? averageRating = null,
+    Object? reviewCount = null,
   }) {
     return _then(
       _$MenuItemImpl(
@@ -377,6 +395,14 @@ class __$$MenuItemImplCopyWithImpl<$Res>
             ? _value.descriptionEn
             : descriptionEn // ignore: cast_nullable_to_non_nullable
                   as String?,
+        averageRating: null == averageRating
+            ? _value.averageRating
+            : averageRating // ignore: cast_nullable_to_non_nullable
+                  as double,
+        reviewCount: null == reviewCount
+            ? _value.reviewCount
+            : reviewCount // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -407,6 +433,8 @@ class _$MenuItemImpl implements _MenuItem {
     this.nameEn,
     this.descriptionAr,
     this.descriptionEn,
+    this.averageRating = 0.0,
+    this.reviewCount = 0,
   }) : _modifierGroups = modifierGroups,
        _oftenOrderedWith = oftenOrderedWith;
 
@@ -484,10 +512,16 @@ class _$MenuItemImpl implements _MenuItem {
   final String? descriptionAr;
   @override
   final String? descriptionEn;
+  @override
+  @JsonKey()
+  final double averageRating;
+  @override
+  @JsonKey()
+  final int reviewCount;
 
   @override
   String toString() {
-    return 'MenuItem(id: $id, categoryId: $categoryId, name: $name, description: $description, imageUrl: $imageUrl, basePrice: $basePrice, discountPrice: $discountPrice, isAvailable: $isAvailable, isFeatured: $isFeatured, isBestSeller: $isBestSeller, prepTimeMinutes: $prepTimeMinutes, modifierGroups: $modifierGroups, sortOrder: $sortOrder, calories: $calories, compareAtPrice: $compareAtPrice, badge: $badge, oftenOrderedWith: $oftenOrderedWith, nameAr: $nameAr, nameEn: $nameEn, descriptionAr: $descriptionAr, descriptionEn: $descriptionEn)';
+    return 'MenuItem(id: $id, categoryId: $categoryId, name: $name, description: $description, imageUrl: $imageUrl, basePrice: $basePrice, discountPrice: $discountPrice, isAvailable: $isAvailable, isFeatured: $isFeatured, isBestSeller: $isBestSeller, prepTimeMinutes: $prepTimeMinutes, modifierGroups: $modifierGroups, sortOrder: $sortOrder, calories: $calories, compareAtPrice: $compareAtPrice, badge: $badge, oftenOrderedWith: $oftenOrderedWith, nameAr: $nameAr, nameEn: $nameEn, descriptionAr: $descriptionAr, descriptionEn: $descriptionEn, averageRating: $averageRating, reviewCount: $reviewCount)';
   }
 
   @override
@@ -535,7 +569,11 @@ class _$MenuItemImpl implements _MenuItem {
             (identical(other.descriptionAr, descriptionAr) ||
                 other.descriptionAr == descriptionAr) &&
             (identical(other.descriptionEn, descriptionEn) ||
-                other.descriptionEn == descriptionEn));
+                other.descriptionEn == descriptionEn) &&
+            (identical(other.averageRating, averageRating) ||
+                other.averageRating == averageRating) &&
+            (identical(other.reviewCount, reviewCount) ||
+                other.reviewCount == reviewCount));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -563,6 +601,8 @@ class _$MenuItemImpl implements _MenuItem {
     nameEn,
     descriptionAr,
     descriptionEn,
+    averageRating,
+    reviewCount,
   ]);
 
   /// Create a copy of MenuItem
@@ -602,6 +642,8 @@ abstract class _MenuItem implements MenuItem {
     final String? nameEn,
     final String? descriptionAr,
     final String? descriptionEn,
+    final double averageRating,
+    final int reviewCount,
   }) = _$MenuItemImpl;
 
   factory _MenuItem.fromJson(Map<String, dynamic> json) =
@@ -658,6 +700,10 @@ abstract class _MenuItem implements MenuItem {
   String? get descriptionAr;
   @override
   String? get descriptionEn;
+  @override
+  double get averageRating;
+  @override
+  int get reviewCount;
 
   /// Create a copy of MenuItem
   /// with the given fields replaced by the non-null parameter values.

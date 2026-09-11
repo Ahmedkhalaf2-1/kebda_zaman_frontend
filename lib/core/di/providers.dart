@@ -50,6 +50,8 @@ import 'package:kebda_zaman/features/shared/domain/repositories/reverse_geocode_
 import 'package:kebda_zaman/features/shared/data/api_favorites_repository.dart';
 import 'package:kebda_zaman/features/shared/data/api_loyalty_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/favorites_repository.dart';
+import 'package:kebda_zaman/features/shared/data/api_review_repository.dart';
+import 'package:kebda_zaman/features/shared/domain/repositories/review_repository.dart';
 import 'package:kebda_zaman/core/notifications/device_service.dart';
 
 /// DI provider overrides per md1 §31.
@@ -121,6 +123,10 @@ final reverseGeocodeRepositoryProvider = Provider<ReverseGeocodeRepository>((
 
 final favoritesRepositoryProvider = Provider<FavoritesRepository>((ref) {
   return ApiFavoritesRepository(ref.watch(apiClientProvider));
+});
+
+final reviewRepositoryProvider = Provider<ReviewRepository>((ref) {
+  return ApiReviewRepository(ref.watch(apiClientProvider));
 });
 
 final loyaltyRepositoryProvider = Provider<LoyaltyRepository>((ref) {

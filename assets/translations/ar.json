@@ -17,7 +17,8 @@
     "restaurant_profile": "بيانات المطعم",
     "working_hours": "ساعات العمل",
     "order_settings": "إعدادات الطلبات",
-    "pricing_settings": "التسعير"
+    "pricing_settings": "التسعير",
+    "reviews": "التقييمات والمراجعات"
   },
   "kitchen": {
     "queue_title": "قائمة المطبخ",
@@ -276,6 +277,7 @@
     "reorder_note_failed": "{count} فشل",
     "reorder_failed": "تعذرت إضافة العناصر إلى السلة، حاول مرة أخرى.",
     "reorder_none_available": "لا توجد عناصر متاحة لإعادة الطلب.",
+    "rate_order": "قيّم الطلب",
     "status": {
       "pending": "في انتظار التأكيد",
       "confirmed": "تم التأكيد",
@@ -287,6 +289,40 @@
       "cancelled": "ملغي",
       "unknown": "غير معروف"
     }
+  },
+  "reviews": {
+    "title": "التقييمات",
+    "rate_items_heading": "قيّم الأصناف",
+    "your_rating": "تقييمك",
+    "tell_us_about_food": "أخبرنا رأيك في الطعام",
+    "overall_experience": "التجربة العامة",
+    "overall_experience_sub": "التغليف، الخدمة، وطلبك ككل",
+    "overall_comment_hint": "أي ملاحظات أخرى",
+    "optional": "اختياري",
+    "submit_review": "إرسال التقييم",
+    "save_changes": "حفظ التعديلات",
+    "thank_you": "شكرًا لتقييمك!",
+    "no_ratings_yet": "لا توجد تقييمات بعد",
+    "rating_compact": "{rating} ({count})",
+    "rated_by": "قيّمه {count} عميل",
+    "submit_error": "تعذر إرسال تقييمك، حاول مرة أخرى.",
+    "load_error": "تعذر تحميل تقييمات هذا الطلب الآن.",
+    "not_eligible": "هذا الطلب غير قابل للتقييم",
+    "not_eligible_sub": "يمكن تقييم الطلبات المسلَّمة أو المستلَمة فقط.",
+    "guest_blocked": "يرجى تسجيل الدخول لإضافة تقييم."
+  },
+  "admin_reviews": {
+    "title": "التقييمات والمراجعات",
+    "item_reviews_average": "متوسط تقييمات الأصناف",
+    "order_feedback_average": "متوسط تقييمات الطلبات",
+    "review_count": "{count} تقييم",
+    "rating_distribution": "توزيع التقييمات",
+    "top_rated": "الأصناف الأعلى تقييمًا",
+    "lowest_rated": "الأصناف الأقل تقييمًا",
+    "recent_reviews": "أحدث تقييمات الأصناف",
+    "order_ref": "طلب #{orderNumber} · {customerName}",
+    "unknown_item": "صنف غير معروف",
+    "no_data": "لا توجد بيانات بعد"
   },
   "tracking": {
     "title": "تتبع طلب رقم #{id}",

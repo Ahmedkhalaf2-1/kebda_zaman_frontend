@@ -35,6 +35,14 @@ extension OrderStatusX on OrderStatus {
       this == OrderStatus.delivered ||
       this == OrderStatus.pickedUp ||
       this == OrderStatus.cancelled;
+
+  /// Frontend-side eligibility hint for offering review UI — a strict
+  /// subset of [isTerminal] (excludes `cancelled`). The backend remains
+  /// authoritative: `GET /reviews/me/orders/:orderId`'s own `eligible` flag
+  /// is what actually gates submission, this only controls whether the
+  /// entry point is shown at all.
+  bool get isReviewable =>
+      this == OrderStatus.delivered || this == OrderStatus.pickedUp;
 }
 
 enum FulfillmentType { delivery, pickup }

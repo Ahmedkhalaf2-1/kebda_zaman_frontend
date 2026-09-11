@@ -87,6 +87,12 @@ class AdminShell extends ConsumerWidget {
           label: 'nav.pricing_settings'.tr(),
           path: '/admin/pricing-settings',
         ),
+        _AdminNavEntry(
+          icon: Icons.star_outline_rounded,
+          activeIcon: Icons.star_rounded,
+          label: 'nav.reviews'.tr(),
+          path: '/admin/reviews',
+        ),
       ],
     ),
     _AdminNavGroup(
@@ -231,12 +237,7 @@ class _ShellBrandHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        KZ.sp16,
-        KZ.sp20,
-        KZ.sp16,
-        KZ.sp16,
-      ),
+      padding: const EdgeInsets.fromLTRB(KZ.sp16, KZ.sp20, KZ.sp16, KZ.sp16),
       child: Row(
         children: [
           const KZBrandLogo(width: 32, height: 32),
@@ -429,9 +430,7 @@ class _SidebarTile extends StatelessWidget {
             child: AnimatedContainer(
               duration: KZMotion.durationFor(context, KZMotion.fast),
               curve: KZMotion.stateChange,
-              constraints: const BoxConstraints(
-                minHeight: KZ.iconTapTargetMin,
-              ),
+              constraints: const BoxConstraints(minHeight: KZ.iconTapTargetMin),
               decoration: BoxDecoration(
                 color: selected
                     ? KZ.primary.withValues(alpha: 0.09)
@@ -576,9 +575,7 @@ class _CashierShell extends StatelessWidget {
                 offset: const Offset(0, -4),
               ),
             ],
-            border: const Border(
-              top: BorderSide(color: KZ.outlineVariant),
-            ),
+            border: const Border(top: BorderSide(color: KZ.outlineVariant)),
           ),
           padding: const EdgeInsets.symmetric(
             horizontal: KZ.sp12,
@@ -674,10 +671,7 @@ class _CashierShell extends StatelessWidget {
                   child: IconButton(
                     onPressed: onLogout,
                     tooltip: 'profile.logout'.tr(),
-                    icon: const Icon(
-                      Icons.logout_rounded,
-                      color: KZ.secondary,
-                    ),
+                    icon: const Icon(Icons.logout_rounded, color: KZ.secondary),
                   ),
                 ),
               ),

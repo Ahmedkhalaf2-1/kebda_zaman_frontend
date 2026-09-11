@@ -215,10 +215,11 @@ class ApiMenuRepository implements MenuRepository {
     try {
       final response = await _apiClient.dio.get('/menu-offers');
       final data = response.data as List;
-      final offers = data
-          .map((json) => _mapMenuOffer(json as Map<String, dynamic>))
-          .toList()
-        ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      final offers =
+          data
+              .map((json) => _mapMenuOffer(json as Map<String, dynamic>))
+              .toList()
+            ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
       return Success(offers);
     } on DioException catch (e) {
       if (e.error is ApiException) {
@@ -482,6 +483,8 @@ class ApiMenuRepository implements MenuRepository {
       nameEn: json['nameEn'] as String?,
       descriptionAr: json['descriptionAr'] as String?,
       descriptionEn: json['descriptionEn'] as String?,
+      averageRating: menuItemAverageRatingFromApi(json['averageRating']),
+      reviewCount: menuItemReviewCountFromApi(json['reviewCount']),
     );
   }
 
