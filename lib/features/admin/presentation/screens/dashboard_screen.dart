@@ -283,6 +283,26 @@ class _FilterBar extends ConsumerWidget {
         );
   }
 
+  Future<void> _pickMonth(BuildContext context, WidgetRef ref) async {
+    final now = DateTime.now();
+    final picked = await showDialog<DateTime>(
+      context: context,
+      builder: (_) => _MonthPickerDialog(
+        initialMonth: DateTime(now.year, now.month),
+        firstMonth: DateTime(now.year - 2, now.month),
+        lastMonth: DateTime(now.year, now.month),
+      ),
+    );
+    if (picked == null) return;
+    final from = DateTime.utc(picked.year, picked.month, 1);
+    // Clamp the month's last day to today when picking the current month —
+    // mirrors _pickCustomRange, which can never select a future end date.
+    final lastOfMonth = DateTime.utc(picked.year, picked.month + 1, 0);
+    final today = DateTime.utc(now.year, now.month, now.day);
+    final to = lastOfMonth.isAfter(today) ? today : lastOfMonth;
+    ref.read(reportsFilterProvider.notifier).selectCustomRange(from, to);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(reportsFilterProvider.notifier);
@@ -321,6 +341,12 @@ class _FilterBar extends ConsumerWidget {
                 selected: filter.preset == DateRangePreset.custom,
                 icon: Icons.date_range_rounded,
                 onTap: () => _pickCustomRange(context, ref),
+              ),
+              KZChip(
+                label: 'dashboard.pick_month'.tr(),
+                selected: false,
+                icon: Icons.calendar_month_rounded,
+                onTap: () => _pickMonth(context, ref),
               ),
             ],
           ),
@@ -363,6 +389,117 @@ class _FilterBar extends ConsumerWidget {
   }
 }
 
+/// A month/year grid for picking one whole calendar month as the custom
+/// range — [showDateRangePicker]'s day-by-day calendar has no fast way to
+/// land on "all of August", so this gives that one tap. Returns the picked
+/// month as its first day, or `null` if dismissed; the caller resolves the
+/// full from/to range (clamped to today for the current month).
+class _MonthPickerDialog extends StatefulWidget {
+  final DateTime initialMonth;
+  final DateTime firstMonth;
+  final DateTime lastMonth;
+
+  const _MonthPickerDialog({
+    required this.initialMonth,
+    required this.firstMonth,
+    required this.lastMonth,
+  });
+
+  @override
+  State<_MonthPickerDialog> createState() => _MonthPickerDialogState();
+}
+
+class _MonthPickerDialogState extends State<_MonthPickerDialog> {
+  late int _year;
+
+  @override
+  void initState() {
+    super.initState();
+    _year = widget.initialMonth.year;
+  }
+
+  bool _monthEnabled(int month) {
+    final d = DateTime(_year, month);
+    final first = DateTime(widget.firstMonth.year, widget.firstMonth.month);
+    final last = DateTime(widget.lastMonth.year, widget.lastMonth.month);
+    return !d.isBefore(first) && !d.isAfter(last);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = context.locale.languageCode;
+
+    return AlertDialog(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left_rounded),
+            onPressed: _year > widget.firstMonth.year
+                ? () => setState(() => _year--)
+                : null,
+          ),
+          Text('$_year', style: KZ.sectionTitle),
+          IconButton(
+            icon: const Icon(Icons.chevron_right_rounded),
+            onPressed: _year < widget.lastMonth.year
+                ? () => setState(() => _year++)
+                : null,
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 300,
+        child: GridView.count(
+          crossAxisCount: 3,
+          shrinkWrap: true,
+          mainAxisSpacing: KZ.sp8,
+          crossAxisSpacing: KZ.sp8,
+          childAspectRatio: 1.7,
+          children: List.generate(12, (i) {
+            final month = i + 1;
+            final enabled = _monthEnabled(month);
+            final isSelected =
+                widget.initialMonth.year == _year &&
+                widget.initialMonth.month == month;
+            return Material(
+              color: isSelected
+                  ? KZ.primary
+                  : KZ.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(KZ.radiusSm),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(KZ.radiusSm),
+                onTap: enabled
+                    ? () => Navigator.pop(context, DateTime(_year, month))
+                    : null,
+                child: Center(
+                  child: Text(
+                    DateFormat.MMM(locale).format(DateTime(_year, month)),
+                    style: KZ.body.copyWith(
+                      color: !enabled
+                          ? KZ.onSurfaceVariant.withValues(alpha: 0.4)
+                          : isSelected
+                          ? Colors.white
+                          : KZ.onSurfaceVariant,
+                      fontWeight: isSelected ? FontWeight.w600 : null,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('common.cancel'.tr()),
+        ),
+      ],
+    );
+  }
+}
+
 // ─── 3. Operations Snapshot ──────────────────────────────────────────────────
 
 class _OperationsSnapshotStrip extends StatelessWidget {
@@ -391,17 +528,17 @@ class _OperationsSnapshotStrip extends StatelessWidget {
           style: KZ.label.copyWith(color: KZ.onSurfaceVariant),
         ),
         _SnapshotPill(
-          label: 'admin.status_pending'.tr(),
+          label: adminOrderStatusVisual(OrderStatus.pending).label,
           count: pending,
           color: KZ.secondary,
         ),
         _SnapshotPill(
-          label: 'admin.status_preparing'.tr(),
+          label: adminOrderStatusVisual(OrderStatus.preparing).label,
           count: preparing,
           color: const Color(0xFF00ACC1),
         ),
         _SnapshotPill(
-          label: 'admin.status_ready_for_pickup'.tr(),
+          label: adminOrderStatusVisual(OrderStatus.readyForPickup).label,
           count: ready,
           color: KZ.tertiary,
         ),
@@ -478,28 +615,28 @@ class _OperationalAttentionCards extends StatelessWidget {
           columns: columns,
           children: [
             _AttentionCard(
-              title: 'admin.status_pending'.tr(),
+              title: adminOrderStatusVisual(OrderStatus.pending).label,
               count: pending,
               icon: adminOrderStatusVisual(OrderStatus.pending).icon,
               color: KZ.secondary,
               isAlert: pending > 0,
             ),
             _AttentionCard(
-              title: 'admin.status_preparing'.tr(),
+              title: adminOrderStatusVisual(OrderStatus.preparing).label,
               count: preparing,
               icon: adminOrderStatusVisual(OrderStatus.preparing).icon,
               color: const Color(0xFF00ACC1),
               isAlert: false,
             ),
             _AttentionCard(
-              title: 'admin.status_ready_for_pickup'.tr(),
+              title: adminOrderStatusVisual(OrderStatus.readyForPickup).label,
               count: ready,
               icon: adminOrderStatusVisual(OrderStatus.readyForPickup).icon,
               color: KZ.tertiary,
               isAlert: false,
             ),
             _AttentionCard(
-              title: 'admin.status_cancelled'.tr(),
+              title: adminOrderStatusVisual(OrderStatus.cancelled).label,
               count: cancelled,
               icon: adminOrderStatusVisual(OrderStatus.cancelled).icon,
               color: KZ.error,

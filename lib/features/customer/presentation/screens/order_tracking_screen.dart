@@ -156,10 +156,15 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                         ),
                       ),
                     ),
-                    Text(
-                      'app_name'.tr(),
-                      style: KZ.pageTitle.copyWith(
-                        color: OrderTrackingScreen.primaryColor,
+                    Expanded(
+                      child: Text(
+                        'app_name'.tr(),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: KZ.pageTitle.copyWith(
+                          color: OrderTrackingScreen.primaryColor,
+                        ),
                       ),
                     ),
                     Container(
@@ -257,15 +262,15 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    shape: BoxShape.circle,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Flexible(
                   child: AnimatedSwitcher(
-                    duration: KZMotion.durationFor(
-                      context,
-                      KZMotion.standard,
-                    ),
+                    duration: KZMotion.durationFor(context, KZMotion.standard),
                     transitionBuilder: (child, animation) =>
                         FadeTransition(opacity: animation, child: child),
                     child: Text(
@@ -292,9 +297,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
-              'orders.order_num'.tr(
-                namedArgs: {'id': _orderDisplayId(order)},
-              ),
+              'orders.order_num'.tr(namedArgs: {'id': _orderDisplayId(order)}),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -354,10 +357,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
         const SizedBox(height: 12),
 
         // 3. Vertical Timeline Stepper
-        Text(
-          'tracking.tracking_status_title'.tr(),
-          style: KZ.sectionTitle,
-        ),
+        Text('tracking.tracking_status_title'.tr(), style: KZ.sectionTitle),
         const SizedBox(height: 16),
         _buildVerticalTimeline(context, order),
         const SizedBox(height: 28),
@@ -632,7 +632,8 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
     final addr = order.deliveryAddress;
     if (addr == null) return null;
     final parts = <String>[
-      if (addr.street != null && addr.street!.trim().isNotEmpty) addr.street!.trim(),
+      if (addr.street != null && addr.street!.trim().isNotEmpty)
+        addr.street!.trim(),
       if (addr.building != null && addr.building!.trim().isNotEmpty)
         addr.building!.trim(),
       if (addr.city != null && addr.city!.trim().isNotEmpty) addr.city!.trim(),

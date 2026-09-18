@@ -1,5 +1,6 @@
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
+import 'package:kebda_zaman/features/shared/domain/models/orders_reset_summary.dart';
 
 /// Order repository interface per md1 §21/§25.
 abstract class OrderRepository {
@@ -41,4 +42,16 @@ abstract class OrderRepository {
   /// ADMIN-only: `DELETE /admin/orders/:id/driver` — unassigns the current
   /// driver. Same rules/response shape as [assignDriver].
   Future<Result<Order>> unassignDriver(String orderId);
+
+  /// ADMIN-only: `GET /admin/orders/reset-preview` — a dry-run count of
+  /// what [resetOrders] would delete, with no side effects. Used to show
+  /// the admin what they're about to permanently destroy before they
+  /// confirm.
+  Future<Result<OrdersResetSummary>> previewResetOrders();
+
+  /// ADMIN-only, destructive: `DELETE /admin/orders/reset` — permanently
+  /// deletes every order (cascading items/payments/reviews/feedback/status
+  /// history at the DB level). Disabled server-side outside non-production
+  /// environments (`403 RESET_DISABLED_IN_PRODUCTION`). Irreversible.
+  Future<Result<OrdersResetSummary>> resetOrders();
 }

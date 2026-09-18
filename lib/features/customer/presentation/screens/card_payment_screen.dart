@@ -37,7 +37,15 @@ class CardPaymentScreen extends ConsumerStatefulWidget {
   ConsumerState<CardPaymentScreen> createState() => _CardPaymentScreenState();
 }
 
-enum _Phase { loadingIntent, intentError, enteringCard, confirming, verificationFailed, confirmError, success }
+enum _Phase {
+  loadingIntent,
+  intentError,
+  enteringCard,
+  confirming,
+  verificationFailed,
+  confirmError,
+  success,
+}
 
 class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
   _Phase _phase = _Phase.loadingIntent;
@@ -254,10 +262,7 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
               const SizedBox(height: KZ.sp20),
               Text(
                 'checkout.card_payment_pay_with_card'.tr(
-                  namedArgs: {
-                    'brand': card.brand,
-                    'lastFour': card.lastFour,
-                  },
+                  namedArgs: {'brand': card.brand, 'lastFour': card.lastFour},
                 ),
                 style: KZ.sectionTitle.copyWith(fontSize: 17),
               ),
@@ -273,7 +278,9 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
                   filled: true,
                   fillColor: KZ.surfaceContainerLow,
                   border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(KZ.radiusMd)),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(KZ.radiusMd),
+                    ),
                     borderSide: BorderSide(color: KZ.outlineVariant),
                   ),
                 ),
@@ -417,7 +424,8 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
       publishableApiKey: providerData.publishableApiKey!,
       amount: providerData.amount,
       currency: providerData.currency,
-      description: providerData.description ??
+      description:
+          providerData.description ??
           'checkout.card_payment_description'.tr(
             namedArgs: {'orderNumber': widget.order.orderNumber},
           ),
@@ -432,7 +440,7 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
       ),
       applePay: moyasar.ApplePayConfig(
         merchantId: _kApplePayMerchantId,
-        label: 'Kebda Zaman',
+        label: 'Kofta & Kebda Zaman',
         // Same authorize-only intent as the card path above — the
         // restaurant still has to accept the order before capture.
         manual: providerData.manual,
@@ -442,13 +450,18 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
 
     final authState = ref.watch(authNotifierProvider);
     final isGuest = !authState.isLoggedIn || (authState.user?.isGuest ?? true);
-    final savedCardsState = isGuest ? null : ref.watch(savedCardsNotifierProvider);
+    final savedCardsState = isGuest
+        ? null
+        : ref.watch(savedCardsNotifierProvider);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
       children: [
         _AmountHeroCard(
-          amount: formatCurrency(widget.order.grandTotal, locale: context.locale),
+          amount: formatCurrency(
+            widget.order.grandTotal,
+            locale: context.locale,
+          ),
         ),
         if (savedCardsState != null && savedCardsState.cards.isNotEmpty) ...[
           const SizedBox(height: KZ.sp28),
@@ -471,7 +484,9 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
           const SizedBox(height: KZ.sp8),
           Row(
             children: [
-              Expanded(child: Divider(color: KZ.outlineVariant.withValues(alpha: 0.6))),
+              Expanded(
+                child: Divider(color: KZ.outlineVariant.withValues(alpha: 0.6)),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: KZ.sp10),
                 child: Text(
@@ -482,7 +497,9 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
                   ),
                 ),
               ),
-              Expanded(child: Divider(color: KZ.outlineVariant.withValues(alpha: 0.6))),
+              Expanded(
+                child: Divider(color: KZ.outlineVariant.withValues(alpha: 0.6)),
+              ),
             ],
           ),
           const SizedBox(height: KZ.sp8),
@@ -499,7 +516,9 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
           const SizedBox(height: KZ.sp16),
           Row(
             children: [
-              Expanded(child: Divider(color: KZ.outlineVariant.withValues(alpha: 0.6))),
+              Expanded(
+                child: Divider(color: KZ.outlineVariant.withValues(alpha: 0.6)),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: KZ.sp10),
                 child: Text(
@@ -510,7 +529,9 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
                   ),
                 ),
               ),
-              Expanded(child: Divider(color: KZ.outlineVariant.withValues(alpha: 0.6))),
+              Expanded(
+                child: Divider(color: KZ.outlineVariant.withValues(alpha: 0.6)),
+              ),
             ],
           ),
           const SizedBox(height: KZ.sp16),
@@ -566,7 +587,11 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
                 color: KZ.error.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.error_outline_rounded, size: 56, color: KZ.error),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                size: 56,
+                color: KZ.error,
+              ),
             ),
             const SizedBox(height: KZ.sp20),
             Text(
@@ -703,7 +728,11 @@ class _SavedCardOption extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.credit_card_rounded, color: Colors.white, size: 26),
+              const Icon(
+                Icons.credit_card_rounded,
+                color: Colors.white,
+                size: 26,
+              ),
               const SizedBox(width: KZ.sp12),
               Expanded(
                 child: Column(
@@ -821,7 +850,11 @@ class _AmountHeroCard extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.lock_rounded, color: Colors.white, size: 24),
+            child: const Icon(
+              Icons.lock_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -831,7 +864,9 @@ class _AmountHeroCard extends StatelessWidget {
               children: [
                 Text(
                   'checkout.card_payment_amount_due'.tr(),
-                  style: KZ.caption.copyWith(color: Colors.white.withValues(alpha: 0.85)),
+                  style: KZ.caption.copyWith(
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -863,10 +898,7 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Icon(icon, color: KZ.primary, size: 20),
         const SizedBox(width: KZ.sp8),
-        Text(
-          label,
-          style: KZ.sectionTitle.copyWith(fontSize: 16),
-        ),
+        Text(label, style: KZ.sectionTitle.copyWith(fontSize: 16)),
       ],
     );
   }
@@ -889,7 +921,10 @@ class _SaveCardToggle extends StatelessWidget {
       borderRadius: BorderRadius.circular(KZ.radiusMd),
       child: Container(
         constraints: const BoxConstraints(minHeight: KZ.iconTapTargetMin),
-        padding: const EdgeInsets.symmetric(horizontal: KZ.sp14, vertical: KZ.sp12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: KZ.sp14,
+          vertical: KZ.sp12,
+        ),
         decoration: BoxDecoration(
           color: value
               ? KZ.primary.withValues(alpha: 0.06)
@@ -933,13 +968,19 @@ class _SecurityFootnote extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.verified_user_outlined, size: 16, color: KZ.onSurfaceVariant.withValues(alpha: 0.7)),
+        Icon(
+          Icons.verified_user_outlined,
+          size: 16,
+          color: KZ.onSurfaceVariant.withValues(alpha: 0.7),
+        ),
         const SizedBox(width: KZ.sp6),
         Flexible(
           child: Text(
             'checkout.card_payment_security_footnote'.tr(),
             textAlign: TextAlign.center,
-            style: KZ.caption.copyWith(color: KZ.onSurfaceVariant.withValues(alpha: 0.7)),
+            style: KZ.caption.copyWith(
+              color: KZ.onSurfaceVariant.withValues(alpha: 0.7),
+            ),
           ),
         ),
       ],

@@ -93,6 +93,11 @@ dependencies:
   webview_flutter: ^4.13.0
   google_nav_bar: ^5.0.7
   home_widget: ^0.9.2+1
+  # Admin new-order alert bell (this feature only) — MIT-licensed, actively
+  # maintained, supports Android/iOS/web/desktop from one API. No other
+  # audio-playback package exists in this project; this is the sole
+  # dependency added for it.
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -139,6 +144,7 @@ flutter:
     - assets/photos/
     - assets/lottie/
     - assets/images/
+    - assets/sounds/order_bell.wav
     - assets/translations/en.json
     - assets/translations/ar.json
 

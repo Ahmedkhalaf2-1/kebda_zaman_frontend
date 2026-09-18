@@ -10,6 +10,7 @@ import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/admin/domain/models/kitchen_order.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/kitchen_repository.dart';
+import 'package:kebda_zaman/features/shared/domain/models/orders_reset_summary.dart';
 import 'package:kebda_zaman/features/admin/presentation/screens/admin_order_details_screen.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
@@ -104,6 +105,12 @@ class _FakeOrderRepository implements OrderRepository {
       throw UnimplementedError();
   @override
   Stream<Order> watchOrder(String id) => throw UnimplementedError();
+  @override
+  Future<Result<OrdersResetSummary>> previewResetOrders() =>
+      throw UnimplementedError();
+  @override
+  Future<Result<OrdersResetSummary>> resetOrders() =>
+      throw UnimplementedError();
 }
 
 class _FakeKitchenRepository implements KitchenRepository {

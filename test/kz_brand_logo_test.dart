@@ -63,7 +63,7 @@ void main() {
     await _pump(tester, const KZBrandLogo(width: 40, height: 40));
 
     final image = tester.widget<Image>(find.byType(Image));
-    expect(image.semanticLabel, 'Kebda Zaman');
+    expect(image.semanticLabel, 'Kofta & Kebda Zaman');
   });
 
   testWidgets('defaults the semantic label to the localized app name (AR)', (
@@ -76,7 +76,7 @@ void main() {
     );
 
     final image = tester.widget<Image>(find.byType(Image));
-    expect(image.semanticLabel, 'كبدة زمان');
+    expect(image.semanticLabel, 'كفتة وكبدة زمان');
   });
 
   testWidgets('an explicit semanticLabel overrides the default', (

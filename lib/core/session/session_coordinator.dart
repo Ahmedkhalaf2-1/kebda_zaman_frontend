@@ -6,6 +6,7 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/cart_notifi
 import 'package:kebda_zaman/features/customer/presentation/notifiers/orders_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/loyalty_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/checkout_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_alert_notifier.dart';
 import 'package:kebda_zaman/features/driver/presentation/notifiers/driver_orders_notifier.dart';
 import 'package:kebda_zaman/features/driver/presentation/notifiers/driver_tracking_coordinator.dart';
 
@@ -34,6 +35,13 @@ bool _isCustomerRole(String? role) => role == null || role == 'CUSTOMER';
 /// session, so no other role's login/logout should touch them.
 bool _isDriverRole(String? role) => role == 'DRIVER';
 
+/// Any role that uses the `/admin/*` app shell — the new-order alert bell
+/// (`adminOrderAlertProvider`) must never keep ringing, or keep a previous
+/// account's acknowledgement/backlog state, once one of these roles logs
+/// out, switches accounts, or is demoted away from these roles entirely.
+bool _isAdminAppRole(String? role) =>
+    role == 'ADMIN' || role == 'CASHIER' || role == 'KITCHEN';
+
 final sessionLifecycleProvider = Provider<void>((ref) {
   AuthState? _previous;
 
@@ -52,6 +60,8 @@ final sessionLifecycleProvider = Provider<void>((ref) {
     final nowCustomer = nowLoggedIn && _isCustomerRole(next.user?.role);
     final wasDriver = wasLoggedIn && _isDriverRole(prev.user?.role);
     final nowDriver = nowLoggedIn && _isDriverRole(next.user?.role);
+    final wasAdminApp = wasLoggedIn && _isAdminAppRole(prev.user?.role);
+    final nowAdminApp = nowLoggedIn && _isAdminAppRole(next.user?.role);
 
     // ── authenticated → unauthenticated ─────────────────────────────────
     if (wasLoggedIn && !nowLoggedIn) {
@@ -63,6 +73,9 @@ final sessionLifecycleProvider = Provider<void>((ref) {
         if (ref.exists(driverTrackingCoordinatorProvider)) {
           ref.read(driverTrackingCoordinatorProvider).endSession();
         }
+      }
+      if (wasAdminApp) {
+        ref.read(adminOrderAlertProvider.notifier).reset();
       }
       return;
     }
@@ -104,7 +117,22 @@ final sessionLifecycleProvider = Provider<void>((ref) {
         // fetch will sync the coordinator — no separate reconcile() here.
         _clearDriverScopedState(ref);
       }
+      if (wasAdminApp || nowAdminApp) {
+        // Same unconditional-reset-then-nothing-to-restart shape as the
+        // driver branch above: an admin/cashier/kitchen session's alert
+        // queue and acknowledgements must never survive into the next
+        // account, even when that next account also uses the admin shell.
+        ref.read(adminOrderAlertProvider.notifier).reset();
+      }
       return;
+    }
+
+    // ── authenticated → authenticated, same user, role changed off the
+    // admin shell entirely (e.g. a demotion applied without a full
+    // logout/login cycle) — loss of admin access without a user-id change,
+    // still not allowed to keep ringing or holding queued alerts. ────────
+    if (wasLoggedIn && nowLoggedIn && wasAdminApp && !nowAdminApp) {
+      ref.read(adminOrderAlertProvider.notifier).reset();
     }
   }, fireImmediately: false);
 });

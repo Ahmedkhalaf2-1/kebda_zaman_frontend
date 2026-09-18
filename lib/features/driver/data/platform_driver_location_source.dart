@@ -80,7 +80,7 @@ class AndroidForegroundLocationSource implements DriverLocationSource {
     await FlutterForegroundTask.startService(
       serviceId: 5100,
       serviceTypes: const [ForegroundServiceTypes.location],
-      notificationTitle: 'Kebda Zaman — Delivering',
+      notificationTitle: 'Kofta & Kebda Zaman — Delivering',
       notificationText: 'Sharing your location for an active delivery.',
       callback: startDriverLocationTask,
     );

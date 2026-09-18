@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
@@ -10,7 +11,9 @@ import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_notification_notifier.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/order_management_notifier.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_reset_data_dialog.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
+import 'package:kebda_zaman/features/shared/domain/models/orders_reset_summary.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/screens/admin_order_details_screen.dart'
     show paymentMethodLabel;
@@ -41,6 +44,39 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
     });
   }
 
+  List<ResetCountLine> _ordersSummaryToLines(OrdersResetSummary s) => [
+    ResetCountLine('admin_reset.line_orders'.tr(), s.orders),
+    ResetCountLine('admin_reset.line_items'.tr(), s.items),
+    ResetCountLine('admin_reset.line_payments'.tr(), s.payments),
+    ResetCountLine('admin_reset.line_reviews'.tr(), s.reviews),
+    ResetCountLine('admin_reset.line_feedback'.tr(), s.feedback),
+  ];
+
+  void _openResetOrdersDialog() {
+    final repo = ref.read(orderRepositoryProvider);
+    showAdminResetDataDialog<OrdersResetSummary>(
+      context,
+      ref: ref,
+      title: 'admin_reset.orders_title'.tr(),
+      warningBody: 'admin_reset.orders_warning'.tr(),
+      fetchPreview: repo.previewResetOrders,
+      performReset: repo.resetOrders,
+      toLines: _ordersSummaryToLines,
+      onSuccess: (summary) {
+        ref.invalidate(orderManagementProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'admin_reset.orders_success'.tr(
+                namedArgs: {'count': '${summary.orders}'},
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final stateAsync = ref.watch(orderManagementProvider);
@@ -53,7 +89,27 @@ class _OrderManagementScreenState extends ConsumerState<OrderManagementScreen> {
           children: [
             AdminPageHeader(
               title: 'admin.orders'.tr(),
-              trailingActions: [_NotificationAction()],
+              trailingActions: [
+                IconButton(
+                  onPressed: () => context.push('/admin/orders/sound-alerts'),
+                  tooltip: 'admin.order_sound_settings_title'.tr(),
+                  icon: const Icon(
+                    Icons.volume_up_outlined,
+                    color: KZ.onSurfaceVariant,
+                    size: 22,
+                  ),
+                ),
+                _NotificationAction(),
+                IconButton(
+                  onPressed: _openResetOrdersDialog,
+                  tooltip: 'admin_reset.orders_tooltip'.tr(),
+                  icon: const Icon(
+                    Icons.delete_sweep_outlined,
+                    color: KZ.error,
+                    size: 22,
+                  ),
+                ),
+              ],
             ),
             _buildTabs(),
             Expanded(

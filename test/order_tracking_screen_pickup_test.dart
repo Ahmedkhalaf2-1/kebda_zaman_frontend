@@ -8,6 +8,7 @@ import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/customer/presentation/screens/order_tracking_screen.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
+import 'package:kebda_zaman/features/shared/domain/models/orders_reset_summary.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/order_repository.dart';
 import 'package:kebda_zaman/generated/codegen_loader.g.dart';
 
@@ -68,6 +69,13 @@ class _FakeOrderRepository implements OrderRepository {
 
   @override
   Future<Result<List<Order>>> getAllOrders() async => Success([order]);
+
+  @override
+  Future<Result<OrdersResetSummary>> previewResetOrders() =>
+      throw UnimplementedError();
+  @override
+  Future<Result<OrdersResetSummary>> resetOrders() =>
+      throw UnimplementedError();
 }
 
 Order _order({

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
+import 'package:kebda_zaman/core/providers/polling_notifier_mixin.dart';
 import 'package:kebda_zaman/features/admin/domain/models/order_notification.dart';
 
 class AdminUnreadNotificationCountNotifier
@@ -26,10 +27,28 @@ final adminUnreadNotificationCountProvider =
       () => AdminUnreadNotificationCountNotifier(),
     );
 
+/// Polls `GET /admin/notifications` (same [PollingNotifierMixin] convention
+/// used by Order Management/Kitchen Queue) so the new-order alert engine
+/// (`AdminOrderAlertNotifier`, which keeps this provider alive by listening
+/// to it for the whole admin session) reliably observes genuinely new
+/// orders even when the FCM push that would otherwise trigger
+/// `handleAdminNewOrderRefresh` never arrives — notably, on the Chrome web
+/// build, which has no service worker/VAPID setup and therefore never
+/// receives FCM at all. This also covers "reconnect": a dropped/restored
+/// network connection just means the next tick's fetch succeeds again,
+/// with no special-cased reconnect logic needed.
 class AdminOrderNotificationNotifier
-    extends AutoDisposeAsyncNotifier<List<OrderNotification>> {
+    extends AutoDisposeAsyncNotifier<List<OrderNotification>>
+    with PollingNotifierMixin<List<OrderNotification>> {
   @override
   Future<List<OrderNotification>> build() async {
+    final notifications = await fetchLatest();
+    startPolling();
+    return notifications;
+  }
+
+  @override
+  Future<List<OrderNotification>> fetchLatest() async {
     final repo = ref.read(adminOrderNotificationRepositoryProvider);
     final result = await repo.getNotifications();
     return result.fold((l) => throw l, (r) => r);

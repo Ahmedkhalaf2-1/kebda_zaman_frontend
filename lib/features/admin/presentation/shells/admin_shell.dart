@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_brand_logo.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_order_alert_banner.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 
 class _AdminNavEntry {
@@ -178,11 +179,24 @@ class AdminShell extends ConsumerWidget {
       if (context.mounted) context.go('/login');
     }
 
+    // The new-order alert banner sits above the routed screen for every
+    // role that can see order notifications (ADMIN full access, CASHIER
+    // confined to Orders Management) — persistent at the shell level, not
+    // per-screen, so navigating between admin screens never silences it.
+    // KITCHEN is excluded below: kitchen staff are pure ticket-viewers with
+    // no order-management/notification access at all.
+    final childWithAlertBanner = Column(
+      children: [
+        const AdminOrderAlertBanner(),
+        Expanded(child: child),
+      ],
+    );
+
     // CASHIER only ever reaches Orders Management inside /admin — every
     // owner-only section is hidden from the nav entirely, on top of the
     // router-level redirect guard that blocks a manual navigation to them.
     if (isCashier) {
-      return _CashierShell(onLogout: onLogout, child: child);
+      return _CashierShell(onLogout: onLogout, child: childWithAlertBanner);
     }
 
     // KITCHEN has exactly one destination (the queue) with no other nav to
@@ -208,7 +222,7 @@ class AdminShell extends ConsumerWidget {
         currentPath: location,
         onNavigate: navigateTo,
         onLogout: onLogout,
-        child: child,
+        child: childWithAlertBanner,
       );
     }
 
@@ -227,7 +241,7 @@ class AdminShell extends ConsumerWidget {
             width: 1,
             color: KZ.outlineVariant,
           ),
-          Expanded(child: child),
+          Expanded(child: childWithAlertBanner),
         ],
       ),
     );

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
+import 'package:kebda_zaman/features/shared/domain/models/orders_reset_summary.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/order_repository.dart';
 
 class FakeOrderRepository implements OrderRepository {
@@ -147,5 +148,36 @@ class FakeOrderRepository implements OrderRepository {
     _orders[index] = updated;
     await _save();
     return Success(updated);
+  }
+
+  @override
+  Future<Result<OrdersResetSummary>> previewResetOrders() async {
+    await _init();
+    return Success(
+      OrdersResetSummary(
+        orders: _orders.length,
+        items: 0,
+        payments: 0,
+        reviews: 0,
+        feedback: 0,
+      ),
+    );
+  }
+
+  @override
+  Future<Result<OrdersResetSummary>> resetOrders() async {
+    await _init();
+    final count = _orders.length;
+    _orders = [];
+    await _save();
+    return Success(
+      OrdersResetSummary(
+        orders: count,
+        items: 0,
+        payments: 0,
+        reviews: 0,
+        feedback: 0,
+      ),
+    );
   }
 }

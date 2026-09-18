@@ -4,14 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_chip.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/admin/domain/models/customer_summary.dart';
+import 'package:kebda_zaman/features/admin/domain/models/customers_reset_summary.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/customer_management_notifier.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/admin_person_card.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_reset_data_dialog.dart';
 
 class CustomerManagementScreen extends ConsumerStatefulWidget {
   const CustomerManagementScreen({super.key});
@@ -53,6 +56,39 @@ class _CustomerManagementScreenState
     });
   }
 
+  List<ResetCountLine> _customersSummaryToLines(CustomersResetSummary s) => [
+    ResetCountLine('admin_reset.line_loyalty_accounts'.tr(), s.loyaltyAccounts),
+    ResetCountLine('admin_reset.line_points_cleared'.tr(), s.pointsCleared),
+    ResetCountLine('admin_reset.line_transactions'.tr(), s.transactions),
+    ResetCountLine('admin_reset.line_reviews'.tr(), s.reviews),
+    ResetCountLine('admin_reset.line_feedback'.tr(), s.feedback),
+  ];
+
+  void _openResetCustomersDialog() {
+    final repo = ref.read(customerRepositoryProvider);
+    showAdminResetDataDialog<CustomersResetSummary>(
+      context,
+      ref: ref,
+      title: 'admin_reset.customers_title'.tr(),
+      warningBody: 'admin_reset.customers_warning'.tr(),
+      fetchPreview: repo.previewResetCustomers,
+      performReset: repo.resetCustomers,
+      toLines: _customersSummaryToLines,
+      onSuccess: (summary) {
+        ref.invalidate(customerListProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'admin_reset.customers_success'.tr(
+                namedArgs: {'count': '${summary.loyaltyAccounts}'},
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final listAsync = ref.watch(customerListProvider);
@@ -62,7 +98,20 @@ class _CustomerManagementScreenState
       body: SafeArea(
         child: Column(
           children: [
-            AdminPageHeader(title: 'customers.title'.tr()),
+            AdminPageHeader(
+              title: 'customers.title'.tr(),
+              trailingActions: [
+                IconButton(
+                  onPressed: _openResetCustomersDialog,
+                  tooltip: 'admin_reset.customers_tooltip'.tr(),
+                  icon: const Icon(
+                    Icons.delete_sweep_outlined,
+                    color: KZ.error,
+                    size: 22,
+                  ),
+                ),
+              ],
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
               child: TextField(

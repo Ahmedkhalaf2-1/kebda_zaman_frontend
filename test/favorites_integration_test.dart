@@ -20,6 +20,7 @@ import 'package:kebda_zaman/features/shared/domain/models/address.dart';
 import 'package:kebda_zaman/features/shared/domain/models/category.dart';
 import 'package:kebda_zaman/features/shared/domain/models/menu_item.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
+import 'package:kebda_zaman/features/shared/domain/models/orders_reset_summary.dart';
 import 'package:kebda_zaman/features/shared/domain/models/user.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/address_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/auth_repository.dart';
@@ -138,6 +139,12 @@ class _FakeOrderRepository implements OrderRepository {
   Stream<Order> watchOrder(String id) => const Stream.empty();
   @override
   Future<Result<List<Order>>> getAllOrders() async => const Success([]);
+  @override
+  Future<Result<OrdersResetSummary>> previewResetOrders() =>
+      throw UnimplementedError();
+  @override
+  Future<Result<OrdersResetSummary>> resetOrders() =>
+      throw UnimplementedError();
 }
 
 class _MockFavoritesRepository implements FavoritesRepository {

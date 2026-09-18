@@ -74,7 +74,7 @@ class CustomerShell extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Kebda Zaman',
+                      'Kofta & Kebda Zaman',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -153,10 +153,7 @@ class CustomerShell extends ConsumerWidget {
               iconSize: 24,
               tabBackgroundColor: primaryColor,
               tabBorderRadius: 100,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               textStyle: const TextStyle(
                 fontWeight: FontWeight.w700,
                 fontFamily: 'Montserrat',

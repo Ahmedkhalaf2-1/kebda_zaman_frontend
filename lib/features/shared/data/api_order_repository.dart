@@ -4,6 +4,7 @@ import 'package:kebda_zaman/core/api/api_client.dart';
 import 'package:kebda_zaman/core/api/api_exceptions.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
+import 'package:kebda_zaman/features/shared/domain/models/orders_reset_summary.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/order_repository.dart';
 
 /// Injectable delay seam for [ApiOrderRepository]'s polling/retry loop, so
@@ -502,6 +503,44 @@ class ApiOrderRepository implements OrderRepository {
       return Success(_mapOrder(response.data as Map<String, dynamic>));
     } catch (e) {
       return Err(_handleDriverAssignmentError(e));
+    }
+  }
+
+  // Both the preview and the actual reset return the identical DTO shape
+  // (the backend computes the same counts before deleting), so one mapper
+  // and one error handler cover both endpoints.
+  Failure _handleResetError(dynamic e) {
+    if (e is DioException) {
+      if (e.error is ApiException) {
+        final apiEx = e.error as ApiException;
+        return NetworkFailure(apiEx.message, apiEx);
+      }
+      return NetworkFailure(e.message ?? 'Failed to reset data');
+    }
+    return UnknownFailure(e.toString());
+  }
+
+  @override
+  Future<Result<OrdersResetSummary>> previewResetOrders() async {
+    try {
+      final response = await _apiClient.dio.get('/admin/orders/reset-preview');
+      return Success(
+        OrdersResetSummary.fromJson(response.data as Map<String, dynamic>),
+      );
+    } catch (e) {
+      return Err(_handleResetError(e));
+    }
+  }
+
+  @override
+  Future<Result<OrdersResetSummary>> resetOrders() async {
+    try {
+      final response = await _apiClient.dio.delete('/admin/orders/reset');
+      return Success(
+        OrdersResetSummary.fromJson(response.data as Map<String, dynamic>),
+      );
+    } catch (e) {
+      return Err(_handleResetError(e));
     }
   }
 

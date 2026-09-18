@@ -44,6 +44,7 @@ import '../../features/admin/presentation/screens/pricing_settings_screen.dart';
 import '../../features/admin/presentation/screens/admin_notifications_screen.dart';
 import '../../features/admin/presentation/screens/admin_notification_center_screen.dart';
 import '../../features/admin/presentation/screens/admin_order_details_screen.dart';
+import '../../features/admin/presentation/screens/admin_order_sound_settings_screen.dart';
 import '../../features/admin/presentation/screens/kitchen_queue_screen.dart';
 import '../../features/admin/presentation/screens/kitchen_ticket_screen.dart';
 import '../../features/admin/presentation/screens/staff_management_screen.dart';
@@ -420,6 +421,20 @@ final routerProvider = Provider.autoDispose<GoRouter>((ref) {
             pageBuilder: (context, state) =>
                 kzAdminPage(state: state, child: const OrderManagementScreen()),
             routes: [
+              // Nested under /admin/orders (not a standalone /admin/*
+              // route) specifically so CASHIER — confined to the
+              // /admin/orders prefix — can reach the order-sound-alert
+              // settings too; this is a front-of-house device setting, not
+              // an owner-only one. Declared BEFORE the ':id' route below so
+              // this literal segment matches first — otherwise ':id' would
+              // greedily capture "sound-alerts" as an order id.
+              GoRoute(
+                path: 'sound-alerts',
+                pageBuilder: (context, state) => kzAdminPage(
+                  state: state,
+                  child: const AdminOrderSoundSettingsScreen(),
+                ),
+              ),
               GoRoute(
                 path: ':id',
                 builder: (context, state) => AdminOrderDetailsScreen(

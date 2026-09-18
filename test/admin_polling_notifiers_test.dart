@@ -9,7 +9,9 @@ import 'package:kebda_zaman/features/admin/domain/repositories/kitchen_repositor
 import 'package:kebda_zaman/features/admin/presentation/notifiers/kitchen_notifier.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/order_management_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
+import 'package:kebda_zaman/features/shared/domain/models/orders_reset_summary.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/order_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Covers [PollingNotifierMixin] as used by Admin Order Management and
 /// Kitchen Queue: no-overlap guard, silent error-swallowing on background
@@ -19,6 +21,12 @@ import 'package:kebda_zaman/features/shared/domain/repositories/order_repository
 /// runs, without waiting on real time.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // `OrderManagementNotifier.updateOrderStatus` now also acknowledges the
+  // admin order-alert bell on success, which reads a `SharedPreferences`-
+  // backed sound preference — needs a mocked plugin channel even though
+  // this file otherwise has nothing to do with local prefs.
+  setUp(() => SharedPreferences.setMockInitialValues({}));
 
   Order buildOrder({
     required String id,
@@ -328,6 +336,13 @@ class _FakeOrderRepository implements OrderRepository {
   @override
   Future<Result<Order>> unassignDriver(String orderId) =>
       throw UnimplementedError();
+
+  @override
+  Future<Result<OrdersResetSummary>> previewResetOrders() =>
+      throw UnimplementedError();
+  @override
+  Future<Result<OrdersResetSummary>> resetOrders() =>
+      throw UnimplementedError();
 }
 
 class _FakeKitchenRepository implements KitchenRepository {
@@ -343,6 +358,8 @@ class _FakeKitchenRepository implements KitchenRepository {
       throw UnimplementedError();
 
   @override
-  Future<Result<KitchenOrder>> setPreparationTime(String orderId, int minutes) =>
-      throw UnimplementedError();
+  Future<Result<KitchenOrder>> setPreparationTime(
+    String orderId,
+    int minutes,
+  ) => throw UnimplementedError();
 }

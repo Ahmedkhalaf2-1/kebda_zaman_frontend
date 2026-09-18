@@ -146,7 +146,7 @@ void main() {
     expect(find.text('Authentic Egyptian Flavor'), findsOneWidget);
     expect(
       find.text(
-        'Classic kebda and sausage sandwiches, served hot and made the Kebda Zaman way.',
+        'Classic kebda and sausage sandwiches, served hot and made the Kofta & Kebda Zaman way.',
       ),
       findsOneWidget,
     );

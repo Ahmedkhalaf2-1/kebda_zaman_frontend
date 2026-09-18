@@ -134,3 +134,67 @@ class KZSettingsRow extends StatelessWidget {
     );
   }
 }
+
+/// A settings row with a trailing [Switch] instead of a chevron — for an
+/// on/off preference rather than a drill-down. An optional [subtitle] sits
+/// under the title (e.g. a one-line explanation), same as [KZSettingsRow]'s
+/// icon/title layout otherwise.
+class KZSettingsSwitchRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final Color? iconColor;
+
+  const KZSettingsSwitchRow({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.onChanged,
+    this.subtitle,
+    this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Icon(icon, color: iconColor ?? KZ.primary, size: 24),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: KZ.labelLarge.copyWith(
+                    fontSize: 15,
+                    color: KZ.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Switch(value: value, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
+}

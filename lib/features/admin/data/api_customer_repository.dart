@@ -3,6 +3,7 @@ import 'package:kebda_zaman/core/api/api_client.dart';
 import 'package:kebda_zaman/core/api/api_exceptions.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/admin/domain/models/customer_summary.dart';
+import 'package:kebda_zaman/features/admin/domain/models/customers_reset_summary.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/customer_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 
@@ -124,6 +125,32 @@ class ApiCustomerRepository implements CustomerRepository {
       return Success(_mapDetail(response.data as Map<String, dynamic>));
     } catch (e) {
       return Err(_handleError(e, 'Failed to update customer status'));
+    }
+  }
+
+  @override
+  Future<Result<CustomersResetSummary>> previewResetCustomers() async {
+    try {
+      final response = await _apiClient.dio.get(
+        '/admin/customers/reset-preview',
+      );
+      return Success(
+        CustomersResetSummary.fromJson(response.data as Map<String, dynamic>),
+      );
+    } catch (e) {
+      return Err(_handleError(e, 'Failed to load reset preview'));
+    }
+  }
+
+  @override
+  Future<Result<CustomersResetSummary>> resetCustomers() async {
+    try {
+      final response = await _apiClient.dio.delete('/admin/customers/reset');
+      return Success(
+        CustomersResetSummary.fromJson(response.data as Map<String, dynamic>),
+      );
+    } catch (e) {
+      return Err(_handleError(e, 'Failed to reset customer data'));
     }
   }
 }

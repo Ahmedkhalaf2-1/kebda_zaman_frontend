@@ -70,7 +70,7 @@ class _KebdaZamanAppState extends ConsumerState<KebdaZamanApp> {
     );
 
     return MaterialApp.router(
-      title: 'Kebda Zaman',
+      title: 'Kofta & Kebda Zaman',
       debugShowCheckedModeBanner: false,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,

@@ -86,12 +86,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'app_name'.tr(),
-                      style: KZ.pageTitle.copyWith(
-                        color: KZ.primary, // #8c2b00
+                    Expanded(
+                      child: Text(
+                        'app_name'.tr(),
+                        style: KZ.pageTitle.copyWith(
+                          color: KZ.primary, // #8c2b00
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    const SizedBox(width: 8),
                     GestureDetector(
                       onTap: () =>
                           ref.read(localAvatarProvider.notifier).pickImage(),
@@ -241,8 +246,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         _buildQuickActionCard(
                           icon: Icons.account_balance_wallet_rounded,
                           title: 'profile.payments'.tr(),
-                          onTap: () =>
-                              context.push('/profile/payment-methods'),
+                          onTap: () => context.push('/profile/payment-methods'),
                         ),
                       ],
                     ),
@@ -355,7 +359,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               // so the card's brand personality still traces back to the
               // one actual brand color instead of a stale duplicate.
               gradient: LinearGradient(
-                colors: [KZ.primary, Color.lerp(KZ.primary, Colors.black, 0.18)!],
+                colors: [
+                  KZ.primary,
+                  Color.lerp(KZ.primary, Colors.black, 0.18)!,
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -578,5 +585,4 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
     );
   }
-
 }

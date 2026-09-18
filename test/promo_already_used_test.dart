@@ -22,6 +22,7 @@ import 'package:kebda_zaman/features/shared/data/api_cart_repository.dart';
 import 'package:kebda_zaman/features/shared/data/fake_auth_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/models/cart.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
+import 'package:kebda_zaman/features/shared/domain/models/orders_reset_summary.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/cart_repository.dart';
 import 'package:kebda_zaman/features/shared/domain/repositories/order_repository.dart';
 
@@ -161,6 +162,13 @@ class _ScriptedOrderRepository implements OrderRepository {
       throw UnimplementedError();
   @override
   Future<Result<Order>> unassignDriver(String orderId) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Result<OrdersResetSummary>> previewResetOrders() =>
+      throw UnimplementedError();
+  @override
+  Future<Result<OrdersResetSummary>> resetOrders() =>
       throw UnimplementedError();
 }
 

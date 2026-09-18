@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kebda_zaman/core/di/providers.dart';
 import 'package:kebda_zaman/core/errors/result.dart';
 import 'package:kebda_zaman/core/providers/polling_notifier_mixin.dart';
+import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_alert_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 
 class OrderManagementNotifier extends AutoDisposeAsyncNotifier<List<Order>>
@@ -85,6 +86,12 @@ class OrderManagementNotifier extends AutoDisposeAsyncNotifier<List<Order>>
       state = AsyncData(
         latest.map((o) => o.id == orderId ? serverOrder : o).toList(),
       );
+
+      // A successful status change means this order is no longer a "new,
+      // needs a decision" order — whether it was just accepted or just
+      // cancelled, its alert (if any) should stop immediately rather than
+      // waiting for the next notification-list refresh to notice.
+      ref.read(adminOrderAlertProvider.notifier).acknowledgeOrder(orderId);
 
       // Award loyalty points if this transition just became a terminal success
       // state — Delivered for Delivery orders, PickedUp for Pickup orders.

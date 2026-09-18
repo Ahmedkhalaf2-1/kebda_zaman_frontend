@@ -57,12 +57,17 @@ class OrderSuccessScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'app_name'.tr(),
-                        style: KZ.pageTitle.copyWith(
-                          color: OrderSuccessScreen.primaryColor,
+                      Expanded(
+                        child: Text(
+                          'app_name'.tr(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: KZ.pageTitle.copyWith(
+                            color: OrderSuccessScreen.primaryColor,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Semantics(
                         button: true,
                         label: 'common.back'.tr(),

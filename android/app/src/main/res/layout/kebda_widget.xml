@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Kebda Zaman"
+            android:text="Kofta &amp; Kebda Zaman"
             android:textColor="@color/kz_on_surface"
             android:textStyle="bold"
             android:textSize="13sp" />

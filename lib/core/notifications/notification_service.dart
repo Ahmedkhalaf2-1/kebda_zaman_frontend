@@ -69,7 +69,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
     const androidChannel = AndroidNotificationChannel(
       'kebda_zaman_high_importance_channel',
-      'Kebda Zaman Orders & Offers',
+      'Kofta & Kebda Zaman Orders & Offers',
       description: 'Notifications for fresh order updates and exclusive deals.',
       importance: Importance.high,
     );
@@ -86,7 +86,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'kebda_zaman_high_importance_channel',
-          'Kebda Zaman Orders & Offers',
+          'Kofta & Kebda Zaman Orders & Offers',
           channelDescription:
               'Notifications for fresh order updates and exclusive deals.',
           importance: Importance.high,
@@ -194,7 +194,7 @@ class NotificationService {
     // Create high importance channel for Android
     const androidChannel = AndroidNotificationChannel(
       'kebda_zaman_high_importance_channel',
-      'Kebda Zaman Orders & Offers',
+      'Kofta & Kebda Zaman Orders & Offers',
       description: 'Notifications for fresh order updates and exclusive deals.',
       importance: Importance.high,
     );
@@ -224,7 +224,7 @@ class NotificationService {
 
     const androidDetails = AndroidNotificationDetails(
       'kebda_zaman_high_importance_channel',
-      'Kebda Zaman Orders & Offers',
+      'Kofta & Kebda Zaman Orders & Offers',
       channelDescription:
           'Notifications for fresh order updates and exclusive deals.',
       importance: Importance.high,
