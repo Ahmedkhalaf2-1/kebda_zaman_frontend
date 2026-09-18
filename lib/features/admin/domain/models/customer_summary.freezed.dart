@@ -1,6 +1,6 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint
+// coverage:ignore-file
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'customer_summary.dart';
@@ -9,794 +9,868 @@ part of 'customer_summary.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
 /// @nodoc
 mixin _$RecentOrderSummary {
-  String get id => throw _privateConstructorUsedError;
-  String get orderNumber => throw _privateConstructorUsedError;
-  OrderStatus get status => throw _privateConstructorUsedError;
-  double get totalAmount => throw _privateConstructorUsedError;
-  String? get paymentMethod => throw _privateConstructorUsedError;
-  FulfillmentType get fulfillmentType => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
 
-  /// Create a copy of RecentOrderSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $RecentOrderSummaryCopyWith<RecentOrderSummary> get copyWith =>
-      throw _privateConstructorUsedError;
+ String get id; String get orderNumber; OrderStatus get status; double get totalAmount; String? get paymentMethod; FulfillmentType get fulfillmentType; DateTime get createdAt;
+/// Create a copy of RecentOrderSummary
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RecentOrderSummaryCopyWith<RecentOrderSummary> get copyWith => _$RecentOrderSummaryCopyWithImpl<RecentOrderSummary>(this as RecentOrderSummary, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RecentOrderSummary;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecentOrderSummary&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.orderNumber, _this.orderNumber) || other.orderNumber == _this.orderNumber)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.totalAmount, _this.totalAmount) || other.totalAmount == _this.totalAmount)&&(identical(other.paymentMethod, _this.paymentMethod) || other.paymentMethod == _this.paymentMethod)&&(identical(other.fulfillmentType, _this.fulfillmentType) || other.fulfillmentType == _this.fulfillmentType)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as RecentOrderSummary;
+  return Object.hash(runtimeType,_this.id,_this.orderNumber,_this.status,_this.totalAmount,_this.paymentMethod,_this.fulfillmentType,_this.createdAt);
+}
+
+@override
+String toString() {
+  final _this = this as RecentOrderSummary;
+  return 'RecentOrderSummary(id: ${_this.id}, orderNumber: ${_this.orderNumber}, status: ${_this.status}, totalAmount: ${_this.totalAmount}, paymentMethod: ${_this.paymentMethod}, fulfillmentType: ${_this.fulfillmentType}, createdAt: ${_this.createdAt})';
+}
+
+
 }
 
 /// @nodoc
-abstract class $RecentOrderSummaryCopyWith<$Res> {
-  factory $RecentOrderSummaryCopyWith(
-    RecentOrderSummary value,
-    $Res Function(RecentOrderSummary) then,
-  ) = _$RecentOrderSummaryCopyWithImpl<$Res, RecentOrderSummary>;
-  @useResult
-  $Res call({
-    String id,
-    String orderNumber,
-    OrderStatus status,
-    double totalAmount,
-    String? paymentMethod,
-    FulfillmentType fulfillmentType,
-    DateTime createdAt,
-  });
-}
+abstract mixin class $RecentOrderSummaryCopyWith<$Res>  {
+  factory $RecentOrderSummaryCopyWith(RecentOrderSummary value, $Res Function(RecentOrderSummary) _then) = _$RecentOrderSummaryCopyWithImpl;
+@useResult
+$Res call({
+ String id, String orderNumber, OrderStatus status, double totalAmount, String? paymentMethod, FulfillmentType fulfillmentType, DateTime createdAt
+});
 
+
+
+
+}
 /// @nodoc
-class _$RecentOrderSummaryCopyWithImpl<$Res, $Val extends RecentOrderSummary>
+class _$RecentOrderSummaryCopyWithImpl<$Res>
     implements $RecentOrderSummaryCopyWith<$Res> {
-  _$RecentOrderSummaryCopyWithImpl(this._value, this._then);
+  _$RecentOrderSummaryCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final RecentOrderSummary _self;
+  final $Res Function(RecentOrderSummary) _then;
 
-  /// Create a copy of RecentOrderSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? orderNumber = null,
-    Object? status = null,
-    Object? totalAmount = null,
-    Object? paymentMethod = freezed,
-    Object? fulfillmentType = null,
-    Object? createdAt = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            orderNumber: null == orderNumber
-                ? _value.orderNumber
-                : orderNumber // ignore: cast_nullable_to_non_nullable
-                      as String,
-            status: null == status
-                ? _value.status
-                : status // ignore: cast_nullable_to_non_nullable
-                      as OrderStatus,
-            totalAmount: null == totalAmount
-                ? _value.totalAmount
-                : totalAmount // ignore: cast_nullable_to_non_nullable
-                      as double,
-            paymentMethod: freezed == paymentMethod
-                ? _value.paymentMethod
-                : paymentMethod // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            fulfillmentType: null == fulfillmentType
-                ? _value.fulfillmentType
-                : fulfillmentType // ignore: cast_nullable_to_non_nullable
-                      as FulfillmentType,
-            createdAt: null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of RecentOrderSummary
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? orderNumber = null,Object? status = null,Object? totalAmount = null,Object? paymentMethod = freezed,Object? fulfillmentType = null,Object? createdAt = null,}) {
+  return _then(RecentOrderSummary(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,orderNumber: null == orderNumber ? _self.orderNumber : orderNumber // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as OrderStatus,totalAmount: null == totalAmount ? _self.totalAmount : totalAmount // ignore: cast_nullable_to_non_nullable
+as double,paymentMethod: freezed == paymentMethod ? _self.paymentMethod : paymentMethod // ignore: cast_nullable_to_non_nullable
+as String?,fulfillmentType: null == fulfillmentType ? _self.fulfillmentType : fulfillmentType // ignore: cast_nullable_to_non_nullable
+as FulfillmentType,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RecentOrderSummary].
+extension RecentOrderSummaryPatterns on RecentOrderSummary {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RecentOrderSummary value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RecentOrderSummary() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RecentOrderSummary value)  $default,){
+final _that = this;
+switch (_that) {
+case _RecentOrderSummary():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RecentOrderSummary value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RecentOrderSummary() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String orderNumber,  OrderStatus status,  double totalAmount,  String? paymentMethod,  FulfillmentType fulfillmentType,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RecentOrderSummary() when $default != null:
+return $default(_that.id,_that.orderNumber,_that.status,_that.totalAmount,_that.paymentMethod,_that.fulfillmentType,_that.createdAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String orderNumber,  OrderStatus status,  double totalAmount,  String? paymentMethod,  FulfillmentType fulfillmentType,  DateTime createdAt)  $default,) {final _that = this;
+switch (_that) {
+case _RecentOrderSummary():
+return $default(_that.id,_that.orderNumber,_that.status,_that.totalAmount,_that.paymentMethod,_that.fulfillmentType,_that.createdAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String orderNumber,  OrderStatus status,  double totalAmount,  String? paymentMethod,  FulfillmentType fulfillmentType,  DateTime createdAt)?  $default,) {final _that = this;
+switch (_that) {
+case _RecentOrderSummary() when $default != null:
+return $default(_that.id,_that.orderNumber,_that.status,_that.totalAmount,_that.paymentMethod,_that.fulfillmentType,_that.createdAt);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
-abstract class _$$RecentOrderSummaryImplCopyWith<$Res>
-    implements $RecentOrderSummaryCopyWith<$Res> {
-  factory _$$RecentOrderSummaryImplCopyWith(
-    _$RecentOrderSummaryImpl value,
-    $Res Function(_$RecentOrderSummaryImpl) then,
-  ) = __$$RecentOrderSummaryImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String orderNumber,
-    OrderStatus status,
-    double totalAmount,
-    String? paymentMethod,
-    FulfillmentType fulfillmentType,
-    DateTime createdAt,
-  });
+
+
+class _RecentOrderSummary implements RecentOrderSummary {
+  const _RecentOrderSummary({required this.id, required this.orderNumber, required this.status, required this.totalAmount, this.paymentMethod, required this.fulfillmentType, required this.createdAt});
+  
+
+@override final  String id;
+@override final  String orderNumber;
+@override final  OrderStatus status;
+@override final  double totalAmount;
+@override final  String? paymentMethod;
+@override final  FulfillmentType fulfillmentType;
+@override final  DateTime createdAt;
+
+/// Create a copy of RecentOrderSummary
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RecentOrderSummaryCopyWith<_RecentOrderSummary> get copyWith => __$RecentOrderSummaryCopyWithImpl<_RecentOrderSummary>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecentOrderSummary&&(identical(other.id, id) || other.id == id)&&(identical(other.orderNumber, orderNumber) || other.orderNumber == orderNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.totalAmount, totalAmount) || other.totalAmount == totalAmount)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.fulfillmentType, fulfillmentType) || other.fulfillmentType == fulfillmentType)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
-/// @nodoc
-class __$$RecentOrderSummaryImplCopyWithImpl<$Res>
-    extends _$RecentOrderSummaryCopyWithImpl<$Res, _$RecentOrderSummaryImpl>
-    implements _$$RecentOrderSummaryImplCopyWith<$Res> {
-  __$$RecentOrderSummaryImplCopyWithImpl(
-    _$RecentOrderSummaryImpl _value,
-    $Res Function(_$RecentOrderSummaryImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of RecentOrderSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? orderNumber = null,
-    Object? status = null,
-    Object? totalAmount = null,
-    Object? paymentMethod = freezed,
-    Object? fulfillmentType = null,
-    Object? createdAt = null,
-  }) {
-    return _then(
-      _$RecentOrderSummaryImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        orderNumber: null == orderNumber
-            ? _value.orderNumber
-            : orderNumber // ignore: cast_nullable_to_non_nullable
-                  as String,
-        status: null == status
-            ? _value.status
-            : status // ignore: cast_nullable_to_non_nullable
-                  as OrderStatus,
-        totalAmount: null == totalAmount
-            ? _value.totalAmount
-            : totalAmount // ignore: cast_nullable_to_non_nullable
-                  as double,
-        paymentMethod: freezed == paymentMethod
-            ? _value.paymentMethod
-            : paymentMethod // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        fulfillmentType: null == fulfillmentType
-            ? _value.fulfillmentType
-            : fulfillmentType // ignore: cast_nullable_to_non_nullable
-                  as FulfillmentType,
-        createdAt: null == createdAt
-            ? _value.createdAt
-            : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-      ),
-    );
-  }
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,orderNumber,status,totalAmount,paymentMethod,fulfillmentType,createdAt);
 }
 
-/// @nodoc
-
-class _$RecentOrderSummaryImpl implements _RecentOrderSummary {
-  const _$RecentOrderSummaryImpl({
-    required this.id,
-    required this.orderNumber,
-    required this.status,
-    required this.totalAmount,
-    this.paymentMethod,
-    required this.fulfillmentType,
-    required this.createdAt,
-  });
-
-  @override
-  final String id;
-  @override
-  final String orderNumber;
-  @override
-  final OrderStatus status;
-  @override
-  final double totalAmount;
-  @override
-  final String? paymentMethod;
-  @override
-  final FulfillmentType fulfillmentType;
-  @override
-  final DateTime createdAt;
-
-  @override
-  String toString() {
+@override
+String toString() {
     return 'RecentOrderSummary(id: $id, orderNumber: $orderNumber, status: $status, totalAmount: $totalAmount, paymentMethod: $paymentMethod, fulfillmentType: $fulfillmentType, createdAt: $createdAt)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$RecentOrderSummaryImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.orderNumber, orderNumber) ||
-                other.orderNumber == orderNumber) &&
-            (identical(other.status, status) || other.status == status) &&
-            (identical(other.totalAmount, totalAmount) ||
-                other.totalAmount == totalAmount) &&
-            (identical(other.paymentMethod, paymentMethod) ||
-                other.paymentMethod == paymentMethod) &&
-            (identical(other.fulfillmentType, fulfillmentType) ||
-                other.fulfillmentType == fulfillmentType) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    orderNumber,
-    status,
-    totalAmount,
-    paymentMethod,
-    fulfillmentType,
-    createdAt,
-  );
-
-  /// Create a copy of RecentOrderSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$RecentOrderSummaryImplCopyWith<_$RecentOrderSummaryImpl> get copyWith =>
-      __$$RecentOrderSummaryImplCopyWithImpl<_$RecentOrderSummaryImpl>(
-        this,
-        _$identity,
-      );
 }
 
-abstract class _RecentOrderSummary implements RecentOrderSummary {
-  const factory _RecentOrderSummary({
-    required final String id,
-    required final String orderNumber,
-    required final OrderStatus status,
-    required final double totalAmount,
-    final String? paymentMethod,
-    required final FulfillmentType fulfillmentType,
-    required final DateTime createdAt,
-  }) = _$RecentOrderSummaryImpl;
 
-  @override
-  String get id;
-  @override
-  String get orderNumber;
-  @override
-  OrderStatus get status;
-  @override
-  double get totalAmount;
-  @override
-  String? get paymentMethod;
-  @override
-  FulfillmentType get fulfillmentType;
-  @override
-  DateTime get createdAt;
+}
 
-  /// Create a copy of RecentOrderSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$RecentOrderSummaryImplCopyWith<_$RecentOrderSummaryImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+/// @nodoc
+abstract mixin class _$RecentOrderSummaryCopyWith<$Res> implements $RecentOrderSummaryCopyWith<$Res> {
+  factory _$RecentOrderSummaryCopyWith(_RecentOrderSummary value, $Res Function(_RecentOrderSummary) _then) = __$RecentOrderSummaryCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String orderNumber, OrderStatus status, double totalAmount, String? paymentMethod, FulfillmentType fulfillmentType, DateTime createdAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$RecentOrderSummaryCopyWithImpl<$Res>
+    implements _$RecentOrderSummaryCopyWith<$Res> {
+  __$RecentOrderSummaryCopyWithImpl(this._self, this._then);
+
+  final _RecentOrderSummary _self;
+  final $Res Function(_RecentOrderSummary) _then;
+
+/// Create a copy of RecentOrderSummary
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? orderNumber = null,Object? status = null,Object? totalAmount = null,Object? paymentMethod = freezed,Object? fulfillmentType = null,Object? createdAt = null,}) {
+  return _then(_RecentOrderSummary(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,orderNumber: null == orderNumber ? _self.orderNumber : orderNumber // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as OrderStatus,totalAmount: null == totalAmount ? _self.totalAmount : totalAmount // ignore: cast_nullable_to_non_nullable
+as double,paymentMethod: freezed == paymentMethod ? _self.paymentMethod : paymentMethod // ignore: cast_nullable_to_non_nullable
+as String?,fulfillmentType: null == fulfillmentType ? _self.fulfillmentType : fulfillmentType // ignore: cast_nullable_to_non_nullable
+as FulfillmentType,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
+}
+
+
 }
 
 /// @nodoc
 mixin _$CustomerSummary {
-  String get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  String? get email => throw _privateConstructorUsedError;
-  String? get phone => throw _privateConstructorUsedError;
-  bool get isGuest => throw _privateConstructorUsedError;
-  bool get isActive => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  int get orderCount => throw _privateConstructorUsedError;
-  double get totalSpent => throw _privateConstructorUsedError;
 
-  /// Create a copy of CustomerSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $CustomerSummaryCopyWith<CustomerSummary> get copyWith =>
-      throw _privateConstructorUsedError;
+ String get id; String get name; String? get email; String? get phone; bool get isGuest; bool get isActive; DateTime get createdAt; int get orderCount; double get totalSpent;
+/// Create a copy of CustomerSummary
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CustomerSummaryCopyWith<CustomerSummary> get copyWith => _$CustomerSummaryCopyWithImpl<CustomerSummary>(this as CustomerSummary, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as CustomerSummary;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CustomerSummary&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.phone, _this.phone) || other.phone == _this.phone)&&(identical(other.isGuest, _this.isGuest) || other.isGuest == _this.isGuest)&&(identical(other.isActive, _this.isActive) || other.isActive == _this.isActive)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.orderCount, _this.orderCount) || other.orderCount == _this.orderCount)&&(identical(other.totalSpent, _this.totalSpent) || other.totalSpent == _this.totalSpent));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as CustomerSummary;
+  return Object.hash(runtimeType,_this.id,_this.name,_this.email,_this.phone,_this.isGuest,_this.isActive,_this.createdAt,_this.orderCount,_this.totalSpent);
+}
+
+@override
+String toString() {
+  final _this = this as CustomerSummary;
+  return 'CustomerSummary(id: ${_this.id}, name: ${_this.name}, email: ${_this.email}, phone: ${_this.phone}, isGuest: ${_this.isGuest}, isActive: ${_this.isActive}, createdAt: ${_this.createdAt}, orderCount: ${_this.orderCount}, totalSpent: ${_this.totalSpent})';
+}
+
+
 }
 
 /// @nodoc
-abstract class $CustomerSummaryCopyWith<$Res> {
-  factory $CustomerSummaryCopyWith(
-    CustomerSummary value,
-    $Res Function(CustomerSummary) then,
-  ) = _$CustomerSummaryCopyWithImpl<$Res, CustomerSummary>;
-  @useResult
-  $Res call({
-    String id,
-    String name,
-    String? email,
-    String? phone,
-    bool isGuest,
-    bool isActive,
-    DateTime createdAt,
-    int orderCount,
-    double totalSpent,
-  });
-}
+abstract mixin class $CustomerSummaryCopyWith<$Res>  {
+  factory $CustomerSummaryCopyWith(CustomerSummary value, $Res Function(CustomerSummary) _then) = _$CustomerSummaryCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name, String? email, String? phone, bool isGuest, bool isActive, DateTime createdAt, int orderCount, double totalSpent
+});
 
+
+
+
+}
 /// @nodoc
-class _$CustomerSummaryCopyWithImpl<$Res, $Val extends CustomerSummary>
+class _$CustomerSummaryCopyWithImpl<$Res>
     implements $CustomerSummaryCopyWith<$Res> {
-  _$CustomerSummaryCopyWithImpl(this._value, this._then);
+  _$CustomerSummaryCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final CustomerSummary _self;
+  final $Res Function(CustomerSummary) _then;
 
-  /// Create a copy of CustomerSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? email = freezed,
-    Object? phone = freezed,
-    Object? isGuest = null,
-    Object? isActive = null,
-    Object? createdAt = null,
-    Object? orderCount = null,
-    Object? totalSpent = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            name: null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                      as String,
-            email: freezed == email
-                ? _value.email
-                : email // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            phone: freezed == phone
-                ? _value.phone
-                : phone // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            isGuest: null == isGuest
-                ? _value.isGuest
-                : isGuest // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            isActive: null == isActive
-                ? _value.isActive
-                : isActive // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            createdAt: null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-            orderCount: null == orderCount
-                ? _value.orderCount
-                : orderCount // ignore: cast_nullable_to_non_nullable
-                      as int,
-            totalSpent: null == totalSpent
-                ? _value.totalSpent
-                : totalSpent // ignore: cast_nullable_to_non_nullable
-                      as double,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of CustomerSummary
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? email = freezed,Object? phone = freezed,Object? isGuest = null,Object? isActive = null,Object? createdAt = null,Object? orderCount = null,Object? totalSpent = null,}) {
+  return _then(CustomerSummary(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String?,isGuest: null == isGuest ? _self.isGuest : isGuest // ignore: cast_nullable_to_non_nullable
+as bool,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,orderCount: null == orderCount ? _self.orderCount : orderCount // ignore: cast_nullable_to_non_nullable
+as int,totalSpent: null == totalSpent ? _self.totalSpent : totalSpent // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [CustomerSummary].
+extension CustomerSummaryPatterns on CustomerSummary {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CustomerSummary value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CustomerSummary() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CustomerSummary value)  $default,){
+final _that = this;
+switch (_that) {
+case _CustomerSummary():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CustomerSummary value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CustomerSummary() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? email,  String? phone,  bool isGuest,  bool isActive,  DateTime createdAt,  int orderCount,  double totalSpent)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CustomerSummary() when $default != null:
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.isGuest,_that.isActive,_that.createdAt,_that.orderCount,_that.totalSpent);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? email,  String? phone,  bool isGuest,  bool isActive,  DateTime createdAt,  int orderCount,  double totalSpent)  $default,) {final _that = this;
+switch (_that) {
+case _CustomerSummary():
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.isGuest,_that.isActive,_that.createdAt,_that.orderCount,_that.totalSpent);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? email,  String? phone,  bool isGuest,  bool isActive,  DateTime createdAt,  int orderCount,  double totalSpent)?  $default,) {final _that = this;
+switch (_that) {
+case _CustomerSummary() when $default != null:
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.isGuest,_that.isActive,_that.createdAt,_that.orderCount,_that.totalSpent);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
-abstract class _$$CustomerSummaryImplCopyWith<$Res>
-    implements $CustomerSummaryCopyWith<$Res> {
-  factory _$$CustomerSummaryImplCopyWith(
-    _$CustomerSummaryImpl value,
-    $Res Function(_$CustomerSummaryImpl) then,
-  ) = __$$CustomerSummaryImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String name,
-    String? email,
-    String? phone,
-    bool isGuest,
-    bool isActive,
-    DateTime createdAt,
-    int orderCount,
-    double totalSpent,
-  });
+
+
+class _CustomerSummary implements CustomerSummary {
+  const _CustomerSummary({required this.id, required this.name, this.email, this.phone, required this.isGuest, required this.isActive, required this.createdAt, required this.orderCount, required this.totalSpent});
+  
+
+@override final  String id;
+@override final  String name;
+@override final  String? email;
+@override final  String? phone;
+@override final  bool isGuest;
+@override final  bool isActive;
+@override final  DateTime createdAt;
+@override final  int orderCount;
+@override final  double totalSpent;
+
+/// Create a copy of CustomerSummary
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CustomerSummaryCopyWith<_CustomerSummary> get copyWith => __$CustomerSummaryCopyWithImpl<_CustomerSummary>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CustomerSummary&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.isGuest, isGuest) || other.isGuest == isGuest)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.orderCount, orderCount) || other.orderCount == orderCount)&&(identical(other.totalSpent, totalSpent) || other.totalSpent == totalSpent));
 }
 
-/// @nodoc
-class __$$CustomerSummaryImplCopyWithImpl<$Res>
-    extends _$CustomerSummaryCopyWithImpl<$Res, _$CustomerSummaryImpl>
-    implements _$$CustomerSummaryImplCopyWith<$Res> {
-  __$$CustomerSummaryImplCopyWithImpl(
-    _$CustomerSummaryImpl _value,
-    $Res Function(_$CustomerSummaryImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of CustomerSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? email = freezed,
-    Object? phone = freezed,
-    Object? isGuest = null,
-    Object? isActive = null,
-    Object? createdAt = null,
-    Object? orderCount = null,
-    Object? totalSpent = null,
-  }) {
-    return _then(
-      _$CustomerSummaryImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        name: null == name
-            ? _value.name
-            : name // ignore: cast_nullable_to_non_nullable
-                  as String,
-        email: freezed == email
-            ? _value.email
-            : email // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        phone: freezed == phone
-            ? _value.phone
-            : phone // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        isGuest: null == isGuest
-            ? _value.isGuest
-            : isGuest // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        isActive: null == isActive
-            ? _value.isActive
-            : isActive // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        createdAt: null == createdAt
-            ? _value.createdAt
-            : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-        orderCount: null == orderCount
-            ? _value.orderCount
-            : orderCount // ignore: cast_nullable_to_non_nullable
-                  as int,
-        totalSpent: null == totalSpent
-            ? _value.totalSpent
-            : totalSpent // ignore: cast_nullable_to_non_nullable
-                  as double,
-      ),
-    );
-  }
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,name,email,phone,isGuest,isActive,createdAt,orderCount,totalSpent);
 }
 
-/// @nodoc
-
-class _$CustomerSummaryImpl implements _CustomerSummary {
-  const _$CustomerSummaryImpl({
-    required this.id,
-    required this.name,
-    this.email,
-    this.phone,
-    required this.isGuest,
-    required this.isActive,
-    required this.createdAt,
-    required this.orderCount,
-    required this.totalSpent,
-  });
-
-  @override
-  final String id;
-  @override
-  final String name;
-  @override
-  final String? email;
-  @override
-  final String? phone;
-  @override
-  final bool isGuest;
-  @override
-  final bool isActive;
-  @override
-  final DateTime createdAt;
-  @override
-  final int orderCount;
-  @override
-  final double totalSpent;
-
-  @override
-  String toString() {
+@override
+String toString() {
     return 'CustomerSummary(id: $id, name: $name, email: $email, phone: $phone, isGuest: $isGuest, isActive: $isActive, createdAt: $createdAt, orderCount: $orderCount, totalSpent: $totalSpent)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$CustomerSummaryImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.email, email) || other.email == email) &&
-            (identical(other.phone, phone) || other.phone == phone) &&
-            (identical(other.isGuest, isGuest) || other.isGuest == isGuest) &&
-            (identical(other.isActive, isActive) ||
-                other.isActive == isActive) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.orderCount, orderCount) ||
-                other.orderCount == orderCount) &&
-            (identical(other.totalSpent, totalSpent) ||
-                other.totalSpent == totalSpent));
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    name,
-    email,
-    phone,
-    isGuest,
-    isActive,
-    createdAt,
-    orderCount,
-    totalSpent,
-  );
-
-  /// Create a copy of CustomerSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$CustomerSummaryImplCopyWith<_$CustomerSummaryImpl> get copyWith =>
-      __$$CustomerSummaryImplCopyWithImpl<_$CustomerSummaryImpl>(
-        this,
-        _$identity,
-      );
 }
 
-abstract class _CustomerSummary implements CustomerSummary {
-  const factory _CustomerSummary({
-    required final String id,
-    required final String name,
-    final String? email,
-    final String? phone,
-    required final bool isGuest,
-    required final bool isActive,
-    required final DateTime createdAt,
-    required final int orderCount,
-    required final double totalSpent,
-  }) = _$CustomerSummaryImpl;
 
-  @override
-  String get id;
-  @override
-  String get name;
-  @override
-  String? get email;
-  @override
-  String? get phone;
-  @override
-  bool get isGuest;
-  @override
-  bool get isActive;
-  @override
-  DateTime get createdAt;
-  @override
-  int get orderCount;
-  @override
-  double get totalSpent;
+}
 
-  /// Create a copy of CustomerSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$CustomerSummaryImplCopyWith<_$CustomerSummaryImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+/// @nodoc
+abstract mixin class _$CustomerSummaryCopyWith<$Res> implements $CustomerSummaryCopyWith<$Res> {
+  factory _$CustomerSummaryCopyWith(_CustomerSummary value, $Res Function(_CustomerSummary) _then) = __$CustomerSummaryCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name, String? email, String? phone, bool isGuest, bool isActive, DateTime createdAt, int orderCount, double totalSpent
+});
+
+
+
+
+}
+/// @nodoc
+class __$CustomerSummaryCopyWithImpl<$Res>
+    implements _$CustomerSummaryCopyWith<$Res> {
+  __$CustomerSummaryCopyWithImpl(this._self, this._then);
+
+  final _CustomerSummary _self;
+  final $Res Function(_CustomerSummary) _then;
+
+/// Create a copy of CustomerSummary
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? email = freezed,Object? phone = freezed,Object? isGuest = null,Object? isActive = null,Object? createdAt = null,Object? orderCount = null,Object? totalSpent = null,}) {
+  return _then(_CustomerSummary(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String?,isGuest: null == isGuest ? _self.isGuest : isGuest // ignore: cast_nullable_to_non_nullable
+as bool,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,orderCount: null == orderCount ? _self.orderCount : orderCount // ignore: cast_nullable_to_non_nullable
+as int,totalSpent: null == totalSpent ? _self.totalSpent : totalSpent // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
 }
 
 /// @nodoc
 mixin _$CustomerDetail {
-  CustomerSummary get summary => throw _privateConstructorUsedError;
-  List<RecentOrderSummary> get recentOrders =>
-      throw _privateConstructorUsedError;
 
-  /// Create a copy of CustomerDetail
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $CustomerDetailCopyWith<CustomerDetail> get copyWith =>
-      throw _privateConstructorUsedError;
+ CustomerSummary get summary; List<RecentOrderSummary> get recentOrders;
+/// Create a copy of CustomerDetail
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CustomerDetailCopyWith<CustomerDetail> get copyWith => _$CustomerDetailCopyWithImpl<CustomerDetail>(this as CustomerDetail, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as CustomerDetail;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CustomerDetail&&(identical(other.summary, _this.summary) || other.summary == _this.summary)&&const DeepCollectionEquality().equals(other.recentOrders, _this.recentOrders));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as CustomerDetail;
+  return Object.hash(runtimeType,_this.summary,const DeepCollectionEquality().hash(_this.recentOrders));
+}
+
+@override
+String toString() {
+  final _this = this as CustomerDetail;
+  return 'CustomerDetail(summary: ${_this.summary}, recentOrders: ${_this.recentOrders})';
+}
+
+
 }
 
 /// @nodoc
-abstract class $CustomerDetailCopyWith<$Res> {
-  factory $CustomerDetailCopyWith(
-    CustomerDetail value,
-    $Res Function(CustomerDetail) then,
-  ) = _$CustomerDetailCopyWithImpl<$Res, CustomerDetail>;
-  @useResult
-  $Res call({CustomerSummary summary, List<RecentOrderSummary> recentOrders});
+abstract mixin class $CustomerDetailCopyWith<$Res>  {
+  factory $CustomerDetailCopyWith(CustomerDetail value, $Res Function(CustomerDetail) _then) = _$CustomerDetailCopyWithImpl;
+@useResult
+$Res call({
+ CustomerSummary summary, List<RecentOrderSummary> recentOrders
+});
 
-  $CustomerSummaryCopyWith<$Res> get summary;
+
+$CustomerSummaryCopyWith<$Res> get summary;
+
 }
-
 /// @nodoc
-class _$CustomerDetailCopyWithImpl<$Res, $Val extends CustomerDetail>
+class _$CustomerDetailCopyWithImpl<$Res>
     implements $CustomerDetailCopyWith<$Res> {
-  _$CustomerDetailCopyWithImpl(this._value, this._then);
+  _$CustomerDetailCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final CustomerDetail _self;
+  final $Res Function(CustomerDetail) _then;
 
-  /// Create a copy of CustomerDetail
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({Object? summary = null, Object? recentOrders = null}) {
-    return _then(
-      _value.copyWith(
-            summary: null == summary
-                ? _value.summary
-                : summary // ignore: cast_nullable_to_non_nullable
-                      as CustomerSummary,
-            recentOrders: null == recentOrders
-                ? _value.recentOrders
-                : recentOrders // ignore: cast_nullable_to_non_nullable
-                      as List<RecentOrderSummary>,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of CustomerDetail
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? summary = null,Object? recentOrders = null,}) {
+  return _then(CustomerDetail(
+summary: null == summary ? _self.summary : summary // ignore: cast_nullable_to_non_nullable
+as CustomerSummary,recentOrders: null == recentOrders ? _self.recentOrders : recentOrders // ignore: cast_nullable_to_non_nullable
+as List<RecentOrderSummary>,
+  ));
+}
+/// Create a copy of CustomerDetail
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CustomerSummaryCopyWith<$Res> get summary {
+  
+  return $CustomerSummaryCopyWith<$Res>(_self.summary, (value) {
+    return _then(_self.copyWith(summary: value));
+  });
+}
+}
 
-  /// Create a copy of CustomerDetail
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $CustomerSummaryCopyWith<$Res> get summary {
-    return $CustomerSummaryCopyWith<$Res>(_value.summary, (value) {
-      return _then(_value.copyWith(summary: value) as $Val);
-    });
-  }
+
+/// Adds pattern-matching-related methods to [CustomerDetail].
+extension CustomerDetailPatterns on CustomerDetail {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CustomerDetail value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CustomerDetail() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CustomerDetail value)  $default,){
+final _that = this;
+switch (_that) {
+case _CustomerDetail():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CustomerDetail value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CustomerDetail() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( CustomerSummary summary,  List<RecentOrderSummary> recentOrders)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CustomerDetail() when $default != null:
+return $default(_that.summary,_that.recentOrders);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( CustomerSummary summary,  List<RecentOrderSummary> recentOrders)  $default,) {final _that = this;
+switch (_that) {
+case _CustomerDetail():
+return $default(_that.summary,_that.recentOrders);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( CustomerSummary summary,  List<RecentOrderSummary> recentOrders)?  $default,) {final _that = this;
+switch (_that) {
+case _CustomerDetail() when $default != null:
+return $default(_that.summary,_that.recentOrders);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
-abstract class _$$CustomerDetailImplCopyWith<$Res>
-    implements $CustomerDetailCopyWith<$Res> {
-  factory _$$CustomerDetailImplCopyWith(
-    _$CustomerDetailImpl value,
-    $Res Function(_$CustomerDetailImpl) then,
-  ) = __$$CustomerDetailImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({CustomerSummary summary, List<RecentOrderSummary> recentOrders});
 
-  @override
-  $CustomerSummaryCopyWith<$Res> get summary;
+
+class _CustomerDetail implements CustomerDetail {
+  const _CustomerDetail({required this.summary, required  List<RecentOrderSummary> recentOrders}): _recentOrders = recentOrders;
+  
+
+@override final  CustomerSummary summary;
+ final  List<RecentOrderSummary> _recentOrders;
+@override List<RecentOrderSummary> get recentOrders {
+  if (_recentOrders is EqualUnmodifiableListView) return _recentOrders;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_recentOrders);
 }
 
-/// @nodoc
-class __$$CustomerDetailImplCopyWithImpl<$Res>
-    extends _$CustomerDetailCopyWithImpl<$Res, _$CustomerDetailImpl>
-    implements _$$CustomerDetailImplCopyWith<$Res> {
-  __$$CustomerDetailImplCopyWithImpl(
-    _$CustomerDetailImpl _value,
-    $Res Function(_$CustomerDetailImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of CustomerDetail
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({Object? summary = null, Object? recentOrders = null}) {
-    return _then(
-      _$CustomerDetailImpl(
-        summary: null == summary
-            ? _value.summary
-            : summary // ignore: cast_nullable_to_non_nullable
-                  as CustomerSummary,
-        recentOrders: null == recentOrders
-            ? _value._recentOrders
-            : recentOrders // ignore: cast_nullable_to_non_nullable
-                  as List<RecentOrderSummary>,
-      ),
-    );
-  }
+/// Create a copy of CustomerDetail
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CustomerDetailCopyWith<_CustomerDetail> get copyWith => __$CustomerDetailCopyWithImpl<_CustomerDetail>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CustomerDetail&&(identical(other.summary, summary) || other.summary == summary)&&const DeepCollectionEquality().equals(other.recentOrders, _recentOrders));
 }
 
-/// @nodoc
 
-class _$CustomerDetailImpl implements _CustomerDetail {
-  const _$CustomerDetailImpl({
-    required this.summary,
-    required final List<RecentOrderSummary> recentOrders,
-  }) : _recentOrders = recentOrders;
+@override
+int get hashCode {
+    return Object.hash(runtimeType,summary,const DeepCollectionEquality().hash(_recentOrders));
+}
 
-  @override
-  final CustomerSummary summary;
-  final List<RecentOrderSummary> _recentOrders;
-  @override
-  List<RecentOrderSummary> get recentOrders {
-    if (_recentOrders is EqualUnmodifiableListView) return _recentOrders;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_recentOrders);
-  }
-
-  @override
-  String toString() {
+@override
+String toString() {
     return 'CustomerDetail(summary: $summary, recentOrders: $recentOrders)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$CustomerDetailImpl &&
-            (identical(other.summary, summary) || other.summary == summary) &&
-            const DeepCollectionEquality().equals(
-              other._recentOrders,
-              _recentOrders,
-            ));
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    summary,
-    const DeepCollectionEquality().hash(_recentOrders),
-  );
-
-  /// Create a copy of CustomerDetail
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$CustomerDetailImplCopyWith<_$CustomerDetailImpl> get copyWith =>
-      __$$CustomerDetailImplCopyWithImpl<_$CustomerDetailImpl>(
-        this,
-        _$identity,
-      );
 }
 
-abstract class _CustomerDetail implements CustomerDetail {
-  const factory _CustomerDetail({
-    required final CustomerSummary summary,
-    required final List<RecentOrderSummary> recentOrders,
-  }) = _$CustomerDetailImpl;
 
-  @override
-  CustomerSummary get summary;
-  @override
-  List<RecentOrderSummary> get recentOrders;
-
-  /// Create a copy of CustomerDetail
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$CustomerDetailImplCopyWith<_$CustomerDetailImpl> get copyWith =>
-      throw _privateConstructorUsedError;
 }
+
+/// @nodoc
+abstract mixin class _$CustomerDetailCopyWith<$Res> implements $CustomerDetailCopyWith<$Res> {
+  factory _$CustomerDetailCopyWith(_CustomerDetail value, $Res Function(_CustomerDetail) _then) = __$CustomerDetailCopyWithImpl;
+@override @useResult
+$Res call({
+ CustomerSummary summary, List<RecentOrderSummary> recentOrders
+});
+
+
+@override $CustomerSummaryCopyWith<$Res> get summary;
+
+}
+/// @nodoc
+class __$CustomerDetailCopyWithImpl<$Res>
+    implements _$CustomerDetailCopyWith<$Res> {
+  __$CustomerDetailCopyWithImpl(this._self, this._then);
+
+  final _CustomerDetail _self;
+  final $Res Function(_CustomerDetail) _then;
+
+/// Create a copy of CustomerDetail
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? summary = null,Object? recentOrders = null,}) {
+  return _then(_CustomerDetail(
+summary: null == summary ? _self.summary : summary // ignore: cast_nullable_to_non_nullable
+as CustomerSummary,recentOrders: null == recentOrders ? _self._recentOrders : recentOrders // ignore: cast_nullable_to_non_nullable
+as List<RecentOrderSummary>,
+  ));
+}
+
+/// Create a copy of CustomerDetail
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CustomerSummaryCopyWith<$Res> get summary {
+  
+  return $CustomerSummaryCopyWith<$Res>(_self.summary, (value) {
+    return _then(_self.copyWith(summary: value));
+  });
+}
+}
+
+// dart format on

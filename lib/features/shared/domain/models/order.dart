@@ -72,7 +72,7 @@ extension FulfillmentTypeStatusX on FulfillmentType {
 }
 
 @freezed
-class Order with _$Order {
+abstract class Order with _$Order {
   const factory Order({
     required String id,
     required String orderNumber,
@@ -122,6 +122,11 @@ class Order with _$Order {
     // Additive field on the checkout response only (03_DTO_REFERENCE.md) — null
     // when no loyalty reward was redeemed for this order (the normal case).
     LoyaltyRedemptionInfo? loyaltyRedemption,
+    // Admin-only additive field (DRIVER_DELIVERY_API_CONTRACT.md) — currently
+    // assigned driver's user id, or null if unassigned. Always null for
+    // PICKUP orders (never assignable) and for any non-admin order response
+    // that doesn't include it.
+    String? driverId,
   }) = _Order;
 
   factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);
@@ -159,7 +164,7 @@ extension OrderCrossMethodX on Order {
 }
 
 @freezed
-class OrderDeliveryAddress with _$OrderDeliveryAddress {
+abstract class OrderDeliveryAddress with _$OrderDeliveryAddress {
   const factory OrderDeliveryAddress({
     String? label,
     String? street,
@@ -221,7 +226,7 @@ extension OrderDeliveryAddressCoordsX on OrderDeliveryAddress {
 /// columns server-side, never a live tier join, so it never changes if the
 /// tier is later edited/deactivated.
 @freezed
-class OrderDeliveryTier with _$OrderDeliveryTier {
+abstract class OrderDeliveryTier with _$OrderDeliveryTier {
   const factory OrderDeliveryTier({
     required String id,
     required double minDistanceKm,
@@ -247,7 +252,7 @@ class OrderDeliveryTier with _$OrderDeliveryTier {
 /// before the distance-pricing migration. `null` for every order placed
 /// after it (and for PICKUP orders).
 @freezed
-class OrderDeliveryZoneSnapshot with _$OrderDeliveryZoneSnapshot {
+abstract class OrderDeliveryZoneSnapshot with _$OrderDeliveryZoneSnapshot {
   const factory OrderDeliveryZoneSnapshot({
     required String id,
     required String nameAr,
@@ -276,7 +281,7 @@ extension OrderDeliveryZoneSnapshotX on OrderDeliveryZoneSnapshot {
 }
 
 @freezed
-class LoyaltyRedemptionInfo with _$LoyaltyRedemptionInfo {
+abstract class LoyaltyRedemptionInfo with _$LoyaltyRedemptionInfo {
   const factory LoyaltyRedemptionInfo({
     required String rewardId,
     required String rewardName,
@@ -288,7 +293,7 @@ class LoyaltyRedemptionInfo with _$LoyaltyRedemptionInfo {
 }
 
 @freezed
-class OrderItem with _$OrderItem {
+abstract class OrderItem with _$OrderItem {
   const factory OrderItem({
     // Live `MenuItem.id` this order item was placed against — `null` for
     // orders placed before the backend exposed this field, or if the item
@@ -327,7 +332,7 @@ class OrderItem with _$OrderItem {
 }
 
 @freezed
-class OrderStatusEntry with _$OrderStatusEntry {
+abstract class OrderStatusEntry with _$OrderStatusEntry {
   const factory OrderStatusEntry({
     required OrderStatus status,
     required DateTime timestamp,

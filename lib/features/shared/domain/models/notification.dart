@@ -6,7 +6,7 @@ part 'notification.g.dart';
 enum NotificationType { orderStatus, promo, system }
 
 @freezed
-class AppNotification with _$AppNotification {
+abstract class AppNotification with _$AppNotification {
   const factory AppNotification({
     required String id,
     String? userId,

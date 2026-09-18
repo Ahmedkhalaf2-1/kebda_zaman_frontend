@@ -10,7 +10,7 @@ part 'order_notification.g.dart';
 /// Mirrors the confirmed backend contract for
 /// `GET /admin/notifications` exactly — field names match the wire format.
 @freezed
-class OrderNotification with _$OrderNotification {
+abstract class OrderNotification with _$OrderNotification {
   const factory OrderNotification({
     required String id,
     required String type,

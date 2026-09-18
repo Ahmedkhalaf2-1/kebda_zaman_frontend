@@ -1,6 +1,6 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint
+// coverage:ignore-file
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'menu_offer.dart';
@@ -9,679 +9,607 @@ part of 'menu_offer.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
 /// @nodoc
 mixin _$MenuOfferMenuItemSummary {
-  String get id => throw _privateConstructorUsedError;
-  String? get name => throw _privateConstructorUsedError;
-  String? get imageUrl => throw _privateConstructorUsedError;
-  double? get basePrice => throw _privateConstructorUsedError;
-  bool? get isAvailable => throw _privateConstructorUsedError;
-  String? get categoryId => throw _privateConstructorUsedError;
 
-  /// Create a copy of MenuOfferMenuItemSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $MenuOfferMenuItemSummaryCopyWith<MenuOfferMenuItemSummary> get copyWith =>
-      throw _privateConstructorUsedError;
+ String get id; String? get name; String? get imageUrl; double? get basePrice; bool? get isAvailable; String? get categoryId;
+/// Create a copy of MenuOfferMenuItemSummary
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MenuOfferMenuItemSummaryCopyWith<MenuOfferMenuItemSummary> get copyWith => _$MenuOfferMenuItemSummaryCopyWithImpl<MenuOfferMenuItemSummary>(this as MenuOfferMenuItemSummary, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as MenuOfferMenuItemSummary;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MenuOfferMenuItemSummary&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.imageUrl, _this.imageUrl) || other.imageUrl == _this.imageUrl)&&(identical(other.basePrice, _this.basePrice) || other.basePrice == _this.basePrice)&&(identical(other.isAvailable, _this.isAvailable) || other.isAvailable == _this.isAvailable)&&(identical(other.categoryId, _this.categoryId) || other.categoryId == _this.categoryId));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as MenuOfferMenuItemSummary;
+  return Object.hash(runtimeType,_this.id,_this.name,_this.imageUrl,_this.basePrice,_this.isAvailable,_this.categoryId);
+}
+
+@override
+String toString() {
+  final _this = this as MenuOfferMenuItemSummary;
+  return 'MenuOfferMenuItemSummary(id: ${_this.id}, name: ${_this.name}, imageUrl: ${_this.imageUrl}, basePrice: ${_this.basePrice}, isAvailable: ${_this.isAvailable}, categoryId: ${_this.categoryId})';
+}
+
+
 }
 
 /// @nodoc
-abstract class $MenuOfferMenuItemSummaryCopyWith<$Res> {
-  factory $MenuOfferMenuItemSummaryCopyWith(
-    MenuOfferMenuItemSummary value,
-    $Res Function(MenuOfferMenuItemSummary) then,
-  ) = _$MenuOfferMenuItemSummaryCopyWithImpl<$Res, MenuOfferMenuItemSummary>;
-  @useResult
-  $Res call({
-    String id,
-    String? name,
-    String? imageUrl,
-    double? basePrice,
-    bool? isAvailable,
-    String? categoryId,
-  });
-}
+abstract mixin class $MenuOfferMenuItemSummaryCopyWith<$Res>  {
+  factory $MenuOfferMenuItemSummaryCopyWith(MenuOfferMenuItemSummary value, $Res Function(MenuOfferMenuItemSummary) _then) = _$MenuOfferMenuItemSummaryCopyWithImpl;
+@useResult
+$Res call({
+ String id, String? name, String? imageUrl, double? basePrice, bool? isAvailable, String? categoryId
+});
 
+
+
+
+}
 /// @nodoc
-class _$MenuOfferMenuItemSummaryCopyWithImpl<
-  $Res,
-  $Val extends MenuOfferMenuItemSummary
->
+class _$MenuOfferMenuItemSummaryCopyWithImpl<$Res>
     implements $MenuOfferMenuItemSummaryCopyWith<$Res> {
-  _$MenuOfferMenuItemSummaryCopyWithImpl(this._value, this._then);
+  _$MenuOfferMenuItemSummaryCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final MenuOfferMenuItemSummary _self;
+  final $Res Function(MenuOfferMenuItemSummary) _then;
 
-  /// Create a copy of MenuOfferMenuItemSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = freezed,
-    Object? imageUrl = freezed,
-    Object? basePrice = freezed,
-    Object? isAvailable = freezed,
-    Object? categoryId = freezed,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            name: freezed == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            imageUrl: freezed == imageUrl
-                ? _value.imageUrl
-                : imageUrl // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            basePrice: freezed == basePrice
-                ? _value.basePrice
-                : basePrice // ignore: cast_nullable_to_non_nullable
-                      as double?,
-            isAvailable: freezed == isAvailable
-                ? _value.isAvailable
-                : isAvailable // ignore: cast_nullable_to_non_nullable
-                      as bool?,
-            categoryId: freezed == categoryId
-                ? _value.categoryId
-                : categoryId // ignore: cast_nullable_to_non_nullable
-                      as String?,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of MenuOfferMenuItemSummary
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = freezed,Object? imageUrl = freezed,Object? basePrice = freezed,Object? isAvailable = freezed,Object? categoryId = freezed,}) {
+  return _then(MenuOfferMenuItemSummary(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String?,basePrice: freezed == basePrice ? _self.basePrice : basePrice // ignore: cast_nullable_to_non_nullable
+as double?,isAvailable: freezed == isAvailable ? _self.isAvailable : isAvailable // ignore: cast_nullable_to_non_nullable
+as bool?,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [MenuOfferMenuItemSummary].
+extension MenuOfferMenuItemSummaryPatterns on MenuOfferMenuItemSummary {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MenuOfferMenuItemSummary value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MenuOfferMenuItemSummary() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MenuOfferMenuItemSummary value)  $default,){
+final _that = this;
+switch (_that) {
+case _MenuOfferMenuItemSummary():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MenuOfferMenuItemSummary value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MenuOfferMenuItemSummary() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? name,  String? imageUrl,  double? basePrice,  bool? isAvailable,  String? categoryId)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MenuOfferMenuItemSummary() when $default != null:
+return $default(_that.id,_that.name,_that.imageUrl,_that.basePrice,_that.isAvailable,_that.categoryId);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? name,  String? imageUrl,  double? basePrice,  bool? isAvailable,  String? categoryId)  $default,) {final _that = this;
+switch (_that) {
+case _MenuOfferMenuItemSummary():
+return $default(_that.id,_that.name,_that.imageUrl,_that.basePrice,_that.isAvailable,_that.categoryId);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? name,  String? imageUrl,  double? basePrice,  bool? isAvailable,  String? categoryId)?  $default,) {final _that = this;
+switch (_that) {
+case _MenuOfferMenuItemSummary() when $default != null:
+return $default(_that.id,_that.name,_that.imageUrl,_that.basePrice,_that.isAvailable,_that.categoryId);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
-abstract class _$$MenuOfferMenuItemSummaryImplCopyWith<$Res>
-    implements $MenuOfferMenuItemSummaryCopyWith<$Res> {
-  factory _$$MenuOfferMenuItemSummaryImplCopyWith(
-    _$MenuOfferMenuItemSummaryImpl value,
-    $Res Function(_$MenuOfferMenuItemSummaryImpl) then,
-  ) = __$$MenuOfferMenuItemSummaryImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String? name,
-    String? imageUrl,
-    double? basePrice,
-    bool? isAvailable,
-    String? categoryId,
-  });
+
+
+class _MenuOfferMenuItemSummary implements MenuOfferMenuItemSummary {
+  const _MenuOfferMenuItemSummary({required this.id, this.name, this.imageUrl, this.basePrice, this.isAvailable, this.categoryId});
+  
+
+@override final  String id;
+@override final  String? name;
+@override final  String? imageUrl;
+@override final  double? basePrice;
+@override final  bool? isAvailable;
+@override final  String? categoryId;
+
+/// Create a copy of MenuOfferMenuItemSummary
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MenuOfferMenuItemSummaryCopyWith<_MenuOfferMenuItemSummary> get copyWith => __$MenuOfferMenuItemSummaryCopyWithImpl<_MenuOfferMenuItemSummary>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MenuOfferMenuItemSummary&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.basePrice, basePrice) || other.basePrice == basePrice)&&(identical(other.isAvailable, isAvailable) || other.isAvailable == isAvailable)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId));
 }
 
-/// @nodoc
-class __$$MenuOfferMenuItemSummaryImplCopyWithImpl<$Res>
-    extends
-        _$MenuOfferMenuItemSummaryCopyWithImpl<
-          $Res,
-          _$MenuOfferMenuItemSummaryImpl
-        >
-    implements _$$MenuOfferMenuItemSummaryImplCopyWith<$Res> {
-  __$$MenuOfferMenuItemSummaryImplCopyWithImpl(
-    _$MenuOfferMenuItemSummaryImpl _value,
-    $Res Function(_$MenuOfferMenuItemSummaryImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of MenuOfferMenuItemSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = freezed,
-    Object? imageUrl = freezed,
-    Object? basePrice = freezed,
-    Object? isAvailable = freezed,
-    Object? categoryId = freezed,
-  }) {
-    return _then(
-      _$MenuOfferMenuItemSummaryImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        name: freezed == name
-            ? _value.name
-            : name // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        imageUrl: freezed == imageUrl
-            ? _value.imageUrl
-            : imageUrl // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        basePrice: freezed == basePrice
-            ? _value.basePrice
-            : basePrice // ignore: cast_nullable_to_non_nullable
-                  as double?,
-        isAvailable: freezed == isAvailable
-            ? _value.isAvailable
-            : isAvailable // ignore: cast_nullable_to_non_nullable
-                  as bool?,
-        categoryId: freezed == categoryId
-            ? _value.categoryId
-            : categoryId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-      ),
-    );
-  }
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,name,imageUrl,basePrice,isAvailable,categoryId);
 }
 
-/// @nodoc
-
-class _$MenuOfferMenuItemSummaryImpl implements _MenuOfferMenuItemSummary {
-  const _$MenuOfferMenuItemSummaryImpl({
-    required this.id,
-    this.name,
-    this.imageUrl,
-    this.basePrice,
-    this.isAvailable,
-    this.categoryId,
-  });
-
-  @override
-  final String id;
-  @override
-  final String? name;
-  @override
-  final String? imageUrl;
-  @override
-  final double? basePrice;
-  @override
-  final bool? isAvailable;
-  @override
-  final String? categoryId;
-
-  @override
-  String toString() {
+@override
+String toString() {
     return 'MenuOfferMenuItemSummary(id: $id, name: $name, imageUrl: $imageUrl, basePrice: $basePrice, isAvailable: $isAvailable, categoryId: $categoryId)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$MenuOfferMenuItemSummaryImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.imageUrl, imageUrl) ||
-                other.imageUrl == imageUrl) &&
-            (identical(other.basePrice, basePrice) ||
-                other.basePrice == basePrice) &&
-            (identical(other.isAvailable, isAvailable) ||
-                other.isAvailable == isAvailable) &&
-            (identical(other.categoryId, categoryId) ||
-                other.categoryId == categoryId));
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    name,
-    imageUrl,
-    basePrice,
-    isAvailable,
-    categoryId,
-  );
-
-  /// Create a copy of MenuOfferMenuItemSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$MenuOfferMenuItemSummaryImplCopyWith<_$MenuOfferMenuItemSummaryImpl>
-  get copyWith =>
-      __$$MenuOfferMenuItemSummaryImplCopyWithImpl<
-        _$MenuOfferMenuItemSummaryImpl
-      >(this, _$identity);
 }
 
-abstract class _MenuOfferMenuItemSummary implements MenuOfferMenuItemSummary {
-  const factory _MenuOfferMenuItemSummary({
-    required final String id,
-    final String? name,
-    final String? imageUrl,
-    final double? basePrice,
-    final bool? isAvailable,
-    final String? categoryId,
-  }) = _$MenuOfferMenuItemSummaryImpl;
 
-  @override
-  String get id;
-  @override
-  String? get name;
-  @override
-  String? get imageUrl;
-  @override
-  double? get basePrice;
-  @override
-  bool? get isAvailable;
-  @override
-  String? get categoryId;
+}
 
-  /// Create a copy of MenuOfferMenuItemSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MenuOfferMenuItemSummaryImplCopyWith<_$MenuOfferMenuItemSummaryImpl>
-  get copyWith => throw _privateConstructorUsedError;
+/// @nodoc
+abstract mixin class _$MenuOfferMenuItemSummaryCopyWith<$Res> implements $MenuOfferMenuItemSummaryCopyWith<$Res> {
+  factory _$MenuOfferMenuItemSummaryCopyWith(_MenuOfferMenuItemSummary value, $Res Function(_MenuOfferMenuItemSummary) _then) = __$MenuOfferMenuItemSummaryCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String? name, String? imageUrl, double? basePrice, bool? isAvailable, String? categoryId
+});
+
+
+
+
+}
+/// @nodoc
+class __$MenuOfferMenuItemSummaryCopyWithImpl<$Res>
+    implements _$MenuOfferMenuItemSummaryCopyWith<$Res> {
+  __$MenuOfferMenuItemSummaryCopyWithImpl(this._self, this._then);
+
+  final _MenuOfferMenuItemSummary _self;
+  final $Res Function(_MenuOfferMenuItemSummary) _then;
+
+/// Create a copy of MenuOfferMenuItemSummary
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = freezed,Object? imageUrl = freezed,Object? basePrice = freezed,Object? isAvailable = freezed,Object? categoryId = freezed,}) {
+  return _then(_MenuOfferMenuItemSummary(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String?,basePrice: freezed == basePrice ? _self.basePrice : basePrice // ignore: cast_nullable_to_non_nullable
+as double?,isAvailable: freezed == isAvailable ? _self.isAvailable : isAvailable // ignore: cast_nullable_to_non_nullable
+as bool?,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
 }
 
 /// @nodoc
 mixin _$MenuOffer {
-  String get id => throw _privateConstructorUsedError;
-  String get menuItemId => throw _privateConstructorUsedError;
-  String get imageUrl => throw _privateConstructorUsedError;
-  String? get title => throw _privateConstructorUsedError;
-  String? get description => throw _privateConstructorUsedError;
-  bool get isActive => throw _privateConstructorUsedError;
-  DateTime? get startAt => throw _privateConstructorUsedError;
-  DateTime? get endAt => throw _privateConstructorUsedError;
-  int get sortOrder => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  DateTime get updatedAt => throw _privateConstructorUsedError;
-  MenuOfferMenuItemSummary? get menuItem => throw _privateConstructorUsedError;
 
-  /// Create a copy of MenuOffer
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $MenuOfferCopyWith<MenuOffer> get copyWith =>
-      throw _privateConstructorUsedError;
+ String get id; String get menuItemId; String get imageUrl; String? get title; String? get description; bool get isActive; DateTime? get startAt; DateTime? get endAt; int get sortOrder; DateTime get createdAt; DateTime get updatedAt; MenuOfferMenuItemSummary? get menuItem;
+/// Create a copy of MenuOffer
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MenuOfferCopyWith<MenuOffer> get copyWith => _$MenuOfferCopyWithImpl<MenuOffer>(this as MenuOffer, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as MenuOffer;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MenuOffer&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.menuItemId, _this.menuItemId) || other.menuItemId == _this.menuItemId)&&(identical(other.imageUrl, _this.imageUrl) || other.imageUrl == _this.imageUrl)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.isActive, _this.isActive) || other.isActive == _this.isActive)&&(identical(other.startAt, _this.startAt) || other.startAt == _this.startAt)&&(identical(other.endAt, _this.endAt) || other.endAt == _this.endAt)&&(identical(other.sortOrder, _this.sortOrder) || other.sortOrder == _this.sortOrder)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.menuItem, _this.menuItem) || other.menuItem == _this.menuItem));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as MenuOffer;
+  return Object.hash(runtimeType,_this.id,_this.menuItemId,_this.imageUrl,_this.title,_this.description,_this.isActive,_this.startAt,_this.endAt,_this.sortOrder,_this.createdAt,_this.updatedAt,_this.menuItem);
+}
+
+@override
+String toString() {
+  final _this = this as MenuOffer;
+  return 'MenuOffer(id: ${_this.id}, menuItemId: ${_this.menuItemId}, imageUrl: ${_this.imageUrl}, title: ${_this.title}, description: ${_this.description}, isActive: ${_this.isActive}, startAt: ${_this.startAt}, endAt: ${_this.endAt}, sortOrder: ${_this.sortOrder}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, menuItem: ${_this.menuItem})';
+}
+
+
 }
 
 /// @nodoc
-abstract class $MenuOfferCopyWith<$Res> {
-  factory $MenuOfferCopyWith(MenuOffer value, $Res Function(MenuOffer) then) =
-      _$MenuOfferCopyWithImpl<$Res, MenuOffer>;
-  @useResult
-  $Res call({
-    String id,
-    String menuItemId,
-    String imageUrl,
-    String? title,
-    String? description,
-    bool isActive,
-    DateTime? startAt,
-    DateTime? endAt,
-    int sortOrder,
-    DateTime createdAt,
-    DateTime updatedAt,
-    MenuOfferMenuItemSummary? menuItem,
-  });
+abstract mixin class $MenuOfferCopyWith<$Res>  {
+  factory $MenuOfferCopyWith(MenuOffer value, $Res Function(MenuOffer) _then) = _$MenuOfferCopyWithImpl;
+@useResult
+$Res call({
+ String id, String menuItemId, String imageUrl, String? title, String? description, bool isActive, DateTime? startAt, DateTime? endAt, int sortOrder, DateTime createdAt, DateTime updatedAt, MenuOfferMenuItemSummary? menuItem
+});
 
-  $MenuOfferMenuItemSummaryCopyWith<$Res>? get menuItem;
+
+$MenuOfferMenuItemSummaryCopyWith<$Res>? get menuItem;
+
 }
-
 /// @nodoc
-class _$MenuOfferCopyWithImpl<$Res, $Val extends MenuOffer>
+class _$MenuOfferCopyWithImpl<$Res>
     implements $MenuOfferCopyWith<$Res> {
-  _$MenuOfferCopyWithImpl(this._value, this._then);
+  _$MenuOfferCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final MenuOffer _self;
+  final $Res Function(MenuOffer) _then;
 
-  /// Create a copy of MenuOffer
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? menuItemId = null,
-    Object? imageUrl = null,
-    Object? title = freezed,
-    Object? description = freezed,
-    Object? isActive = null,
-    Object? startAt = freezed,
-    Object? endAt = freezed,
-    Object? sortOrder = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
-    Object? menuItem = freezed,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            menuItemId: null == menuItemId
-                ? _value.menuItemId
-                : menuItemId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            imageUrl: null == imageUrl
-                ? _value.imageUrl
-                : imageUrl // ignore: cast_nullable_to_non_nullable
-                      as String,
-            title: freezed == title
-                ? _value.title
-                : title // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            description: freezed == description
-                ? _value.description
-                : description // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            isActive: null == isActive
-                ? _value.isActive
-                : isActive // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            startAt: freezed == startAt
-                ? _value.startAt
-                : startAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            endAt: freezed == endAt
-                ? _value.endAt
-                : endAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            sortOrder: null == sortOrder
-                ? _value.sortOrder
-                : sortOrder // ignore: cast_nullable_to_non_nullable
-                      as int,
-            createdAt: null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-            updatedAt: null == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-            menuItem: freezed == menuItem
-                ? _value.menuItem
-                : menuItem // ignore: cast_nullable_to_non_nullable
-                      as MenuOfferMenuItemSummary?,
-          )
-          as $Val,
-    );
-  }
-
-  /// Create a copy of MenuOffer
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $MenuOfferMenuItemSummaryCopyWith<$Res>? get menuItem {
-    if (_value.menuItem == null) {
-      return null;
-    }
-
-    return $MenuOfferMenuItemSummaryCopyWith<$Res>(_value.menuItem!, (value) {
-      return _then(_value.copyWith(menuItem: value) as $Val);
-    });
-  }
+/// Create a copy of MenuOffer
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? menuItemId = null,Object? imageUrl = null,Object? title = freezed,Object? description = freezed,Object? isActive = null,Object? startAt = freezed,Object? endAt = freezed,Object? sortOrder = null,Object? createdAt = null,Object? updatedAt = null,Object? menuItem = freezed,}) {
+  return _then(MenuOffer(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,menuItemId: null == menuItemId ? _self.menuItemId : menuItemId // ignore: cast_nullable_to_non_nullable
+as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,startAt: freezed == startAt ? _self.startAt : startAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,endAt: freezed == endAt ? _self.endAt : endAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,sortOrder: null == sortOrder ? _self.sortOrder : sortOrder // ignore: cast_nullable_to_non_nullable
+as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime,menuItem: freezed == menuItem ? _self.menuItem : menuItem // ignore: cast_nullable_to_non_nullable
+as MenuOfferMenuItemSummary?,
+  ));
 }
+/// Create a copy of MenuOffer
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MenuOfferMenuItemSummaryCopyWith<$Res>? get menuItem {
+    if (_self.menuItem == null) {
+    return null;
+  }
 
-/// @nodoc
-abstract class _$$MenuOfferImplCopyWith<$Res>
-    implements $MenuOfferCopyWith<$Res> {
-  factory _$$MenuOfferImplCopyWith(
-    _$MenuOfferImpl value,
-    $Res Function(_$MenuOfferImpl) then,
-  ) = __$$MenuOfferImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String menuItemId,
-    String imageUrl,
-    String? title,
-    String? description,
-    bool isActive,
-    DateTime? startAt,
-    DateTime? endAt,
-    int sortOrder,
-    DateTime createdAt,
-    DateTime updatedAt,
-    MenuOfferMenuItemSummary? menuItem,
+  return $MenuOfferMenuItemSummaryCopyWith<$Res>(_self.menuItem!, (value) {
+    return _then(_self.copyWith(menuItem: value));
   });
+}
+}
 
-  @override
-  $MenuOfferMenuItemSummaryCopyWith<$Res>? get menuItem;
+
+/// Adds pattern-matching-related methods to [MenuOffer].
+extension MenuOfferPatterns on MenuOffer {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MenuOffer value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MenuOffer() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MenuOffer value)  $default,){
+final _that = this;
+switch (_that) {
+case _MenuOffer():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MenuOffer value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MenuOffer() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String menuItemId,  String imageUrl,  String? title,  String? description,  bool isActive,  DateTime? startAt,  DateTime? endAt,  int sortOrder,  DateTime createdAt,  DateTime updatedAt,  MenuOfferMenuItemSummary? menuItem)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MenuOffer() when $default != null:
+return $default(_that.id,_that.menuItemId,_that.imageUrl,_that.title,_that.description,_that.isActive,_that.startAt,_that.endAt,_that.sortOrder,_that.createdAt,_that.updatedAt,_that.menuItem);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String menuItemId,  String imageUrl,  String? title,  String? description,  bool isActive,  DateTime? startAt,  DateTime? endAt,  int sortOrder,  DateTime createdAt,  DateTime updatedAt,  MenuOfferMenuItemSummary? menuItem)  $default,) {final _that = this;
+switch (_that) {
+case _MenuOffer():
+return $default(_that.id,_that.menuItemId,_that.imageUrl,_that.title,_that.description,_that.isActive,_that.startAt,_that.endAt,_that.sortOrder,_that.createdAt,_that.updatedAt,_that.menuItem);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String menuItemId,  String imageUrl,  String? title,  String? description,  bool isActive,  DateTime? startAt,  DateTime? endAt,  int sortOrder,  DateTime createdAt,  DateTime updatedAt,  MenuOfferMenuItemSummary? menuItem)?  $default,) {final _that = this;
+switch (_that) {
+case _MenuOffer() when $default != null:
+return $default(_that.id,_that.menuItemId,_that.imageUrl,_that.title,_that.description,_that.isActive,_that.startAt,_that.endAt,_that.sortOrder,_that.createdAt,_that.updatedAt,_that.menuItem);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
-class __$$MenuOfferImplCopyWithImpl<$Res>
-    extends _$MenuOfferCopyWithImpl<$Res, _$MenuOfferImpl>
-    implements _$$MenuOfferImplCopyWith<$Res> {
-  __$$MenuOfferImplCopyWithImpl(
-    _$MenuOfferImpl _value,
-    $Res Function(_$MenuOfferImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of MenuOffer
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? menuItemId = null,
-    Object? imageUrl = null,
-    Object? title = freezed,
-    Object? description = freezed,
-    Object? isActive = null,
-    Object? startAt = freezed,
-    Object? endAt = freezed,
-    Object? sortOrder = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
-    Object? menuItem = freezed,
-  }) {
-    return _then(
-      _$MenuOfferImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        menuItemId: null == menuItemId
-            ? _value.menuItemId
-            : menuItemId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        imageUrl: null == imageUrl
-            ? _value.imageUrl
-            : imageUrl // ignore: cast_nullable_to_non_nullable
-                  as String,
-        title: freezed == title
-            ? _value.title
-            : title // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        description: freezed == description
-            ? _value.description
-            : description // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        isActive: null == isActive
-            ? _value.isActive
-            : isActive // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        startAt: freezed == startAt
-            ? _value.startAt
-            : startAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        endAt: freezed == endAt
-            ? _value.endAt
-            : endAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        sortOrder: null == sortOrder
-            ? _value.sortOrder
-            : sortOrder // ignore: cast_nullable_to_non_nullable
-                  as int,
-        createdAt: null == createdAt
-            ? _value.createdAt
-            : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-        updatedAt: null == updatedAt
-            ? _value.updatedAt
-            : updatedAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-        menuItem: freezed == menuItem
-            ? _value.menuItem
-            : menuItem // ignore: cast_nullable_to_non_nullable
-                  as MenuOfferMenuItemSummary?,
-      ),
-    );
-  }
+
+class _MenuOffer implements MenuOffer {
+  const _MenuOffer({required this.id, required this.menuItemId, required this.imageUrl, this.title, this.description, this.isActive = true, this.startAt, this.endAt, this.sortOrder = 0, required this.createdAt, required this.updatedAt, this.menuItem});
+  
+
+@override final  String id;
+@override final  String menuItemId;
+@override final  String imageUrl;
+@override final  String? title;
+@override final  String? description;
+@override@JsonKey() final  bool isActive;
+@override final  DateTime? startAt;
+@override final  DateTime? endAt;
+@override@JsonKey() final  int sortOrder;
+@override final  DateTime createdAt;
+@override final  DateTime updatedAt;
+@override final  MenuOfferMenuItemSummary? menuItem;
+
+/// Create a copy of MenuOffer
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MenuOfferCopyWith<_MenuOffer> get copyWith => __$MenuOfferCopyWithImpl<_MenuOffer>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MenuOffer&&(identical(other.id, id) || other.id == id)&&(identical(other.menuItemId, menuItemId) || other.menuItemId == menuItemId)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.startAt, startAt) || other.startAt == startAt)&&(identical(other.endAt, endAt) || other.endAt == endAt)&&(identical(other.sortOrder, sortOrder) || other.sortOrder == sortOrder)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.menuItem, menuItem) || other.menuItem == menuItem));
 }
 
-/// @nodoc
 
-class _$MenuOfferImpl implements _MenuOffer {
-  const _$MenuOfferImpl({
-    required this.id,
-    required this.menuItemId,
-    required this.imageUrl,
-    this.title,
-    this.description,
-    this.isActive = true,
-    this.startAt,
-    this.endAt,
-    this.sortOrder = 0,
-    required this.createdAt,
-    required this.updatedAt,
-    this.menuItem,
-  });
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,menuItemId,imageUrl,title,description,isActive,startAt,endAt,sortOrder,createdAt,updatedAt,menuItem);
+}
 
-  @override
-  final String id;
-  @override
-  final String menuItemId;
-  @override
-  final String imageUrl;
-  @override
-  final String? title;
-  @override
-  final String? description;
-  @override
-  @JsonKey()
-  final bool isActive;
-  @override
-  final DateTime? startAt;
-  @override
-  final DateTime? endAt;
-  @override
-  @JsonKey()
-  final int sortOrder;
-  @override
-  final DateTime createdAt;
-  @override
-  final DateTime updatedAt;
-  @override
-  final MenuOfferMenuItemSummary? menuItem;
-
-  @override
-  String toString() {
+@override
+String toString() {
     return 'MenuOffer(id: $id, menuItemId: $menuItemId, imageUrl: $imageUrl, title: $title, description: $description, isActive: $isActive, startAt: $startAt, endAt: $endAt, sortOrder: $sortOrder, createdAt: $createdAt, updatedAt: $updatedAt, menuItem: $menuItem)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$MenuOfferImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.menuItemId, menuItemId) ||
-                other.menuItemId == menuItemId) &&
-            (identical(other.imageUrl, imageUrl) ||
-                other.imageUrl == imageUrl) &&
-            (identical(other.title, title) || other.title == title) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
-            (identical(other.isActive, isActive) ||
-                other.isActive == isActive) &&
-            (identical(other.startAt, startAt) || other.startAt == startAt) &&
-            (identical(other.endAt, endAt) || other.endAt == endAt) &&
-            (identical(other.sortOrder, sortOrder) ||
-                other.sortOrder == sortOrder) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
-            (identical(other.menuItem, menuItem) ||
-                other.menuItem == menuItem));
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    menuItemId,
-    imageUrl,
-    title,
-    description,
-    isActive,
-    startAt,
-    endAt,
-    sortOrder,
-    createdAt,
-    updatedAt,
-    menuItem,
-  );
-
-  /// Create a copy of MenuOffer
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$MenuOfferImplCopyWith<_$MenuOfferImpl> get copyWith =>
-      __$$MenuOfferImplCopyWithImpl<_$MenuOfferImpl>(this, _$identity);
 }
 
-abstract class _MenuOffer implements MenuOffer {
-  const factory _MenuOffer({
-    required final String id,
-    required final String menuItemId,
-    required final String imageUrl,
-    final String? title,
-    final String? description,
-    final bool isActive,
-    final DateTime? startAt,
-    final DateTime? endAt,
-    final int sortOrder,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
-    final MenuOfferMenuItemSummary? menuItem,
-  }) = _$MenuOfferImpl;
 
-  @override
-  String get id;
-  @override
-  String get menuItemId;
-  @override
-  String get imageUrl;
-  @override
-  String? get title;
-  @override
-  String? get description;
-  @override
-  bool get isActive;
-  @override
-  DateTime? get startAt;
-  @override
-  DateTime? get endAt;
-  @override
-  int get sortOrder;
-  @override
-  DateTime get createdAt;
-  @override
-  DateTime get updatedAt;
-  @override
-  MenuOfferMenuItemSummary? get menuItem;
-
-  /// Create a copy of MenuOffer
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MenuOfferImplCopyWith<_$MenuOfferImpl> get copyWith =>
-      throw _privateConstructorUsedError;
 }
+
+/// @nodoc
+abstract mixin class _$MenuOfferCopyWith<$Res> implements $MenuOfferCopyWith<$Res> {
+  factory _$MenuOfferCopyWith(_MenuOffer value, $Res Function(_MenuOffer) _then) = __$MenuOfferCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String menuItemId, String imageUrl, String? title, String? description, bool isActive, DateTime? startAt, DateTime? endAt, int sortOrder, DateTime createdAt, DateTime updatedAt, MenuOfferMenuItemSummary? menuItem
+});
+
+
+@override $MenuOfferMenuItemSummaryCopyWith<$Res>? get menuItem;
+
+}
+/// @nodoc
+class __$MenuOfferCopyWithImpl<$Res>
+    implements _$MenuOfferCopyWith<$Res> {
+  __$MenuOfferCopyWithImpl(this._self, this._then);
+
+  final _MenuOffer _self;
+  final $Res Function(_MenuOffer) _then;
+
+/// Create a copy of MenuOffer
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? menuItemId = null,Object? imageUrl = null,Object? title = freezed,Object? description = freezed,Object? isActive = null,Object? startAt = freezed,Object? endAt = freezed,Object? sortOrder = null,Object? createdAt = null,Object? updatedAt = null,Object? menuItem = freezed,}) {
+  return _then(_MenuOffer(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,menuItemId: null == menuItemId ? _self.menuItemId : menuItemId // ignore: cast_nullable_to_non_nullable
+as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,startAt: freezed == startAt ? _self.startAt : startAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,endAt: freezed == endAt ? _self.endAt : endAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,sortOrder: null == sortOrder ? _self.sortOrder : sortOrder // ignore: cast_nullable_to_non_nullable
+as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime,menuItem: freezed == menuItem ? _self.menuItem : menuItem // ignore: cast_nullable_to_non_nullable
+as MenuOfferMenuItemSummary?,
+  ));
+}
+
+/// Create a copy of MenuOffer
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MenuOfferMenuItemSummaryCopyWith<$Res>? get menuItem {
+    if (_self.menuItem == null) {
+    return null;
+  }
+
+  return $MenuOfferMenuItemSummaryCopyWith<$Res>(_self.menuItem!, (value) {
+    return _then(_self.copyWith(menuItem: value));
+  });
+}
+}
+
+// dart format on

@@ -4,7 +4,7 @@ part 'cart.freezed.dart';
 part 'cart.g.dart';
 
 @freezed
-class Cart with _$Cart {
+abstract class Cart with _$Cart {
   const factory Cart({
     required String id,
     @Default([]) List<CartItem> items,
@@ -21,7 +21,7 @@ class Cart with _$Cart {
 }
 
 @freezed
-class CartItem with _$CartItem {
+abstract class CartItem with _$CartItem {
   const CartItem._();
 
   const factory CartItem({

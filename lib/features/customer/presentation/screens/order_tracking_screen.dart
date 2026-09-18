@@ -16,6 +16,8 @@ import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
+import 'package:kebda_zaman/core/widgets/kz_live_tracking_map.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/customer_tracking_notifier.dart';
 
 final orderTrackingProvider = StreamProvider.family<Order, String>((ref, id) {
   final repo = ref.read(orderRepositoryProvider);
@@ -100,6 +102,14 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
       final nextStatus = next.valueOrNull?.status;
       if (nextStatus != null && nextStatus != previousStatus) {
         ref.invalidate(ordersProvider);
+        // A status change (e.g. re-entering OUT_FOR_DELIVERY after a
+        // reassignment) can only ever be discovered by this order-status
+        // stream, since the tracking poll itself stops once ENDED — kick
+        // it awake so a newly (re)assigned driver's location can appear
+        // without the customer reinstalling/restarting the app.
+        if (ref.exists(customerTrackingProvider(widget.orderId))) {
+          ref.read(customerTrackingProvider(widget.orderId).notifier).refresh();
+        }
       }
       // Keeps the home-screen widget's ETA/progress current every ~10s
       // while this screen is open, rather than only on status changes.
@@ -333,7 +343,15 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
 
         // 2. Branded Status Card (no external image — offline-safe)
         _StatusBannerCard(order: order, onViewDetails: _scrollToSummary),
-        const SizedBox(height: 28),
+        const SizedBox(height: 16),
+
+        // Live driver-location map — delivery orders only (the backend
+        // reports NOT_STARTED forever for PICKUP, so this never even polls
+        // for one); the map card itself decides what to render per state,
+        // including rendering nothing for NOT_STARTED/ENDED.
+        if (order.fulfillmentType == FulfillmentType.delivery)
+          _LiveTrackingSection(order: order),
+        const SizedBox(height: 12),
 
         // 3. Vertical Timeline Stepper
         Text(
@@ -1021,6 +1039,47 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
           ],
         );
       }),
+    );
+  }
+}
+
+/// Watches [customerTrackingProvider] for this order and renders
+/// [KZLiveTrackingMap] once data is available. A load failure is shown as a
+/// small inline retry rather than replacing the whole tracking screen —
+/// this section is a supplement to the timeline above, not the page's
+/// primary content.
+class _LiveTrackingSection extends ConsumerWidget {
+  final Order order;
+
+  const _LiveTrackingSection({required this.order});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final trackingAsync = ref.watch(customerTrackingProvider(order.id));
+
+    return trackingAsync.when(
+      loading: () => const SizedBox(
+        height: 160,
+        child: Center(
+          child: CircularProgressIndicator(strokeWidth: 2, color: KZ.primary),
+        ),
+      ),
+      error: (e, st) => Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: TextButton.icon(
+          onPressed: () => ref.invalidate(customerTrackingProvider(order.id)),
+          icon: const Icon(Icons.refresh_rounded, size: 16),
+          label: Text('tracking.live_load_error'.tr()),
+        ),
+      ),
+      data: (tracking) {
+        final addr = order.deliveryAddress;
+        return KZLiveTrackingMap(
+          tracking: tracking,
+          destinationLat: addr?.hasValidCoordinates == true ? addr!.lat : null,
+          destinationLng: addr?.hasValidCoordinates == true ? addr!.lng : null,
+        );
+      },
     );
   }
 }

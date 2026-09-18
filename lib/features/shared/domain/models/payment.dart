@@ -7,7 +7,7 @@ part 'payment.g.dart';
 /// handed straight to the Moyasar SDK (or, for CASH, just display copy) —
 /// never constructed or guessed client-side.
 @freezed
-class PaymentIntent with _$PaymentIntent {
+abstract class PaymentIntent with _$PaymentIntent {
   const factory PaymentIntent({
     required String paymentId,
     required String status,
@@ -19,7 +19,7 @@ class PaymentIntent with _$PaymentIntent {
 }
 
 @freezed
-class PaymentIntentProviderData with _$PaymentIntentProviderData {
+abstract class PaymentIntentProviderData with _$PaymentIntentProviderData {
   const factory PaymentIntentProviderData({
     // Absent for CASH intents (there is nothing to feed the Moyasar SDK).
     String? publishableApiKey,
@@ -44,7 +44,7 @@ class PaymentIntentProviderData with _$PaymentIntentProviderData {
 /// thing that ever makes a payment "real"; a Moyasar SDK callback alone is
 /// never treated as final.
 @freezed
-class Payment with _$Payment {
+abstract class Payment with _$Payment {
   const factory Payment({
     required String id,
     required String orderId,
@@ -65,7 +65,7 @@ class Payment with _$Payment {
 /// `GET /payments/cards` entry — brand/last-four/expiry only, by design:
 /// the backend never has (and never returns) a full card number.
 @freezed
-class SavedCard with _$SavedCard {
+abstract class SavedCard with _$SavedCard {
   const factory SavedCard({
     required String id,
     required String brand,
@@ -85,7 +85,7 @@ class SavedCard with _$SavedCard {
 /// challenge — otherwise the charge is already authorized and the caller
 /// just moves straight to confirm.
 @freezed
-class CardChargeResult with _$CardChargeResult {
+abstract class CardChargeResult with _$CardChargeResult {
   const factory CardChargeResult({
     required String paymentId,
     required String status,
@@ -97,7 +97,7 @@ class CardChargeResult with _$CardChargeResult {
 }
 
 @freezed
-class CardChargeProviderData with _$CardChargeProviderData {
+abstract class CardChargeProviderData with _$CardChargeProviderData {
   const factory CardChargeProviderData({required String transactionUrl}) =
       _CardChargeProviderData;
 

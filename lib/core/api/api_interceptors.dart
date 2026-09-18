@@ -47,6 +47,26 @@ class AuthInterceptor extends Interceptor {
 
     // 2. Automatic 401 -> refresh token (single-flight) -> retry original request ONCE
     if (err.response?.statusCode == 401) {
+      // A deactivated driver's access token is rejected by `ActiveDriverGuard`
+      // (see DRIVER_DELIVERY_API_CONTRACT.md) even though it hasn't expired —
+      // the server already revoked every refresh-token session for this
+      // account (`TokenService.revokeAllForUser`), so attempting `/auth/
+      // refresh` here would only waste a round-trip before failing anyway.
+      // End the session locally right away instead: clear both tokens (same
+      // as a definitive `RefreshRejected`) and let the original 401
+      // propagate as an ordinary AuthFailure — the app-level auth state
+      // transition (and the router's redirect back to /login) is driven by
+      // whichever driver notifier made this call, via `clearLocalSession`.
+      final err401Exception = err.error;
+      if (err401Exception is ApiException &&
+          err401Exception.code == 'DRIVER_DEACTIVATED') {
+        coordinator.tokenStorage.accessToken = null;
+        await coordinator.secureStorage.delete(
+          key: TokenRefreshCoordinator.refreshTokenKey,
+        );
+        return handler.next(err);
+      }
+
       // Never attempt to refresh for public auth endpoints or the refresh
       // endpoint itself.
       const noRefreshPaths = {

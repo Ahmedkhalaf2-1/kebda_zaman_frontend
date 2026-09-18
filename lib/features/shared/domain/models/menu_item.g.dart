@@ -6,75 +6,73 @@ part of 'menu_item.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$MenuItemImpl _$$MenuItemImplFromJson(Map<String, dynamic> json) =>
-    _$MenuItemImpl(
-      id: json['id'] as String,
-      categoryId: json['categoryId'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      imageUrl: json['imageUrl'] as String,
-      basePrice: (json['basePrice'] as num).toDouble(),
-      discountPrice: (json['discountPrice'] as num?)?.toDouble(),
-      isAvailable: json['isAvailable'] as bool? ?? true,
-      isFeatured: json['isFeatured'] as bool? ?? false,
-      isBestSeller: json['isBestSeller'] as bool? ?? false,
-      prepTimeMinutes: (json['prepTimeMinutes'] as num?)?.toInt() ?? 15,
-      modifierGroups:
-          (json['modifierGroups'] as List<dynamic>?)
-              ?.map((e) => ModifierGroup.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
-      calories: (json['calories'] as num?)?.toInt(),
-      compareAtPrice: (json['compareAtPrice'] as num?)?.toDouble(),
-      badge: $enumDecodeNullable(_$MenuItemBadgeEnumMap, json['badge']),
-      oftenOrderedWith:
-          (json['oftenOrderedWith'] as List<dynamic>?)
-              ?.map((e) => MenuItem.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      nameAr: json['nameAr'] as String?,
-      nameEn: json['nameEn'] as String?,
-      descriptionAr: json['descriptionAr'] as String?,
-      descriptionEn: json['descriptionEn'] as String?,
-      averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0.0,
-      reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 0,
-    );
+_MenuItem _$MenuItemFromJson(Map<String, dynamic> json) => _MenuItem(
+  id: json['id'] as String,
+  categoryId: json['categoryId'] as String,
+  name: json['name'] as String,
+  description: json['description'] as String,
+  imageUrl: json['imageUrl'] as String,
+  basePrice: (json['basePrice'] as num).toDouble(),
+  discountPrice: (json['discountPrice'] as num?)?.toDouble(),
+  isAvailable: json['isAvailable'] as bool? ?? true,
+  isFeatured: json['isFeatured'] as bool? ?? false,
+  isBestSeller: json['isBestSeller'] as bool? ?? false,
+  prepTimeMinutes: (json['prepTimeMinutes'] as num?)?.toInt() ?? 15,
+  modifierGroups:
+      (json['modifierGroups'] as List<dynamic>?)
+          ?.map((e) => ModifierGroup.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
+  calories: (json['calories'] as num?)?.toInt(),
+  compareAtPrice: (json['compareAtPrice'] as num?)?.toDouble(),
+  badge: $enumDecodeNullable(_$MenuItemBadgeEnumMap, json['badge']),
+  oftenOrderedWith:
+      (json['oftenOrderedWith'] as List<dynamic>?)
+          ?.map((e) => MenuItem.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  nameAr: json['nameAr'] as String?,
+  nameEn: json['nameEn'] as String?,
+  descriptionAr: json['descriptionAr'] as String?,
+  descriptionEn: json['descriptionEn'] as String?,
+  averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0.0,
+  reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 0,
+);
 
-Map<String, dynamic> _$$MenuItemImplToJson(_$MenuItemImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'categoryId': instance.categoryId,
-      'name': instance.name,
-      'description': instance.description,
-      'imageUrl': instance.imageUrl,
-      'basePrice': instance.basePrice,
-      'discountPrice': instance.discountPrice,
-      'isAvailable': instance.isAvailable,
-      'isFeatured': instance.isFeatured,
-      'isBestSeller': instance.isBestSeller,
-      'prepTimeMinutes': instance.prepTimeMinutes,
-      'modifierGroups': instance.modifierGroups,
-      'sortOrder': instance.sortOrder,
-      'calories': instance.calories,
-      'compareAtPrice': instance.compareAtPrice,
-      'badge': _$MenuItemBadgeEnumMap[instance.badge],
-      'oftenOrderedWith': instance.oftenOrderedWith,
-      'nameAr': instance.nameAr,
-      'nameEn': instance.nameEn,
-      'descriptionAr': instance.descriptionAr,
-      'descriptionEn': instance.descriptionEn,
-      'averageRating': instance.averageRating,
-      'reviewCount': instance.reviewCount,
-    };
+Map<String, dynamic> _$MenuItemToJson(_MenuItem instance) => <String, dynamic>{
+  'id': instance.id,
+  'categoryId': instance.categoryId,
+  'name': instance.name,
+  'description': instance.description,
+  'imageUrl': instance.imageUrl,
+  'basePrice': instance.basePrice,
+  'discountPrice': instance.discountPrice,
+  'isAvailable': instance.isAvailable,
+  'isFeatured': instance.isFeatured,
+  'isBestSeller': instance.isBestSeller,
+  'prepTimeMinutes': instance.prepTimeMinutes,
+  'modifierGroups': instance.modifierGroups,
+  'sortOrder': instance.sortOrder,
+  'calories': instance.calories,
+  'compareAtPrice': instance.compareAtPrice,
+  'badge': _$MenuItemBadgeEnumMap[instance.badge],
+  'oftenOrderedWith': instance.oftenOrderedWith,
+  'nameAr': instance.nameAr,
+  'nameEn': instance.nameEn,
+  'descriptionAr': instance.descriptionAr,
+  'descriptionEn': instance.descriptionEn,
+  'averageRating': instance.averageRating,
+  'reviewCount': instance.reviewCount,
+};
 
 const _$MenuItemBadgeEnumMap = {
   MenuItemBadge.bestseller: 'bestseller',
   MenuItemBadge.topRated: 'topRated',
 };
 
-_$ModifierGroupImpl _$$ModifierGroupImplFromJson(Map<String, dynamic> json) =>
-    _$ModifierGroupImpl(
+_ModifierGroup _$ModifierGroupFromJson(Map<String, dynamic> json) =>
+    _ModifierGroup(
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,
@@ -90,7 +88,7 @@ _$ModifierGroupImpl _$$ModifierGroupImplFromJson(Map<String, dynamic> json) =>
       sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
     );
 
-Map<String, dynamic> _$$ModifierGroupImplToJson(_$ModifierGroupImpl instance) =>
+Map<String, dynamic> _$ModifierGroupToJson(_ModifierGroup instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -103,8 +101,8 @@ Map<String, dynamic> _$$ModifierGroupImplToJson(_$ModifierGroupImpl instance) =>
       'sortOrder': instance.sortOrder,
     };
 
-_$ModifierOptionImpl _$$ModifierOptionImplFromJson(Map<String, dynamic> json) =>
-    _$ModifierOptionImpl(
+_ModifierOption _$ModifierOptionFromJson(Map<String, dynamic> json) =>
+    _ModifierOption(
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,
@@ -119,15 +117,14 @@ _$ModifierOptionImpl _$$ModifierOptionImplFromJson(Map<String, dynamic> json) =>
           const [],
     );
 
-Map<String, dynamic> _$$ModifierOptionImplToJson(
-  _$ModifierOptionImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'name': instance.name,
-  'description': instance.description,
-  'image': instance.image,
-  'priceModifier': instance.priceModifier,
-  'isDefault': instance.isDefault,
-  'isAvailable': instance.isAvailable,
-  'nestedModifierGroups': instance.nestedModifierGroups,
-};
+Map<String, dynamic> _$ModifierOptionToJson(_ModifierOption instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'description': instance.description,
+      'image': instance.image,
+      'priceModifier': instance.priceModifier,
+      'isDefault': instance.isDefault,
+      'isAvailable': instance.isAvailable,
+      'nestedModifierGroups': instance.nestedModifierGroups,
+    };

@@ -6,6 +6,9 @@ import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_order_details_notifier.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/preparation_time_section.dart';
+import 'package:kebda_zaman/features/admin/presentation/widgets/admin_order_driver_section.dart';
+import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_tracking_notifier.dart';
+import 'package:kebda_zaman/core/widgets/kz_live_tracking_map.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/order.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
@@ -160,6 +163,10 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
             distanceKm: order.deliveryDistanceKm,
             durationSeconds: order.deliveryDurationSeconds,
           ),
+          const SizedBox(height: 12),
+          AdminOrderDriverSection(orderId: orderId, order: order),
+          const SizedBox(height: 12),
+          _AdminLiveTrackingSection(orderId: orderId, order: order),
           const SizedBox(height: 12),
         ],
 
@@ -399,6 +406,49 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
           child,
         ],
       ),
+    );
+  }
+}
+
+/// Staff equivalent of the customer tracking screen's live map — same
+/// widget (`KZLiveTrackingMap`), fed by the admin-only tracking read
+/// (`GET /admin/orders/:id/tracking`) via its own polling notifier.
+class _AdminLiveTrackingSection extends ConsumerWidget {
+  final String orderId;
+  final Order order;
+
+  const _AdminLiveTrackingSection({required this.orderId, required this.order});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (order.fulfillmentType != FulfillmentType.delivery) {
+      return const SizedBox.shrink();
+    }
+    final trackingAsync = ref.watch(adminTrackingProvider(orderId));
+
+    return trackingAsync.when(
+      loading: () => const SizedBox(
+        height: 120,
+        child: Center(
+          child: CircularProgressIndicator(strokeWidth: 2, color: KZ.primary),
+        ),
+      ),
+      error: (e, st) => Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: TextButton.icon(
+          onPressed: () => ref.invalidate(adminTrackingProvider(orderId)),
+          icon: const Icon(Icons.refresh_rounded, size: 16),
+          label: Text('tracking.live_load_error'.tr()),
+        ),
+      ),
+      data: (tracking) {
+        final addr = order.deliveryAddress;
+        return KZLiveTrackingMap(
+          tracking: tracking,
+          destinationLat: addr?.hasValidCoordinates == true ? addr!.lat : null,
+          destinationLng: addr?.hasValidCoordinates == true ? addr!.lng : null,
+        );
+      },
     );
   }
 }

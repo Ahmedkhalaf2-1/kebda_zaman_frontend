@@ -31,6 +31,13 @@ class _FakeOrderRepository implements OrderRepository {
   Future<Result<Order>> getAdminOrderById(String id) async => Success(order);
 
   @override
+  Future<Result<Order>> assignDriver(String orderId, String driverId) =>
+      throw UnimplementedError();
+  @override
+  Future<Result<Order>> unassignDriver(String orderId) =>
+      throw UnimplementedError();
+
+  @override
   Future<Result<List<Order>>> getOrders({
     String? userId,
     int? page,

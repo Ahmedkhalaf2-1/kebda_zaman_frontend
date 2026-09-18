@@ -450,6 +450,61 @@ class ApiOrderRepository implements OrderRepository {
     }
   }
 
+  /// Shared error mapping for the driver-assignment endpoints. Distinguishes
+  /// a real precondition rejection (422 — wrong order type/terminal status/
+  /// inactive driver) and a lost-race conflict (409 `ASSIGNMENT_CHANGED`,
+  /// another admin changed the assignment first) from a generic network
+  /// failure, so the UI never shows false success and can tell the two apart
+  /// (a conflict means "refresh and see the current state", not "try again
+  /// with the same input").
+  Failure _handleDriverAssignmentError(dynamic e) {
+    if (e is DioException) {
+      if (e.error is ApiException) {
+        final apiEx = e.error as ApiException;
+        // Prefer the ApiException's own carried statusCode (always present,
+        // whether it came from a parsed response body or was constructed
+        // directly) over `e.response?.statusCode`, which is null whenever
+        // the DioException was built without a `response` (as this
+        // repository's own tests, and every sibling repository's tests, do).
+        final statusCode = e.response?.statusCode ?? apiEx.statusCode;
+        if (statusCode == 404) {
+          return NotFoundFailure(apiEx.message, apiEx);
+        }
+        if (statusCode == 422 || statusCode == 409) {
+          return ValidationFailure(apiEx.message, apiEx);
+        }
+        return NetworkFailure(apiEx.message, apiEx);
+      }
+      return NetworkFailure(e.message ?? 'Failed to update driver assignment');
+    }
+    return UnknownFailure(e.toString());
+  }
+
+  @override
+  Future<Result<Order>> assignDriver(String orderId, String driverId) async {
+    try {
+      final response = await _apiClient.dio.patch(
+        '/admin/orders/$orderId/driver',
+        data: {'driverId': driverId},
+      );
+      return Success(_mapOrder(response.data as Map<String, dynamic>));
+    } catch (e) {
+      return Err(_handleDriverAssignmentError(e));
+    }
+  }
+
+  @override
+  Future<Result<Order>> unassignDriver(String orderId) async {
+    try {
+      final response = await _apiClient.dio.delete(
+        '/admin/orders/$orderId/driver',
+      );
+      return Success(_mapOrder(response.data as Map<String, dynamic>));
+    } catch (e) {
+      return Err(_handleDriverAssignmentError(e));
+    }
+  }
+
   /// Maps the backend `deliveryMethod` wire value ('DELIVERY' | 'PICKUP').
   ///
   /// Deliberately does NOT default missing/malformed/unknown values to
@@ -585,6 +640,7 @@ class ApiOrderRepository implements OrderRepository {
           [], // If we got status history from /orders/:id/status, it would go here. But /orders/:id doesn't return history.
       estimatedTime: json['estimatedDeliveryTime'],
       preparationTimeMinutes: _toIntField(json['preparationTimeMinutes']),
+      driverId: json['driverId'] as String?,
     );
   }
 

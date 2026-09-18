@@ -54,7 +54,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isStaffRole(User? user) =>
       user?.role == 'ADMIN' ||
       user?.role == 'CASHIER' ||
-      user?.role == 'KITCHEN';
+      user?.role == 'KITCHEN' ||
+      user?.role == 'DRIVER';
 
   void _navigateForUser(User? user) {
     if (user?.role == 'ADMIN') {
@@ -67,6 +68,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Kitchen staff land directly on their ticket queue — same
       // confined-to-one-section pattern as cashiers above.
       context.go('/admin/kitchen');
+    } else if (user?.role == 'DRIVER') {
+      // Drivers land directly on their own app — never customer navigation,
+      // same confined-to-one-section pattern as the staff roles above.
+      context.go('/driver/orders');
     } else {
       context.go('/home');
     }

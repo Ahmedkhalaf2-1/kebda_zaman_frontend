@@ -4,7 +4,7 @@ part 'staff_account.freezed.dart';
 part 'staff_account.g.dart';
 
 @freezed
-class StaffAccount with _$StaffAccount {
+abstract class StaffAccount with _$StaffAccount {
   const factory StaffAccount({
     required String id,
     required String name,

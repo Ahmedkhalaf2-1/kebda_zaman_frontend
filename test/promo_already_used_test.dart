@@ -155,6 +155,13 @@ class _ScriptedOrderRepository implements OrderRepository {
   @override
   Future<Result<Order>> getAdminOrderById(String id) async =>
       throw UnimplementedError();
+
+  @override
+  Future<Result<Order>> assignDriver(String orderId, String driverId) =>
+      throw UnimplementedError();
+  @override
+  Future<Result<Order>> unassignDriver(String orderId) =>
+      throw UnimplementedError();
 }
 
 Failure _promoAlreadyUsedFailure() => NetworkFailure(

@@ -10,7 +10,7 @@ part 'review.g.dart';
 /// A customer's review of a single purchased order item
 /// (RATINGS_REVIEWS_API_CONTRACT.md — `POST/PATCH /reviews/items`).
 @freezed
-class ItemReview with _$ItemReview {
+abstract class ItemReview with _$ItemReview {
   const factory ItemReview({
     required String id,
     required String orderItemId,
@@ -29,7 +29,7 @@ class ItemReview with _$ItemReview {
 /// as a whole) — distinct from per-item food reviews
 /// (`POST/PATCH /reviews/orders`).
 @freezed
-class OrderFeedback with _$OrderFeedback {
+abstract class OrderFeedback with _$OrderFeedback {
   const factory OrderFeedback({
     required String id,
     required String orderId,
@@ -51,7 +51,7 @@ class OrderFeedback with _$OrderFeedback {
 /// key (two rows for the same menu item are two distinct reviewable lines,
 /// never deduplicated by menuItemId).
 @freezed
-class OrderReviewItem with _$OrderReviewItem {
+abstract class OrderReviewItem with _$OrderReviewItem {
   const factory OrderReviewItem({
     required String orderItemId,
     String? menuItemId,
@@ -71,7 +71,7 @@ class OrderReviewItem with _$OrderReviewItem {
 /// the frontend must never submit review requests when it is false, even if
 /// the order looks locally completed.
 @freezed
-class OrderReviewDetails with _$OrderReviewDetails {
+abstract class OrderReviewDetails with _$OrderReviewDetails {
   const factory OrderReviewDetails({
     required String orderId,
     required String orderStatus,
@@ -111,7 +111,7 @@ extension OrderReviewItemX on OrderReviewItem {
 // ever mismatches.
 
 @freezed
-class AdminReviewCustomer with _$AdminReviewCustomer {
+abstract class AdminReviewCustomer with _$AdminReviewCustomer {
   const factory AdminReviewCustomer({
     required String id,
     required String fullName,
@@ -124,7 +124,7 @@ class AdminReviewCustomer with _$AdminReviewCustomer {
 }
 
 @freezed
-class AdminReviewOrderRef with _$AdminReviewOrderRef {
+abstract class AdminReviewOrderRef with _$AdminReviewOrderRef {
   const factory AdminReviewOrderRef({
     required String id,
     required String orderNumber,
@@ -135,7 +135,7 @@ class AdminReviewOrderRef with _$AdminReviewOrderRef {
 }
 
 @freezed
-class AdminReviewItemRef with _$AdminReviewItemRef {
+abstract class AdminReviewItemRef with _$AdminReviewItemRef {
   const factory AdminReviewItemRef({
     required String orderItemId,
     String? menuItemId,
@@ -158,7 +158,7 @@ extension AdminReviewItemRefX on AdminReviewItemRef {
 }
 
 @freezed
-class AdminItemReview with _$AdminItemReview {
+abstract class AdminItemReview with _$AdminItemReview {
   const factory AdminItemReview({
     required String id,
     required int rating,
@@ -175,7 +175,7 @@ class AdminItemReview with _$AdminItemReview {
 }
 
 @freezed
-class AdminOrderFeedback with _$AdminOrderFeedback {
+abstract class AdminOrderFeedback with _$AdminOrderFeedback {
   const factory AdminOrderFeedback({
     required String id,
     required int rating,
@@ -196,7 +196,7 @@ class AdminOrderFeedback with _$AdminOrderFeedback {
 /// neutral localized label (via [AdminTopRatedItemX.localizedName] returning
 /// `null`) rather than crash or show an empty string.
 @freezed
-class AdminTopRatedItem with _$AdminTopRatedItem {
+abstract class AdminTopRatedItem with _$AdminTopRatedItem {
   const factory AdminTopRatedItem({
     required String menuItemId,
     String? nameAr,
@@ -229,7 +229,7 @@ extension AdminTopRatedItemX on AdminTopRatedItem {
 }
 
 @freezed
-class AdminRatingAggregate with _$AdminRatingAggregate {
+abstract class AdminRatingAggregate with _$AdminRatingAggregate {
   const factory AdminRatingAggregate({
     required double averageRating,
     required int reviewCount,
@@ -260,7 +260,7 @@ Map<String, int> _adminRatingDistributionToApi(Map<int, int> value) =>
 /// `GET /admin/reviews/summary`. Top/lowest-rated lists only include items
 /// with at least 5 reviews per the confirmed backend contract.
 @freezed
-class AdminReviewsSummary with _$AdminReviewsSummary {
+abstract class AdminReviewsSummary with _$AdminReviewsSummary {
   const factory AdminReviewsSummary({
     required AdminRatingAggregate itemReviews,
     required AdminRatingAggregate orderFeedback,

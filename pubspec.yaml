@@ -34,9 +34,22 @@ dependencies:
   cupertino_icons: ^1.0.8
   go_router: ^14.2.0
   flutter_riverpod: ^2.5.1
-  riverpod_annotation: ^2.3.5
-  freezed_annotation: ^2.4.1
-  json_annotation: ^4.8.1
+  # riverpod_annotation removed: `router.dart`'s `router()` was the only
+  # `@riverpod`-annotated provider in the app; it's now a manually declared
+  # `Provider.autoDispose` (see router.dart) since riverpod_generator can't
+  # coexist with the freezed 4.x bump below (see that comment) without also
+  # forcing a breaking riverpod/flutter_riverpod 3.x upgrade.
+  # Bumped from ^2.4.1: the installed toolchain here is Flutter 3.47.1 / Dart
+  # 3.13.1 (see the local_auth pin below for the same class of issue) — the
+  # analyzer versions resolvable under freezed_annotation/freezed 2.x cap out
+  # at analyzer <8.0.0, which crashes in build_runner (`Missing
+  # implementation of visitDotShorthandPropertyAccess`) on this SDK's own
+  # "dot shorthand" syntax. freezed 4.x requires exactly this major.
+  freezed_annotation: ^3.1.0
+  # Bumped from ^4.8.1: json_serializable 6.14.1 (pulled in by the freezed
+  # 4.x bump above) requires json_annotation >=4.12.0 — already what
+  # resolves in practice, this just makes the constraint honest.
+  json_annotation: ^4.12.0
   cached_network_image: ^3.4.1
   uuid: ^4.6.0
   shared_preferences: ^2.5.3
@@ -61,6 +74,18 @@ dependencies:
   google_maps_flutter_android: ^2.18.3
   google_maps_flutter_platform_interface: ^2.14.1
   geolocator: ^13.0.1
+  # Android-only: geolocator's own foreground-notification option explicitly
+  # does not implement a real foreground Service (per its own doc comment on
+  # `ForegroundNotificationConfig`) — it only raises process priority, so
+  # Android can still kill the activity while backgrounded/screen-locked.
+  # flutter_foreground_task (MIT, actively maintained) is the smallest
+  # addition that runs a genuine Android foreground Service driven entirely
+  # from Dart (no native Kotlin/Java to write) for the driver app's
+  # location-upload loop while a delivery is active. iOS needs no equivalent
+  # package: geolocator_apple's own `allowBackgroundLocationUpdates` +
+  # `UIBackgroundModes: [location]` already gives genuine OS-level background
+  # delivery for "Always"-authorized apps — a first-party Apple capability.
+  flutter_foreground_task: ^11.0.3
   geocoding: ^3.0.0
   url_launcher: ^6.3.1
   lottie: ^3.1.2
@@ -73,9 +98,18 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  fake_async: ^1.3.1
   build_runner: ^2.4.9
-  riverpod_generator: ^2.4.0
-  freezed: ^2.5.2
+  # riverpod_generator removed: its 2.x line hard-caps `analyzer` at <8.0.0
+  # (transitively, via `analyzer: ^7.0.0`), which is incompatible with the
+  # analyzer >=13.0.0 that freezed 4.x (bumped below) requires — pub cannot
+  # solve both simultaneously. riverpod_generator 4.x would resolve, but it
+  # requires `riverpod: 3.4.3`/`flutter_riverpod` 3.x, a breaking rewrite of
+  # the state-management layer used throughout this app — far outside the
+  # scope of a codegen-toolchain fix. The only `@riverpod`-annotated function
+  # in this codebase is `router.dart`'s `router()`, whose already-committed
+  # `router.g.dart` is untouched by this task and needs no regeneration.
+  freezed: ^4.0.1
   json_serializable: ^6.7.1
   flutter_secure_storage_platform_interface: ^2.0.1
   change_app_package_name: ^1.5.0

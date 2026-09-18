@@ -4,7 +4,7 @@ part 'loyalty.freezed.dart';
 part 'loyalty.g.dart';
 
 @freezed
-class LoyaltyAccount with _$LoyaltyAccount {
+abstract class LoyaltyAccount with _$LoyaltyAccount {
   const factory LoyaltyAccount({
     required String userId,
     @Default(0) int pointsBalance,
@@ -18,7 +18,7 @@ class LoyaltyAccount with _$LoyaltyAccount {
 enum LoyaltyTransactionType { earn, redeem, adjust }
 
 @freezed
-class LoyaltyTransaction with _$LoyaltyTransaction {
+abstract class LoyaltyTransaction with _$LoyaltyTransaction {
   const factory LoyaltyTransaction({
     required String id,
     required String userId,

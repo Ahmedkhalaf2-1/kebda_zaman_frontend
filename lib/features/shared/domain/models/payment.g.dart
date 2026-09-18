@@ -6,8 +6,8 @@ part of 'payment.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PaymentIntentImpl _$$PaymentIntentImplFromJson(Map<String, dynamic> json) =>
-    _$PaymentIntentImpl(
+_PaymentIntent _$PaymentIntentFromJson(Map<String, dynamic> json) =>
+    _PaymentIntent(
       paymentId: json['paymentId'] as String,
       status: json['status'] as String,
       providerData: PaymentIntentProviderData.fromJson(
@@ -15,16 +15,16 @@ _$PaymentIntentImpl _$$PaymentIntentImplFromJson(Map<String, dynamic> json) =>
       ),
     );
 
-Map<String, dynamic> _$$PaymentIntentImplToJson(_$PaymentIntentImpl instance) =>
+Map<String, dynamic> _$PaymentIntentToJson(_PaymentIntent instance) =>
     <String, dynamic>{
       'paymentId': instance.paymentId,
       'status': instance.status,
       'providerData': instance.providerData,
     };
 
-_$PaymentIntentProviderDataImpl _$$PaymentIntentProviderDataImplFromJson(
+_PaymentIntentProviderData _$PaymentIntentProviderDataFromJson(
   Map<String, dynamic> json,
-) => _$PaymentIntentProviderDataImpl(
+) => _PaymentIntentProviderData(
   publishableApiKey: json['publishableApiKey'] as String?,
   amount: (json['amount'] as num).toInt(),
   currency: json['currency'] as String,
@@ -35,8 +35,8 @@ _$PaymentIntentProviderDataImpl _$$PaymentIntentProviderDataImplFromJson(
   instructions: json['instructions'] as String?,
 );
 
-Map<String, dynamic> _$$PaymentIntentProviderDataImplToJson(
-  _$PaymentIntentProviderDataImpl instance,
+Map<String, dynamic> _$PaymentIntentProviderDataToJson(
+  _PaymentIntentProviderData instance,
 ) => <String, dynamic>{
   'publishableApiKey': instance.publishableApiKey,
   'amount': instance.amount,
@@ -48,48 +48,45 @@ Map<String, dynamic> _$$PaymentIntentProviderDataImplToJson(
   'instructions': instance.instructions,
 };
 
-_$PaymentImpl _$$PaymentImplFromJson(Map<String, dynamic> json) =>
-    _$PaymentImpl(
-      id: json['id'] as String,
-      orderId: json['orderId'] as String,
-      method: json['method'] as String,
-      status: json['status'] as String,
-      amount: (json['amount'] as num).toDouble(),
-      currency: json['currency'] as String,
-      provider: json['provider'] as String,
-      providerRef: json['providerRef'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
-    );
+_Payment _$PaymentFromJson(Map<String, dynamic> json) => _Payment(
+  id: json['id'] as String,
+  orderId: json['orderId'] as String,
+  method: json['method'] as String,
+  status: json['status'] as String,
+  amount: (json['amount'] as num).toDouble(),
+  currency: json['currency'] as String,
+  provider: json['provider'] as String,
+  providerRef: json['providerRef'] as String?,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
+);
 
-Map<String, dynamic> _$$PaymentImplToJson(_$PaymentImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'orderId': instance.orderId,
-      'method': instance.method,
-      'status': instance.status,
-      'amount': instance.amount,
-      'currency': instance.currency,
-      'provider': instance.provider,
-      'providerRef': instance.providerRef,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-    };
+Map<String, dynamic> _$PaymentToJson(_Payment instance) => <String, dynamic>{
+  'id': instance.id,
+  'orderId': instance.orderId,
+  'method': instance.method,
+  'status': instance.status,
+  'amount': instance.amount,
+  'currency': instance.currency,
+  'provider': instance.provider,
+  'providerRef': instance.providerRef,
+  'createdAt': instance.createdAt.toIso8601String(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
+};
 
-_$SavedCardImpl _$$SavedCardImplFromJson(Map<String, dynamic> json) =>
-    _$SavedCardImpl(
-      id: json['id'] as String,
-      brand: json['brand'] as String,
-      lastFour: json['lastFour'] as String,
-      expMonth: (json['expMonth'] as num).toInt(),
-      expYear: (json['expYear'] as num).toInt(),
-      isDefault: json['isDefault'] as bool,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-    );
+_SavedCard _$SavedCardFromJson(Map<String, dynamic> json) => _SavedCard(
+  id: json['id'] as String,
+  brand: json['brand'] as String,
+  lastFour: json['lastFour'] as String,
+  expMonth: (json['expMonth'] as num).toInt(),
+  expYear: (json['expYear'] as num).toInt(),
+  isDefault: json['isDefault'] as bool,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+);
 
-Map<String, dynamic> _$$SavedCardImplToJson(_$SavedCardImpl instance) =>
+Map<String, dynamic> _$SavedCardToJson(_SavedCard instance) =>
     <String, dynamic>{
       'id': instance.id,
       'brand': instance.brand,
@@ -100,32 +97,28 @@ Map<String, dynamic> _$$SavedCardImplToJson(_$SavedCardImpl instance) =>
       'createdAt': instance.createdAt.toIso8601String(),
     };
 
-_$CardChargeResultImpl _$$CardChargeResultImplFromJson(
+_CardChargeResult _$CardChargeResultFromJson(Map<String, dynamic> json) =>
+    _CardChargeResult(
+      paymentId: json['paymentId'] as String,
+      status: json['status'] as String,
+      providerData: json['providerData'] == null
+          ? null
+          : CardChargeProviderData.fromJson(
+              json['providerData'] as Map<String, dynamic>,
+            ),
+    );
+
+Map<String, dynamic> _$CardChargeResultToJson(_CardChargeResult instance) =>
+    <String, dynamic>{
+      'paymentId': instance.paymentId,
+      'status': instance.status,
+      'providerData': instance.providerData,
+    };
+
+_CardChargeProviderData _$CardChargeProviderDataFromJson(
   Map<String, dynamic> json,
-) => _$CardChargeResultImpl(
-  paymentId: json['paymentId'] as String,
-  status: json['status'] as String,
-  providerData: json['providerData'] == null
-      ? null
-      : CardChargeProviderData.fromJson(
-          json['providerData'] as Map<String, dynamic>,
-        ),
-);
+) => _CardChargeProviderData(transactionUrl: json['transactionUrl'] as String);
 
-Map<String, dynamic> _$$CardChargeResultImplToJson(
-  _$CardChargeResultImpl instance,
-) => <String, dynamic>{
-  'paymentId': instance.paymentId,
-  'status': instance.status,
-  'providerData': instance.providerData,
-};
-
-_$CardChargeProviderDataImpl _$$CardChargeProviderDataImplFromJson(
-  Map<String, dynamic> json,
-) => _$CardChargeProviderDataImpl(
-  transactionUrl: json['transactionUrl'] as String,
-);
-
-Map<String, dynamic> _$$CardChargeProviderDataImplToJson(
-  _$CardChargeProviderDataImpl instance,
+Map<String, dynamic> _$CardChargeProviderDataToJson(
+  _CardChargeProviderData instance,
 ) => <String, dynamic>{'transactionUrl': instance.transactionUrl};

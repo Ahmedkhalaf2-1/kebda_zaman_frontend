@@ -13,7 +13,7 @@ part 'kitchen_order.g.dart';
 /// model rather than inventing parallel enums, since the wire values are
 /// identical.
 @freezed
-class KitchenOrder with _$KitchenOrder {
+abstract class KitchenOrder with _$KitchenOrder {
   const factory KitchenOrder({
     required String id,
     required String orderNumber,
@@ -38,7 +38,7 @@ class KitchenOrder with _$KitchenOrder {
 }
 
 @freezed
-class KitchenOrderItem with _$KitchenOrderItem {
+abstract class KitchenOrderItem with _$KitchenOrderItem {
   const factory KitchenOrderItem({
     required String id,
     // Live MenuItem id — nullable the same way OrderItem.menuItemId is
@@ -68,7 +68,8 @@ class KitchenOrderItem with _$KitchenOrderItem {
 /// completeness — display uses `nameAr`/`nameEn`/`priceSnapshot`, which are
 /// point-in-time and always correct regardless of `refId`.
 @freezed
-class KitchenCustomizationSnapshot with _$KitchenCustomizationSnapshot {
+abstract class KitchenCustomizationSnapshot
+    with _$KitchenCustomizationSnapshot {
   const factory KitchenCustomizationSnapshot({
     required String id,
     String? refId,

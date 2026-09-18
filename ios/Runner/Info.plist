@@ -42,7 +42,9 @@
 	<key>NSFaceIDUsageDescription</key>
 	<string>Allow Kebda Zaman to use Face ID to sign you in securely.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Allow Kebda Zaman to use your location to select an accurate delivery address.</string>
+	<string>Allow Kebda Zaman to use your location to select an accurate delivery address, or to share your position with a customer while you're delivering their order.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Allow Kebda Zaman to keep sharing your location while delivering an order, even when the app is in the background, so the customer can see your progress.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow Kebda Zaman to access your photo library to choose a profile photo.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
@@ -51,6 +53,7 @@
 	<array>
 		<string>remote-notification</string>
 		<string>fetch</string>
+		<string>location</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

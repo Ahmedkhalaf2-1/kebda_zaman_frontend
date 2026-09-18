@@ -6,7 +6,7 @@ part of 'user.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$UserImpl _$$UserImplFromJson(Map<String, dynamic> json) => _$UserImpl(
+_User _$UserFromJson(Map<String, dynamic> json) => _User(
   id: json['id'] as String,
   phone: json['phone'] as String?,
   name: json['name'] as String,
@@ -27,16 +27,15 @@ _$UserImpl _$$UserImplFromJson(Map<String, dynamic> json) => _$UserImpl(
   createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
-Map<String, dynamic> _$$UserImplToJson(_$UserImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'phone': instance.phone,
-      'name': instance.name,
-      'email': instance.email,
-      'addressIds': instance.addressIds,
-      'favoriteItemIds': instance.favoriteItemIds,
-      'loyaltyAccountId': instance.loyaltyAccountId,
-      'role': instance.role,
-      'isGuest': instance.isGuest,
-      'createdAt': instance.createdAt.toIso8601String(),
-    };
+Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
+  'id': instance.id,
+  'phone': instance.phone,
+  'name': instance.name,
+  'email': instance.email,
+  'addressIds': instance.addressIds,
+  'favoriteItemIds': instance.favoriteItemIds,
+  'loyaltyAccountId': instance.loyaltyAccountId,
+  'role': instance.role,
+  'isGuest': instance.isGuest,
+  'createdAt': instance.createdAt.toIso8601String(),
+};

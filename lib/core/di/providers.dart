@@ -29,6 +29,12 @@ import 'package:kebda_zaman/features/admin/domain/repositories/admin_order_notif
 import 'package:kebda_zaman/features/admin/data/api_admin_order_notification_repository.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/staff_repository.dart';
 import 'package:kebda_zaman/features/admin/data/api_staff_repository.dart';
+import 'package:kebda_zaman/features/admin/domain/repositories/driver_repository.dart';
+import 'package:kebda_zaman/features/admin/data/api_driver_repository.dart';
+import 'package:kebda_zaman/features/driver/domain/repositories/driver_order_repository.dart';
+import 'package:kebda_zaman/features/driver/data/api_driver_order_repository.dart';
+import 'package:kebda_zaman/features/shared/domain/repositories/tracking_repository.dart';
+import 'package:kebda_zaman/features/shared/data/api_tracking_repository.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/kitchen_repository.dart';
 import 'package:kebda_zaman/features/admin/data/api_kitchen_repository.dart';
 import 'package:kebda_zaman/features/admin/domain/repositories/customer_repository.dart';
@@ -144,6 +150,18 @@ final adminNotificationRepositoryProvider =
 
 final staffRepositoryProvider = Provider<StaffRepository>((ref) {
   return ApiStaffRepository(ref.watch(apiClientProvider));
+});
+
+final driverRepositoryProvider = Provider<DriverRepository>((ref) {
+  return ApiDriverRepository(ref.watch(apiClientProvider));
+});
+
+final driverOrderRepositoryProvider = Provider<DriverOrderRepository>((ref) {
+  return ApiDriverOrderRepository(ref.watch(apiClientProvider));
+});
+
+final trackingRepositoryProvider = Provider<TrackingRepository>((ref) {
+  return ApiTrackingRepository(ref.watch(apiClientProvider));
 });
 
 final kitchenRepositoryProvider = Provider<KitchenRepository>((ref) {

@@ -6,22 +6,21 @@ part of 'promo_code.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PromoCodeImpl _$$PromoCodeImplFromJson(Map<String, dynamic> json) =>
-    _$PromoCodeImpl(
-      id: json['id'] as String,
-      code: json['code'] as String,
-      discountType: $enumDecode(_$DiscountTypeEnumMap, json['discountType']),
-      value: (json['value'] as num).toDouble(),
-      minOrderValue: (json['minOrderValue'] as num?)?.toDouble() ?? 0.0,
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: DateTime.parse(json['endDate'] as String),
-      isActive: json['isActive'] as bool? ?? true,
-      usageLimit: (json['usageLimit'] as num?)?.toInt(),
-      perUserLimit: (json['perUserLimit'] as num?)?.toInt(),
-      usageCount: (json['usageCount'] as num?)?.toInt() ?? 0,
-    );
+_PromoCode _$PromoCodeFromJson(Map<String, dynamic> json) => _PromoCode(
+  id: json['id'] as String,
+  code: json['code'] as String,
+  discountType: $enumDecode(_$DiscountTypeEnumMap, json['discountType']),
+  value: (json['value'] as num).toDouble(),
+  minOrderValue: (json['minOrderValue'] as num?)?.toDouble() ?? 0.0,
+  startDate: DateTime.parse(json['startDate'] as String),
+  endDate: DateTime.parse(json['endDate'] as String),
+  isActive: json['isActive'] as bool? ?? true,
+  usageLimit: (json['usageLimit'] as num?)?.toInt(),
+  perUserLimit: (json['perUserLimit'] as num?)?.toInt(),
+  usageCount: (json['usageCount'] as num?)?.toInt() ?? 0,
+);
 
-Map<String, dynamic> _$$PromoCodeImplToJson(_$PromoCodeImpl instance) =>
+Map<String, dynamic> _$PromoCodeToJson(_PromoCode instance) =>
     <String, dynamic>{
       'id': instance.id,
       'code': instance.code,

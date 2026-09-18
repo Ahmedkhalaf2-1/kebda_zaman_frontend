@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/customer/presentation/screens/home_screen.dart';
 import '../../features/customer/presentation/screens/search_screen.dart';
 import '../../features/customer/presentation/screens/cart_screen.dart';
@@ -48,6 +47,12 @@ import '../../features/admin/presentation/screens/admin_order_details_screen.dar
 import '../../features/admin/presentation/screens/kitchen_queue_screen.dart';
 import '../../features/admin/presentation/screens/kitchen_ticket_screen.dart';
 import '../../features/admin/presentation/screens/staff_management_screen.dart';
+import '../../features/admin/presentation/screens/driver_management_screen.dart';
+import '../../features/driver/presentation/shells/driver_shell.dart';
+import '../../features/driver/presentation/screens/driver_orders_screen.dart';
+import '../../features/driver/presentation/screens/driver_history_screen.dart';
+import '../../features/driver/presentation/screens/driver_order_details_screen.dart';
+import '../../features/driver/presentation/screens/driver_account_screen.dart';
 import '../../features/admin/presentation/screens/customer_management_screen.dart';
 import '../../features/admin/presentation/screens/customer_details_screen.dart';
 import '../../features/admin/presentation/screens/admin_reviews_screen.dart';
@@ -60,41 +65,93 @@ import '../../features/shared/domain/models/menu_offer.dart';
 import '../../features/shared/domain/models/address.dart';
 import 'kz_page_transitions.dart';
 
-part 'router.g.dart';
-
-@riverpod
-GoRouter router(Ref ref) {
+/// Manually declared (not `@riverpod`-generated): riverpod_generator's 2.x
+/// line hard-caps `analyzer` below the version freezed 4.x requires (see
+/// pubspec.yaml's freezed/build_runner comments), and riverpod_generator
+/// 4.x would force a breaking `riverpod`/`flutter_riverpod` 3.x bump across
+/// every notifier in this app — far outside a codegen-toolchain fix. This
+/// is the exact equivalent of what `@riverpod GoRouter router(Ref ref)`
+/// used to generate (`AutoDisposeProvider<GoRouter>`, no tracked
+/// dependencies, same name/lifecycle) — verified against the last-generated
+/// `router.g.dart` before it was deleted.
+final routerProvider = Provider.autoDispose<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/splash',
     redirect: (context, state) {
       final path = state.uri.path;
-      if (!path.startsWith('/admin')) return null;
-
       final auth = ref.read(authNotifierProvider);
       final role = auth.user?.role;
 
-      // Unauthenticated users never reach any /admin/* route.
-      if (!auth.isLoggedIn) return '/login';
+      final isAdminPath = path.startsWith('/admin');
+      final isDriverPath = path.startsWith('/driver');
 
-      // ADMIN has full access to every /admin/* route.
-      if (role == 'ADMIN') return null;
-
-      // A cashier may only reach Orders Management inside /admin — every
-      // other admin section (dashboard metrics, menu, promos, settings,
-      // staff, etc.) redirects back there even on a direct/manual navigation.
-      if (role == 'CASHIER') {
-        return path.startsWith('/admin/orders') ? null : '/admin/orders';
+      // Unauthenticated users never reach any /admin/* or /driver/* route.
+      if ((isAdminPath || isDriverPath) && !auth.isLoggedIn) {
+        return '/login';
       }
 
-      // Kitchen staff are pure ticket-viewers — confined to their own
-      // queue/detail routes, same pattern as CASHIER above.
-      if (role == 'KITCHEN') {
-        return path.startsWith('/admin/kitchen') ? null : '/admin/kitchen';
+      if (isDriverPath) {
+        // Only an active DRIVER session may reach the driver app — any
+        // other authenticated role (ADMIN/CASHIER/KITCHEN/CUSTOMER) is
+        // bounced back to its own home, same "confined section" pattern
+        // used for CASHIER/KITCHEN below.
+        if (role == 'DRIVER') return null;
+        return role == 'ADMIN'
+            ? '/admin/dashboard'
+            : role == 'CASHIER'
+            ? '/admin/orders'
+            : role == 'KITCHEN'
+            ? '/admin/kitchen'
+            : '/home';
       }
 
-      // Any other authenticated role (CUSTOMER, incl. guest) is not admin
-      // staff at all — send them back to customer navigation.
-      return '/home';
+      if (isAdminPath) {
+        // A DRIVER session never has any business in /admin/* — deep link
+        // or stale navigation state must never leak them in.
+        if (role == 'DRIVER') return '/driver/orders';
+
+        // ADMIN has full access to every /admin/* route.
+        if (role == 'ADMIN') return null;
+
+        // A cashier may only reach Orders Management inside /admin — every
+        // other admin section (dashboard metrics, menu, promos, settings,
+        // staff, etc.) redirects back there even on a direct/manual navigation.
+        if (role == 'CASHIER') {
+          return path.startsWith('/admin/orders') ? null : '/admin/orders';
+        }
+
+        // Kitchen staff are pure ticket-viewers — confined to their own
+        // queue/detail routes, same pattern as CASHIER above.
+        if (role == 'KITCHEN') {
+          return path.startsWith('/admin/kitchen') ? null : '/admin/kitchen';
+        }
+
+        // Any other authenticated role (CUSTOMER, incl. guest) is not admin
+        // staff at all — send them back to customer navigation.
+        return '/home';
+      }
+
+      // Outside /admin and /driver: a signed-in DRIVER must never reach
+      // customer routes (deep link, stale navigation state, etc.) — the
+      // pre-auth flow (splash/language-select/onboarding/auth-choice/login/
+      // signup/legal) stays reachable for everyone regardless of role.
+      const publicPreAuthPaths = {
+        '/splash',
+        '/language-select',
+        '/onboarding',
+        '/auth-choice',
+        '/login',
+        '/signup',
+        '/legal/privacy',
+        '/legal/terms',
+      };
+      if (auth.isLoggedIn &&
+          role == 'DRIVER' &&
+          !publicPreAuthPaths.contains(path)) {
+        return '/driver/orders';
+      }
+
+      return null;
     },
     routes: [
       GoRoute(
@@ -449,6 +506,13 @@ GoRouter router(Ref ref) {
                 kzAdminPage(state: state, child: const StaffManagementScreen()),
           ),
           GoRoute(
+            path: '/admin/drivers',
+            pageBuilder: (context, state) => kzAdminPage(
+              state: state,
+              child: const DriverManagementScreen(),
+            ),
+          ),
+          GoRoute(
             path: '/admin/customers',
             pageBuilder: (context, state) => kzAdminPage(
               state: state,
@@ -465,6 +529,39 @@ GoRouter router(Ref ref) {
           ),
         ],
       ),
+      ShellRoute(
+        builder: (context, state, child) => DriverShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/driver/orders',
+            builder: (context, state) => const DriverOrdersScreen(),
+            routes: [
+              GoRoute(
+                path: ':id',
+                builder: (context, state) => DriverOrderDetailsScreen(
+                  orderId: state.pathParameters['id']!,
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/driver/history',
+            builder: (context, state) => const DriverHistoryScreen(),
+            routes: [
+              GoRoute(
+                path: ':id',
+                builder: (context, state) => DriverOrderDetailsScreen(
+                  orderId: state.pathParameters['id']!,
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/driver/account',
+            builder: (context, state) => const DriverAccountScreen(),
+          ),
+        ],
+      ),
     ],
   );
-}
+});

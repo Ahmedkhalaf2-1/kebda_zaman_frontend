@@ -97,7 +97,7 @@ int menuItemReviewCountFromApi(dynamic value) {
 }
 
 @freezed
-class MenuItem with _$MenuItem {
+abstract class MenuItem with _$MenuItem {
   const factory MenuItem({
     required String id,
     required String categoryId,
@@ -161,7 +161,7 @@ extension MenuItemLocalization on MenuItem {
 }
 
 @freezed
-class ModifierGroup with _$ModifierGroup {
+abstract class ModifierGroup with _$ModifierGroup {
   const factory ModifierGroup({
     required String id,
     required String name,
@@ -179,7 +179,7 @@ class ModifierGroup with _$ModifierGroup {
 }
 
 @freezed
-class ModifierOption with _$ModifierOption {
+abstract class ModifierOption with _$ModifierOption {
   const factory ModifierOption({
     required String id,
     required String name,

@@ -6,7 +6,7 @@ part of 'cart.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$CartImpl _$$CartImplFromJson(Map<String, dynamic> json) => _$CartImpl(
+_Cart _$CartFromJson(Map<String, dynamic> json) => _Cart(
   id: json['id'] as String,
   items:
       (json['items'] as List<dynamic>?)
@@ -22,22 +22,19 @@ _$CartImpl _$$CartImplFromJson(Map<String, dynamic> json) => _$CartImpl(
   grandTotal: (json['grandTotal'] as num?)?.toDouble() ?? 0.0,
 );
 
-Map<String, dynamic> _$$CartImplToJson(_$CartImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'items': instance.items,
-      'promoCodeId': instance.promoCodeId,
-      'loyaltyPointsApplied': instance.loyaltyPointsApplied,
-      'deliveryFee': instance.deliveryFee,
-      'subtotal': instance.subtotal,
-      'discountTotal': instance.discountTotal,
-      'taxTotal': instance.taxTotal,
-      'grandTotal': instance.grandTotal,
-    };
+Map<String, dynamic> _$CartToJson(_Cart instance) => <String, dynamic>{
+  'id': instance.id,
+  'items': instance.items,
+  'promoCodeId': instance.promoCodeId,
+  'loyaltyPointsApplied': instance.loyaltyPointsApplied,
+  'deliveryFee': instance.deliveryFee,
+  'subtotal': instance.subtotal,
+  'discountTotal': instance.discountTotal,
+  'taxTotal': instance.taxTotal,
+  'grandTotal': instance.grandTotal,
+};
 
-_$CartItemImpl _$$CartItemImplFromJson(
-  Map<String, dynamic> json,
-) => _$CartItemImpl(
+_CartItem _$CartItemFromJson(Map<String, dynamic> json) => _CartItem(
   id: json['id'] as String,
   menuItemId: json['menuItemId'] as String,
   productName: json['productName'] as String,
@@ -81,22 +78,21 @@ _$CartItemImpl _$$CartItemImplFromJson(
   menuItemDiscountPrice: (json['menuItemDiscountPrice'] as num?)?.toDouble(),
 );
 
-Map<String, dynamic> _$$CartItemImplToJson(_$CartItemImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'menuItemId': instance.menuItemId,
-      'productName': instance.productName,
-      'productImage': instance.productImage,
-      'basePrice': instance.basePrice,
-      'quantity': instance.quantity,
-      'selectedOptions': instance.selectedOptions,
-      'nestedSelections': instance.nestedSelections,
-      'extraQuantities': instance.extraQuantities,
-      'removedIngredients': instance.removedIngredients,
-      'specialInstructions': instance.specialInstructions,
-      'unitPrice': instance.unitPrice,
-      'lineTotal': instance.lineTotal,
-      'isAvailable': instance.isAvailable,
-      'menuItemBasePrice': instance.menuItemBasePrice,
-      'menuItemDiscountPrice': instance.menuItemDiscountPrice,
-    };
+Map<String, dynamic> _$CartItemToJson(_CartItem instance) => <String, dynamic>{
+  'id': instance.id,
+  'menuItemId': instance.menuItemId,
+  'productName': instance.productName,
+  'productImage': instance.productImage,
+  'basePrice': instance.basePrice,
+  'quantity': instance.quantity,
+  'selectedOptions': instance.selectedOptions,
+  'nestedSelections': instance.nestedSelections,
+  'extraQuantities': instance.extraQuantities,
+  'removedIngredients': instance.removedIngredients,
+  'specialInstructions': instance.specialInstructions,
+  'unitPrice': instance.unitPrice,
+  'lineTotal': instance.lineTotal,
+  'isAvailable': instance.isAvailable,
+  'menuItemBasePrice': instance.menuItemBasePrice,
+  'menuItemDiscountPrice': instance.menuItemDiscountPrice,
+};

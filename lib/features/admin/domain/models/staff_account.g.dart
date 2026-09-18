@@ -6,8 +6,8 @@ part of 'staff_account.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$StaffAccountImpl _$$StaffAccountImplFromJson(Map<String, dynamic> json) =>
-    _$StaffAccountImpl(
+_StaffAccount _$StaffAccountFromJson(Map<String, dynamic> json) =>
+    _StaffAccount(
       id: json['id'] as String,
       name: json['name'] as String,
       email: json['email'] as String?,
@@ -17,7 +17,7 @@ _$StaffAccountImpl _$$StaffAccountImplFromJson(Map<String, dynamic> json) =>
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
 
-Map<String, dynamic> _$$StaffAccountImplToJson(_$StaffAccountImpl instance) =>
+Map<String, dynamic> _$StaffAccountToJson(_StaffAccount instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,

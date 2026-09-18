@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_brand_logo.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/session_bootstrap_notifier.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -93,6 +94,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       // Login, which auto-prompts biometrics once and falls back to the
       // normal form on cancel/failure.
       context.go('/login');
+    } else if (status == SessionBootstrapStatus.authenticated &&
+        ref.read(authNotifierProvider).user?.role == 'DRIVER') {
+      // A restored DRIVER session must land on the driver app, never
+      // customer navigation — the router's redirect guard would bounce them
+      // there anyway, but routing directly avoids a visible extra hop.
+      context.go('/driver/orders');
     } else {
       // Both authenticated and unauthenticated sessions land on the same
       // destination today — /home already supports guest browsing; this

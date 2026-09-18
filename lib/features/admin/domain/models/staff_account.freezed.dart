@@ -1,6 +1,6 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint
+// coverage:ignore-file
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'staff_account.dart';
@@ -9,307 +9,295 @@ part of 'staff_account.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-StaffAccount _$StaffAccountFromJson(Map<String, dynamic> json) {
-  return _StaffAccount.fromJson(json);
-}
 
 /// @nodoc
 mixin _$StaffAccount {
-  String get id => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
-  String? get email => throw _privateConstructorUsedError;
-  String? get phone =>
-      throw _privateConstructorUsedError; // 'CASHIER' | 'KITCHEN' — fixed at creation, not editable via
-  // PATCH /admin/staff/:id.
-  String get role => throw _privateConstructorUsedError;
-  bool get isActive => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
+
+ String get id; String get name; String? get email; String? get phone; String get role; bool get isActive; DateTime get createdAt;
+/// Create a copy of StaffAccount
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$StaffAccountCopyWith<StaffAccount> get copyWith => _$StaffAccountCopyWithImpl<StaffAccount>(this as StaffAccount, _$identity);
 
   /// Serializes this StaffAccount to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of StaffAccount
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $StaffAccountCopyWith<StaffAccount> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  final _this = this as StaffAccount;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StaffAccount&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.phone, _this.phone) || other.phone == _this.phone)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.isActive, _this.isActive) || other.isActive == _this.isActive)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as StaffAccount;
+  return Object.hash(runtimeType,_this.id,_this.name,_this.email,_this.phone,_this.role,_this.isActive,_this.createdAt);
+}
+
+@override
+String toString() {
+  final _this = this as StaffAccount;
+  return 'StaffAccount(id: ${_this.id}, name: ${_this.name}, email: ${_this.email}, phone: ${_this.phone}, role: ${_this.role}, isActive: ${_this.isActive}, createdAt: ${_this.createdAt})';
+}
+
+
 }
 
 /// @nodoc
-abstract class $StaffAccountCopyWith<$Res> {
-  factory $StaffAccountCopyWith(
-    StaffAccount value,
-    $Res Function(StaffAccount) then,
-  ) = _$StaffAccountCopyWithImpl<$Res, StaffAccount>;
-  @useResult
-  $Res call({
-    String id,
-    String name,
-    String? email,
-    String? phone,
-    String role,
-    bool isActive,
-    DateTime createdAt,
-  });
-}
+abstract mixin class $StaffAccountCopyWith<$Res>  {
+  factory $StaffAccountCopyWith(StaffAccount value, $Res Function(StaffAccount) _then) = _$StaffAccountCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name, String? email, String? phone, String role, bool isActive, DateTime createdAt
+});
 
+
+
+
+}
 /// @nodoc
-class _$StaffAccountCopyWithImpl<$Res, $Val extends StaffAccount>
+class _$StaffAccountCopyWithImpl<$Res>
     implements $StaffAccountCopyWith<$Res> {
-  _$StaffAccountCopyWithImpl(this._value, this._then);
+  _$StaffAccountCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final StaffAccount _self;
+  final $Res Function(StaffAccount) _then;
 
-  /// Create a copy of StaffAccount
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? email = freezed,
-    Object? phone = freezed,
-    Object? role = null,
-    Object? isActive = null,
-    Object? createdAt = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            name: null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                      as String,
-            email: freezed == email
-                ? _value.email
-                : email // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            phone: freezed == phone
-                ? _value.phone
-                : phone // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            role: null == role
-                ? _value.role
-                : role // ignore: cast_nullable_to_non_nullable
-                      as String,
-            isActive: null == isActive
-                ? _value.isActive
-                : isActive // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            createdAt: null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of StaffAccount
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? email = freezed,Object? phone = freezed,Object? role = null,Object? isActive = null,Object? createdAt = null,}) {
+  return _then(StaffAccount(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as String,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
 }
 
-/// @nodoc
-abstract class _$$StaffAccountImplCopyWith<$Res>
-    implements $StaffAccountCopyWith<$Res> {
-  factory _$$StaffAccountImplCopyWith(
-    _$StaffAccountImpl value,
-    $Res Function(_$StaffAccountImpl) then,
-  ) = __$$StaffAccountImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String name,
-    String? email,
-    String? phone,
-    String role,
-    bool isActive,
-    DateTime createdAt,
-  });
 }
 
-/// @nodoc
-class __$$StaffAccountImplCopyWithImpl<$Res>
-    extends _$StaffAccountCopyWithImpl<$Res, _$StaffAccountImpl>
-    implements _$$StaffAccountImplCopyWith<$Res> {
-  __$$StaffAccountImplCopyWithImpl(
-    _$StaffAccountImpl _value,
-    $Res Function(_$StaffAccountImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of StaffAccount
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? name = null,
-    Object? email = freezed,
-    Object? phone = freezed,
-    Object? role = null,
-    Object? isActive = null,
-    Object? createdAt = null,
-  }) {
-    return _then(
-      _$StaffAccountImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        name: null == name
-            ? _value.name
-            : name // ignore: cast_nullable_to_non_nullable
-                  as String,
-        email: freezed == email
-            ? _value.email
-            : email // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        phone: freezed == phone
-            ? _value.phone
-            : phone // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        role: null == role
-            ? _value.role
-            : role // ignore: cast_nullable_to_non_nullable
-                  as String,
-        isActive: null == isActive
-            ? _value.isActive
-            : isActive // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        createdAt: null == createdAt
-            ? _value.createdAt
-            : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [StaffAccount].
+extension StaffAccountPatterns on StaffAccount {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _StaffAccount value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _StaffAccount() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _StaffAccount value)  $default,){
+final _that = this;
+switch (_that) {
+case _StaffAccount():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _StaffAccount value)?  $default,){
+final _that = this;
+switch (_that) {
+case _StaffAccount() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? email,  String? phone,  String role,  bool isActive,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _StaffAccount() when $default != null:
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.role,_that.isActive,_that.createdAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? email,  String? phone,  String role,  bool isActive,  DateTime createdAt)  $default,) {final _that = this;
+switch (_that) {
+case _StaffAccount():
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.role,_that.isActive,_that.createdAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? email,  String? phone,  String role,  bool isActive,  DateTime createdAt)?  $default,) {final _that = this;
+switch (_that) {
+case _StaffAccount() when $default != null:
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.role,_that.isActive,_that.createdAt);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$StaffAccountImpl implements _StaffAccount {
-  const _$StaffAccountImpl({
-    required this.id,
-    required this.name,
-    this.email,
-    this.phone,
-    required this.role,
-    required this.isActive,
-    required this.createdAt,
-  });
 
-  factory _$StaffAccountImpl.fromJson(Map<String, dynamic> json) =>
-      _$$StaffAccountImplFromJson(json);
+class _StaffAccount implements StaffAccount {
+  const _StaffAccount({required this.id, required this.name, this.email, this.phone, required this.role, required this.isActive, required this.createdAt});
+  factory _StaffAccount.fromJson(Map<String, dynamic> json) => _$StaffAccountFromJson(json);
 
-  @override
-  final String id;
-  @override
-  final String name;
-  @override
-  final String? email;
-  @override
-  final String? phone;
-  // 'CASHIER' | 'KITCHEN' — fixed at creation, not editable via
-  // PATCH /admin/staff/:id.
-  @override
-  final String role;
-  @override
-  final bool isActive;
-  @override
-  final DateTime createdAt;
+@override final  String id;
+@override final  String name;
+@override final  String? email;
+@override final  String? phone;
+@override final  String role;
+@override final  bool isActive;
+@override final  DateTime createdAt;
 
-  @override
-  String toString() {
+/// Create a copy of StaffAccount
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$StaffAccountCopyWith<_StaffAccount> get copyWith => __$StaffAccountCopyWithImpl<_StaffAccount>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$StaffAccountToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StaffAccount&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.role, role) || other.role == role)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,name,email,phone,role,isActive,createdAt);
+}
+
+@override
+String toString() {
     return 'StaffAccount(id: $id, name: $name, email: $email, phone: $phone, role: $role, isActive: $isActive, createdAt: $createdAt)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$StaffAccountImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.email, email) || other.email == email) &&
-            (identical(other.phone, phone) || other.phone == phone) &&
-            (identical(other.role, role) || other.role == role) &&
-            (identical(other.isActive, isActive) ||
-                other.isActive == isActive) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    name,
-    email,
-    phone,
-    role,
-    isActive,
-    createdAt,
-  );
-
-  /// Create a copy of StaffAccount
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$StaffAccountImplCopyWith<_$StaffAccountImpl> get copyWith =>
-      __$$StaffAccountImplCopyWithImpl<_$StaffAccountImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$StaffAccountImplToJson(this);
-  }
 }
 
-abstract class _StaffAccount implements StaffAccount {
-  const factory _StaffAccount({
-    required final String id,
-    required final String name,
-    final String? email,
-    final String? phone,
-    required final String role,
-    required final bool isActive,
-    required final DateTime createdAt,
-  }) = _$StaffAccountImpl;
 
-  factory _StaffAccount.fromJson(Map<String, dynamic> json) =
-      _$StaffAccountImpl.fromJson;
-
-  @override
-  String get id;
-  @override
-  String get name;
-  @override
-  String? get email;
-  @override
-  String? get phone; // 'CASHIER' | 'KITCHEN' — fixed at creation, not editable via
-  // PATCH /admin/staff/:id.
-  @override
-  String get role;
-  @override
-  bool get isActive;
-  @override
-  DateTime get createdAt;
-
-  /// Create a copy of StaffAccount
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$StaffAccountImplCopyWith<_$StaffAccountImpl> get copyWith =>
-      throw _privateConstructorUsedError;
 }
+
+/// @nodoc
+abstract mixin class _$StaffAccountCopyWith<$Res> implements $StaffAccountCopyWith<$Res> {
+  factory _$StaffAccountCopyWith(_StaffAccount value, $Res Function(_StaffAccount) _then) = __$StaffAccountCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name, String? email, String? phone, String role, bool isActive, DateTime createdAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$StaffAccountCopyWithImpl<$Res>
+    implements _$StaffAccountCopyWith<$Res> {
+  __$StaffAccountCopyWithImpl(this._self, this._then);
+
+  final _StaffAccount _self;
+  final $Res Function(_StaffAccount) _then;
+
+/// Create a copy of StaffAccount
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? email = freezed,Object? phone = freezed,Object? role = null,Object? isActive = null,Object? createdAt = null,}) {
+  return _then(_StaffAccount(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
+as String?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as String,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
+}
+
+
+}
+
+// dart format on

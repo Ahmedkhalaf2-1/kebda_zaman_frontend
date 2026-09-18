@@ -8,7 +8,7 @@ part 'customer_summary.freezed.dart';
 /// Mapped manually in `ApiCustomerRepository` (not via generated JSON codegen)
 /// to reuse the same defensive enum-fallback handling as `ApiOrderRepository`.
 @freezed
-class RecentOrderSummary with _$RecentOrderSummary {
+abstract class RecentOrderSummary with _$RecentOrderSummary {
   const factory RecentOrderSummary({
     required String id,
     required String orderNumber,
@@ -22,7 +22,7 @@ class RecentOrderSummary with _$RecentOrderSummary {
 
 /// `CustomerListItemDto` — one row in `GET /admin/customers`.
 @freezed
-class CustomerSummary with _$CustomerSummary {
+abstract class CustomerSummary with _$CustomerSummary {
   const factory CustomerSummary({
     required String id,
     required String name,
@@ -38,7 +38,7 @@ class CustomerSummary with _$CustomerSummary {
 
 /// `CustomerDetailDto` — `CustomerListItemDto` fields + recent orders.
 @freezed
-class CustomerDetail with _$CustomerDetail {
+abstract class CustomerDetail with _$CustomerDetail {
   const factory CustomerDetail({
     required CustomerSummary summary,
     required List<RecentOrderSummary> recentOrders,

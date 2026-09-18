@@ -6,6 +6,8 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/cart_notifi
 import 'package:kebda_zaman/features/customer/presentation/notifiers/orders_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/loyalty_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/checkout_notifier.dart';
+import 'package:kebda_zaman/features/driver/presentation/notifiers/driver_orders_notifier.dart';
+import 'package:kebda_zaman/features/driver/presentation/notifiers/driver_tracking_coordinator.dart';
 
 /// A root-level provider that watches [authNotifierProvider] and reacts to
 /// auth-state transitions by clearing or reloading user-scoped providers.
@@ -26,6 +28,12 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/checkout_no
 /// ADMIN and CASHIER sessions must never trigger these providers.
 bool _isCustomerRole(String? role) => role == null || role == 'CUSTOMER';
 
+/// DRIVER-scoped resources (`/driver/*`) — same "never let one account see
+/// another's cached data" requirement as the customer block below, but
+/// gated on the DRIVER role instead: only ever populated for a DRIVER
+/// session, so no other role's login/logout should touch them.
+bool _isDriverRole(String? role) => role == 'DRIVER';
+
 final sessionLifecycleProvider = Provider<void>((ref) {
   AuthState? _previous;
 
@@ -42,12 +50,20 @@ final sessionLifecycleProvider = Provider<void>((ref) {
     final nextUserId = next.user?.id;
     final wasCustomer = wasLoggedIn && _isCustomerRole(prev.user?.role);
     final nowCustomer = nowLoggedIn && _isCustomerRole(next.user?.role);
+    final wasDriver = wasLoggedIn && _isDriverRole(prev.user?.role);
+    final nowDriver = nowLoggedIn && _isDriverRole(next.user?.role);
 
     // ── authenticated → unauthenticated ─────────────────────────────────
     if (wasLoggedIn && !nowLoggedIn) {
       // An ADMIN/CASHIER session never loaded these providers in the first
       // place (see below), so there's nothing customer-scoped to clear.
       if (wasCustomer) _clearUserScopedState(ref);
+      if (wasDriver) {
+        _clearDriverScopedState(ref);
+        if (ref.exists(driverTrackingCoordinatorProvider)) {
+          ref.read(driverTrackingCoordinatorProvider).endSession();
+        }
+      }
       return;
     }
 
@@ -57,6 +73,12 @@ final sessionLifecycleProvider = Provider<void>((ref) {
       if (nowCustomer) {
         _reloadUserScopedState(ref, isGuest: next.user?.isGuest ?? true);
       }
+      // No coordinator `reconcile()` call here: the router sends a freshly
+      // authenticated DRIVER straight to the driver orders screen, whose
+      // own first fetch (`DriverActiveOrdersNotifier.fetchLatest`) already
+      // calls `syncFromActiveOrders` — a second fetch here would just
+      // double the network call for the same reconciliation.
+      if (nowDriver) _clearDriverScopedState(ref);
       return;
     }
 
@@ -70,10 +92,53 @@ final sessionLifecycleProvider = Provider<void>((ref) {
       if (nowCustomer) {
         _reloadUserScopedState(ref, isGuest: next.user?.isGuest ?? true);
       }
+      if (wasDriver || nowDriver) {
+        // A previous driver session's tracking must never survive into the
+        // next account, even when the next account is also a driver — end
+        // it unconditionally, then start fresh only if the new session is
+        // itself a driver.
+        if (ref.exists(driverTrackingCoordinatorProvider)) {
+          ref.read(driverTrackingCoordinatorProvider).endSession();
+        }
+        // Same reasoning as above: the newly routed driver screen's own
+        // fetch will sync the coordinator — no separate reconcile() here.
+        _clearDriverScopedState(ref);
+      }
       return;
     }
   }, fireImmediately: false);
 });
+
+/// Invalidates every driver/order provider so a freshly (re)authenticated
+/// DRIVER session always fetches fresh — and a previous DRIVER session's
+/// cached orders can never leak into whatever logs in next, staff or
+/// another driver alike.
+///
+/// Each call is guarded by [Ref.exists]: invalidating an autoDispose
+/// provider that has never been built is a harmless no-op in terms of final
+/// state, but it can still eagerly instantiate-then-immediately-invalidate
+/// the provider, racing a caller's very next `container.read(...future)`
+/// into building it a second time (observed directly via instrumented
+/// `PollingNotifierMixin` tracing: two `fetchLatest()` calls, only one
+/// `startPolling()` timer path each, no timer/lifecycle event between
+/// them). Skipping the invalidate when nothing has read the provider yet —
+/// the normal case, since the driver screen never mounts before login
+/// resolves — removes that race entirely instead of masking it.
+void _clearDriverScopedState(Ref ref) {
+  if (ref.exists(driverActiveOrdersProvider)) {
+    ref.invalidate(driverActiveOrdersProvider);
+  }
+  if (ref.exists(driverHistoryProvider)) {
+    ref.invalidate(driverHistoryProvider);
+  }
+  // `driverOrderDetailProvider` is a family — `Ref.exists` only accepts a
+  // concrete provider instance (a specific `.family(id)`), not the bare
+  // family, so there's no cheap "does any instance exist" check here. An
+  // unconditional invalidate of an entirely-unbuilt family has no
+  // observable effect (there is nothing to tear down or rebuild), unlike
+  // the plain providers above.
+  ref.invalidate(driverOrderDetailProvider);
+}
 
 /// Immediately clears all user-scoped provider state.
 ///

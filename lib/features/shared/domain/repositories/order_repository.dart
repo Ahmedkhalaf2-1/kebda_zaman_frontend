@@ -30,4 +30,15 @@ abstract class OrderRepository {
   /// from [getOrderById], which hits the customer-owned `GET /orders/:id`
   /// and 404s for orders the caller doesn't own (every order, for staff).
   Future<Result<Order>> getAdminOrderById(String id);
+
+  /// ADMIN-only: `PATCH /admin/orders/:id/driver` — assigns or reassigns a
+  /// DELIVERY order to an active driver. Backend rules (DRIVER_DELIVERY_API_
+  /// CONTRACT.md): only DELIVERY orders, not already DELIVERED/CANCELLED,
+  /// target must be an active DRIVER, and a concurrent reassignment loses
+  /// with `409 ASSIGNMENT_CHANGED`. Returns the authoritative updated order.
+  Future<Result<Order>> assignDriver(String orderId, String driverId);
+
+  /// ADMIN-only: `DELETE /admin/orders/:id/driver` — unassigns the current
+  /// driver. Same rules/response shape as [assignDriver].
+  Future<Result<Order>> unassignDriver(String orderId);
 }

@@ -126,4 +126,26 @@ class FakeOrderRepository implements OrderRepository {
     }
     return const Err(NetworkFailure('Order not found'));
   }
+
+  @override
+  Future<Result<Order>> assignDriver(String orderId, String driverId) async {
+    await _init();
+    final index = _orders.indexWhere((o) => o.id == orderId);
+    if (index == -1) return const Err(NetworkFailure('Order not found'));
+    final updated = _orders[index].copyWith(driverId: driverId);
+    _orders[index] = updated;
+    await _save();
+    return Success(updated);
+  }
+
+  @override
+  Future<Result<Order>> unassignDriver(String orderId) async {
+    await _init();
+    final index = _orders.indexWhere((o) => o.id == orderId);
+    if (index == -1) return const Err(NetworkFailure('Order not found'));
+    final updated = _orders[index].copyWith(driverId: null);
+    _orders[index] = updated;
+    await _save();
+    return Success(updated);
+  }
 }

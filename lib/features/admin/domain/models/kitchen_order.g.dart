@@ -6,8 +6,8 @@ part of 'kitchen_order.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$KitchenOrderImpl _$$KitchenOrderImplFromJson(Map<String, dynamic> json) =>
-    _$KitchenOrderImpl(
+_KitchenOrder _$KitchenOrderFromJson(Map<String, dynamic> json) =>
+    _KitchenOrder(
       id: json['id'] as String,
       orderNumber: json['orderNumber'] as String,
       status: $enumDecode(_$OrderStatusEnumMap, json['status']),
@@ -23,7 +23,7 @@ _$KitchenOrderImpl _$$KitchenOrderImplFromJson(Map<String, dynamic> json) =>
       estimatedDeliveryTime: json['estimatedDeliveryTime'] as String?,
     );
 
-Map<String, dynamic> _$$KitchenOrderImplToJson(_$KitchenOrderImpl instance) =>
+Map<String, dynamic> _$KitchenOrderToJson(_KitchenOrder instance) =>
     <String, dynamic>{
       'id': instance.id,
       'orderNumber': instance.orderNumber,
@@ -52,53 +52,51 @@ const _$FulfillmentTypeEnumMap = {
   FulfillmentType.pickup: 'pickup',
 };
 
-_$KitchenOrderItemImpl _$$KitchenOrderItemImplFromJson(
-  Map<String, dynamic> json,
-) => _$KitchenOrderItemImpl(
-  id: json['id'] as String,
-  menuItemId: json['menuItemId'] as String?,
-  nameAr: json['nameAr'] as String,
-  nameEn: json['nameEn'] as String,
-  imageUrl: json['imageUrl'] as String?,
-  selectedVariant: json['selectedVariant'] == null
-      ? null
-      : KitchenCustomizationSnapshot.fromJson(
-          json['selectedVariant'] as Map<String, dynamic>,
-        ),
-  selectedAddons:
-      (json['selectedAddons'] as List<dynamic>?)
-          ?.map(
-            (e) => KitchenCustomizationSnapshot.fromJson(
-              e as Map<String, dynamic>,
+_KitchenOrderItem _$KitchenOrderItemFromJson(Map<String, dynamic> json) =>
+    _KitchenOrderItem(
+      id: json['id'] as String,
+      menuItemId: json['menuItemId'] as String?,
+      nameAr: json['nameAr'] as String,
+      nameEn: json['nameEn'] as String,
+      imageUrl: json['imageUrl'] as String?,
+      selectedVariant: json['selectedVariant'] == null
+          ? null
+          : KitchenCustomizationSnapshot.fromJson(
+              json['selectedVariant'] as Map<String, dynamic>,
             ),
-          )
-          .toList() ??
-      const [],
-  quantity: (json['quantity'] as num).toInt(),
-  specialInstructions: json['specialInstructions'] as String?,
-  unitPrice: (json['unitPrice'] as num).toDouble(),
-  totalPrice: (json['totalPrice'] as num).toDouble(),
-);
+      selectedAddons:
+          (json['selectedAddons'] as List<dynamic>?)
+              ?.map(
+                (e) => KitchenCustomizationSnapshot.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
+              .toList() ??
+          const [],
+      quantity: (json['quantity'] as num).toInt(),
+      specialInstructions: json['specialInstructions'] as String?,
+      unitPrice: (json['unitPrice'] as num).toDouble(),
+      totalPrice: (json['totalPrice'] as num).toDouble(),
+    );
 
-Map<String, dynamic> _$$KitchenOrderItemImplToJson(
-  _$KitchenOrderItemImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'menuItemId': instance.menuItemId,
-  'nameAr': instance.nameAr,
-  'nameEn': instance.nameEn,
-  'imageUrl': instance.imageUrl,
-  'selectedVariant': instance.selectedVariant,
-  'selectedAddons': instance.selectedAddons,
-  'quantity': instance.quantity,
-  'specialInstructions': instance.specialInstructions,
-  'unitPrice': instance.unitPrice,
-  'totalPrice': instance.totalPrice,
-};
+Map<String, dynamic> _$KitchenOrderItemToJson(_KitchenOrderItem instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'menuItemId': instance.menuItemId,
+      'nameAr': instance.nameAr,
+      'nameEn': instance.nameEn,
+      'imageUrl': instance.imageUrl,
+      'selectedVariant': instance.selectedVariant,
+      'selectedAddons': instance.selectedAddons,
+      'quantity': instance.quantity,
+      'specialInstructions': instance.specialInstructions,
+      'unitPrice': instance.unitPrice,
+      'totalPrice': instance.totalPrice,
+    };
 
-_$KitchenCustomizationSnapshotImpl _$$KitchenCustomizationSnapshotImplFromJson(
+_KitchenCustomizationSnapshot _$KitchenCustomizationSnapshotFromJson(
   Map<String, dynamic> json,
-) => _$KitchenCustomizationSnapshotImpl(
+) => _KitchenCustomizationSnapshot(
   id: json['id'] as String,
   refId: json['refId'] as String?,
   nameAr: json['nameAr'] as String,
@@ -106,8 +104,8 @@ _$KitchenCustomizationSnapshotImpl _$$KitchenCustomizationSnapshotImplFromJson(
   priceSnapshot: (json['priceSnapshot'] as num).toDouble(),
 );
 
-Map<String, dynamic> _$$KitchenCustomizationSnapshotImplToJson(
-  _$KitchenCustomizationSnapshotImpl instance,
+Map<String, dynamic> _$KitchenCustomizationSnapshotToJson(
+  _KitchenCustomizationSnapshot instance,
 ) => <String, dynamic>{
   'id': instance.id,
   'refId': instance.refId,

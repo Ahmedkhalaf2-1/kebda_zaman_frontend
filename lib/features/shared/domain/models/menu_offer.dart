@@ -9,7 +9,7 @@ part 'menu_offer.freezed.dart';
 /// repository mapper tolerates a narrower or differently-shaped object
 /// rather than crashing on parse.
 @freezed
-class MenuOfferMenuItemSummary with _$MenuOfferMenuItemSummary {
+abstract class MenuOfferMenuItemSummary with _$MenuOfferMenuItemSummary {
   const factory MenuOfferMenuItemSummary({
     required String id,
     String? name,
@@ -27,7 +27,7 @@ class MenuOfferMenuItemSummary with _$MenuOfferMenuItemSummary {
 /// here — transient UI state (upload progress, etc.) belongs in
 /// presentation state, not this model.
 @freezed
-class MenuOffer with _$MenuOffer {
+abstract class MenuOffer with _$MenuOffer {
   const factory MenuOffer({
     required String id,
     required String menuItemId,

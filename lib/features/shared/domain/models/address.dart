@@ -4,7 +4,7 @@ part 'address.freezed.dart';
 part 'address.g.dart';
 
 @freezed
-class Address with _$Address {
+abstract class Address with _$Address {
   const factory Address({
     required String id,
     required String userId,

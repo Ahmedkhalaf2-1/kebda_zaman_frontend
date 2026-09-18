@@ -6,7 +6,7 @@ part of 'order.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
+_Order _$OrderFromJson(Map<String, dynamic> json) => _Order(
   id: json['id'] as String,
   orderNumber: json['orderNumber'] as String,
   userId: json['userId'] as String,
@@ -64,41 +64,42 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
       : LoyaltyRedemptionInfo.fromJson(
           json['loyaltyRedemption'] as Map<String, dynamic>,
         ),
+  driverId: json['driverId'] as String?,
 );
 
-Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'orderNumber': instance.orderNumber,
-      'userId': instance.userId,
-      'customerName': instance.customerName,
-      'items': instance.items,
-      'fulfillmentType': _$FulfillmentTypeEnumMap[instance.fulfillmentType]!,
-      'addressId': instance.addressId,
-      'pickupLocation': instance.pickupLocation,
-      'deliveryAddress': instance.deliveryAddress,
-      'status': _$OrderStatusEnumMap[instance.status]!,
-      'subtotal': instance.subtotal,
-      'deliveryFee': instance.deliveryFee,
-      'deliveryDistanceMeters': instance.deliveryDistanceMeters,
-      'deliveryDistanceKm': instance.deliveryDistanceKm,
-      'deliveryDurationSeconds': instance.deliveryDurationSeconds,
-      'deliveryTier': instance.deliveryTier,
-      'deliveryZone': instance.deliveryZone,
-      'discountTotal': instance.discountTotal,
-      'loyaltyPointsUsed': instance.loyaltyPointsUsed,
-      'loyaltyPointsEarned': instance.loyaltyPointsEarned,
-      'grandTotal': instance.grandTotal,
-      'paymentId': instance.paymentId,
-      'paymentStatus': instance.paymentStatus,
-      'paymentMethod': instance.paymentMethod,
-      'paymentAuthorizedAt': instance.paymentAuthorizedAt?.toIso8601String(),
-      'placedAt': instance.placedAt.toIso8601String(),
-      'statusHistory': instance.statusHistory,
-      'estimatedTime': instance.estimatedTime,
-      'preparationTimeMinutes': instance.preparationTimeMinutes,
-      'loyaltyRedemption': instance.loyaltyRedemption,
-    };
+Map<String, dynamic> _$OrderToJson(_Order instance) => <String, dynamic>{
+  'id': instance.id,
+  'orderNumber': instance.orderNumber,
+  'userId': instance.userId,
+  'customerName': instance.customerName,
+  'items': instance.items,
+  'fulfillmentType': _$FulfillmentTypeEnumMap[instance.fulfillmentType]!,
+  'addressId': instance.addressId,
+  'pickupLocation': instance.pickupLocation,
+  'deliveryAddress': instance.deliveryAddress,
+  'status': _$OrderStatusEnumMap[instance.status]!,
+  'subtotal': instance.subtotal,
+  'deliveryFee': instance.deliveryFee,
+  'deliveryDistanceMeters': instance.deliveryDistanceMeters,
+  'deliveryDistanceKm': instance.deliveryDistanceKm,
+  'deliveryDurationSeconds': instance.deliveryDurationSeconds,
+  'deliveryTier': instance.deliveryTier,
+  'deliveryZone': instance.deliveryZone,
+  'discountTotal': instance.discountTotal,
+  'loyaltyPointsUsed': instance.loyaltyPointsUsed,
+  'loyaltyPointsEarned': instance.loyaltyPointsEarned,
+  'grandTotal': instance.grandTotal,
+  'paymentId': instance.paymentId,
+  'paymentStatus': instance.paymentStatus,
+  'paymentMethod': instance.paymentMethod,
+  'paymentAuthorizedAt': instance.paymentAuthorizedAt?.toIso8601String(),
+  'placedAt': instance.placedAt.toIso8601String(),
+  'statusHistory': instance.statusHistory,
+  'estimatedTime': instance.estimatedTime,
+  'preparationTimeMinutes': instance.preparationTimeMinutes,
+  'loyaltyRedemption': instance.loyaltyRedemption,
+  'driverId': instance.driverId,
+};
 
 const _$FulfillmentTypeEnumMap = {
   FulfillmentType.delivery: 'delivery',
@@ -117,9 +118,9 @@ const _$OrderStatusEnumMap = {
   OrderStatus.unknown: 'unknown',
 };
 
-_$OrderDeliveryAddressImpl _$$OrderDeliveryAddressImplFromJson(
+_OrderDeliveryAddress _$OrderDeliveryAddressFromJson(
   Map<String, dynamic> json,
-) => _$OrderDeliveryAddressImpl(
+) => _OrderDeliveryAddress(
   label: json['label'] as String?,
   street: json['street'] as String?,
   building: json['building'] as String?,
@@ -132,8 +133,8 @@ _$OrderDeliveryAddressImpl _$$OrderDeliveryAddressImplFromJson(
   lng: (json['lng'] as num?)?.toDouble(),
 );
 
-Map<String, dynamic> _$$OrderDeliveryAddressImplToJson(
-  _$OrderDeliveryAddressImpl instance,
+Map<String, dynamic> _$OrderDeliveryAddressToJson(
+  _OrderDeliveryAddress instance,
 ) => <String, dynamic>{
   'label': instance.label,
   'street': instance.street,
@@ -147,105 +148,100 @@ Map<String, dynamic> _$$OrderDeliveryAddressImplToJson(
   'lng': instance.lng,
 };
 
-_$OrderDeliveryTierImpl _$$OrderDeliveryTierImplFromJson(
-  Map<String, dynamic> json,
-) => _$OrderDeliveryTierImpl(
-  id: json['id'] as String,
-  minDistanceKm: (json['minDistanceKm'] as num).toDouble(),
-  maxDistanceKm: (json['maxDistanceKm'] as num).toDouble(),
-);
+_OrderDeliveryTier _$OrderDeliveryTierFromJson(Map<String, dynamic> json) =>
+    _OrderDeliveryTier(
+      id: json['id'] as String,
+      minDistanceKm: (json['minDistanceKm'] as num).toDouble(),
+      maxDistanceKm: (json['maxDistanceKm'] as num).toDouble(),
+    );
 
-Map<String, dynamic> _$$OrderDeliveryTierImplToJson(
-  _$OrderDeliveryTierImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'minDistanceKm': instance.minDistanceKm,
-  'maxDistanceKm': instance.maxDistanceKm,
-};
+Map<String, dynamic> _$OrderDeliveryTierToJson(_OrderDeliveryTier instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'minDistanceKm': instance.minDistanceKm,
+      'maxDistanceKm': instance.maxDistanceKm,
+    };
 
-_$OrderDeliveryZoneSnapshotImpl _$$OrderDeliveryZoneSnapshotImplFromJson(
+_OrderDeliveryZoneSnapshot _$OrderDeliveryZoneSnapshotFromJson(
   Map<String, dynamic> json,
-) => _$OrderDeliveryZoneSnapshotImpl(
+) => _OrderDeliveryZoneSnapshot(
   id: json['id'] as String,
   nameAr: json['nameAr'] as String,
   nameEn: json['nameEn'] as String,
 );
 
-Map<String, dynamic> _$$OrderDeliveryZoneSnapshotImplToJson(
-  _$OrderDeliveryZoneSnapshotImpl instance,
+Map<String, dynamic> _$OrderDeliveryZoneSnapshotToJson(
+  _OrderDeliveryZoneSnapshot instance,
 ) => <String, dynamic>{
   'id': instance.id,
   'nameAr': instance.nameAr,
   'nameEn': instance.nameEn,
 };
 
-_$LoyaltyRedemptionInfoImpl _$$LoyaltyRedemptionInfoImplFromJson(
+_LoyaltyRedemptionInfo _$LoyaltyRedemptionInfoFromJson(
   Map<String, dynamic> json,
-) => _$LoyaltyRedemptionInfoImpl(
+) => _LoyaltyRedemptionInfo(
   rewardId: json['rewardId'] as String,
   rewardName: json['rewardName'] as String,
   pointsRedeemed: (json['pointsRedeemed'] as num).toInt(),
 );
 
-Map<String, dynamic> _$$LoyaltyRedemptionInfoImplToJson(
-  _$LoyaltyRedemptionInfoImpl instance,
+Map<String, dynamic> _$LoyaltyRedemptionInfoToJson(
+  _LoyaltyRedemptionInfo instance,
 ) => <String, dynamic>{
   'rewardId': instance.rewardId,
   'rewardName': instance.rewardName,
   'pointsRedeemed': instance.pointsRedeemed,
 };
 
-_$OrderItemImpl _$$OrderItemImplFromJson(Map<String, dynamic> json) =>
-    _$OrderItemImpl(
-      menuItemId: json['menuItemId'] as String?,
-      variantRefId: json['variantRefId'] as String?,
-      addonRefIds:
-          (json['addonRefIds'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      name: json['name'] as String,
-      imageUrl: json['imageUrl'] as String,
-      basePrice: (json['basePrice'] as num).toDouble(),
-      unitPrice: (json['unitPrice'] as num).toDouble(),
-      quantity: (json['quantity'] as num).toInt(),
-      selectedOptions:
-          (json['selectedOptions'] as Map<String, dynamic>?)?.map(
+_OrderItem _$OrderItemFromJson(Map<String, dynamic> json) => _OrderItem(
+  menuItemId: json['menuItemId'] as String?,
+  variantRefId: json['variantRefId'] as String?,
+  addonRefIds:
+      (json['addonRefIds'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  name: json['name'] as String,
+  imageUrl: json['imageUrl'] as String,
+  basePrice: (json['basePrice'] as num).toDouble(),
+  unitPrice: (json['unitPrice'] as num).toDouble(),
+  quantity: (json['quantity'] as num).toInt(),
+  selectedOptions:
+      (json['selectedOptions'] as Map<String, dynamic>?)?.map(
+        (k, e) =>
+            MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
+      ) ??
+      const {},
+  nestedSelections:
+      (json['nestedSelections'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+          k,
+          (e as Map<String, dynamic>).map(
             (k, e) => MapEntry(
               k,
               (e as List<dynamic>).map((e) => e as String).toList(),
             ),
-          ) ??
-          const {},
-      nestedSelections:
-          (json['nestedSelections'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(
-              k,
-              (e as Map<String, dynamic>).map(
-                (k, e) => MapEntry(
-                  k,
-                  (e as List<dynamic>).map((e) => e as String).toList(),
-                ),
-              ),
-            ),
-          ) ??
-          const {},
-      extraQuantities:
-          (json['extraQuantities'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, (e as num).toInt()),
-          ) ??
-          const {},
-      removedIngredients:
-          (json['removedIngredients'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      specialInstructions: json['specialInstructions'] as String? ?? '',
-      formattedConfiguration: json['formattedConfiguration'] as String? ?? '',
-      lineTotal: (json['lineTotal'] as num).toDouble(),
-    );
+          ),
+        ),
+      ) ??
+      const {},
+  extraQuantities:
+      (json['extraQuantities'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, (e as num).toInt()),
+      ) ??
+      const {},
+  removedIngredients:
+      (json['removedIngredients'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  specialInstructions: json['specialInstructions'] as String? ?? '',
+  formattedConfiguration: json['formattedConfiguration'] as String? ?? '',
+  lineTotal: (json['lineTotal'] as num).toDouble(),
+);
 
-Map<String, dynamic> _$$OrderItemImplToJson(_$OrderItemImpl instance) =>
+Map<String, dynamic> _$OrderItemToJson(_OrderItem instance) =>
     <String, dynamic>{
       'menuItemId': instance.menuItemId,
       'variantRefId': instance.variantRefId,
@@ -264,16 +260,14 @@ Map<String, dynamic> _$$OrderItemImplToJson(_$OrderItemImpl instance) =>
       'lineTotal': instance.lineTotal,
     };
 
-_$OrderStatusEntryImpl _$$OrderStatusEntryImplFromJson(
-  Map<String, dynamic> json,
-) => _$OrderStatusEntryImpl(
-  status: $enumDecode(_$OrderStatusEnumMap, json['status']),
-  timestamp: DateTime.parse(json['timestamp'] as String),
-);
+_OrderStatusEntry _$OrderStatusEntryFromJson(Map<String, dynamic> json) =>
+    _OrderStatusEntry(
+      status: $enumDecode(_$OrderStatusEnumMap, json['status']),
+      timestamp: DateTime.parse(json['timestamp'] as String),
+    );
 
-Map<String, dynamic> _$$OrderStatusEntryImplToJson(
-  _$OrderStatusEntryImpl instance,
-) => <String, dynamic>{
-  'status': _$OrderStatusEnumMap[instance.status]!,
-  'timestamp': instance.timestamp.toIso8601String(),
-};
+Map<String, dynamic> _$OrderStatusEntryToJson(_OrderStatusEntry instance) =>
+    <String, dynamic>{
+      'status': _$OrderStatusEnumMap[instance.status]!,
+      'timestamp': instance.timestamp.toIso8601String(),
+    };

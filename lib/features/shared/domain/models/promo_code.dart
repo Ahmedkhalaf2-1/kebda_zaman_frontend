@@ -6,7 +6,7 @@ part 'promo_code.g.dart';
 enum DiscountType { percentage, fixed }
 
 @freezed
-class PromoCode with _$PromoCode {
+abstract class PromoCode with _$PromoCode {
   const factory PromoCode({
     required String id,
     required String code,

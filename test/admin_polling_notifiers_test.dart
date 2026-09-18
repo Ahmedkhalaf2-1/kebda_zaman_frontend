@@ -321,6 +321,13 @@ class _FakeOrderRepository implements OrderRepository {
   @override
   Future<Result<Order>> getAdminOrderById(String id) =>
       throw UnimplementedError();
+
+  @override
+  Future<Result<Order>> assignDriver(String orderId, String driverId) =>
+      throw UnimplementedError();
+  @override
+  Future<Result<Order>> unassignDriver(String orderId) =>
+      throw UnimplementedError();
 }
 
 class _FakeKitchenRepository implements KitchenRepository {
