@@ -10,6 +10,7 @@ import 'package:kebda_zaman/core/api/api_client.dart';
 import 'package:kebda_zaman/core/api/api_interceptors.dart';
 import 'package:kebda_zaman/core/errors/errors.dart';
 import 'package:kebda_zaman/features/admin/data/api_driver_repository.dart';
+import 'package:kebda_zaman/features/admin/domain/models/driver_account.dart';
 
 class _ScriptedAdapter implements HttpClientAdapter {
   _ScriptedAdapter(this.script);
@@ -126,6 +127,45 @@ void main() {
 
         expect(result.isSuccess, isTrue);
         expect(result.value, isEmpty);
+      },
+    );
+
+    test('parses server-calculated availability and activeOrderId', () async {
+      final adapter = _ScriptedAdapter([
+        _jsonResponse([
+          {
+            ..._driverJson(id: 'driver-1'),
+            'availability': 'AVAILABLE',
+            'activeOrderId': null,
+          },
+          {
+            ..._driverJson(id: 'driver-2'),
+            'availability': 'BUSY',
+            'activeOrderId': 'order-99',
+          },
+        ], 200),
+      ]);
+      final repo = ApiDriverRepository(_buildClient(adapter));
+
+      final result = await repo.getDrivers();
+
+      expect(result.value[0].availability, DriverAvailability.available);
+      expect(result.value[0].activeOrderId, isNull);
+      expect(result.value[1].availability, DriverAvailability.busy);
+      expect(result.value[1].activeOrderId, 'order-99');
+    });
+
+    test(
+      'a missing/unrecognized availability value falls back to unknown, never available',
+      () async {
+        final adapter = _ScriptedAdapter([
+          _jsonResponse([_driverJson(id: 'driver-1')], 200),
+        ]);
+        final repo = ApiDriverRepository(_buildClient(adapter));
+
+        final result = await repo.getDrivers();
+
+        expect(result.value.single.availability, DriverAvailability.unknown);
       },
     );
   });

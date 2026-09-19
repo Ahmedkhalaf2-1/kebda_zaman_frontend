@@ -295,9 +295,276 @@ as DateTime,
 }
 
 /// @nodoc
+mixin _$TrackingDestination {
+
+ double get latitude; double get longitude;
+/// Create a copy of TrackingDestination
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$TrackingDestinationCopyWith<TrackingDestination> get copyWith => _$TrackingDestinationCopyWithImpl<TrackingDestination>(this as TrackingDestination, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as TrackingDestination;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrackingDestination&&(identical(other.latitude, _this.latitude) || other.latitude == _this.latitude)&&(identical(other.longitude, _this.longitude) || other.longitude == _this.longitude));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as TrackingDestination;
+  return Object.hash(runtimeType,_this.latitude,_this.longitude);
+}
+
+@override
+String toString() {
+  final _this = this as TrackingDestination;
+  return 'TrackingDestination(latitude: ${_this.latitude}, longitude: ${_this.longitude})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $TrackingDestinationCopyWith<$Res>  {
+  factory $TrackingDestinationCopyWith(TrackingDestination value, $Res Function(TrackingDestination) _then) = _$TrackingDestinationCopyWithImpl;
+@useResult
+$Res call({
+ double latitude, double longitude
+});
+
+
+
+
+}
+/// @nodoc
+class _$TrackingDestinationCopyWithImpl<$Res>
+    implements $TrackingDestinationCopyWith<$Res> {
+  _$TrackingDestinationCopyWithImpl(this._self, this._then);
+
+  final TrackingDestination _self;
+  final $Res Function(TrackingDestination) _then;
+
+/// Create a copy of TrackingDestination
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? latitude = null,Object? longitude = null,}) {
+  return _then(TrackingDestination(
+latitude: null == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
+as double,longitude: null == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [TrackingDestination].
+extension TrackingDestinationPatterns on TrackingDestination {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _TrackingDestination value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _TrackingDestination() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _TrackingDestination value)  $default,){
+final _that = this;
+switch (_that) {
+case _TrackingDestination():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _TrackingDestination value)?  $default,){
+final _that = this;
+switch (_that) {
+case _TrackingDestination() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double latitude,  double longitude)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _TrackingDestination() when $default != null:
+return $default(_that.latitude,_that.longitude);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double latitude,  double longitude)  $default,) {final _that = this;
+switch (_that) {
+case _TrackingDestination():
+return $default(_that.latitude,_that.longitude);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double latitude,  double longitude)?  $default,) {final _that = this;
+switch (_that) {
+case _TrackingDestination() when $default != null:
+return $default(_that.latitude,_that.longitude);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _TrackingDestination implements TrackingDestination {
+  const _TrackingDestination({required this.latitude, required this.longitude});
+  
+
+@override final  double latitude;
+@override final  double longitude;
+
+/// Create a copy of TrackingDestination
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$TrackingDestinationCopyWith<_TrackingDestination> get copyWith => __$TrackingDestinationCopyWithImpl<_TrackingDestination>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrackingDestination&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,latitude,longitude);
+}
+
+@override
+String toString() {
+    return 'TrackingDestination(latitude: $latitude, longitude: $longitude)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$TrackingDestinationCopyWith<$Res> implements $TrackingDestinationCopyWith<$Res> {
+  factory _$TrackingDestinationCopyWith(_TrackingDestination value, $Res Function(_TrackingDestination) _then) = __$TrackingDestinationCopyWithImpl;
+@override @useResult
+$Res call({
+ double latitude, double longitude
+});
+
+
+
+
+}
+/// @nodoc
+class __$TrackingDestinationCopyWithImpl<$Res>
+    implements _$TrackingDestinationCopyWith<$Res> {
+  __$TrackingDestinationCopyWithImpl(this._self, this._then);
+
+  final _TrackingDestination _self;
+  final $Res Function(_TrackingDestination) _then;
+
+/// Create a copy of TrackingDestination
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? latitude = null,Object? longitude = null,}) {
+  return _then(_TrackingDestination(
+latitude: null == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
+as double,longitude: null == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$OrderTracking {
 
- String get orderId; TrackingState get state; String? get driverName; String? get driverPhone; TrackingLocationSample? get location; int? get locationAgeSeconds;
+ String get orderId; TrackingState get state; String? get driverName; String? get driverPhone; TrackingLocationSample? get location; int? get locationAgeSeconds; TrackingDestination? get destination; double? get distanceKm; int? get etaSeconds; String? get encodedPolyline;
 /// Create a copy of OrderTracking
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -309,20 +576,20 @@ $OrderTrackingCopyWith<OrderTracking> get copyWith => _$OrderTrackingCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as OrderTracking;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrderTracking&&(identical(other.orderId, _this.orderId) || other.orderId == _this.orderId)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.driverName, _this.driverName) || other.driverName == _this.driverName)&&(identical(other.driverPhone, _this.driverPhone) || other.driverPhone == _this.driverPhone)&&(identical(other.location, _this.location) || other.location == _this.location)&&(identical(other.locationAgeSeconds, _this.locationAgeSeconds) || other.locationAgeSeconds == _this.locationAgeSeconds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrderTracking&&(identical(other.orderId, _this.orderId) || other.orderId == _this.orderId)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.driverName, _this.driverName) || other.driverName == _this.driverName)&&(identical(other.driverPhone, _this.driverPhone) || other.driverPhone == _this.driverPhone)&&(identical(other.location, _this.location) || other.location == _this.location)&&(identical(other.locationAgeSeconds, _this.locationAgeSeconds) || other.locationAgeSeconds == _this.locationAgeSeconds)&&(identical(other.destination, _this.destination) || other.destination == _this.destination)&&(identical(other.distanceKm, _this.distanceKm) || other.distanceKm == _this.distanceKm)&&(identical(other.etaSeconds, _this.etaSeconds) || other.etaSeconds == _this.etaSeconds)&&(identical(other.encodedPolyline, _this.encodedPolyline) || other.encodedPolyline == _this.encodedPolyline));
 }
 
 
 @override
 int get hashCode {
   final _this = this as OrderTracking;
-  return Object.hash(runtimeType,_this.orderId,_this.state,_this.driverName,_this.driverPhone,_this.location,_this.locationAgeSeconds);
+  return Object.hash(runtimeType,_this.orderId,_this.state,_this.driverName,_this.driverPhone,_this.location,_this.locationAgeSeconds,_this.destination,_this.distanceKm,_this.etaSeconds,_this.encodedPolyline);
 }
 
 @override
 String toString() {
   final _this = this as OrderTracking;
-  return 'OrderTracking(orderId: ${_this.orderId}, state: ${_this.state}, driverName: ${_this.driverName}, driverPhone: ${_this.driverPhone}, location: ${_this.location}, locationAgeSeconds: ${_this.locationAgeSeconds})';
+  return 'OrderTracking(orderId: ${_this.orderId}, state: ${_this.state}, driverName: ${_this.driverName}, driverPhone: ${_this.driverPhone}, location: ${_this.location}, locationAgeSeconds: ${_this.locationAgeSeconds}, destination: ${_this.destination}, distanceKm: ${_this.distanceKm}, etaSeconds: ${_this.etaSeconds}, encodedPolyline: ${_this.encodedPolyline})';
 }
 
 
@@ -333,11 +600,11 @@ abstract mixin class $OrderTrackingCopyWith<$Res>  {
   factory $OrderTrackingCopyWith(OrderTracking value, $Res Function(OrderTracking) _then) = _$OrderTrackingCopyWithImpl;
 @useResult
 $Res call({
- String orderId, TrackingState state, String? driverName, String? driverPhone, TrackingLocationSample? location, int? locationAgeSeconds
+ String orderId, TrackingState state, String? driverName, String? driverPhone, TrackingLocationSample? location, int? locationAgeSeconds, TrackingDestination? destination, double? distanceKm, int? etaSeconds, String? encodedPolyline
 });
 
 
-$TrackingLocationSampleCopyWith<$Res>? get location;
+$TrackingLocationSampleCopyWith<$Res>? get location;$TrackingDestinationCopyWith<$Res>? get destination;
 
 }
 /// @nodoc
@@ -350,7 +617,7 @@ class _$OrderTrackingCopyWithImpl<$Res>
 
 /// Create a copy of OrderTracking
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? orderId = null,Object? state = null,Object? driverName = freezed,Object? driverPhone = freezed,Object? location = freezed,Object? locationAgeSeconds = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? orderId = null,Object? state = null,Object? driverName = freezed,Object? driverPhone = freezed,Object? location = freezed,Object? locationAgeSeconds = freezed,Object? destination = freezed,Object? distanceKm = freezed,Object? etaSeconds = freezed,Object? encodedPolyline = freezed,}) {
   return _then(OrderTracking(
 orderId: null == orderId ? _self.orderId : orderId // ignore: cast_nullable_to_non_nullable
 as String,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
@@ -358,7 +625,11 @@ as TrackingState,driverName: freezed == driverName ? _self.driverName : driverNa
 as String?,driverPhone: freezed == driverPhone ? _self.driverPhone : driverPhone // ignore: cast_nullable_to_non_nullable
 as String?,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as TrackingLocationSample?,locationAgeSeconds: freezed == locationAgeSeconds ? _self.locationAgeSeconds : locationAgeSeconds // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,destination: freezed == destination ? _self.destination : destination // ignore: cast_nullable_to_non_nullable
+as TrackingDestination?,distanceKm: freezed == distanceKm ? _self.distanceKm : distanceKm // ignore: cast_nullable_to_non_nullable
+as double?,etaSeconds: freezed == etaSeconds ? _self.etaSeconds : etaSeconds // ignore: cast_nullable_to_non_nullable
+as int?,encodedPolyline: freezed == encodedPolyline ? _self.encodedPolyline : encodedPolyline // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 /// Create a copy of OrderTracking
@@ -372,6 +643,18 @@ $TrackingLocationSampleCopyWith<$Res>? get location {
 
   return $TrackingLocationSampleCopyWith<$Res>(_self.location!, (value) {
     return _then(_self.copyWith(location: value));
+  });
+}/// Create a copy of OrderTracking
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TrackingDestinationCopyWith<$Res>? get destination {
+    if (_self.destination == null) {
+    return null;
+  }
+
+  return $TrackingDestinationCopyWith<$Res>(_self.destination!, (value) {
+    return _then(_self.copyWith(destination: value));
   });
 }
 }
@@ -455,10 +738,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String orderId,  TrackingState state,  String? driverName,  String? driverPhone,  TrackingLocationSample? location,  int? locationAgeSeconds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String orderId,  TrackingState state,  String? driverName,  String? driverPhone,  TrackingLocationSample? location,  int? locationAgeSeconds,  TrackingDestination? destination,  double? distanceKm,  int? etaSeconds,  String? encodedPolyline)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OrderTracking() when $default != null:
-return $default(_that.orderId,_that.state,_that.driverName,_that.driverPhone,_that.location,_that.locationAgeSeconds);case _:
+return $default(_that.orderId,_that.state,_that.driverName,_that.driverPhone,_that.location,_that.locationAgeSeconds,_that.destination,_that.distanceKm,_that.etaSeconds,_that.encodedPolyline);case _:
   return orElse();
 
 }
@@ -476,10 +759,10 @@ return $default(_that.orderId,_that.state,_that.driverName,_that.driverPhone,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String orderId,  TrackingState state,  String? driverName,  String? driverPhone,  TrackingLocationSample? location,  int? locationAgeSeconds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String orderId,  TrackingState state,  String? driverName,  String? driverPhone,  TrackingLocationSample? location,  int? locationAgeSeconds,  TrackingDestination? destination,  double? distanceKm,  int? etaSeconds,  String? encodedPolyline)  $default,) {final _that = this;
 switch (_that) {
 case _OrderTracking():
-return $default(_that.orderId,_that.state,_that.driverName,_that.driverPhone,_that.location,_that.locationAgeSeconds);case _:
+return $default(_that.orderId,_that.state,_that.driverName,_that.driverPhone,_that.location,_that.locationAgeSeconds,_that.destination,_that.distanceKm,_that.etaSeconds,_that.encodedPolyline);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -496,10 +779,10 @@ return $default(_that.orderId,_that.state,_that.driverName,_that.driverPhone,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String orderId,  TrackingState state,  String? driverName,  String? driverPhone,  TrackingLocationSample? location,  int? locationAgeSeconds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String orderId,  TrackingState state,  String? driverName,  String? driverPhone,  TrackingLocationSample? location,  int? locationAgeSeconds,  TrackingDestination? destination,  double? distanceKm,  int? etaSeconds,  String? encodedPolyline)?  $default,) {final _that = this;
 switch (_that) {
 case _OrderTracking() when $default != null:
-return $default(_that.orderId,_that.state,_that.driverName,_that.driverPhone,_that.location,_that.locationAgeSeconds);case _:
+return $default(_that.orderId,_that.state,_that.driverName,_that.driverPhone,_that.location,_that.locationAgeSeconds,_that.destination,_that.distanceKm,_that.etaSeconds,_that.encodedPolyline);case _:
   return null;
 
 }
@@ -511,7 +794,7 @@ return $default(_that.orderId,_that.state,_that.driverName,_that.driverPhone,_th
 
 
 class _OrderTracking implements OrderTracking {
-  const _OrderTracking({required this.orderId, required this.state, this.driverName, this.driverPhone, this.location, this.locationAgeSeconds});
+  const _OrderTracking({required this.orderId, required this.state, this.driverName, this.driverPhone, this.location, this.locationAgeSeconds, this.destination, this.distanceKm, this.etaSeconds, this.encodedPolyline});
   
 
 @override final  String orderId;
@@ -520,6 +803,10 @@ class _OrderTracking implements OrderTracking {
 @override final  String? driverPhone;
 @override final  TrackingLocationSample? location;
 @override final  int? locationAgeSeconds;
+@override final  TrackingDestination? destination;
+@override final  double? distanceKm;
+@override final  int? etaSeconds;
+@override final  String? encodedPolyline;
 
 /// Create a copy of OrderTracking
 /// with the given fields replaced by the non-null parameter values.
@@ -531,18 +818,18 @@ _$OrderTrackingCopyWith<_OrderTracking> get copyWith => __$OrderTrackingCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrderTracking&&(identical(other.orderId, orderId) || other.orderId == orderId)&&(identical(other.state, state) || other.state == state)&&(identical(other.driverName, driverName) || other.driverName == driverName)&&(identical(other.driverPhone, driverPhone) || other.driverPhone == driverPhone)&&(identical(other.location, location) || other.location == location)&&(identical(other.locationAgeSeconds, locationAgeSeconds) || other.locationAgeSeconds == locationAgeSeconds));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrderTracking&&(identical(other.orderId, orderId) || other.orderId == orderId)&&(identical(other.state, state) || other.state == state)&&(identical(other.driverName, driverName) || other.driverName == driverName)&&(identical(other.driverPhone, driverPhone) || other.driverPhone == driverPhone)&&(identical(other.location, location) || other.location == location)&&(identical(other.locationAgeSeconds, locationAgeSeconds) || other.locationAgeSeconds == locationAgeSeconds)&&(identical(other.destination, destination) || other.destination == destination)&&(identical(other.distanceKm, distanceKm) || other.distanceKm == distanceKm)&&(identical(other.etaSeconds, etaSeconds) || other.etaSeconds == etaSeconds)&&(identical(other.encodedPolyline, encodedPolyline) || other.encodedPolyline == encodedPolyline));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,orderId,state,driverName,driverPhone,location,locationAgeSeconds);
+    return Object.hash(runtimeType,orderId,state,driverName,driverPhone,location,locationAgeSeconds,destination,distanceKm,etaSeconds,encodedPolyline);
 }
 
 @override
 String toString() {
-    return 'OrderTracking(orderId: $orderId, state: $state, driverName: $driverName, driverPhone: $driverPhone, location: $location, locationAgeSeconds: $locationAgeSeconds)';
+    return 'OrderTracking(orderId: $orderId, state: $state, driverName: $driverName, driverPhone: $driverPhone, location: $location, locationAgeSeconds: $locationAgeSeconds, destination: $destination, distanceKm: $distanceKm, etaSeconds: $etaSeconds, encodedPolyline: $encodedPolyline)';
 }
 
 
@@ -553,11 +840,11 @@ abstract mixin class _$OrderTrackingCopyWith<$Res> implements $OrderTrackingCopy
   factory _$OrderTrackingCopyWith(_OrderTracking value, $Res Function(_OrderTracking) _then) = __$OrderTrackingCopyWithImpl;
 @override @useResult
 $Res call({
- String orderId, TrackingState state, String? driverName, String? driverPhone, TrackingLocationSample? location, int? locationAgeSeconds
+ String orderId, TrackingState state, String? driverName, String? driverPhone, TrackingLocationSample? location, int? locationAgeSeconds, TrackingDestination? destination, double? distanceKm, int? etaSeconds, String? encodedPolyline
 });
 
 
-@override $TrackingLocationSampleCopyWith<$Res>? get location;
+@override $TrackingLocationSampleCopyWith<$Res>? get location;@override $TrackingDestinationCopyWith<$Res>? get destination;
 
 }
 /// @nodoc
@@ -570,7 +857,7 @@ class __$OrderTrackingCopyWithImpl<$Res>
 
 /// Create a copy of OrderTracking
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? orderId = null,Object? state = null,Object? driverName = freezed,Object? driverPhone = freezed,Object? location = freezed,Object? locationAgeSeconds = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? orderId = null,Object? state = null,Object? driverName = freezed,Object? driverPhone = freezed,Object? location = freezed,Object? locationAgeSeconds = freezed,Object? destination = freezed,Object? distanceKm = freezed,Object? etaSeconds = freezed,Object? encodedPolyline = freezed,}) {
   return _then(_OrderTracking(
 orderId: null == orderId ? _self.orderId : orderId // ignore: cast_nullable_to_non_nullable
 as String,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
@@ -578,7 +865,11 @@ as TrackingState,driverName: freezed == driverName ? _self.driverName : driverNa
 as String?,driverPhone: freezed == driverPhone ? _self.driverPhone : driverPhone // ignore: cast_nullable_to_non_nullable
 as String?,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as TrackingLocationSample?,locationAgeSeconds: freezed == locationAgeSeconds ? _self.locationAgeSeconds : locationAgeSeconds // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,destination: freezed == destination ? _self.destination : destination // ignore: cast_nullable_to_non_nullable
+as TrackingDestination?,distanceKm: freezed == distanceKm ? _self.distanceKm : distanceKm // ignore: cast_nullable_to_non_nullable
+as double?,etaSeconds: freezed == etaSeconds ? _self.etaSeconds : etaSeconds // ignore: cast_nullable_to_non_nullable
+as int?,encodedPolyline: freezed == encodedPolyline ? _self.encodedPolyline : encodedPolyline // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -593,6 +884,18 @@ $TrackingLocationSampleCopyWith<$Res>? get location {
 
   return $TrackingLocationSampleCopyWith<$Res>(_self.location!, (value) {
     return _then(_self.copyWith(location: value));
+  });
+}/// Create a copy of OrderTracking
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TrackingDestinationCopyWith<$Res>? get destination {
+    if (_self.destination == null) {
+    return null;
+  }
+
+  return $TrackingDestinationCopyWith<$Res>(_self.destination!, (value) {
+    return _then(_self.copyWith(destination: value));
   });
 }
 }

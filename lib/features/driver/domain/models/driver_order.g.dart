@@ -27,6 +27,8 @@ _DriverOrder _$DriverOrderFromJson(Map<String, dynamic> json) => _DriverOrder(
   totalAmount: (json['totalAmount'] as num).toDouble(),
   createdAt: DateTime.parse(json['createdAt'] as String),
   assignmentVersion: (json['assignmentVersion'] as num).toInt(),
+  deliveryDistanceKm: (json['deliveryDistanceKm'] as num?)?.toDouble(),
+  deliveryDurationSeconds: (json['deliveryDurationSeconds'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$DriverOrderToJson(_DriverOrder instance) =>
@@ -45,6 +47,8 @@ Map<String, dynamic> _$DriverOrderToJson(_DriverOrder instance) =>
       'totalAmount': instance.totalAmount,
       'createdAt': instance.createdAt.toIso8601String(),
       'assignmentVersion': instance.assignmentVersion,
+      'deliveryDistanceKm': instance.deliveryDistanceKm,
+      'deliveryDurationSeconds': instance.deliveryDurationSeconds,
     };
 
 const _$OrderStatusEnumMap = {

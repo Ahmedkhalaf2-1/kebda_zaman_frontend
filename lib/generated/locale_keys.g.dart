@@ -354,6 +354,9 @@ abstract class  LocaleKeys {
   static const tracking_live_updated_minutes_ago = 'tracking.live_updated_minutes_ago';
   static const tracking_live_stale_badge = 'tracking.live_stale_badge';
   static const tracking_live_load_error = 'tracking.live_load_error';
+  static const tracking_live_waiting_driver = 'tracking.live_waiting_driver';
+  static const tracking_live_distance_away = 'tracking.live_distance_away';
+  static const tracking_live_eta_arriving = 'tracking.live_eta_arriving';
   static const tracking_item_quantity = 'tracking.item_quantity';
   static const tracking_status_desc_pending = 'tracking.status_desc_pending';
   static const tracking_status_desc_pending_card_authorized = 'tracking.status_desc_pending_card_authorized';
@@ -559,6 +562,10 @@ abstract class  LocaleKeys {
   static const admin_driver_terminal_note = 'admin.driver_terminal_note';
   static const admin_driver_unassign_title = 'admin.driver_unassign_title';
   static const admin_driver_unassign_message = 'admin.driver_unassign_message';
+  static const admin_driver_available = 'admin.driver_available';
+  static const admin_driver_busy = 'admin.driver_busy';
+  static const admin_driver_busy_title = 'admin.driver_busy_title';
+  static const admin_driver_busy_confirm_message = 'admin.driver_busy_confirm_message';
   static const admin_dashboard = 'admin.dashboard';
   static const admin_orders = 'admin.orders';
   static const admin_menu = 'admin.menu';
@@ -720,10 +727,8 @@ abstract class  LocaleKeys {
   static const admin_reset_line_payments = 'admin_reset.line_payments';
   static const admin_reset_line_reviews = 'admin_reset.line_reviews';
   static const admin_reset_line_feedback = 'admin_reset.line_feedback';
-  static const admin_reset_line_loyalty_accounts =
-      'admin_reset.line_loyalty_accounts';
-  static const admin_reset_line_points_cleared =
-      'admin_reset.line_points_cleared';
+  static const admin_reset_line_loyalty_accounts = 'admin_reset.line_loyalty_accounts';
+  static const admin_reset_line_points_cleared = 'admin_reset.line_points_cleared';
   static const admin_reset_line_transactions = 'admin_reset.line_transactions';
   static const admin_reset_password_label = 'admin_reset.password_label';
   static const admin_reset_type_to_confirm = 'admin_reset.type_to_confirm';
@@ -731,9 +736,9 @@ abstract class  LocaleKeys {
   static const admin_reset_verify_no_email = 'admin_reset.verify_no_email';
   static const admin_reset_wrong_password = 'admin_reset.wrong_password';
   static const admin_reset_account_locked = 'admin_reset.account_locked';
-  static const admin_reset_disabled_in_production =
-      'admin_reset.disabled_in_production';
+  static const admin_reset_disabled_in_production = 'admin_reset.disabled_in_production';
   static const admin_reset_forbidden = 'admin_reset.forbidden';
+  static const admin_reset = 'admin_reset';
   static const customers_title = 'customers.title';
   static const customers_search_hint = 'customers.search_hint';
   static const customers_filter_all = 'customers.filter_all';
@@ -962,6 +967,36 @@ abstract class  LocaleKeys {
   static const auth_fill_all_fields = 'auth.fill_all_fields';
   static const auth_invalid_credentials = 'auth.invalid_credentials';
   static const auth = 'auth';
+  static const password_reset_forgot_subtitle = 'password_reset.forgot_subtitle';
+  static const password_reset_forgot_title = 'password_reset.forgot_title';
+  static const password_reset_forgot_body = 'password_reset.forgot_body';
+  static const password_reset_send_link_btn = 'password_reset.send_link_btn';
+  static const password_reset_invalid_email = 'password_reset.invalid_email';
+  static const password_reset_cooldown_message = 'password_reset.cooldown_message';
+  static const password_reset_rate_limited_message = 'password_reset.rate_limited_message';
+  static const password_reset_rate_limited_generic = 'password_reset.rate_limited_generic';
+  static const password_reset_resend_countdown = 'password_reset.resend_countdown';
+  static const password_reset_check_inbox_title = 'password_reset.check_inbox_title';
+  static const password_reset_generic_sent_message = 'password_reset.generic_sent_message';
+  static const password_reset_resend_btn = 'password_reset.resend_btn';
+  static const password_reset_back_to_login = 'password_reset.back_to_login';
+  static const password_reset_reset_subtitle = 'password_reset.reset_subtitle';
+  static const password_reset_reset_title = 'password_reset.reset_title';
+  static const password_reset_new_password_label = 'password_reset.new_password_label';
+  static const password_reset_confirm_password_label = 'password_reset.confirm_password_label';
+  static const password_reset_password_length_error = 'password_reset.password_length_error';
+  static const password_reset_password_mismatch = 'password_reset.password_mismatch';
+  static const password_reset_reset_btn = 'password_reset.reset_btn';
+  static const password_reset_success_title = 'password_reset.success_title';
+  static const password_reset_success_message = 'password_reset.success_message';
+  static const password_reset_go_to_login_btn = 'password_reset.go_to_login_btn';
+  static const password_reset_invalid_link_title = 'password_reset.invalid_link_title';
+  static const password_reset_invalid_link_message = 'password_reset.invalid_link_message';
+  static const password_reset_expired_link_message = 'password_reset.expired_link_message';
+  static const password_reset_used_link_message = 'password_reset.used_link_message';
+  static const password_reset_missing_token_message = 'password_reset.missing_token_message';
+  static const password_reset_request_new_link_btn = 'password_reset.request_new_link_btn';
+  static const password_reset = 'password_reset';
   static const onboarding_select_language = 'onboarding.select_language';
   static const onboarding_select_language_sub = 'onboarding.select_language_sub';
   static const onboarding_arabic = 'onboarding.arabic';

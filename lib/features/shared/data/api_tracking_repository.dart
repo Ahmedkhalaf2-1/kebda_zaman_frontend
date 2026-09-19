@@ -40,6 +40,7 @@ class ApiTrackingRepository implements TrackingRepository {
 
   static OrderTracking _mapTracking(String orderId, Map<String, dynamic> json) {
     final locationJson = json['location'] as Map<String, dynamic>?;
+    final destinationJson = json['destination'] as Map<String, dynamic>?;
     return OrderTracking(
       orderId: json['orderId'] as String? ?? orderId,
       state: trackingStateFromWire(json['state'] as String?),
@@ -63,6 +64,15 @@ class ApiTrackingRepository implements TrackingRepository {
               ).toLocal(),
             ),
       locationAgeSeconds: (json['locationAgeSeconds'] as num?)?.toInt(),
+      destination: destinationJson == null
+          ? null
+          : TrackingDestination(
+              latitude: (destinationJson['latitude'] as num).toDouble(),
+              longitude: (destinationJson['longitude'] as num).toDouble(),
+            ),
+      distanceKm: (json['distanceKm'] as num?)?.toDouble(),
+      etaSeconds: (json['etaSeconds'] as num?)?.toInt(),
+      encodedPolyline: json['encodedPolyline'] as String?,
     );
   }
 

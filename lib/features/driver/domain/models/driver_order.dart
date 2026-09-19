@@ -39,6 +39,13 @@ abstract class DriverOrder with _$DriverOrder {
     // must echo back on every location upload. Preserved here (unused until
     // the tracking phase) so a stale value is never silently dropped.
     required int assignmentVersion,
+    // Same checkout-time route-estimate snapshot the customer/admin [Order]
+    // model carries (`deliveryDistanceKm`/`deliveryDurationSeconds`) — not
+    // a live/current-position figure, so it's shown as a static reference
+    // on the driver's order screen rather than something that updates as
+    // the driver moves.
+    double? deliveryDistanceKm,
+    int? deliveryDurationSeconds,
   }) = _DriverOrder;
 
   factory DriverOrder.fromJson(Map<String, dynamic> json) =>

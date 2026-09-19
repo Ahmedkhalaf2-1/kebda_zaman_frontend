@@ -100,6 +100,29 @@ void main() {
     },
   );
 
+  test('parses the optional delivery distance/duration snapshot', () {
+    final json = baseDriverOrderJson();
+    json['deliveryDistanceKm'] = 3.4;
+    json['deliveryDurationSeconds'] = 480;
+
+    final order = ApiDriverOrderRepository.mapDriverOrderForTesting(json);
+
+    expect(order.deliveryDistanceKm, 3.4);
+    expect(order.deliveryDurationSeconds, 480);
+  });
+
+  test(
+    'a missing delivery distance/duration snapshot stays null rather than defaulting to 0',
+    () {
+      final order = ApiDriverOrderRepository.mapDriverOrderForTesting(
+        baseDriverOrderJson(),
+      );
+
+      expect(order.deliveryDistanceKm, isNull);
+      expect(order.deliveryDurationSeconds, isNull);
+    },
+  );
+
   test('a null deliveryAddress never crashes and stays null', () {
     final order = ApiDriverOrderRepository.mapDriverOrderForTesting(
       baseDriverOrderJson(deliveryAddress: null),

@@ -14,6 +14,10 @@ _DriverAccount _$DriverAccountFromJson(Map<String, dynamic> json) =>
       phone: json['phone'] as String?,
       isActive: json['isActive'] as bool,
       createdAt: DateTime.parse(json['createdAt'] as String),
+      availability: json['availability'] == null
+          ? DriverAvailability.unknown
+          : _availabilityFromWire(json['availability'] as String?),
+      activeOrderId: json['activeOrderId'] as String?,
     );
 
 Map<String, dynamic> _$DriverAccountToJson(_DriverAccount instance) =>
@@ -24,4 +28,5 @@ Map<String, dynamic> _$DriverAccountToJson(_DriverAccount instance) =>
       'phone': instance.phone,
       'isActive': instance.isActive,
       'createdAt': instance.createdAt.toIso8601String(),
+      'activeOrderId': instance.activeOrderId,
     };

@@ -40,6 +40,11 @@ class _AdminOrderDriverSectionState
     if (!mounted) return;
     setState(() => _submitting = false);
     if (message != null) {
+      // A rejected assignment (e.g. `409 DRIVER_ALREADY_BUSY`) means the
+      // driver directory shown to the admin is now stale — refresh it so
+      // the next attempt picks from current availability rather than the
+      // same snapshot that just got rejected.
+      ref.invalidate(activeDriversForAssignmentProvider);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
@@ -208,10 +213,55 @@ class _DriverPickerDialog extends ConsumerWidget {
                 itemCount: available.length,
                 itemBuilder: (context, index) {
                   final driver = available[index];
+                  final isBusy = driver.availability == DriverAvailability.busy;
                   return ListTile(
                     title: Text(driver.name),
                     subtitle: driver.phone != null ? Text(driver.phone!) : null,
-                    onTap: () => Navigator.of(context).pop(driver),
+                    trailing: switch (driver.availability) {
+                      DriverAvailability.available => Text(
+                        'admin.driver_available'.tr(),
+                        style: KZ.caption.copyWith(color: KZ.tertiary),
+                      ),
+                      DriverAvailability.busy => Text(
+                        'admin.driver_busy'.tr(),
+                        style: KZ.caption.copyWith(color: KZ.error),
+                      ),
+                      DriverAvailability.unknown => null,
+                    },
+                    // Still selectable while busy — availability can change
+                    // between load and tap, and the backend's own `409
+                    // DRIVER_ALREADY_BUSY` is the real enforcement; this is
+                    // just a strong visual steer away from an assignment
+                    // that's very likely to be rejected.
+                    enabled: true,
+                    onTap: isBusy
+                        ? () async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: Text('admin.driver_busy_title'.tr()),
+                                content: Text(
+                                  'admin.driver_busy_confirm_message'.tr(),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(ctx).pop(false),
+                                    child: Text('common.cancel'.tr()),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(ctx).pop(true),
+                                    child: Text('common.continue'.tr()),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirmed == true && context.mounted) {
+                              Navigator.of(context).pop(driver);
+                            }
+                          }
+                        : () => Navigator.of(context).pop(driver),
                   );
                 },
               ),

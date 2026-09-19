@@ -196,6 +196,22 @@ class _DriverOrderDetailsScreenState
                 ..._addressLines(address)
               else
                 const Text('—', style: KZ.body),
+              if (order.deliveryDistanceKm != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    '${'checkout.distance'.tr()}: ${order.deliveryDistanceKm!.toStringAsFixed(2)} km',
+                    style: KZ.body,
+                  ),
+                ),
+              if (order.deliveryDurationSeconds != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    '${'checkout.estimated_time'.tr()}: ${(order.deliveryDurationSeconds! / 60).round()} min',
+                    style: KZ.body,
+                  ),
+                ),
               const SizedBox(height: 12),
               if (canNavigate)
                 SizedBox(

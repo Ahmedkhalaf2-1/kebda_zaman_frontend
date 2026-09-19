@@ -58,6 +58,69 @@ void main() {
     });
 
     test(
+      'parses destination/distanceKm/etaSeconds/encodedPolyline when present',
+      () {
+        final tracking = ApiTrackingRepository.mapTrackingForTesting(
+          'order-1',
+          {
+            'orderId': 'order-1',
+            'state': 'ACTIVE',
+            'driverName': 'Ahmed',
+            'driverPhone': '+201234567890',
+            'location': {
+              'latitude': 30.05,
+              'longitude': 31.24,
+              'capturedAt': '2026-01-01T12:00:00.000Z',
+              'receivedAt': '2026-01-01T12:00:02.000Z',
+            },
+            'destination': {'latitude': 30.06, 'longitude': 31.25},
+            'distanceKm': 3.4,
+            'etaSeconds': 480,
+            'encodedPolyline': 'abc123',
+          },
+        );
+
+        expect(tracking.destination, isNotNull);
+        expect(tracking.destination!.latitude, 30.06);
+        expect(tracking.destination!.longitude, 31.25);
+        expect(tracking.distanceKm, 3.4);
+        expect(tracking.etaSeconds, 480);
+        expect(tracking.encodedPolyline, 'abc123');
+      },
+    );
+
+    test(
+      'route fields are independently nullable when Google Routes fails temporarily',
+      () {
+        final tracking = ApiTrackingRepository.mapTrackingForTesting(
+          'order-1',
+          {
+            'orderId': 'order-1',
+            'state': 'ACTIVE',
+            'location': {
+              'latitude': 30.05,
+              'longitude': 31.24,
+              'capturedAt': '2026-01-01T12:00:00.000Z',
+              'receivedAt': '2026-01-01T12:00:02.000Z',
+            },
+            'destination': null,
+            'distanceKm': null,
+            'etaSeconds': null,
+            'encodedPolyline': null,
+          },
+        );
+
+        expect(tracking.destination, isNull);
+        expect(tracking.distanceKm, isNull);
+        expect(tracking.etaSeconds, isNull);
+        expect(tracking.encodedPolyline, isNull);
+        // The driver location itself must remain present regardless of the
+        // route computation having failed.
+        expect(tracking.location, isNotNull);
+      },
+    );
+
+    test(
       'a null location (e.g. NOT_STARTED/WAITING_FOR_LOCATION) never becomes (0,0)',
       () {
         final tracking =

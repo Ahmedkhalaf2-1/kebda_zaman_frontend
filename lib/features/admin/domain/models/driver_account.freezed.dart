@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DriverAccount {
 
- String get id; String get name; String? get email; String? get phone; bool get isActive; DateTime get createdAt;
+ String get id; String get name; String? get email; String? get phone; bool get isActive; DateTime get createdAt;@JsonKey(name: 'availability', fromJson: _availabilityFromWire, includeToJson: false) DriverAvailability get availability; String? get activeOrderId;
 /// Create a copy of DriverAccount
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $DriverAccountCopyWith<DriverAccount> get copyWith => _$DriverAccountCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as DriverAccount;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DriverAccount&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.phone, _this.phone) || other.phone == _this.phone)&&(identical(other.isActive, _this.isActive) || other.isActive == _this.isActive)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DriverAccount&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.phone, _this.phone) || other.phone == _this.phone)&&(identical(other.isActive, _this.isActive) || other.isActive == _this.isActive)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.availability, _this.availability) || other.availability == _this.availability)&&(identical(other.activeOrderId, _this.activeOrderId) || other.activeOrderId == _this.activeOrderId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as DriverAccount;
-  return Object.hash(runtimeType,_this.id,_this.name,_this.email,_this.phone,_this.isActive,_this.createdAt);
+  return Object.hash(runtimeType,_this.id,_this.name,_this.email,_this.phone,_this.isActive,_this.createdAt,_this.availability,_this.activeOrderId);
 }
 
 @override
 String toString() {
   final _this = this as DriverAccount;
-  return 'DriverAccount(id: ${_this.id}, name: ${_this.name}, email: ${_this.email}, phone: ${_this.phone}, isActive: ${_this.isActive}, createdAt: ${_this.createdAt})';
+  return 'DriverAccount(id: ${_this.id}, name: ${_this.name}, email: ${_this.email}, phone: ${_this.phone}, isActive: ${_this.isActive}, createdAt: ${_this.createdAt}, availability: ${_this.availability}, activeOrderId: ${_this.activeOrderId})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $DriverAccountCopyWith<$Res>  {
   factory $DriverAccountCopyWith(DriverAccount value, $Res Function(DriverAccount) _then) = _$DriverAccountCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String? email, String? phone, bool isActive, DateTime createdAt
+ String id, String name, String? email, String? phone, bool isActive, DateTime createdAt,@JsonKey(name: 'availability', fromJson: _availabilityFromWire, includeToJson: false) DriverAvailability availability, String? activeOrderId
 });
 
 
@@ -71,7 +71,7 @@ class _$DriverAccountCopyWithImpl<$Res>
 
 /// Create a copy of DriverAccount
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? email = freezed,Object? phone = freezed,Object? isActive = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? email = freezed,Object? phone = freezed,Object? isActive = null,Object? createdAt = null,Object? availability = null,Object? activeOrderId = freezed,}) {
   return _then(DriverAccount(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -79,7 +79,9 @@ as String,email: freezed == email ? _self.email : email // ignore: cast_nullable
 as String?,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
 as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,availability: null == availability ? _self.availability : availability // ignore: cast_nullable_to_non_nullable
+as DriverAvailability,activeOrderId: freezed == activeOrderId ? _self.activeOrderId : activeOrderId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -164,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? email,  String? phone,  bool isActive,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? email,  String? phone,  bool isActive,  DateTime createdAt, @JsonKey(name: 'availability', fromJson: _availabilityFromWire, includeToJson: false)  DriverAvailability availability,  String? activeOrderId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DriverAccount() when $default != null:
-return $default(_that.id,_that.name,_that.email,_that.phone,_that.isActive,_that.createdAt);case _:
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.isActive,_that.createdAt,_that.availability,_that.activeOrderId);case _:
   return orElse();
 
 }
@@ -185,10 +187,10 @@ return $default(_that.id,_that.name,_that.email,_that.phone,_that.isActive,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? email,  String? phone,  bool isActive,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? email,  String? phone,  bool isActive,  DateTime createdAt, @JsonKey(name: 'availability', fromJson: _availabilityFromWire, includeToJson: false)  DriverAvailability availability,  String? activeOrderId)  $default,) {final _that = this;
 switch (_that) {
 case _DriverAccount():
-return $default(_that.id,_that.name,_that.email,_that.phone,_that.isActive,_that.createdAt);case _:
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.isActive,_that.createdAt,_that.availability,_that.activeOrderId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +207,10 @@ return $default(_that.id,_that.name,_that.email,_that.phone,_that.isActive,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? email,  String? phone,  bool isActive,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? email,  String? phone,  bool isActive,  DateTime createdAt, @JsonKey(name: 'availability', fromJson: _availabilityFromWire, includeToJson: false)  DriverAvailability availability,  String? activeOrderId)?  $default,) {final _that = this;
 switch (_that) {
 case _DriverAccount() when $default != null:
-return $default(_that.id,_that.name,_that.email,_that.phone,_that.isActive,_that.createdAt);case _:
+return $default(_that.id,_that.name,_that.email,_that.phone,_that.isActive,_that.createdAt,_that.availability,_that.activeOrderId);case _:
   return null;
 
 }
@@ -220,7 +222,7 @@ return $default(_that.id,_that.name,_that.email,_that.phone,_that.isActive,_that
 @JsonSerializable()
 
 class _DriverAccount implements DriverAccount {
-  const _DriverAccount({required this.id, required this.name, this.email, this.phone, required this.isActive, required this.createdAt});
+  const _DriverAccount({required this.id, required this.name, this.email, this.phone, required this.isActive, required this.createdAt, @JsonKey(name: 'availability', fromJson: _availabilityFromWire, includeToJson: false) this.availability = DriverAvailability.unknown, this.activeOrderId});
   factory _DriverAccount.fromJson(Map<String, dynamic> json) => _$DriverAccountFromJson(json);
 
 @override final  String id;
@@ -229,6 +231,8 @@ class _DriverAccount implements DriverAccount {
 @override final  String? phone;
 @override final  bool isActive;
 @override final  DateTime createdAt;
+@override@JsonKey(name: 'availability', fromJson: _availabilityFromWire, includeToJson: false) final  DriverAvailability availability;
+@override final  String? activeOrderId;
 
 /// Create a copy of DriverAccount
 /// with the given fields replaced by the non-null parameter values.
@@ -243,18 +247,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DriverAccount&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DriverAccount&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.availability, availability) || other.availability == availability)&&(identical(other.activeOrderId, activeOrderId) || other.activeOrderId == activeOrderId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,email,phone,isActive,createdAt);
+    return Object.hash(runtimeType,id,name,email,phone,isActive,createdAt,availability,activeOrderId);
 }
 
 @override
 String toString() {
-    return 'DriverAccount(id: $id, name: $name, email: $email, phone: $phone, isActive: $isActive, createdAt: $createdAt)';
+    return 'DriverAccount(id: $id, name: $name, email: $email, phone: $phone, isActive: $isActive, createdAt: $createdAt, availability: $availability, activeOrderId: $activeOrderId)';
 }
 
 
@@ -265,7 +269,7 @@ abstract mixin class _$DriverAccountCopyWith<$Res> implements $DriverAccountCopy
   factory _$DriverAccountCopyWith(_DriverAccount value, $Res Function(_DriverAccount) _then) = __$DriverAccountCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String? email, String? phone, bool isActive, DateTime createdAt
+ String id, String name, String? email, String? phone, bool isActive, DateTime createdAt,@JsonKey(name: 'availability', fromJson: _availabilityFromWire, includeToJson: false) DriverAvailability availability, String? activeOrderId
 });
 
 
@@ -282,7 +286,7 @@ class __$DriverAccountCopyWithImpl<$Res>
 
 /// Create a copy of DriverAccount
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? email = freezed,Object? phone = freezed,Object? isActive = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? email = freezed,Object? phone = freezed,Object? isActive = null,Object? createdAt = null,Object? availability = null,Object? activeOrderId = freezed,}) {
   return _then(_DriverAccount(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -290,7 +294,9 @@ as String,email: freezed == email ? _self.email : email // ignore: cast_nullable
 as String?,phone: freezed == phone ? _self.phone : phone // ignore: cast_nullable_to_non_nullable
 as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,availability: null == availability ? _self.availability : availability // ignore: cast_nullable_to_non_nullable
+as DriverAvailability,activeOrderId: freezed == activeOrderId ? _self.activeOrderId : activeOrderId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

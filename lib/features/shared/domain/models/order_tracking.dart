@@ -52,6 +52,18 @@ abstract class TrackingLocationSample with _$TrackingLocationSample {
   }) = _TrackingLocationSample;
 }
 
+/// The customer's delivery destination coordinates, as carried on every
+/// tracking response (`OrderTrackingResponseDto.destination`) — always the
+/// same point regardless of driver movement, so it never needs its own
+/// staleness handling the way [TrackingLocationSample] does.
+@freezed
+abstract class TrackingDestination with _$TrackingDestination {
+  const factory TrackingDestination({
+    required double latitude,
+    required double longitude,
+  }) = _TrackingDestination;
+}
+
 /// `OrderTrackingResponseDto` (DRIVER_DELIVERY_API_CONTRACT.md Phase 2) — the
 /// shape both `GET /orders/:id/tracking` (customer) and
 /// `GET /admin/orders/:id/tracking` (staff) return. `driverName`/
@@ -60,6 +72,11 @@ abstract class TrackingLocationSample with _$TrackingLocationSample {
 /// callers must still treat them as nullable rather than assuming the
 /// state guarantees it, since this is client-side defensive parsing of a
 /// contract, not a language-level guarantee.
+///
+/// `distanceKm`/`etaSeconds`/`encodedPolyline` are all server-computed
+/// (Google Routes) and may independently be `null` when that computation
+/// temporarily fails — never recomputed client-side, and a `null` route
+/// must never block the driver marker itself from continuing to update.
 @freezed
 abstract class OrderTracking with _$OrderTracking {
   const factory OrderTracking({
@@ -69,6 +86,10 @@ abstract class OrderTracking with _$OrderTracking {
     String? driverPhone,
     TrackingLocationSample? location,
     int? locationAgeSeconds,
+    TrackingDestination? destination,
+    double? distanceKm,
+    int? etaSeconds,
+    String? encodedPolyline,
   }) = _OrderTracking;
 }
 

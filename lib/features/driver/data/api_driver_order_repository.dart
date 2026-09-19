@@ -114,6 +114,9 @@ class ApiDriverOrderRepository implements DriverOrderRepository {
           ? DateTime.parse(json['createdAt']).toLocal()
           : DateTime.now(),
       assignmentVersion: (json['assignmentVersion'] as num?)?.toInt() ?? 0,
+      deliveryDistanceKm: (json['deliveryDistanceKm'] as num?)?.toDouble(),
+      deliveryDurationSeconds: (json['deliveryDurationSeconds'] as num?)
+          ?.toInt(),
     );
   }
 
