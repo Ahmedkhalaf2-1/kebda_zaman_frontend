@@ -127,6 +127,11 @@ abstract class Order with _$Order {
     // PICKUP orders (never assignable) and for any non-admin order response
     // that doesn't include it.
     String? driverId,
+    // Admin-only additive field — the customer's phone number, returned as a
+    // top-level field on `GET /admin/orders` and `GET /admin/orders/:id`
+    // only. Always null on customer-facing order responses (they simply
+    // don't carry this key), never populated from any other source.
+    String? customerPhone,
   }) = _Order;
 
   factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);

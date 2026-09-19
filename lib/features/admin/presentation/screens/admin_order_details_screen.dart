@@ -132,15 +132,53 @@ class AdminOrderDetailsScreen extends ConsumerWidget {
 
         _buildSectionCard(
           title: 'Customer',
-          child: Text(
-            order.customerName?.isNotEmpty == true
-                ? order.customerName!
-                : order.userId,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: onSurfaceColor,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                order.customerName?.isNotEmpty == true
+                    ? order.customerName!
+                    : order.userId,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: onSurfaceColor,
+                ),
+              ),
+              if (order.customerPhone != null &&
+                  order.customerPhone!.trim().isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  order.customerPhone!,
+                  style: const TextStyle(fontSize: 13, color: KZ.secondary),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: primaryColor,
+                      side: const BorderSide(color: primaryColor),
+                      shape: const StadiumBorder(),
+                    ),
+                    onPressed: () async {
+                      final launched = await launchPhoneCall(
+                        order.customerPhone!,
+                      );
+                      if (!launched && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('driver_app.call_unavailable'.tr()),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.call_rounded),
+                    label: Text('admin.call_customer'.tr()),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
         const SizedBox(height: 12),

@@ -65,6 +65,7 @@ _Order _$OrderFromJson(Map<String, dynamic> json) => _Order(
           json['loyaltyRedemption'] as Map<String, dynamic>,
         ),
   driverId: json['driverId'] as String?,
+  customerPhone: json['customerPhone'] as String?,
 );
 
 Map<String, dynamic> _$OrderToJson(_Order instance) => <String, dynamic>{
@@ -99,6 +100,7 @@ Map<String, dynamic> _$OrderToJson(_Order instance) => <String, dynamic>{
   'preparationTimeMinutes': instance.preparationTimeMinutes,
   'loyaltyRedemption': instance.loyaltyRedemption,
   'driverId': instance.driverId,
+  'customerPhone': instance.customerPhone,
 };
 
 const _$FulfillmentTypeEnumMap = {

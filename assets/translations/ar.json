@@ -588,6 +588,7 @@
     "driver_busy": "مشغول",
     "driver_busy_title": "السائق مشغول",
     "driver_busy_confirm_message": "هذا السائق في توصيلة أخرى حاليًا. هل تريد تعيينه رغم ذلك؟",
+    "call_customer": "الاتصال بالعميل",
     "dashboard": "لوحة التحكم",
     "orders": "إدارة الطلبات",
     "menu": "إدارة الأصناف والأقسام",

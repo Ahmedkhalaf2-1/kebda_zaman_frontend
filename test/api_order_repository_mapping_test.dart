@@ -65,6 +65,26 @@ void main() {
     });
   });
 
+  group('ApiOrderRepository customerPhone mapping', () {
+    test('parses a top-level customerPhone (admin order response)', () {
+      final json = baseOrderJson();
+      json['customerPhone'] = '0500000000';
+
+      final order = ApiOrderRepository.mapOrderForTesting(json);
+
+      expect(order.customerPhone, '0500000000');
+    });
+
+    test(
+      'a missing customerPhone (customer-facing order response) stays null, never crashes',
+      () {
+        final order = ApiOrderRepository.mapOrderForTesting(baseOrderJson());
+
+        expect(order.customerPhone, isNull);
+      },
+    );
+  });
+
   group('ApiOrderRepository paymentStatus mapping', () {
     test(
       'paymentStatus PENDING maps to the wire format expected by the UI',

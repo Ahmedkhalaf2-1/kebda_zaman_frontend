@@ -213,6 +213,15 @@ class _DriverPickerDialog extends ConsumerWidget {
                 itemCount: available.length,
                 itemBuilder: (context, index) {
                   final driver = available[index];
+                  // BUSY is the only availability value that blocks
+                  // selection — `unknown` (older backend responses that
+                  // don't carry the field yet, or a value this build
+                  // doesn't recognize) stays selectable rather than being
+                  // treated as AVAILABLE *or* locked out, preserving the
+                  // pre-availability picker behavior for those cases. The
+                  // backend's own `409 DRIVER_ALREADY_BUSY` remains the
+                  // real enforcement for any race between this list
+                  // loading and the assign tap.
                   final isBusy = driver.availability == DriverAvailability.busy;
                   return ListTile(
                     title: Text(driver.name),
@@ -228,39 +237,9 @@ class _DriverPickerDialog extends ConsumerWidget {
                       ),
                       DriverAvailability.unknown => null,
                     },
-                    // Still selectable while busy — availability can change
-                    // between load and tap, and the backend's own `409
-                    // DRIVER_ALREADY_BUSY` is the real enforcement; this is
-                    // just a strong visual steer away from an assignment
-                    // that's very likely to be rejected.
-                    enabled: true,
+                    enabled: !isBusy,
                     onTap: isBusy
-                        ? () async {
-                            final confirmed = await showDialog<bool>(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                title: Text('admin.driver_busy_title'.tr()),
-                                content: Text(
-                                  'admin.driver_busy_confirm_message'.tr(),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(ctx).pop(false),
-                                    child: Text('common.cancel'.tr()),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(ctx).pop(true),
-                                    child: Text('common.continue'.tr()),
-                                  ),
-                                ],
-                              ),
-                            );
-                            if (confirmed == true && context.mounted) {
-                              Navigator.of(context).pop(driver);
-                            }
-                          }
+                        ? null
                         : () => Navigator.of(context).pop(driver),
                   );
                 },

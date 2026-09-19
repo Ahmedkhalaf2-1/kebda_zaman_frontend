@@ -588,6 +588,7 @@
     "driver_busy": "Busy",
     "driver_busy_title": "Driver is busy",
     "driver_busy_confirm_message": "This driver is currently on another delivery. Assign anyway?",
+    "call_customer": "Call Customer",
     "dashboard": "Dashboard",
     "orders": "Orders Management",
     "menu": "Menu Management",

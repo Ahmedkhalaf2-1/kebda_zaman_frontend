@@ -566,6 +566,7 @@ abstract class  LocaleKeys {
   static const admin_driver_busy = 'admin.driver_busy';
   static const admin_driver_busy_title = 'admin.driver_busy_title';
   static const admin_driver_busy_confirm_message = 'admin.driver_busy_confirm_message';
+  static const admin_call_customer = 'admin.call_customer';
   static const admin_dashboard = 'admin.dashboard';
   static const admin_orders = 'admin.orders';
   static const admin_menu = 'admin.menu';

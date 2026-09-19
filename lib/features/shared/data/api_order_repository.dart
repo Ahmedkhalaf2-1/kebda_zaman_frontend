@@ -680,6 +680,7 @@ class ApiOrderRepository implements OrderRepository {
       estimatedTime: json['estimatedDeliveryTime'],
       preparationTimeMinutes: _toIntField(json['preparationTimeMinutes']),
       driverId: json['driverId'] as String?,
+      customerPhone: json['customerPhone'] as String?,
     );
   }
 
