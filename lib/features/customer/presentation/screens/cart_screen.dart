@@ -854,10 +854,7 @@ class _OrderSummarySection extends StatelessWidget {
                   alignment: AlignmentDirectional.centerEnd,
                   child: Text(
                     formatCurrency(cart.grandTotal, locale: context.locale),
-                    style: KZ.priceLarge.copyWith(
-                      fontSize: 28,
-                      color: CartScreen.primaryColor,
-                    ),
+                    style: KZ.priceLarge.copyWith(color: CartScreen.primaryColor),
                     maxLines: 1,
                   ),
                 ),
@@ -896,11 +893,16 @@ class _CheckoutButtonState extends State<_CheckoutButton> {
         duration: const Duration(milliseconds: 120),
         curve: Curves.easeOut,
         child: Container(
-          height: 56,
+          // Canonical control height (KZ.iconTapTargetMin) — matches
+          // KZButton's own height rather than a bespoke, taller value; this
+          // stays a custom widget (not a literal KZButton) because it needs
+          // a composite label — text + separator + live total — that
+          // KZButton's single-label API doesn't support.
+          height: KZ.iconTapTargetMin,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: CartScreen.primaryColor,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(KZ.radiusFull),
             boxShadow: [
               BoxShadow(
                 color: CartScreen.primaryColor.withValues(alpha: 0.35),
@@ -916,29 +918,20 @@ class _CheckoutButtonState extends State<_CheckoutButton> {
               children: [
                 Text(
                   'cart.checkout'.tr(),
-                  style: KZ.buttonLabel.copyWith(
-                    fontSize: 17,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: KZ.buttonLabel.copyWith(color: Colors.white),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: KZ.sp8),
                   child: Text(
                     '•',
                     style: KZ.buttonLabel.copyWith(
-                      fontSize: 17,
                       color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
                 ),
                 Text(
                   formatCurrency(widget.total, locale: context.locale),
-                  style: KZ.buttonLabel.copyWith(
-                    fontSize: 17,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: KZ.buttonLabel.copyWith(color: Colors.white),
                 ),
               ],
             ),

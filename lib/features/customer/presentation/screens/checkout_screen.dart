@@ -1207,7 +1207,9 @@ class _FulfillmentToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 52,
+      // Matches KZ.iconTapTargetMin — the same canonical control height as
+      // every other tappable control, rather than a taller bespoke value.
+      height: KZ.iconTapTargetMin,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: CheckoutScreen.surfaceContainerLowColor,
@@ -1797,7 +1799,6 @@ class _OrderSummaryCard extends StatelessWidget {
                   child: Text(
                     formatCurrency(grandTotal, locale: context.locale),
                     style: KZ.priceLarge.copyWith(
-                      fontSize: 28,
                       color: CheckoutScreen.primaryColor,
                     ),
                     maxLines: 1,

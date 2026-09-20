@@ -555,7 +555,7 @@ class _StickyMenuHeaderDelegate extends SliverPersistentHeaderDelegate {
                   borderRadius: BorderRadius.circular(KZ.radiusLg),
                   onTap: () => context.push('/search'),
                   child: Container(
-                    height: 50,
+                    height: KZ.searchBarHeight,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: KZ.cardDecoration(),
                     child: Row(

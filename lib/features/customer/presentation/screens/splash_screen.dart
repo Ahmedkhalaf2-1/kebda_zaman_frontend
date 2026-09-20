@@ -227,7 +227,10 @@ class _PulsingRingLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScaleTransition(
       scale: scaleAnim,
-      child: const KZBrandLogo(width: 148, height: 148),
+      child: const KZBrandLogo(
+        width: KZ.authLogoSize,
+        height: KZ.authLogoSize,
+      ),
     );
   }
 }

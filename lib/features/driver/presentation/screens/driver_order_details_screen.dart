@@ -6,6 +6,7 @@ import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/utils/date_formatter.dart';
 import 'package:kebda_zaman/core/utils/maps_launcher.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_section_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/features/driver/domain/models/driver_order.dart';
 import 'package:kebda_zaman/features/driver/presentation/notifiers/driver_orders_notifier.dart';
@@ -138,19 +139,30 @@ class _DriverOrderDetailsScreenState
         order.customerPhone != null && order.customerPhone!.trim().isNotEmpty;
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(KZ.sp16),
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('#${order.orderNumber}', style: KZ.pageTitle),
+            // Not KZ.pageTitle — this element sits inside a list, not an
+            // AppBar, and the customer tracking screen scopes the identical
+            // "order number heading" element down to 20px rather than the
+            // full page-title size; matching that keeps driver and customer
+            // from reading as two differently-scaled apps.
+            Text(
+              '#${order.orderNumber}',
+              style: KZ.sectionTitle.copyWith(fontSize: 20),
+            ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: KZ.sp10,
+                vertical: KZ.sp4,
+              ),
               decoration: BoxDecoration(
                 color: driverOrderStatusColor(
                   order.status,
                 ).withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(KZ.radiusMd),
               ),
               child: Text(
                 driverOrderStatusLabel(order.status),
@@ -161,33 +173,32 @@ class _DriverOrderDetailsScreenState
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: KZ.sp4),
         Text(formatOrderTimestamp(order.createdAt), style: KZ.caption),
-        const SizedBox(height: 16),
+        const SizedBox(height: KZ.sp16),
 
-        _SectionCard(
+        KZSectionCard(
           title: 'driver_app.section_customer'.tr(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(order.customerName, style: KZ.itemTitle),
               if (hasPhone) ...[
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _callCustomer(order.customerPhone!),
-                    icon: const Icon(Icons.call_rounded),
-                    label: Text('driver_app.call_customer'.tr()),
-                  ),
+                const SizedBox(height: KZ.sp10),
+                KZButton(
+                  label: 'driver_app.call_customer'.tr(),
+                  icon: Icons.call_rounded,
+                  variant: KZButtonVariant.secondary,
+                  fullWidth: true,
+                  onPressed: () => _callCustomer(order.customerPhone!),
                 ),
               ],
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: KZ.sp12),
 
-        _SectionCard(
+        KZSectionCard(
           title: 'admin.delivery_address'.tr(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,34 +223,32 @@ class _DriverOrderDetailsScreenState
                     style: KZ.body,
                   ),
                 ),
-              const SizedBox(height: 12),
+              const SizedBox(height: KZ.sp12),
               if (canNavigate)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () =>
-                        _openDirections(address!.lat!, address.lng!),
-                    icon: const Icon(Icons.directions_rounded),
-                    label: Text('admin.open_in_maps'.tr()),
-                  ),
+                KZButton(
+                  label: 'admin.open_in_maps'.tr(),
+                  icon: Icons.directions_rounded,
+                  fullWidth: true,
+                  onPressed: () =>
+                      _openDirections(address!.lat!, address.lng!),
                 )
               else
                 Text('admin.location_unavailable'.tr(), style: KZ.bodySmall),
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: KZ.sp12),
 
-        _SectionCard(
+        KZSectionCard(
           title: 'driver_app.section_items'.tr(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: order.items.map((item) => _ItemRow(item: item)).toList(),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: KZ.sp12),
 
-        _SectionCard(
+        KZSectionCard(
           title: 'driver_app.section_payment'.tr(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,7 +274,7 @@ class _DriverOrderDetailsScreenState
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: KZ.sp20),
 
         _buildActionButton(order),
       ],
@@ -324,40 +333,6 @@ class _DriverOrderDetailsScreenState
     addRow('admin.address_apartment'.tr(), address.apartment);
     addRow('admin.address_notes'.tr(), address.notes);
     return rows;
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  final String title;
-  final Widget child;
-
-  const _SectionCard({required this.title, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: KZ.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: KZ.outlineVariant.withValues(alpha: 0.25)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: KZ.caption.copyWith(
-              fontWeight: FontWeight.w700,
-              color: KZ.secondary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          child,
-        ],
-      ),
-    );
   }
 }
 

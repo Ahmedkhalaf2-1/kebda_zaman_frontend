@@ -295,7 +295,7 @@ class HomeScreen extends ConsumerWidget {
                   if (data.featuredItems.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(16, KZ.sectionGap, 16, 12),
                         child: Text(
                           'home.featured_meals'.tr(),
                           style: KZ.sectionTitle,
@@ -323,7 +323,7 @@ class HomeScreen extends ConsumerWidget {
                   // ── 8. Best Sellers Section ──
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
+                      padding: const EdgeInsets.fromLTRB(16, KZ.sectionGap, 16, 12),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -460,7 +460,7 @@ class HomeScreen extends ConsumerWidget {
                   if (data.offers.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(16, KZ.sectionGap, 16, 12),
                         child: Text(
                           'home.featured'.tr(),
                           style: KZ.sectionTitle,
@@ -494,7 +494,7 @@ class HomeScreen extends ConsumerWidget {
                   if (recentOrderItems.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(16, KZ.sectionGap, 16, 12),
                         child: Text(
                           'home.recently_ordered'.tr(),
                           style: KZ.sectionTitle,
@@ -521,7 +521,7 @@ class HomeScreen extends ConsumerWidget {
                   if (data.popular.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 28, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(16, KZ.sectionGap, 16, 12),
                         child: Text(
                           'home.recommended'.tr(),
                           style: KZ.sectionTitle,
@@ -1040,7 +1040,11 @@ class _PromoHero extends StatelessWidget {
       child: GestureDetector(
         onTap: () => context.push('/home/item/${item.id}'),
         child: Container(
-          height: 200,
+          // Trimmed from 200 — kept conservative (not the full ~12-18%
+          // suggested range) since a 2-line item name + badge + button
+          // stack needs ~180px of internal content even after the padding
+          // trim below; going lower risks overflowing on a long name.
+          height: 184,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(KZ.radiusXl),
             boxShadow: _kzElevatedShadow,
@@ -1082,7 +1086,7 @@ class _PromoHero extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.all(KZ.sp16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1106,20 +1110,17 @@ class _PromoHero extends StatelessWidget {
                           style: KZ.statusLabel.copyWith(color: Colors.white),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: KZ.sp8),
                       SizedBox(
                         width: 220,
                         child: Text(
                           item.localizedName(context.locale.languageCode),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: KZ.sectionTitle.copyWith(
-                            color: Colors.white,
-                            fontSize: 22,
-                          ),
+                          style: KZ.sectionTitle.copyWith(color: Colors.white),
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: KZ.sp12),
                       KZButton(
                         label: 'home.claim_now'.tr(),
                         pill: true,

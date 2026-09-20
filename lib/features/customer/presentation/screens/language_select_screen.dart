@@ -39,39 +39,36 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
       backgroundColor: KZ.surface,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: KZ.screenPadding,
+            vertical: KZ.pageVerticalPadding,
+          ),
           child: Column(
             children: [
-              const SizedBox(height: 24),
+              const SizedBox(height: KZ.sectionGap),
 
               // Header Emblem with Pulse Animation
               const _PulseEmblem(),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: KZ.sectionGap),
 
               Text(
                 'onboarding.select_language'.tr(),
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: KZ.onSurface,
-                  letterSpacing: -0.5,
-                ),
+                style: KZ.pageTitle.copyWith(letterSpacing: -0.5),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: KZ.sp8),
 
               Text(
                 'onboarding.select_language_sub'.tr(),
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
+                style: KZ.bodySmall.copyWith(
                   color: KZ.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
               ),
 
-              const SizedBox(height: 36),
+              const SizedBox(height: KZ.sectionGap),
 
               // Arabic Option Card
               _buildLangCard(
@@ -80,7 +77,7 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
                 subtitle: 'أصيل طعم الشارع المصري',
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: KZ.sp16),
 
               // English Option Card
               _buildLangCard(
@@ -100,7 +97,7 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
                 pill: true,
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: KZ.sp16),
             ],
           ),
         ),
@@ -123,10 +120,10 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(KZ.sp16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(KZ.radiusXl),
           border: Border.all(
             color: isSelected
                 ? KZ.primary
@@ -142,17 +139,14 @@ class _LanguageSelectScreenState extends ConsumerState<LanguageSelectScreen> {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
+                    style: KZ.sectionTitle.copyWith(
                       color: isSelected ? KZ.primary : KZ.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 14,
+                    style: KZ.bodySmall.copyWith(
                       color: KZ.onSurfaceVariant.withValues(alpha: 0.8),
                     ),
                   ),
@@ -215,14 +209,14 @@ class _PulseEmblemState extends State<_PulseEmblem>
       animation: _controller,
       builder: (context, child) {
         return SizedBox(
-          width: 116,
-          height: 116,
+          width: 100,
+          height: 100,
           child: Stack(
             alignment: Alignment.center,
             children: [
               Container(
-                width: 96 + (16 * _controller.value),
-                height: 96 + (16 * _controller.value),
+                width: 84 + (14 * _controller.value),
+                height: 84 + (14 * _controller.value),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
@@ -234,8 +228,8 @@ class _PulseEmblemState extends State<_PulseEmblem>
                 ),
               ),
               Container(
-                width: 96,
-                height: 96,
+                width: 84,
+                height: 84,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
@@ -244,7 +238,7 @@ class _PulseEmblemState extends State<_PulseEmblem>
                 child: const Center(
                   child: Icon(
                     Icons.language_rounded,
-                    size: 40,
+                    size: 34,
                     color: KZ.primary,
                   ),
                 ),

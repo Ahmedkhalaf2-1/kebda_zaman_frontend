@@ -34,7 +34,7 @@ class KZSettingsGroup extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(KZ.radiusLg),
         border: Border.all(
           color: KZ.outlineVariant.withValues(alpha: 0.5),
           width: 1,
@@ -95,15 +95,22 @@ class KZSettingsRow extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(
+            horizontal: KZ.sp16,
+            vertical: KZ.sp14,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Row(
                   children: [
-                    Icon(icon, color: iconColor ?? KZ.primary, size: 24),
-                    const SizedBox(width: 14),
+                    Icon(
+                      icon,
+                      color: iconColor ?? KZ.primary,
+                      size: KZ.iconAction,
+                    ),
+                    const SizedBox(width: KZ.sp14),
                     Flexible(
                       child: Text(
                         title,
@@ -120,11 +127,11 @@ class KZSettingsRow extends StatelessWidget {
                 ),
               ),
               if (showChevron) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: KZ.sp8),
                 Icon(
                   Icons.chevron_right_rounded,
                   color: KZ.outline.withValues(alpha: 0.7),
-                  size: 24,
+                  size: KZ.iconAction,
                 ),
               ],
             ],
@@ -160,11 +167,14 @@ class KZSettingsSwitchRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: KZ.sp16,
+        vertical: KZ.sp10,
+      ),
       child: Row(
         children: [
-          Icon(icon, color: iconColor ?? KZ.primary, size: 24),
-          const SizedBox(width: 14),
+          Icon(icon, color: iconColor ?? KZ.primary, size: KZ.iconAction),
+          const SizedBox(width: KZ.sp14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,7 +201,7 @@ class KZSettingsSwitchRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: KZ.sp8),
           Switch(value: value, onChanged: onChanged),
         ],
       ),

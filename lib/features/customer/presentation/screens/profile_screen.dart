@@ -129,7 +129,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Expanded(
                 child: ListView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+                  padding: const EdgeInsets.fromLTRB(
+                    20,
+                    KZ.pageVerticalPadding,
+                    20,
+                    40,
+                  ),
                   children: [
                     // 1. Profile Avatar & Info Section (matching HTML)
                     Center(
@@ -208,12 +213,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: KZ.sectionGap),
 
                     // 2. Kebda Rewards Loyalty Card (matching HTML with our rich terracotta brand)
                     _buildLoyaltyCard(context, loyaltyAsync),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: KZ.sectionGap),
 
                     // 3. Quick Actions — compact horizontal tiles instead of
                     // tall centered-icon cards, so the section scans faster
@@ -251,7 +256,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 28),
+                    const SizedBox(height: KZ.sectionGap),
 
                     // 4. Settings entry point — Profile stays the
                     // high-level hub; account editing, language,

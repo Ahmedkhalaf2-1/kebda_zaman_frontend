@@ -46,6 +46,11 @@ class ItemDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
+  // Trimmed from 340px, then 300px — the hero image and the scroll sheet's
+  // top spacer (further below) must stay in sync, since the sheet starts
+  // exactly flush with the bottom of the image.
+  static const double _heroImageHeight = 250;
+
   int quantity = 1;
   final Map<String, String> selectedSingleOptions = {};
   final Map<String, List<String>> selectedMultipleOptions = {};
@@ -632,7 +637,7 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
     List<MenuItem> recommendations,
   ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 32.0),
+      padding: const EdgeInsets.only(bottom: KZ.sectionGap),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -726,18 +731,18 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
             child: Stack(
               children: [
                 // 1. Top Hero Image — the product itself is the visual
-                // focus; height trimmed from the original 340px so it no
-                // longer dominates the screen, and the no-image/error
-                // fallback is now the same neutral, icon-based placeholder
-                // used everywhere else a product photo is missing (see
-                // KZFoodImage) instead of a full-bleed brand-red block
-                // repeating the product name a second time (the title right
-                // below already shows it once).
+                // focus; height trimmed from the original 340px (then 300px)
+                // so it no longer dominates the screen, and the no-image/
+                // error fallback is now the same neutral, icon-based
+                // placeholder used everywhere else a product photo is
+                // missing (see KZFoodImage) instead of a full-bleed
+                // brand-red block repeating the product name a second time
+                // (the title right below already shows it once).
                 Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
-                  height: 300,
+                  height: _heroImageHeight,
                   child: Stack(
                     children: [
                       Positioned.fill(
@@ -777,15 +782,17 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                   ),
                 ),
 
-                // 2. Scrollable Content Sheet (starts at Y=300px — flush
-                // with the bottom of the 300px hero, no overlap — so more of
-                // the product photo stays visible above the sheet than the
-                // original 40px-overlap version).
+                // 2. Scrollable Content Sheet (starts flush with the bottom
+                // of the hero image, no overlap — so more of the product
+                // photo stays visible above the sheet than the original
+                // 40px-overlap version).
                 Positioned.fill(
                   child: CustomScrollView(
                     physics: const BouncingScrollPhysics(),
                     slivers: [
-                      const SliverToBoxAdapter(child: SizedBox(height: 300)),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: _heroImageHeight),
+                      ),
                       SliverToBoxAdapter(
                         child: Container(
                           decoration: const BoxDecoration(
@@ -801,13 +808,20 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                               ),
                             ],
                           ),
-                          padding: const EdgeInsets.fromLTRB(20, 32, 20, 140),
+                          padding: const EdgeInsets.fromLTRB(
+                            20,
+                            KZ.sectionGap,
+                            20,
+                            140,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Header Information
                               Padding(
-                                padding: const EdgeInsets.only(bottom: 32.0),
+                                padding: const EdgeInsets.only(
+                                  bottom: KZ.sectionGap,
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -823,7 +837,14 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                       item.localizedName(
                                         context.locale.languageCode,
                                       ),
-                                      style: KZ.display.copyWith(fontSize: 28),
+                                      // Was KZ.display (32/28) — the
+                                      // hero-emphasis token is meant for at
+                                      // most one standout moment per screen
+                                      // (a splash statement, a big number),
+                                      // not an ordinary page title. This is
+                                      // this screen's own title, which is
+                                      // exactly what KZ.pageTitle is for.
+                                      style: KZ.pageTitle,
                                     ),
                                     const SizedBox(height: 6),
 
@@ -917,7 +938,9 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
 
                               // Customize Ingredients Section
                               Padding(
-                                padding: const EdgeInsets.only(bottom: 32.0),
+                                padding: const EdgeInsets.only(
+                                  bottom: KZ.sectionGap,
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [

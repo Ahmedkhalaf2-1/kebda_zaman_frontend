@@ -141,11 +141,17 @@ class _Banner extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: color.withValues(alpha: 0.12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: KZ.sp16,
+        vertical: KZ.sp8,
+      ),
       child: Row(
         children: [
+          // No exact KZ icon-size token matches 18 (iconInline=16,
+          // iconControl=20) — left as a literal rather than nudging the
+          // visual size in either direction for a pure token-hygiene pass.
           Icon(icon, size: 18, color: color),
-          const SizedBox(width: 8),
+          const SizedBox(width: KZ.sp8),
           Expanded(
             child: Text(text, style: KZ.bodySmall.copyWith(color: color)),
           ),

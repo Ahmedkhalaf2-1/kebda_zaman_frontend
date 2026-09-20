@@ -230,10 +230,10 @@ class _KZLiveTrackingMapState extends State<KZLiveTrackingMap>
         (tracking.driverPhone != null && tracking.driverPhone!.trim().isNotEmpty);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(KZ.sp16),
       decoration: BoxDecoration(
         color: KZ.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(KZ.radiusLg),
         border: Border.all(color: KZ.outlineVariant.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -252,19 +252,19 @@ class _KZLiveTrackingMapState extends State<KZLiveTrackingMap>
                     tracking.driverPhone!.trim().isNotEmpty)
                   TextButton.icon(
                     onPressed: () => launchPhoneCall(tracking.driverPhone!),
-                    icon: const Icon(Icons.call_rounded, size: 16),
+                    icon: const Icon(Icons.call_rounded, size: KZ.iconInline),
                     label: Text('tracking.call_driver'.tr()),
                   ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: KZ.sp8),
           ],
           const SizedBox(
             width: 20,
             height: 20,
             child: CircularProgressIndicator(strokeWidth: 2, color: KZ.primary),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: KZ.sp10),
           Text(
             'tracking.live_waiting_driver'.tr(),
             style: KZ.bodySmall.copyWith(color: KZ.onSurfaceVariant),
@@ -336,7 +336,7 @@ class _KZLiveTrackingMapState extends State<KZLiveTrackingMap>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(KZ.radiusLg),
               child: SizedBox(
                 height: 220,
                 child: Stack(

@@ -32,8 +32,8 @@ class AuthChoiceScreen extends ConsumerWidget {
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 32,
+                  horizontal: KZ.screenPadding,
+                  vertical: KZ.sp28,
                 ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 400),
@@ -41,40 +41,42 @@ class AuthChoiceScreen extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Brand Logo Section — the shared full-color mark, no plate/shadow behind it.
-                      const KZBrandLogo(width: 128, height: 128),
+                      const KZBrandLogo(
+                        width: KZ.authLogoSize,
+                        height: KZ.authLogoSize,
+                      ),
 
-                      const SizedBox(height: 56),
+                      const SizedBox(height: KZ.sectionGap),
 
                       // Title
                       Text(
                         'onboarding.welcome_title'.tr(),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF1A1A1A),
+                        style: KZ.display.copyWith(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
                           letterSpacing: -0.5,
-                          height: 1.2,
                         ),
                       ),
 
-                      const SizedBox(height: 14),
+                      const SizedBox(height: KZ.sp12),
 
                       // Subtitle
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KZ.sp20,
+                        ),
                         child: Text(
                           'onboarding.welcome_sub'.tr(),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
+                          style: KZ.bodyLarge.copyWith(
                             color: KZ.secondary.withValues(alpha: 0.9),
                             height: 1.5,
                           ),
                         ),
                       ),
 
-                      const SizedBox(height: 48),
+                      const SizedBox(height: KZ.sp32),
 
                       // Primary CTA: Log In Button
                       KZButton(
@@ -85,7 +87,7 @@ class AuthChoiceScreen extends ConsumerWidget {
                         pill: true,
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: KZ.sp16),
 
                       // Secondary CTA: Create My Account Button
                       KZButton(
@@ -96,7 +98,7 @@ class AuthChoiceScreen extends ConsumerWidget {
                         pill: true,
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: KZ.sp16),
 
                       // Text Link: Continue as Guest (with arrow after text)
                       Consumer(

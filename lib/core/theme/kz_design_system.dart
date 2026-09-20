@@ -48,6 +48,38 @@ class KZ {
   /// Horizontal padding for all screens
   static const double screenPadding = 20;
 
+  /// Vertical padding for a screen's scrollable content (top of a ListView,
+  /// bottom safe-area buffer above a sticky CTA, etc). Deliberately smaller
+  /// than [screenPadding] — horizontal gutters read as generous by design,
+  /// but stacking that same value vertically between every screen's edge
+  /// and its first/last block is what makes a screen feel like it starts
+  /// "already scrolled down" before any content shows.
+  static const double pageVerticalPadding = sp16;
+
+  /// The gap between two *major, unrelated* blocks on a screen (e.g. a hero
+  /// card and the section below it, or two independent cards stacked
+  /// vertically) — never for spacing *within* a block (a label under a
+  /// value, rows inside a card), which should use [sp8]/[sp12] instead.
+  /// Before this token existed, screens each picked their own value here
+  /// (16/24/28/32), and several stacked 2-4 of those large gaps back to
+  /// back; this is the single token meant to replace all of that ad hoc
+  /// choice with one consistent value.
+  static const double sectionGap = 18;
+
+  /// Fixed logo size for auth/splash "hero brand moment" contexts (splash
+  /// screen, the auth-choice screen) — the one place [KZBrandLogo] is shown
+  /// at a large, fixed size outside of a responsive layout. Screens that lay
+  /// the logo out responsively (e.g. onboarding's hero, which already
+  /// clamps to its available width) should keep doing that instead of using
+  /// this constant.
+  static const double authLogoSize = 116;
+
+  /// Canonical height for a customer-facing search field, shared by every
+  /// screen that offers one (Home's quick-search entry point, Menu's
+  /// inline search, the dedicated Search screen) so the same control never
+  /// reads as a different size depending on which screen it's on.
+  static const double searchBarHeight = 50;
+
   // ─── Border Radius ─────────────────────────────────────
   static const double radiusSm = 8;
   static const double radiusMd = 12;
@@ -204,8 +236,12 @@ class KZ {
     border: Border.all(color: outlineVariant.withOpacity(0.25)),
   );
 
-  // ─── Text Styles (legacy — still used by screens outside the Sprint 2
-  // first-batch migration; kept unchanged for those call sites) ──────────
+  // ─── Text Styles (legacy — being retired. Prefer the Semantic Type Scale
+  // below at every new/touched call site: [headingStyle] → [sectionTitle]
+  // or [pageTitle] depending on role, [bodyStyle] → [body] or [bodyLarge].
+  // Left in place (values unchanged) only for call sites — admin and any
+  // not-yet-migrated non-admin screen — not touched by this pass; do not
+  // add new usages of either. ─────────────────────────────────────────
   static const TextStyle headingStyle = TextStyle(
     // Was 'Montserrat', which was never bundled as an asset and silently
     // fell back to each platform's system font — fixed to the app's real

@@ -158,7 +158,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
                                   child: _OrderCard(order: o),
                                 ),
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: KZ.sectionGap),
                             ],
                             if (data.previousOrders.isNotEmpty) ...[
                               Text(
@@ -173,7 +173,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
                                 ),
                               ),
                             ],
-                            const SizedBox(height: 24),
+                            const SizedBox(height: KZ.sectionGap),
                           ],
                         ),
                       );
