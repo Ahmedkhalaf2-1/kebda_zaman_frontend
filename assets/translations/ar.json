@@ -305,10 +305,10 @@
   },
   "reviews": {
     "title": "التقييمات",
-    "rate_items_heading": "قيّم الأصناف",
+    "rate_items_heading": "تقييم الأصناف",
     "your_rating": "تقييمك",
     "tell_us_about_food": "أخبرنا رأيك في الطعام",
-    "overall_experience": "التجربة العامة",
+    "overall_experience": "تجربة الطلب بشكل عام",
     "overall_experience_sub": "التغليف، الخدمة، وطلبك ككل",
     "overall_comment_hint": "أي ملاحظات أخرى",
     "optional": "اختياري",
@@ -324,7 +324,11 @@
     "load_error": "تعذر تحميل تقييمات هذا الطلب الآن.",
     "not_eligible": "هذا الطلب غير قابل للتقييم",
     "not_eligible_sub": "يمكن تقييم الطلبات المسلَّمة أو المستلَمة فقط.",
-    "guest_blocked": "يرجى تسجيل الدخول لإضافة تقييم."
+    "guest_blocked": "يرجى تسجيل الدخول لإضافة تقييم.",
+    "prompt_title": "كيف كان طلبك؟",
+    "prompt_subtitle": "قيّم تجربتك والأصناف التي طلبتها.",
+    "rate_order": "قيّم الطلب",
+    "not_now": "ليس الآن"
   },
   "admin_reviews": {
     "title": "التقييمات والمراجعات",
@@ -334,7 +338,11 @@
     "rating_distribution": "توزيع التقييمات",
     "top_rated": "الأصناف الأعلى تقييماً",
     "lowest_rated": "الأصناف الأقل تقييماً",
-    "recent_reviews": "أحدث التقييمات",
+    "recent_reviews": "تقييمات الأصناف",
+    "order_feedback_section": "ملاحظات الطلبات",
+    "customer_label": "العميل",
+    "phone_label": "الهاتف",
+    "email_label": "البريد الإلكتروني",
     "order_ref": "طلب #{orderNumber} · {customerName}",
     "unknown_item": "صنف غير معروف",
     "no_data": "لا تتوفر بيانات"
@@ -518,6 +526,8 @@
     "biometric_login_sub_generic": "استخدم بصمة الجهاز لتسجيل الدخول بشكل أسرع",
     "support": "الدعم والمعلومات",
     "help": "المساعدة والدعم",
+    "help_whatsapp_message": "السلام عليكم، أحتاج مساعدة بخصوص طلب من تطبيق كبدة زمان. ممكن تساعدوني لو سمحتم؟",
+    "help_unavailable": "تعذر فتح واتساب. يرجى التأكد من تثبيت التطبيق والمحاولة مرة أخرى.",
     "contact": "تواصل مع خدمة العملاء",
     "privacy": "سياسة الخصوصية",
     "terms": "شروط الاستخدام",

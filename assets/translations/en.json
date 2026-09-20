@@ -305,10 +305,10 @@
   },
   "reviews": {
     "title": "Reviews",
-    "rate_items_heading": "Rate the food",
+    "rate_items_heading": "Item Ratings",
     "your_rating": "Your rating",
     "tell_us_about_food": "Tell us about the food",
-    "overall_experience": "Overall experience",
+    "overall_experience": "Overall Order Experience",
     "overall_experience_sub": "Packaging, service, and your order as a whole",
     "overall_comment_hint": "Any other comments",
     "optional": "Optional",
@@ -324,7 +324,11 @@
     "load_error": "We couldn't load this order's reviews right now.",
     "not_eligible": "This order isn't reviewable",
     "not_eligible_sub": "Only delivered or picked-up orders can be reviewed.",
-    "guest_blocked": "Please sign in to leave a review."
+    "guest_blocked": "Please sign in to leave a review.",
+    "prompt_title": "How was your order?",
+    "prompt_subtitle": "Rate your experience and the items you ordered.",
+    "rate_order": "Rate Order",
+    "not_now": "Not now"
   },
   "admin_reviews": {
     "title": "Ratings & Reviews",
@@ -334,7 +338,11 @@
     "rating_distribution": "Rating Distribution",
     "top_rated": "Top Rated Items",
     "lowest_rated": "Lowest Rated Items",
-    "recent_reviews": "Recent Reviews",
+    "recent_reviews": "Item Reviews",
+    "order_feedback_section": "Order Feedback",
+    "customer_label": "Customer",
+    "phone_label": "Phone",
+    "email_label": "Email",
     "order_ref": "Order #{orderNumber} · {customerName}",
     "unknown_item": "Unknown Item",
     "no_data": "No data available"
@@ -518,6 +526,8 @@
     "biometric_login_sub_generic": "Use device biometrics to log in faster",
     "support": "SUPPORT & ABOUT",
     "help": "Help & Support",
+    "help_whatsapp_message": "Hello, I need help regarding an order from the Kebda Zaman app. Could you please assist me?",
+    "help_unavailable": "Couldn't open WhatsApp. Please make sure it's installed and try again.",
     "contact": "Contact Customer Support",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",

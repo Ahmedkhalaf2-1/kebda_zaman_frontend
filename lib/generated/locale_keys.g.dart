@@ -316,6 +316,10 @@ abstract class  LocaleKeys {
   static const reviews_not_eligible = 'reviews.not_eligible';
   static const reviews_not_eligible_sub = 'reviews.not_eligible_sub';
   static const reviews_guest_blocked = 'reviews.guest_blocked';
+  static const reviews_prompt_title = 'reviews.prompt_title';
+  static const reviews_prompt_subtitle = 'reviews.prompt_subtitle';
+  static const reviews_rate_order = 'reviews.rate_order';
+  static const reviews_not_now = 'reviews.not_now';
   static const reviews = 'reviews';
   static const admin_reviews_title = 'admin_reviews.title';
   static const admin_reviews_item_reviews_average = 'admin_reviews.item_reviews_average';
@@ -325,6 +329,10 @@ abstract class  LocaleKeys {
   static const admin_reviews_top_rated = 'admin_reviews.top_rated';
   static const admin_reviews_lowest_rated = 'admin_reviews.lowest_rated';
   static const admin_reviews_recent_reviews = 'admin_reviews.recent_reviews';
+  static const admin_reviews_order_feedback_section = 'admin_reviews.order_feedback_section';
+  static const admin_reviews_customer_label = 'admin_reviews.customer_label';
+  static const admin_reviews_phone_label = 'admin_reviews.phone_label';
+  static const admin_reviews_email_label = 'admin_reviews.email_label';
   static const admin_reviews_order_ref = 'admin_reviews.order_ref';
   static const admin_reviews_unknown_item = 'admin_reviews.unknown_item';
   static const admin_reviews_no_data = 'admin_reviews.no_data';
@@ -498,6 +506,8 @@ abstract class  LocaleKeys {
   static const settings_biometric_login_sub_generic = 'settings.biometric_login_sub_generic';
   static const settings_support = 'settings.support';
   static const settings_help = 'settings.help';
+  static const settings_help_whatsapp_message = 'settings.help_whatsapp_message';
+  static const settings_help_unavailable = 'settings.help_unavailable';
   static const settings_contact = 'settings.contact';
   static const settings_privacy = 'settings.privacy';
   static const settings_terms = 'settings.terms';

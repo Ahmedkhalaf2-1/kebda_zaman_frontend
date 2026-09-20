@@ -11,6 +11,7 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/favorites_n
 import 'package:kebda_zaman/features/customer/presentation/widgets/delete_account_dialog.dart';
 import 'package:kebda_zaman/core/services/biometric_service.dart';
 import 'package:kebda_zaman/core/services/biometric_preference_store.dart';
+import 'package:kebda_zaman/core/utils/maps_launcher.dart';
 
 /// The real account-management destination — reached from Profile's
 /// "Edit Profile"/"Settings" entry point. Holds everything that used to be
@@ -41,6 +42,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _nameCtrl = TextEditingController(text: user?.name);
     _phoneCtrl = TextEditingController(text: user?.phone);
     _loadBiometricState();
+  }
+
+  // Support WhatsApp number — digits only (country code + number, no `+`,
+  // no spaces), exactly as the `wa.me` deep link requires.
+  static const String _supportWhatsAppNumber = '966539766416';
+
+  Future<void> _openHelpSupport() async {
+    final launched = await launchWhatsAppChat(
+      phoneDigitsOnly: _supportWhatsAppNumber,
+      message: 'settings.help_whatsapp_message'.tr(),
+    );
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('settings.help_unavailable'.tr())));
+    }
   }
 
   Future<void> _loadBiometricState() async {
@@ -174,7 +191,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             KZSettingsGroupHeader('profile.edit_profile'.tr()),
             const SizedBox(height: 8),
             _buildEditProfileForm(),
-            const SizedBox(height: 24),
+            const SizedBox(height: KZ.sectionGap),
           ],
 
           // Preferences
@@ -195,7 +212,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: KZ.sectionGap),
 
           // Other — support/about + the existing dashboard shortcut.
           KZSettingsGroupHeader('settings.support'.tr()),
@@ -217,7 +234,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               KZSettingsRow(
                 icon: Icons.headset_mic_rounded,
                 title: 'settings.help'.tr(),
-                onTap: () {},
+                onTap: _openHelpSupport,
               ),
               const KZSettingsDivider(),
               KZSettingsRow(
@@ -234,7 +251,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: KZ.sectionGap),
 
           // Account exit — separated from the groups above, exactly as it
           // was on Profile (extra space + a quiet hairline, no card

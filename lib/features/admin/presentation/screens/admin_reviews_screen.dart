@@ -6,6 +6,7 @@ import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/widgets/kz_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_star_rating.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
+import 'package:kebda_zaman/core/utils/maps_launcher.dart';
 import 'package:kebda_zaman/features/admin/presentation/widgets/admin_page_header.dart';
 import 'package:kebda_zaman/features/admin/presentation/notifiers/admin_reviews_notifier.dart';
 import 'package:kebda_zaman/features/shared/domain/models/review.dart';
@@ -49,6 +50,7 @@ class _AdminReviewsContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncRecent = ref.watch(adminItemReviewsProvider);
+    final asyncOrderFeedback = ref.watch(adminOrderFeedbackProvider);
 
     return Column(
       children: [
@@ -127,6 +129,38 @@ class _AdminReviewsContent extends ConsumerWidget {
                     children: [
                       for (final review in top)
                         _RecentReviewRow(review: review),
+                    ],
+                  );
+                },
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: KZ.sp16),
+                  child: Center(
+                    child: CircularProgressIndicator(color: KZ.primary),
+                  ),
+                ),
+                error: (_, __) => _EmptyRow(text: 'admin_reviews.no_data'.tr()),
+              ),
+              const SizedBox(height: KZ.sp24),
+              // Order-level feedback — distinct from the per-item reviews
+              // above; same `adminOrderFeedbackProvider` the repository
+              // already exposed, just not rendered anywhere until now.
+              Text(
+                'admin_reviews.order_feedback_section'.tr(),
+                style: KZ.sectionTitle,
+              ),
+              const SizedBox(height: KZ.sp12),
+              asyncOrderFeedback.when(
+                data: (feedback) {
+                  final recent = [...feedback]
+                    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                  final top = recent.take(10).toList();
+                  if (top.isEmpty) {
+                    return _EmptyRow(text: 'admin_reviews.no_data'.tr());
+                  }
+                  return Column(
+                    children: [
+                      for (final item in top)
+                        _OrderFeedbackRow(feedback: item),
                     ],
                   );
                 },
@@ -391,6 +425,7 @@ class _RecentReviewRow extends StatelessWidget {
                 ),
               ],
             ),
+            _CustomerContactRow(customer: review.customer),
             if (review.comment != null &&
                 review.comment!.trim().isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -410,6 +445,139 @@ class _RecentReviewRow extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Order-level feedback ("overall experience") row — same visual language
+/// as [_RecentReviewRow] but with no purchased-item context (order feedback
+/// isn't tied to a single line item), and no star-rating size override
+/// since there's no adjacent item name to balance against.
+class _OrderFeedbackRow extends StatelessWidget {
+  final AdminOrderFeedback feedback;
+
+  const _OrderFeedbackRow({required this.feedback});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: KZCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'admin_reviews.order_ref'.tr(
+                      namedArgs: {
+                        'orderNumber': feedback.order.orderNumber,
+                        'customerName': feedback.customer.fullName,
+                      },
+                    ),
+                    style: KZ.body.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                ),
+                KZStarRating(rating: feedback.rating, size: 18),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              DateFormat.yMMMd(
+                context.locale.languageCode,
+              ).add_jm().format(feedback.createdAt),
+              style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
+            ),
+            _CustomerContactRow(customer: feedback.customer),
+            if (feedback.comment != null &&
+                feedback.comment!.trim().isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: KZ.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(KZ.radiusSm),
+                  border: Border.all(color: KZ.outline.withValues(alpha: 0.3)),
+                ),
+                child: Text(
+                  feedback.comment!,
+                  style: KZ.bodySmall.copyWith(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Secondary line under a review/feedback row's order reference — phone
+/// (with a tap-to-call action, mirroring Admin Order Details' existing
+/// "Call Customer" pattern) and/or email, shown only when present so the
+/// row never displays an empty "Phone: —" placeholder. Kept out of the
+/// primary name/rating line so the main list stays scannable, per the
+/// "customer name primary, phone/email secondary" layout.
+class _CustomerContactRow extends StatelessWidget {
+  final AdminReviewCustomer customer;
+
+  const _CustomerContactRow({required this.customer});
+
+  @override
+  Widget build(BuildContext context) {
+    final phone = customer.phone?.trim();
+    final email = customer.email?.trim();
+    final hasPhone = phone != null && phone.isNotEmpty;
+    final hasEmail = email != null && email.isNotEmpty;
+    if (!hasPhone && !hasEmail) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 12,
+        runSpacing: 2,
+        children: [
+          if (hasPhone)
+            InkWell(
+              onTap: () => launchPhoneCall(phone),
+              borderRadius: BorderRadius.circular(KZ.radiusSm),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.call_rounded,
+                    size: 13,
+                    color: KZ.primary,
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    phone,
+                    style: KZ.caption.copyWith(color: KZ.primary),
+                  ),
+                ],
+              ),
+            ),
+          if (hasEmail)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.email_outlined,
+                  size: 13,
+                  color: KZ.onSurfaceVariant,
+                ),
+                const SizedBox(width: 3),
+                Text(
+                  email,
+                  style: KZ.caption.copyWith(color: KZ.onSurfaceVariant),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

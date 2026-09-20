@@ -17,7 +17,10 @@ import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/core/widgets/kz_live_tracking_map.dart';
+import 'package:kebda_zaman/core/services/review_prompt_dismissal_store.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/customer_tracking_notifier.dart';
+import 'package:kebda_zaman/features/customer/presentation/notifiers/order_reviews_notifier.dart';
 
 final orderTrackingProvider = StreamProvider.family<Order, String>((ref, id) {
   final repo = ref.read(orderRepositoryProvider);
@@ -342,11 +345,20 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
             ),
           ),
         ],
-        const SizedBox(height: 24),
+        const SizedBox(height: KZ.sectionGap),
 
         // 2. Branded Status Card (no external image — offline-safe)
         _StatusBannerCard(order: order, onViewDetails: _scrollToSummary),
-        const SizedBox(height: 16),
+        const SizedBox(height: KZ.sp12),
+
+        // Post-delivery/pickup review prompt — same "reviewable" gate the
+        // manual "Rate Order" entry point on Orders history already uses,
+        // so this never offers to review an order the backend wouldn't
+        // actually accept a review for.
+        if (order.status.isReviewable) ...[
+          _ReviewPromptBanner(order: order),
+          const SizedBox(height: KZ.sp12),
+        ],
 
         // Live driver-location map — delivery orders only (the backend
         // reports NOT_STARTED forever for PICKUP, so this never even polls
@@ -354,13 +366,13 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
         // including rendering nothing for NOT_STARTED/ENDED.
         if (order.fulfillmentType == FulfillmentType.delivery)
           _LiveTrackingSection(order: order),
-        const SizedBox(height: 12),
+        const SizedBox(height: KZ.sp12),
 
         // 3. Vertical Timeline Stepper
         Text('tracking.tracking_status_title'.tr(), style: KZ.sectionTitle),
-        const SizedBox(height: 16),
+        const SizedBox(height: KZ.sp16),
         _buildVerticalTimeline(context, order),
-        const SizedBox(height: 28),
+        const SizedBox(height: KZ.sectionGap),
 
         // 4. Order Summary Collapsible Card
         Container(
@@ -422,7 +434,7 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: KZ.sp24),
       ],
     );
   }
@@ -1040,6 +1052,132 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
           ],
         );
       }),
+    );
+  }
+}
+
+/// Compact, dismissible "how was your order?" banner — the automatic
+/// counterpart to Orders history's manual "Rate Order" entry point, both of
+/// which navigate to the same [OrderReviewScreen] and never duplicate its
+/// submission logic. Never shown for guests, and reuses
+/// [orderReviewsProvider] (the same family provider [OrderReviewScreen]
+/// itself watches) as the sole source of truth for whether anything is
+/// actually still reviewable — a local "dismissed" flag only ever suppresses
+/// this banner, it never substitutes for that backend-authoritative check.
+class _ReviewPromptBanner extends ConsumerStatefulWidget {
+  final Order order;
+
+  const _ReviewPromptBanner({required this.order});
+
+  @override
+  ConsumerState<_ReviewPromptBanner> createState() =>
+      _ReviewPromptBannerState();
+}
+
+class _ReviewPromptBannerState extends ConsumerState<_ReviewPromptBanner> {
+  // `null` = dismissal state not loaded yet (render nothing rather than
+  // flash the banner then hide it); `true`/`false` once resolved.
+  bool? _dismissed;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDismissed();
+  }
+
+  Future<void> _loadDismissed() async {
+    final dismissed = await ReviewPromptDismissalStore.isDismissed(
+      widget.order.id,
+    );
+    if (!mounted) return;
+    setState(() => _dismissed = dismissed);
+  }
+
+  Future<void> _handleNotNow() async {
+    // Hide immediately — the store write completing is not something the
+    // UI needs to wait on, and this never touches backend eligibility or
+    // the manual "Rate Order" entry point in Orders history.
+    setState(() => _dismissed = true);
+    await ReviewPromptDismissalStore.dismiss(widget.order.id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+    final isGuest = !authState.isLoggedIn || (authState.user?.isGuest ?? true);
+    if (isGuest || _dismissed != false) return const SizedBox.shrink();
+
+    final reviewsAsync = ref.watch(orderReviewsProvider(widget.order.id));
+    return reviewsAsync.maybeWhen(
+      data: (data) {
+        // Backend-authoritative: only offer the prompt when the backend
+        // says this order is eligible AND something is genuinely still
+        // unreviewed — never inferred from local state alone. A
+        // partially-reviewed order (e.g. items rated but no overall
+        // feedback yet) still counts as needing the prompt.
+        final needsReview =
+            data.eligible &&
+            (data.items.any((item) => item.review == null) ||
+                data.orderFeedback == null);
+        if (!needsReview) return const SizedBox.shrink();
+
+        return Container(
+          padding: const EdgeInsets.all(KZ.sp16),
+          decoration: BoxDecoration(
+            color: KZ.primary.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(KZ.radiusLg),
+            border: Border.all(color: KZ.primary.withValues(alpha: 0.12)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.stars_rounded,
+                    color: KZ.primary,
+                    size: KZ.iconAction,
+                  ),
+                  const SizedBox(width: KZ.sp8),
+                  Expanded(
+                    child: Text(
+                      'reviews.prompt_title'.tr(),
+                      style: KZ.itemTitle,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: KZ.sp4),
+              Text(
+                'reviews.prompt_subtitle'.tr(),
+                style: KZ.bodySmall.copyWith(color: KZ.onSurfaceVariant),
+              ),
+              const SizedBox(height: KZ.sp12),
+              Row(
+                children: [
+                  Expanded(
+                    child: KZButton(
+                      label: 'reviews.not_now'.tr(),
+                      variant: KZButtonVariant.tertiary,
+                      onPressed: _handleNotNow,
+                    ),
+                  ),
+                  const SizedBox(width: KZ.sp12),
+                  Expanded(
+                    child: KZButton(
+                      label: 'reviews.rate_order'.tr(),
+                      icon: Icons.stars_rounded,
+                      onPressed: () =>
+                          context.push('/orders/review/${widget.order.id}'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }

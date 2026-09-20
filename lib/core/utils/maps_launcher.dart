@@ -18,3 +18,32 @@ Future<bool> launchPhoneCall(String phone) async {
   final uri = Uri(scheme: 'tel', path: phone);
   return launchUrl(uri, mode: LaunchMode.externalApplication);
 }
+
+/// Builds the `https://wa.me/` deep-link URI for a WhatsApp chat with
+/// [phoneDigitsOnly] (no `+`, no spaces — just country code + number, e.g.
+/// `966539766416`), pre-filled with [message]. Split out from
+/// [launchWhatsAppChat] as a pure function so the URI shape (host, path,
+/// query encoding) is unit-testable without touching the `url_launcher`
+/// platform channel. `Uri.https` handles the message's URL-encoding itself,
+/// so [message] is passed as plain text.
+Uri buildWhatsAppChatUri({
+  required String phoneDigitsOnly,
+  required String message,
+}) {
+  return Uri.https('wa.me', '/$phoneDigitsOnly', {'text': message});
+}
+
+/// Opens a WhatsApp chat via [buildWhatsAppChatUri] — opens the WhatsApp app
+/// directly when installed, falls back to WhatsApp Web/App Store in the
+/// browser otherwise (the same link format works either way, unlike a raw
+/// `whatsapp://` scheme which has no browser fallback at all).
+Future<bool> launchWhatsAppChat({
+  required String phoneDigitsOnly,
+  required String message,
+}) async {
+  final uri = buildWhatsAppChatUri(
+    phoneDigitsOnly: phoneDigitsOnly,
+    message: message,
+  );
+  return launchUrl(uri, mode: LaunchMode.externalApplication);
+}
