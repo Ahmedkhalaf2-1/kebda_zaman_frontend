@@ -144,4 +144,22 @@ class FakeAuthRepository implements AuthRepository {
     _currentUser = null;
     return const Success(null);
   }
+
+  @override
+  Future<Result<void>> forgotPassword(String email) async {
+    await _simulateDelay();
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<void>> resetPassword({
+    required String token,
+    required String password,
+  }) async {
+    await _simulateDelay();
+    if (token.trim().isEmpty) {
+      return const Err(AuthFailure('Invalid reset token'));
+    }
+    return const Success(null);
+  }
 }

@@ -274,4 +274,109 @@ class ApiAuthRepository implements AuthRepository, AppleAuthRepository {
       return Err(_handleDeleteAccountError(e));
     }
   }
+
+  /// Parses a `Retry-After` header (seconds, per the contract) if present —
+  /// `null` when the server didn't send one, never a guessed value.
+  int? _retryAfterSeconds(DioException e) {
+    final header = e.response?.headers.value('retry-after');
+    return header != null ? int.tryParse(header) : null;
+  }
+
+  Failure _handleForgotPasswordError(dynamic e) {
+    if (e is DioException) {
+      final statusCode = e.response?.statusCode;
+      final apiEx = e.error is ApiException ? e.error as ApiException : null;
+      if (statusCode == 429) {
+        return PasswordResetRateLimitedFailure(
+          apiEx?.message ?? 'Too many requests. Please try again later.',
+          apiEx,
+          _retryAfterSeconds(e),
+        );
+      }
+      if (statusCode == 400 && apiEx != null) {
+        return ValidationFailure(apiEx.message, apiEx);
+      }
+      // Anything else — including RetryInterceptor's own synthetic
+      // `OFFLINE` ApiException for a connection error/timeout (which never
+      // carries a real `response`, so `statusCode` is null here) — is a
+      // transport/service problem, not a rejection of this specific
+      // request's contents.
+      if (apiEx != null) {
+        return NetworkFailure(apiEx.message, apiEx);
+      }
+      return NetworkFailure(e.message ?? 'Failed to request password reset');
+    }
+    return UnknownFailure(e.toString());
+  }
+
+  @override
+  Future<Result<void>> forgotPassword(String email) async {
+    try {
+      await apiClient.dio.post(
+        '/auth/forgot-password',
+        data: {'email': email},
+        // Never attach whatever access token happens to be in memory (the
+        // user may be mid-session on another account, or have a stale one)
+        // — this is a public endpoint and must not depend on/leak session
+        // state either way. See AuthInterceptor.onRequest.
+        options: Options(extra: const {'skipAuth': true}),
+      );
+      return const Success(null);
+    } catch (e) {
+      return Err(_handleForgotPasswordError(e));
+    }
+  }
+
+  Failure _handleResetPasswordError(dynamic e) {
+    if (e is DioException) {
+      final statusCode = e.response?.statusCode;
+      final apiEx = e.error is ApiException ? e.error as ApiException : null;
+      if (statusCode == 429) {
+        return PasswordResetRateLimitedFailure(
+          apiEx?.message ?? 'Too many requests. Please try again later.',
+          apiEx,
+          _retryAfterSeconds(e),
+        );
+      }
+      if (statusCode == 401) {
+        // INVALID_RESET_TOKEN / RESET_TOKEN_ALREADY_USED /
+        // RESET_TOKEN_EXPIRED — a rejection of the *reset token*, which was
+        // never a session credential in the first place. AuthFailure here
+        // must NOT be read by any caller as "the current session is
+        // invalid" the way it is for every authenticated endpoint; this
+        // screen is public and never touches AuthNotifier/session state on
+        // this path. The specific code is preserved on `cause` so the UI
+        // can distinguish expired/used/invalid.
+        return AuthFailure(
+          apiEx?.message ?? 'This reset link is no longer valid.',
+          apiEx,
+        );
+      }
+      if (statusCode == 400 && apiEx != null) {
+        return ValidationFailure(apiEx.message, apiEx);
+      }
+      if (apiEx != null) {
+        return NetworkFailure(apiEx.message, apiEx);
+      }
+      return NetworkFailure(e.message ?? 'Failed to reset password');
+    }
+    return UnknownFailure(e.toString());
+  }
+
+  @override
+  Future<Result<void>> resetPassword({
+    required String token,
+    required String password,
+  }) async {
+    try {
+      await apiClient.dio.post(
+        '/auth/reset-password',
+        data: {'token': token, 'password': password},
+        options: Options(extra: const {'skipAuth': true}),
+      );
+      return const Success(null);
+    } catch (e) {
+      return Err(_handleResetPasswordError(e));
+    }
+  }
 }

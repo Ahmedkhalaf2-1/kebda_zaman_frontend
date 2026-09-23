@@ -19,8 +19,13 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Inject token if needed.
-    final String? accessToken = coordinator.tokenStorage.accessToken;
+    // Public endpoints (e.g. forgot/reset-password) opt out via
+    // `Options(extra: {'skipAuth': true})` — they must never depend on, or
+    // leak, whatever session happens to be in memory.
+    final skipAuth = options.extra['skipAuth'] == true;
+    final String? accessToken = skipAuth
+        ? null
+        : coordinator.tokenStorage.accessToken;
 
     if (accessToken != null) {
       options.headers['Authorization'] = 'Bearer $accessToken';
@@ -80,6 +85,8 @@ class AuthInterceptor extends Interceptor {
         '/auth/admin/login',
         '/auth/refresh',
         '/auth/logout',
+        '/auth/forgot-password',
+        '/auth/reset-password',
       };
       for (final blocked in noRefreshPaths) {
         if (err.requestOptions.path.contains(blocked)) {
@@ -136,6 +143,8 @@ class RetryInterceptor extends Interceptor {
     '/auth/apple',
     '/admin/auth/login',
     '/auth/admin/login',
+    '/auth/forgot-password',
+    '/auth/reset-password',
   };
 
   // The only mutation endpoint we permit to retry automatically.

@@ -18,6 +18,7 @@ class _RoutedScriptedAdapter implements HttpClientAdapter {
   final Map<String, List<Future<ResponseBody> Function(RequestOptions)>>
   scriptsByPath;
   final Map<String, int> callCounts = {};
+  final List<RequestOptions> recordedRequests = [];
 
   _RoutedScriptedAdapter(this.scriptsByPath);
 
@@ -28,6 +29,7 @@ class _RoutedScriptedAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) {
     callCounts[options.path] = (callCounts[options.path] ?? 0) + 1;
+    recordedRequests.add(options);
     final script = scriptsByPath[options.path];
     if (script == null || script.isEmpty) {
       throw StateError('No more scripted responses for ${options.path}');
@@ -254,6 +256,80 @@ void main() {
       expect(stack.adapter.callCounts['/auth/refresh'], isNull);
       expect(stack.adapter.callCounts['/auth/login'], 1);
     });
+
+    test('forgot-password 401 does not call /auth/refresh', () async {
+      const secureStorage = FlutterSecureStorage();
+      await secureStorage.write(
+        key: TokenRefreshCoordinator.refreshTokenKey,
+        value: 'valid-refresh-token',
+      );
+
+      final stack = buildStack({
+        '/auth/forgot-password': [
+          _statusError(429, {'code': 'PASSWORD_RESET_COOLDOWN'}),
+        ],
+      });
+
+      await expectLater(
+        stack.dio.post(
+          '/auth/forgot-password',
+          data: {'email': 'a@example.com'},
+        ),
+        throwsA(isA<DioException>()),
+      );
+      expect(stack.adapter.callCounts['/auth/refresh'], isNull);
+      expect(stack.adapter.callCounts['/auth/forgot-password'], 1);
+    });
+
+    test(
+      'reset-password 401 (an invalid/expired/used token) reaches the caller directly — no refresh, no retry',
+      () async {
+        const secureStorage = FlutterSecureStorage();
+        await secureStorage.write(
+          key: TokenRefreshCoordinator.refreshTokenKey,
+          value: 'valid-refresh-token',
+        );
+
+        final stack = buildStack({
+          '/auth/reset-password': [
+            _statusError(401, {'code': 'RESET_TOKEN_EXPIRED'}),
+          ],
+        });
+
+        await expectLater(
+          stack.dio.post(
+            '/auth/reset-password',
+            data: {'token': 'abc', 'password': 'newPassword123'},
+          ),
+          throwsA(isA<DioException>()),
+        );
+        // The defining assertion: a 401 that is really just "this token is
+        // no longer valid" must never be mistaken for "this session's
+        // access token expired" — it must not trigger /auth/refresh, and
+        // the original request must not be silently retried.
+        expect(stack.adapter.callCounts['/auth/refresh'], isNull);
+        expect(stack.adapter.callCounts['/auth/reset-password'], 1);
+      },
+    );
+
+    test(
+      'skipAuth omits the Authorization header even when an access token is set',
+      () async {
+        final stack = buildStack({
+          '/auth/forgot-password': [_jsonSuccess({'message': 'ok'})],
+        });
+        stack.tokenStorage.accessToken = 'some-access-token';
+
+        await stack.dio.post(
+          '/auth/forgot-password',
+          data: {'email': 'a@example.com'},
+          options: Options(extra: const {'skipAuth': true}),
+        );
+
+        final request = stack.adapter.recordedRequests.single;
+        expect(request.headers.containsKey('Authorization'), isFalse);
+      },
+    );
 
     test('admin login 401 does not call /auth/refresh', () async {
       const secureStorage = FlutterSecureStorage();

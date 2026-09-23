@@ -20,6 +20,8 @@ import '../../features/customer/presentation/screens/order_tracking_screen.dart'
 import '../../features/customer/presentation/screens/order_review_screen.dart';
 import '../../features/customer/presentation/screens/login_screen.dart';
 import '../../features/customer/presentation/screens/signup_screen.dart';
+import '../../features/customer/presentation/screens/forgot_password_screen.dart';
+import '../../features/customer/presentation/screens/reset_password_screen.dart';
 import '../../features/customer/presentation/screens/splash_screen.dart';
 import '../../features/customer/presentation/screens/language_select_screen.dart';
 import '../../features/customer/presentation/screens/onboarding_screen.dart';
@@ -145,6 +147,12 @@ final routerProvider = Provider.autoDispose<GoRouter>((ref) {
         '/signup',
         '/legal/privacy',
         '/legal/terms',
+        // Password recovery must stay reachable regardless of role/session
+        // state (PASSWORD_RESET_API_CONTRACT.md) — a signed-in DRIVER
+        // opening a reset link (their own or anyone else's) must never be
+        // bounced back into the driver app before they can use it.
+        '/forgot-password',
+        '/reset-password',
       };
       if (auth.isLoggedIn &&
           role == 'DRIVER' &&
@@ -272,6 +280,33 @@ final routerProvider = Provider.autoDispose<GoRouter>((ref) {
         path: '/signup',
         pageBuilder: (context, state) =>
             kzFadeSlidePage(state: state, child: const SignupScreen()),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        pageBuilder: (context, state) => kzFadeSlidePage(
+          state: state,
+          child: const ForgotPasswordScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        pageBuilder: (context, state) {
+          // Defensively tolerant of a missing/duplicated/malformed `token`
+          // param: `Uri.queryParameters` already collapses a repeated key to
+          // its last value, and any other unexpected shape here just means
+          // `token` reads as `null` — ResetPasswordScreen treats that as
+          // "no token" rather than throwing.
+          String? token;
+          try {
+            token = state.uri.queryParameters['token'];
+          } catch (_) {
+            token = null;
+          }
+          return kzFadeSlidePage(
+            state: state,
+            child: ResetPasswordScreen(token: token),
+          );
+        },
       ),
       GoRoute(
         path: '/search',

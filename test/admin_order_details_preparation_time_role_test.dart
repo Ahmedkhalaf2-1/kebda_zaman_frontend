@@ -61,6 +61,16 @@ class _FakeAuthRepository implements AuthRepository {
     String? avatarUrl,
     String? locale,
   }) => throw UnimplementedError();
+
+  @override
+  Future<Result<void>> forgotPassword(String email) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<Result<void>> resetPassword({
+    required String token,
+    required String password,
+  }) async => throw UnimplementedError();
 }
 
 class _FakeOrderRepository implements OrderRepository {

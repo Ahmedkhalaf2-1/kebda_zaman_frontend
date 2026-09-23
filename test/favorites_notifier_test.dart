@@ -105,6 +105,16 @@ class _MockFavoritesRepository implements FavoritesRepository {
 class _DummyAuthRepository implements AuthRepository {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  Future<Result<void>> forgotPassword(String email) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<Result<void>> resetPassword({
+    required String token,
+    required String password,
+  }) async => throw UnimplementedError();
 }
 
 class _FakeAuthNotifier extends AuthNotifier {

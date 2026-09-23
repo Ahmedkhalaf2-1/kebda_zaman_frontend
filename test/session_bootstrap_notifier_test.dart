@@ -66,6 +66,16 @@ class _FakeAuthRepository implements AuthRepository {
     String? avatarUrl,
     String? locale,
   }) async => Success(_testUser());
+
+  @override
+  Future<Result<void>> forgotPassword(String email) async =>
+      throw UnimplementedError();
+
+  @override
+  Future<Result<void>> resetPassword({
+    required String token,
+    required String password,
+  }) async => throw UnimplementedError();
 }
 
 class _ScriptedAdapter implements HttpClientAdapter {

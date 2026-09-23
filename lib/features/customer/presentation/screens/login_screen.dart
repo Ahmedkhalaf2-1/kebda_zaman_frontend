@@ -305,7 +305,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   },
                 ),
 
-                const SizedBox(height: KZ.sp24),
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: TextButton(
+                    onPressed: () => context.push('/forgot-password'),
+                    child: Text('auth.forgot_password'.tr()),
+                  ),
+                ),
+
+                const SizedBox(height: KZ.sp8),
 
                 KZButton(
                   label: 'auth.login_btn'.tr(),
