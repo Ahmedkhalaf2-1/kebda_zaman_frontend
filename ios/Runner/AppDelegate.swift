@@ -3,7 +3,7 @@ import UIKit
 import GoogleMaps
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -13,7 +13,10 @@ import GoogleMaps
     // build time; iOS has no equivalent mechanism, so this must be filled in
     // manually before Archive — map screens will fail to render without it.
     GMSServices.provideAPIKey("AIzaSyB3UneS6SICnGQ6jd_uIfIexyKIsxF1acs")
-    GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 }
