@@ -8,6 +8,7 @@ import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/features/customer/presentation/notifiers/auth_notifier.dart';
 import 'package:kebda_zaman/core/widgets/kz_social_auth_buttons.dart';
 import 'package:kebda_zaman/core/widgets/kz_auth_layout.dart';
+import 'package:kebda_zaman/features/customer/presentation/post_auth_navigation.dart';
 import 'package:kebda_zaman/features/customer/presentation/widgets/biometric_onboarding_dialog.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
@@ -95,24 +96,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     // navigate. The backend may resolve an existing account rather than
     // create one, so this intentionally skips the "signup success" copy
     // and just enters the app like Login's Google button does.
-    if (success && mounted) {
-      final user = ref.read(authNotifierProvider).user;
-      if (user?.role == 'ADMIN') {
-        context.go('/admin/dashboard');
-      } else if (user?.role == 'CASHIER') {
-        context.go('/admin/orders');
-      } else {
-        context.go('/home');
-      }
-    }
+    if (success && mounted) await completeSignIn(context, ref);
   }
 
   void _handleAppleSignIn() async {
     final success = await ref.read(authNotifierProvider.notifier).appleSignIn();
 
-    if (success && mounted) {
-      context.go('/home');
-    }
+    if (success && mounted) await completeSignIn(context, ref);
   }
 
   @override

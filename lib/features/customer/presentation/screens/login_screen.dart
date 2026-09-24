@@ -9,8 +9,7 @@ import 'package:kebda_zaman/features/customer/presentation/notifiers/session_boo
 import 'package:kebda_zaman/core/widgets/kz_social_auth_buttons.dart';
 import 'package:kebda_zaman/core/widgets/kz_auth_layout.dart';
 import 'package:kebda_zaman/core/services/biometric_service.dart';
-import 'package:kebda_zaman/features/shared/domain/models/user.dart';
-import 'package:kebda_zaman/features/customer/presentation/widgets/biometric_onboarding_dialog.dart';
+import 'package:kebda_zaman/features/customer/presentation/post_auth_navigation.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -51,32 +50,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  bool _isStaffRole(User? user) =>
-      user?.role == 'ADMIN' ||
-      user?.role == 'CASHIER' ||
-      user?.role == 'KITCHEN' ||
-      user?.role == 'DRIVER';
-
-  void _navigateForUser(User? user) {
-    if (user?.role == 'ADMIN') {
-      context.go('/admin/dashboard');
-    } else if (user?.role == 'CASHIER') {
-      // Cashiers never see customer navigation — they land directly on
-      // Orders Management, the only admin section they're allowed into.
-      context.go('/admin/orders');
-    } else if (user?.role == 'KITCHEN') {
-      // Kitchen staff land directly on their ticket queue — same
-      // confined-to-one-section pattern as cashiers above.
-      context.go('/admin/kitchen');
-    } else if (user?.role == 'DRIVER') {
-      // Drivers land directly on their own app — never customer navigation,
-      // same confined-to-one-section pattern as the staff roles above.
-      context.go('/driver/orders');
-    } else {
-      context.go('/home');
-    }
-  }
-
   void _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -87,17 +60,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         .read(authNotifierProvider.notifier)
         .login(identifier: identifier, password: password);
 
-    if (success && mounted) {
-      final user = ref.read(authNotifierProvider).user;
-      // Staff roles (checked from the actual returned user, not a
-      // pre-submit toggle) never see the customer biometric-onboarding
-      // prompt — it's not relevant to their login surface.
-      if (!_isStaffRole(user)) {
-        await maybeShowBiometricOnboardingDialog(context, ref);
-        if (!mounted) return;
-      }
-      _navigateForUser(user);
-    }
+    // Staff roles (checked from the actual returned user, not a pre-submit
+    // toggle) skip the customer biometric-onboarding prompt.
+    if (success && mounted) await completeSignIn(context, ref);
   }
 
   Future<void> _maybeAutoPromptBiometric() async {
@@ -127,7 +92,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (!mounted) return;
         final newStatus = ref.read(sessionBootstrapProvider).value;
         if (newStatus == SessionBootstrapStatus.authenticated) {
-          _navigateForUser(ref.read(authNotifierProvider).user);
+          context.go(homeRouteForUser(ref.read(authNotifierProvider).user));
         } else {
           // Backend rejected the refresh token (expired/revoked) — biometric
           // success never overrides that. Local session is already cleared
@@ -191,26 +156,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // A `false` result covers both cancellation and failure — either way
     // the error banner (if any) is already reflected in authState, and we
-    // must not navigate. Same role-based routing as email/password login,
-    // though Google accounts are always CUSTOMER on the backend today.
-    if (success && mounted) {
-      final user = ref.read(authNotifierProvider).user;
-      if (user?.role == 'ADMIN') {
-        context.go('/admin/dashboard');
-      } else if (user?.role == 'CASHIER') {
-        context.go('/admin/orders');
-      } else {
-        context.go('/home');
-      }
-    }
+    // must not navigate. Same onboarding + role-based routing as
+    // email/password login.
+    if (success && mounted) await completeSignIn(context, ref);
   }
 
   void _handleAppleSignIn() async {
     final success = await ref.read(authNotifierProvider.notifier).appleSignIn();
 
-    if (success && mounted) {
-      context.go('/home');
-    }
+    if (success && mounted) await completeSignIn(context, ref);
   }
 
   @override
