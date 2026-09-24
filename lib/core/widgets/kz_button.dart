@@ -148,12 +148,8 @@ class KZButton extends StatelessWidget {
             : palette.background.withValues(alpha: 0.4),
         foregroundColor: palette.foreground,
         disabledForegroundColor: palette.foreground.withValues(alpha: 0.4),
-        elevation:
-            variant == KZButtonVariant.primary ||
-                variant == KZButtonVariant.destructive
-            ? 2
-            : 0,
-        shadowColor: KZ.primary.withValues(alpha: 0.25),
+        elevation: 0,
+        shadowColor: Colors.transparent,
         minimumSize: Size(fullWidth ? double.infinity : 0, KZ.iconTapTargetMin),
         padding: const EdgeInsets.symmetric(horizontal: KZ.sp20),
         shape: shape,

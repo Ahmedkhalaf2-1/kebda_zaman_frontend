@@ -190,14 +190,12 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
         children: [
           Expanded(
             child: Text(
-              dense ? title : title.toUpperCase(),
+              title,
               style: dense
                   ? KZ.labelLarge.copyWith(
                       color: ItemDetailsScreen.onSurfaceColor,
                     )
                   : KZ.sectionTitle.copyWith(fontSize: 16),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           if (isRequired) ...[
@@ -345,6 +343,7 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
           selectedSingleOptions[group.id] = opt.id;
         });
       },
+      borderRadius: BorderRadius.circular(KZ.radiusLg),
       child: Container(
         decoration: BoxDecoration(
           border: Border(
@@ -642,21 +641,25 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionHeader(title: 'product_details.often_ordered_with'.tr()),
-          SizedBox(
-            height: 190,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: recommendations.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                final rec = recommendations[index];
-                return _OftenOrderedWithCard(
-                  item: rec,
-                  onTap: () => context.push('/menu/item/${rec.id}'),
-                  onAdd: () => _handleQuickAdd(context, rec),
-                );
-              },
+          // Equal-height row (not a fixed-height list) so full item names
+          // always fit.
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final (i, rec) in recommendations.indexed) ...[
+                    if (i > 0) const SizedBox(width: 12),
+                    _OftenOrderedWithCard(
+                      item: rec,
+                      onTap: () => context.push('/menu/item/${rec.id}'),
+                      onAdd: () => _handleQuickAdd(context, rec),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ],
@@ -1071,13 +1074,6 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white.withValues(alpha: 0.9),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.15),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
                             ),
                             child: Icon(
                               Icons.arrow_back_rounded,
@@ -1092,7 +1088,6 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                         semanticsLabel: 'profile.my_favorites'.tr(),
                         size: KZ.iconTapTargetMin,
                         iconSize: KZ.iconControl,
-                        shadowOpacity: 0.15,
                         onTap: () async {
                           final success = await ref
                               .read(customerFavoritesProvider.notifier)
@@ -1311,7 +1306,7 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                       }
                                     }
                                   },
-                            borderRadius: BorderRadius.circular(KZ.radiusMd),
+                            borderRadius: BorderRadius.circular(KZ.radiusFull),
                             child: KZPressableScale(
                               enabled: !_isAddingToCart,
                               child: Container(
@@ -1324,16 +1319,8 @@ class _ItemDetailsScreenState extends ConsumerState<ItemDetailsScreen> {
                                         alpha: _isAddingToCart ? 0.7 : 1,
                                       ),
                                   borderRadius: BorderRadius.circular(
-                                    KZ.radiusMd,
+                                    KZ.radiusFull,
                                   ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: ItemDetailsScreen.primaryColor
-                                          .withValues(alpha: 0.25),
-                                      blurRadius: 16,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
                                 ),
                                 child: AnimatedSwitcher(
                                   duration: KZMotion.durationFor(
@@ -1453,66 +1440,75 @@ class _OftenOrderedWithCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 140,
-      child: KZCard(
-        padding: const EdgeInsets.all(10),
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Stack(
+      child: Material(
+        color: Colors.white,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KZ.radiusXl),
+          side: BorderSide(color: KZ.outlineVariant.withValues(alpha: 0.5)),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: 90,
-                  width: double.infinity,
-                  child: KZFoodImage(
-                    imageUrl: item.imageUrl,
-                    borderRadius: BorderRadius.circular(KZ.radiusSm),
-                  ),
+                Stack(
+                  children: [
+                    SizedBox(
+                      height: 90,
+                      width: double.infinity,
+                      child: KZFoodImage(
+                        imageUrl: item.imageUrl,
+                        borderRadius: BorderRadius.circular(KZ.radiusLg),
+                      ),
+                    ),
+                    if (item.badge != null)
+                      Positioned(
+                        bottom: 6,
+                        left: 6,
+                        child: MenuItemBadgeChip(badge: item.badge!),
+                      ),
+                  ],
                 ),
-                if (item.badge != null)
-                  Positioned(
-                    bottom: 6,
-                    left: 6,
-                    child: MenuItemBadgeChip(badge: item.badge!),
-                  ),
+                const SizedBox(height: 8),
+                Text(
+                  item.localizedName(context.locale.languageCode),
+                  style: KZ.labelLarge.copyWith(fontWeight: FontWeight.w700),
+                ),
+                // Price row sits at the bottom so it lines up across the row.
+                const Spacer(),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        formatCurrency(item.basePrice, locale: context.locale),
+                        style: KZ.price,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    KZLottieAddButton(
+                      onTap: onAdd,
+                      semanticsLabel: 'home.add_to_cart'.tr(),
+                      size: 32,
+                      backgroundColor: KZ.primary,
+                      iconColor: Colors.white,
+                      iconSize: 18,
+                    ),
+                  ],
+                ),
+                if (item.calories != null) ...[
+                  const SizedBox(height: 2),
+                  MenuItemCaloriesText(calories: item.calories!),
+                ],
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              item.localizedName(context.locale.languageCode),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: KZ.labelLarge.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Text(
-                    formatCurrency(item.basePrice, locale: context.locale),
-                    style: KZ.price,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                KZLottieAddButton(
-                  onTap: onAdd,
-                  semanticsLabel: 'home.add_to_cart'.tr(),
-                  size: 24,
-                  backgroundColor: KZ.primary,
-                  iconColor: Colors.white,
-                  iconSize: 16,
-                ),
-              ],
-            ),
-            if (item.calories != null) ...[
-              const SizedBox(height: 2),
-              MenuItemCaloriesText(calories: item.calories!),
-            ],
-          ],
+          ),
         ),
       ),
     );

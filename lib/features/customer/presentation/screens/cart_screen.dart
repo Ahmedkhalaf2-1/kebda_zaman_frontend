@@ -168,6 +168,22 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                           physics: const BouncingScrollPhysics(),
                           padding: const EdgeInsets.fromLTRB(20, 16, 20, 150),
                           children: [
+                            Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                start: 4,
+                                bottom: KZ.sp10,
+                              ),
+                              child: Text(
+                                'orders.items_summary'.tr(
+                                  namedArgs: {
+                                    'count': '${cart.items.fold<int>(0, (sum, i) => sum + i.quantity)}',
+                                  },
+                                ),
+                                style: KZ.label.copyWith(
+                                  color: CartScreen.onSurfaceVariantColor,
+                                ),
+                              ),
+                            ),
                             // Cart items — grouped together, small gaps
                             // between each card since they're one section.
                             for (final item in cart.items) ...[
@@ -269,6 +285,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
   }
 }
 
+/// One surface for every block on the page (items, promo, summary).
+final _cartSurface = KZ.flatCardDecoration();
+
 // ── Header: one clear title, Clear Cart kept visually secondary so it
 // never competes with the checkout CTA below. ──
 class _CartHeader extends StatelessWidget {
@@ -329,7 +348,7 @@ class _CartHeader extends StatelessWidget {
           if (showClear)
             InkWell(
               onTap: onClear,
-              borderRadius: BorderRadius.circular(KZ.radiusSm),
+              borderRadius: BorderRadius.circular(KZ.radiusFull),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: KZ.sp8,
@@ -382,17 +401,18 @@ class _CartItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasNote = item.specialInstructions.trim().isNotEmpty;
 
-    return KZCard(
+    return Container(
       padding: const EdgeInsets.all(KZ.sp12),
+      decoration: _cartSurface,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 76,
-            height: 76,
+            width: 104,
+            height: 104,
             child: KZFoodImage(
               imageUrl: item.productImage,
-              borderRadius: BorderRadius.circular(KZ.radiusMd),
+              borderRadius: BorderRadius.circular(KZ.radiusLg),
             ),
           ),
           const SizedBox(width: KZ.sp12),
@@ -401,15 +421,21 @@ class _CartItemCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                Text(
+                  item.productName,
+                  style: KZ.itemTitle,
+                ),
+                const SizedBox(height: KZ.sp4),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Unit price × quantity explains the line total below.
                     Expanded(
                       child: Text(
-                        item.productName,
-                        style: KZ.itemTitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        '${formatCurrency(item.unitPrice, locale: context.locale)}'
+                        ' × ${item.quantity}',
+                        style: KZ.caption.copyWith(
+                          color: CartScreen.onSurfaceVariantColor,
+                        ),
                       ),
                     ),
                     _RowIconAction(
@@ -417,23 +443,43 @@ class _CartItemCard extends StatelessWidget {
                       tooltip: 'common.edit'.tr(),
                       onTap: onEdit,
                     ),
+                    const SizedBox(width: KZ.sp6),
                     _RowIconAction(
-                      icon: Icons.close_rounded,
+                      icon: Icons.delete_outline_rounded,
                       tooltip: 'cart.remove'.tr(),
                       onTap: onRemove,
+                      color: CartScreen.errorColor,
                     ),
                   ],
                 ),
                 if (hasNote) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    item.specialInstructions.trim(),
-                    style: KZ.caption,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  const SizedBox(height: KZ.sp4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 2),
+                        child: Icon(
+                          Icons.sticky_note_2_outlined,
+                          size: 14,
+                          color: CartScreen.onSurfaceVariantColor,
+                        ),
+                      ),
+                      const SizedBox(width: KZ.sp4),
+                      Expanded(
+                        child: Text(
+                          item.specialInstructions.trim(),
+                          style: KZ.caption.copyWith(
+                            color: CartScreen.onSurfaceVariantColor,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-                const SizedBox(height: KZ.sp8),
+                const SizedBox(height: KZ.sp10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -446,7 +492,7 @@ class _CartItemCard extends StatelessWidget {
                               item.lineTotal,
                               locale: context.locale,
                             ),
-                            style: KZ.priceLarge.copyWith(fontSize: 17),
+                            style: KZ.priceLarge.copyWith(fontSize: 18),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -483,18 +529,19 @@ class _CartItemCard extends StatelessWidget {
   }
 }
 
-/// A small, muted icon affordance for a card's secondary actions (Edit,
-/// Remove) — deliberately quieter than the row's primary content so it
-/// never competes with the price/quantity stepper below it.
+/// A small round, tinted button for a card's secondary actions (Edit,
+/// Remove) — quieter than the price/quantity stepper below it.
 class _RowIconAction extends StatelessWidget {
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
+  final Color color;
 
   const _RowIconAction({
     required this.icon,
     required this.tooltip,
     required this.onTap,
+    this.color = CartScreen.onSurfaceVariantColor,
   });
 
   @override
@@ -502,16 +549,19 @@ class _RowIconAction extends StatelessWidget {
     return Semantics(
       button: true,
       label: tooltip,
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const CircleBorder(),
-        child: SizedBox(
-          width: KZ.iconTapTargetMin,
-          height: KZ.iconTapTargetMin,
-          child: Icon(
-            icon,
-            size: 18,
-            color: CartScreen.onSurfaceVariantColor,
+      child: Tooltip(
+        message: tooltip,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 18, color: color),
           ),
         ),
       ),
@@ -533,7 +583,7 @@ class _QuantityStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 36,
+      height: 38,
       decoration: BoxDecoration(
         color: CartScreen.surfaceContainerColor,
         borderRadius: BorderRadius.circular(KZ.radiusFull),
@@ -625,7 +675,7 @@ class _PromoSection extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: CartScreen.surfaceContainerLowColor,
-        borderRadius: BorderRadius.circular(KZ.radiusMd),
+        borderRadius: BorderRadius.circular(KZ.radiusXl),
         border: Border.all(color: CartScreen.outlineVariantColor),
       ),
       child: Row(
@@ -653,7 +703,7 @@ class _PromoSection extends StatelessWidget {
           const SizedBox(width: KZ.sp8),
           InkWell(
             onTap: onRemove,
-            borderRadius: BorderRadius.circular(KZ.radiusSm),
+            borderRadius: BorderRadius.circular(KZ.radiusFull),
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: KZ.sp8,
@@ -676,7 +726,7 @@ class _PromoSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: KZ.sp12),
       decoration: BoxDecoration(
         color: CartScreen.surfaceContainerLowColor,
-        borderRadius: BorderRadius.circular(KZ.radiusMd),
+        borderRadius: BorderRadius.circular(KZ.radiusFull),
         border: Border.all(color: CartScreen.outlineVariantColor),
       ),
       child: Row(
@@ -779,7 +829,7 @@ class _OrderSummarySection extends StatelessWidget {
                 color: color ?? CartScreen.onSurfaceColor,
                 fontWeight: FontWeight.w600,
               ),
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
             ),
@@ -794,7 +844,7 @@ class _OrderSummarySection extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(KZ.sp20),
-      decoration: KZ.sectionDecoration(),
+      decoration: _cartSurface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -903,13 +953,6 @@ class _CheckoutButtonState extends State<_CheckoutButton> {
           decoration: BoxDecoration(
             color: CartScreen.primaryColor,
             borderRadius: BorderRadius.circular(KZ.radiusFull),
-            boxShadow: [
-              BoxShadow(
-                color: CartScreen.primaryColor.withValues(alpha: 0.35),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
           ),
           child: FittedBox(
             fit: BoxFit.scaleDown,

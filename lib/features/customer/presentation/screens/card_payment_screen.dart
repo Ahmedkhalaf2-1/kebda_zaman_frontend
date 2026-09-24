@@ -718,13 +718,6 @@ class _SavedCardOption extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: cardBrandGradient(card.brand),
             borderRadius: BorderRadius.circular(KZ.radiusLg),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           child: Row(
             children: [
@@ -834,13 +827,6 @@ class _AmountHeroCard extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: KZ.primary.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: Row(
         children: [
@@ -918,7 +904,7 @@ class _SaveCardToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => onChanged(!value),
-      borderRadius: BorderRadius.circular(KZ.radiusMd),
+      borderRadius: BorderRadius.circular(KZ.radiusLg),
       child: Container(
         constraints: const BoxConstraints(minHeight: KZ.iconTapTargetMin),
         padding: const EdgeInsets.symmetric(
@@ -929,7 +915,7 @@ class _SaveCardToggle extends StatelessWidget {
           color: value
               ? KZ.primary.withValues(alpha: 0.06)
               : KZ.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(KZ.radiusMd),
+          borderRadius: BorderRadius.circular(KZ.radiusLg),
           border: Border.all(
             color: value ? KZ.primary : KZ.outlineVariant,
             width: value ? 1.5 : 1,

@@ -16,7 +16,6 @@ class KZLottieHeartButton extends StatefulWidget {
   final String semanticsLabel;
   final double size;
   final double iconSize;
-  final double shadowOpacity;
 
   const KZLottieHeartButton({
     super.key,
@@ -25,7 +24,6 @@ class KZLottieHeartButton extends StatefulWidget {
     required this.semanticsLabel,
     this.size = 48,
     this.iconSize = 20,
-    this.shadowOpacity = 0.1,
   });
 
   @override
@@ -81,13 +79,6 @@ class _KZLottieHeartButtonState extends State<KZLottieHeartButton>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white.withValues(alpha: 0.92),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: widget.shadowOpacity),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           child: Center(
             child: Stack(

@@ -285,7 +285,7 @@ void main() {
       await _pumpItemDetails(tester, items: {'m1': item}, initialId: 'm1');
 
       expect(tester.takeException(), isNull);
-      expect(find.text('OFTEN ORDERED WITH'), findsNothing);
+      expect(find.text('Often Ordered With'), findsNothing);
     });
 
     testWidgets('section shown with recommendation cards when present', (
@@ -302,7 +302,7 @@ void main() {
       await _pumpItemDetails(tester, items: {'m1': item}, initialId: 'm1');
 
       expect(tester.takeException(), isNull);
-      expect(find.text('OFTEN ORDERED WITH'), findsOneWidget);
+      expect(find.text('Often Ordered With'), findsOneWidget);
       expect(find.text('Fries'), findsOneWidget);
       expect(find.text('SAR 12'), findsOneWidget);
       expect(find.text('300 kcal'), findsOneWidget);
@@ -391,7 +391,7 @@ void main() {
       expect(tester.takeException(), isNull);
       // Exactly one "Often Ordered With" section/list, one recommendation
       // card ("Item B") — no nested second list inside it.
-      expect(find.text('OFTEN ORDERED WITH'), findsOneWidget);
+      expect(find.text('Often Ordered With'), findsOneWidget);
       expect(find.text('Item B'), findsOneWidget);
     });
   });

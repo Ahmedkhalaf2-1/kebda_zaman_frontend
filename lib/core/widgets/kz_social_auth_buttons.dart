@@ -26,13 +26,15 @@ class _SocialButtonShell extends StatelessWidget {
         height: 52,
         child: Material(
           color: Colors.white,
+          elevation: 0,
+          shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KZ.radiusMd),
+            borderRadius: BorderRadius.circular(KZ.radiusFull),
             side: const BorderSide(color: KZ.outlineVariant, width: 1),
           ),
           child: InkWell(
             onTap: isLoading ? null : onTap,
-            borderRadius: BorderRadius.circular(KZ.radiusMd),
+            borderRadius: BorderRadius.circular(KZ.radiusFull),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

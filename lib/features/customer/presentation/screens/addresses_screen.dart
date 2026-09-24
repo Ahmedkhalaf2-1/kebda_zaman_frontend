@@ -82,7 +82,8 @@ class AddressesScreen extends ConsumerWidget {
           : FloatingActionButton.extended(
               backgroundColor: KZ.primary,
               foregroundColor: Colors.white,
-              elevation: 3,
+              elevation: 0,
+              highlightElevation: 0,
               icon: const Icon(Icons.add_location_alt_rounded),
               label: Text(
                 'addresses.add'.tr(),
@@ -107,7 +108,7 @@ class _AddressCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(KZ.sp16),
-      decoration: KZ.cardDecoration(),
+      decoration: KZ.flatCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -295,7 +296,7 @@ class _CardAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(KZ.radiusSm),
+      borderRadius: BorderRadius.circular(KZ.radiusFull),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
         child: Row(

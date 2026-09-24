@@ -262,6 +262,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     required String? promoCode,
   }) {
     return KZCard(
+      flat: true,
       padding: const EdgeInsets.all(KZ.sp20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,9 +309,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 foregroundColor: CheckoutScreen.primaryColor,
                 side: const BorderSide(color: CheckoutScreen.primaryColor, width: 1.5),
                 padding: const EdgeInsets.symmetric(horizontal: KZ.sp24, vertical: KZ.sp12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KZ.radiusMd),
-                ),
               ),
               child: Text(
                 'checkout.sign_in'.tr(),
@@ -347,7 +345,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         : () => setState(
                             () => _selectedRewardId = isSelected ? null : reward.id,
                           ),
-                    borderRadius: BorderRadius.circular(KZ.radiusMd),
+                    borderRadius: BorderRadius.circular(KZ.radiusLg),
                     child: Container(
                       constraints: const BoxConstraints(minHeight: KZ.iconTapTargetMin),
                       padding: const EdgeInsets.symmetric(horizontal: KZ.sp14, vertical: KZ.sp12),
@@ -355,7 +353,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         color: isSelected
                             ? CheckoutScreen.primaryColor.withValues(alpha: 0.06)
                             : CheckoutScreen.surfaceContainerLowColor,
-                        borderRadius: BorderRadius.circular(KZ.radiusMd),
+                        borderRadius: BorderRadius.circular(KZ.radiusLg),
                         border: Border.all(
                           color: isSelected
                               ? CheckoutScreen.primaryColor
@@ -622,7 +620,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             _PaymentOptionTile(
                               icon: Icons.payments_rounded,
                               title: 'checkout.cash'.tr(),
-                              subtitle: 'checkout.pay_upon_receipt'.tr().toUpperCase(),
+                              subtitle: 'checkout.pay_upon_receipt'.tr(),
                               selected: _selectedPaymentMethod == 0,
                               enabled: true,
                               onTap: () => setState(() => _selectedPaymentMethod = 0),
@@ -631,7 +629,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             _PaymentOptionTile(
                               icon: Icons.credit_card_rounded,
                               title: 'checkout.card'.tr(),
-                              subtitle: 'checkout.pay_with_card_subtitle'.tr().toUpperCase(),
+                              subtitle: 'checkout.pay_with_card_subtitle'.tr(),
                               selected: _selectedPaymentMethod == 1,
                               enabled: true,
                               onTap: () => setState(() => _selectedPaymentMethod = 1),
@@ -996,6 +994,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                   _selectedAddressId ?? addressState.defaultAddress?.id;
                               final isSelected = address.id == effectiveSelectedId;
                               return ListTile(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(KZ.radiusLg),
+                                ),
                                 leading: Icon(
                                   isSelected
                                       ? Icons.radio_button_checked_rounded
@@ -1166,14 +1167,14 @@ class _FulfillmentToggle extends StatelessWidget {
     return Expanded(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(KZ.radiusMd),
+        borderRadius: BorderRadius.circular(KZ.radiusFull),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           height: double.infinity,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: selected ? CheckoutScreen.primaryColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(KZ.radiusMd),
+            borderRadius: BorderRadius.circular(KZ.radiusFull),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: KZ.sp8),
@@ -1264,6 +1265,7 @@ class _FulfillmentCard extends StatelessWidget {
     final isDelivery = orderType == 'delivery';
 
     return KZCard(
+      flat: true,
       padding: const EdgeInsets.all(KZ.sp20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1713,7 +1715,7 @@ class _OrderSummaryCard extends StatelessWidget {
           _row(
             'cart.delivery_fee'.tr(),
             effectiveDeliveryFee == 0
-                ? 'checkout.free'.tr().toUpperCase()
+                ? 'checkout.free'.tr()
                 : formatCurrency(effectiveDeliveryFee, locale: context.locale),
             color: effectiveDeliveryFee == 0 ? CheckoutScreen.tertiaryColor : null,
             bold: effectiveDeliveryFee == 0,
@@ -1761,6 +1763,7 @@ class _OrderSummaryCard extends StatelessWidget {
                       ),
                       InkWell(
                         onTap: onRemoveDiscount,
+                        borderRadius: BorderRadius.circular(KZ.radiusFull),
                         child: Padding(
                           padding: const EdgeInsets.only(top: 2),
                           child: Text(

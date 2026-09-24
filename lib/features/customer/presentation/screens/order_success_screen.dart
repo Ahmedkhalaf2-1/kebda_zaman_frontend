@@ -184,6 +184,7 @@ class OrderSuccessScreen extends StatelessWidget {
                           // Order Number Card
                           Expanded(
                             child: KZCard(
+                              flat: true,
                               padding: const EdgeInsets.symmetric(
                                 vertical: 20,
                                 horizontal: 16,
@@ -207,6 +208,7 @@ class OrderSuccessScreen extends StatelessWidget {
                           // Delivery Time Card
                           Expanded(
                             child: KZCard(
+                              flat: true,
                               padding: const EdgeInsets.symmetric(
                                 vertical: 20,
                                 horizontal: 16,
@@ -236,6 +238,7 @@ class OrderSuccessScreen extends StatelessWidget {
 
                       // Featured Dish Preview Card
                       KZCard(
+                        flat: true,
                         child: Row(
                           children: [
                             Container(

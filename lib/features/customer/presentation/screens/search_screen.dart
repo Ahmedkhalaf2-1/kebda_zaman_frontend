@@ -26,13 +26,6 @@ int _searchColumnCount(BuildContext context) {
 // Same tuning as Menu's catalog grid (menu_screen.dart's _cardExtent) — kept
 // in sync deliberately so a card looks pixel-identical whether it's reached
 // from Menu or from a Search result.
-double _searchCardExtent(BuildContext context) {
-  final w = MediaQuery.of(context).size.width;
-  if (w >= 600) return 272.0;
-  if (w >= 390) return 265.0;
-  return 260.0;
-}
-
 void _handleSearchResultAdd(BuildContext context, WidgetRef ref, MenuItem item) {
   if (!item.isAvailable) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -181,6 +174,7 @@ class SearchScreen extends ConsumerWidget {
                         const SizedBox(width: 6),
                         InkWell(
                           onTap: () => notifier.removeRecentSearch(s),
+                          customBorder: const CircleBorder(),
                           child: const Icon(
                             Icons.close_rounded,
                             size: 16,
@@ -209,13 +203,13 @@ class SearchScreen extends ConsumerWidget {
                     cat.id,
                     menuState.value!.items,
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(KZ.radiusLg),
                   child: Container(
                     width: 80,
                     height: 90,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(KZ.radiusLg),
                       border: Border.all(
                         color: KZ.outlineVariant.withOpacity(0.3),
                       ),
@@ -299,40 +293,40 @@ class SearchScreen extends ConsumerWidget {
 
     final favorites = ref.watch(customerFavoritesProvider).favoriteIds;
     final columnCount = _searchColumnCount(context);
-    final extent = _searchCardExtent(context);
 
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(14, 16, 14, 16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columnCount,
-        mainAxisSpacing: 14,
-        crossAxisSpacing: 14,
-        mainAxisExtent: extent,
-      ),
-      itemCount: state.results.length,
-      itemBuilder: (context, index) {
-        final item = state.results[index];
-        final isFav = favorites.contains(item.id);
-        return ProductGridCard(
-          item: item,
-          isFavorite: isFav,
-          onTap: () => context.push('/home/item/${item.id}'),
-          onAdd: () => _handleSearchResultAdd(context, ref, item),
-          onToggleFavorite: () async {
-            final success = await ref
-                .read(customerFavoritesProvider.notifier)
-                .toggleFavorite(item.id);
-            if (!success && context.mounted) {
-              final err = ref.read(customerFavoritesProvider).errorMessage;
-              if (err != null) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(err)));
-              }
-            }
-          },
-        );
-      },
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(14, 16, 14, 16),
+          sliver: SliverProductRows(
+            columns: columnCount,
+            itemCount: state.results.length,
+            itemBuilder: (context, index) {
+              final item = state.results[index];
+              final isFav = favorites.contains(item.id);
+              return ProductGridCard(
+                item: item,
+                isFavorite: isFav,
+                onTap: () => context.push('/home/item/${item.id}'),
+                onAdd: () => _handleSearchResultAdd(context, ref, item),
+                onToggleFavorite: () async {
+                  final success = await ref
+                      .read(customerFavoritesProvider.notifier)
+                      .toggleFavorite(item.id);
+                  if (!success && context.mounted) {
+                    final err = ref.read(customerFavoritesProvider).errorMessage;
+                    if (err != null) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(err)));
+                    }
+                  }
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

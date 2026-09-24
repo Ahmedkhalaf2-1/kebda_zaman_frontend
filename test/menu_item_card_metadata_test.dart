@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kebda_zaman/core/widgets/kz_product_card.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -461,17 +462,20 @@ void main() {
       expect(overflows, isEmpty);
     });
 
-    testWidgets('card remains tappable (shared KZCard present with onTap)', (
+    testWidgets('card remains tappable (shared ProductGridCard with onTap)', (
       tester,
     ) async {
       await setViewport(tester, const Size(390, 844));
       final overflows = await _pumpMenuScreen(tester, [_item('m1')]);
       expect(tester.takeException(), isNull);
       expect(overflows, isEmpty);
-      final cardFinder = find.byType(KZCard);
+      final cardFinder = find.byType(ProductGridCard);
       expect(cardFinder, findsWidgets);
-      final card = tester.widget<KZCard>(cardFinder.first);
-      expect(card.onTap, isNotNull);
+      final inkWell = find.descendant(
+        of: cardFinder.first,
+        matching: find.byType(InkWell),
+      );
+      expect(tester.widget<InkWell>(inkWell.first).onTap, isNotNull);
     });
 
     testWidgets(

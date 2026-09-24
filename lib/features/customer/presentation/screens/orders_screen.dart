@@ -393,13 +393,6 @@ class _OrderCardState extends ConsumerState<_OrderCard> {
                 color: KZ.outlineVariant.withValues(alpha: 0.5),
                 width: 1,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: KZ.primary.withValues(alpha: 0.04),
-                  blurRadius: 12,
-                  offset: const Offset(0, 3),
-                ),
-              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

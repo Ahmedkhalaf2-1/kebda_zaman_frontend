@@ -145,7 +145,7 @@ class _DeleteAccountDialogState extends ConsumerState<_DeleteAccountDialog> {
             onTap: _submitting
                 ? null
                 : () => setState(() => _acknowledged = !_acknowledged),
-            borderRadius: BorderRadius.circular(KZ.radiusSm),
+            borderRadius: BorderRadius.circular(KZ.radiusLg),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: KZ.sp4),
               child: Row(

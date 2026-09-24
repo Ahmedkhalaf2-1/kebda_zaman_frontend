@@ -45,7 +45,6 @@ class LoyaltyScreen extends ConsumerWidget {
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(KZ.radiusXl),
-                    boxShadow: KZ.cardShadow,
                   ),
                   child: Column(
                     children: [
@@ -108,7 +107,7 @@ class LoyaltyScreen extends ConsumerWidget {
                 Text('loyalty.how_it_works'.tr(), style: KZ.labelLarge),
                 const SizedBox(height: KZ.sp8),
                 Container(
-                  decoration: KZ.cardDecoration(),
+                  decoration: KZ.flatCardDecoration(),
                   child: Column(
                     children: [
                       _InfoTile(
@@ -148,7 +147,7 @@ class LoyaltyScreen extends ConsumerWidget {
                 if (data.history.isEmpty)
                   Container(
                     padding: const EdgeInsets.all(KZ.sp24),
-                    decoration: KZ.cardDecoration(),
+                    decoration: KZ.flatCardDecoration(),
                     child: Center(
                       child: Text(
                         'loyalty.no_history'.tr(),
@@ -159,7 +158,7 @@ class LoyaltyScreen extends ConsumerWidget {
                   )
                 else
                   Container(
-                    decoration: KZ.cardDecoration(),
+                    decoration: KZ.flatCardDecoration(),
                     child: Column(
                       children: List.generate(data.history.length, (index) {
                         final tx = data.history[index];

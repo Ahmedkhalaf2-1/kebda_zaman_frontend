@@ -12,11 +12,15 @@ import 'package:kebda_zaman/core/theme/kz_motion.dart';
 /// Pass `onTap` to get a correctly-clipped ripple that respects the card's
 /// rounded corners — the whole card becomes the tap target, with no extra
 /// decoration needed to signal that it's tappable.
+///
+/// Pass `flat: true` for the customer app's shadowless style
+/// (`KZ.flatCardDecoration()`).
 class KZCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
   final Color? color;
+  final bool flat;
 
   const KZCard({
     super.key,
@@ -24,13 +28,16 @@ class KZCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(KZ.sp16),
     this.onTap,
     this.color,
+    this.flat = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final card = Container(
       clipBehavior: onTap != null ? Clip.antiAlias : Clip.none,
-      decoration: KZ.cardDecoration(color: color),
+      decoration: flat
+          ? KZ.flatCardDecoration(color: color)
+          : KZ.cardDecoration(color: color),
       child: onTap == null
           ? Padding(padding: padding, child: child)
           : Material(

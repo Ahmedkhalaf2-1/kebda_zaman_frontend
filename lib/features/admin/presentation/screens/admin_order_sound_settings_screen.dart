@@ -52,6 +52,7 @@ class AdminOrderSoundSettingsScreen extends ConsumerWidget {
           const KZSettingsGroupHeader('admin.order_sound_settings_title'),
           const SizedBox(height: KZ.sp8),
           KZSettingsGroup(
+            separateRows: false,
             rows: [
               KZSettingsSwitchRow(
                 icon: Icons.notifications_active_rounded,

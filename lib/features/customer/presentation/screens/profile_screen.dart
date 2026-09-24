@@ -63,6 +63,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               : 'profile.guest_email'.tr());
 
     final loyaltyAsync = ref.watch(loyaltyProvider);
+    // A guest session counts as "logged in" but owns no real account, so it
+    // gets the same sign-up prompts as a logged-out visitor.
+    final isGuest = !authState.isLoggedIn || (user?.isGuest ?? true);
 
     return Scaffold(
       backgroundColor: KZ.surface, // #fcf9f5 (our brand cream background)
@@ -200,13 +203,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: KZ.bodySmall,
                           ),
-                          if (!authState.isLoggedIn) ...[
+                          if (isGuest) ...[
                             const SizedBox(height: 16),
-                            KZButton(
-                              onPressed: () => context.push('/login'),
-                              icon: Icons.login_rounded,
-                              label: 'auth.login_btn'.tr(),
-                              pill: true,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: KZButton(
+                                    onPressed: () => context.push('/signup'),
+                                    label: 'auth.signup_btn'.tr(),
+                                    pill: true,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: KZButton(
+                                    onPressed: () => context.push('/login'),
+                                    icon: Icons.login_rounded,
+                                    label: 'auth.login_btn'.tr(),
+                                    variant: KZButtonVariant.secondary,
+                                    pill: true,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ],
@@ -216,7 +234,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(height: KZ.sectionGap),
 
                     // 2. Kebda Rewards Loyalty Card (matching HTML with our rich terracotta brand)
-                    _buildLoyaltyCard(context, loyaltyAsync),
+                    isGuest
+                        ? _buildGuestRewardsCard()
+                        : _buildLoyaltyCard(context, loyaltyAsync),
 
                     const SizedBox(height: KZ.sectionGap),
 
@@ -272,12 +292,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     KZSettingsGroup(
                       rows: [
                         KZSettingsRow(
-                          icon: authState.isLoggedIn
-                              ? Icons.edit_rounded
-                              : Icons.settings_rounded,
-                          title: authState.isLoggedIn
-                              ? 'profile.edit_profile'.tr()
-                              : 'profile.settings'.tr(),
+                          icon: isGuest
+                              ? Icons.settings_rounded
+                              : Icons.edit_rounded,
+                          title: isGuest
+                              ? 'profile.settings'.tr()
+                              : 'profile.edit_profile'.tr(),
                           onTap: () => context.push('/profile/settings'),
                         ),
                       ],
@@ -290,6 +310,50 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// Shown instead of the points card for guests: a points balance means
+  /// nothing without an account, so explain how to start earning instead.
+  Widget _buildGuestRewardsCard() {
+    return Container(
+      padding: const EdgeInsets.all(KZ.sp16),
+      decoration: BoxDecoration(
+        color: KZ.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(KZ.radiusXl),
+        border: Border.all(color: KZ.primary.withValues(alpha: 0.15)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: KZ.primary.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.loyalty_rounded,
+              color: KZ.primary,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: KZ.sp12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('loyalty.title'.tr(), style: KZ.itemTitle),
+                const SizedBox(height: 2),
+                Text(
+                  'checkout.guest_loyalty_notice'.tr(),
+                  style: KZ.bodySmall.copyWith(color: KZ.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -372,13 +436,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: KZ.primary.withValues(alpha: 0.25),
-                  blurRadius: 24,
-                  offset: const Offset(0, 10),
-                ),
-              ],
             ),
             child: Stack(
               clipBehavior: Clip.none,
@@ -561,12 +618,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(KZ.radiusFull),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(KZ.radiusFull),
             border: Border.all(
               color: KZ.outlineVariant.withValues(alpha: 0.5),
               width: 1,

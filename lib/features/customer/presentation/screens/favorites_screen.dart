@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
+import 'package:kebda_zaman/core/widgets/kz_product_card.dart';
 import 'package:kebda_zaman/core/utils/currency_formatter.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
 import 'package:kebda_zaman/core/widgets/kz_menu_item_meta.dart';
@@ -43,22 +44,23 @@ class FavoritesScreen extends ConsumerWidget {
               actionLabel: 'favorites.browse_menu'.tr(),
               onAction: () => context.go('/menu'),
             )
-          : GridView.builder(
-              padding: const EdgeInsets.symmetric(
-                horizontal: KZ.screenPadding,
-                vertical: KZ.sp16,
-              ),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: KZ.sp16,
-                crossAxisSpacing: KZ.sp16,
-                childAspectRatio: 0.76,
-              ),
-              itemCount: favState.favoriteItems.length,
-              itemBuilder: (context, index) {
-                final item = favState.favoriteItems[index];
-                return _FavoriteItemCard(item: item);
-              },
+          : CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: KZ.screenPadding,
+                    vertical: KZ.sp16,
+                  ),
+                  sliver: SliverProductRows(
+                    columns: 2,
+                    spacing: KZ.sp16,
+                    itemCount: favState.favoriteItems.length,
+                    itemBuilder: (context, index) => _FavoriteItemCard(
+                      item: favState.favoriteItems[index],
+                    ),
+                  ),
+                ),
+              ],
             ),
     );
   }
@@ -73,16 +75,20 @@ class _FavoriteItemCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hasDiscount = item.discountPrice != null;
 
-    return Container(
-      decoration: KZ.cardDecoration(),
+    return Material(
+      color: Colors.white,
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(KZ.radiusXl),
+        side: BorderSide(color: KZ.outlineVariant.withValues(alpha: 0.5)),
+      ),
       child: InkWell(
         onTap: () => context.push('/home/item/${item.id}'),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              flex: 3,
+            AspectRatio(
+              aspectRatio: 1.15,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -140,20 +146,17 @@ class _FavoriteItemCard extends ConsumerWidget {
               ),
             ),
             Expanded(
-              flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(KZ.sp12),
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // Full name — never truncated; rows grow to fit it.
                     Text(
                       item.localizedName(context.locale.languageCode),
-                      style: KZ.cardTitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      style: KZ.itemTitle,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     KZMenuItemRatingBadge(
                       averageRating: item.averageRating,
                       reviewCount: item.reviewCount,
@@ -166,6 +169,8 @@ class _FavoriteItemCard extends ConsumerWidget {
                             },
                           ),
                     ),
+                    const Spacer(),
+                    const SizedBox(height: 8),
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [

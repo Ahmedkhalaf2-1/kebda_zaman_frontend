@@ -26,17 +26,9 @@ import 'package:kebda_zaman/core/widgets/kz_product_card.dart';
 import 'package:kebda_zaman/core/widgets/kz_star_rating.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 
-/// Shared elevation tier for the page's two full-bleed promotional
-/// surfaces (dynamic hero, Featured Meals showcase cards) — kept identical
-/// so both read as the same visual weight instead of two slightly
-/// different one-off shadows.
-List<BoxShadow> get _kzElevatedShadow => [
-  BoxShadow(
-    color: Colors.black.withValues(alpha: 0.12),
-    blurRadius: 20,
-    offset: const Offset(0, 8),
-  ),
-];
+/// Minimum height of the Home promo banner; it grows past this when a long
+/// item name wraps.
+const double _bannerMinHeight = 184;
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -229,7 +221,7 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
 
-                  // ── 4. Search Bar — same KZ.cardDecoration() treatment as
+                  // ── 4. Search Bar — same KZ.flatCardDecoration() treatment as
                   // Menu's sticky search bar, instead of a one-off pill
                   // shape unique to this screen. ──
                   SliverToBoxAdapter(
@@ -249,7 +241,7 @@ class HomeScreen extends ConsumerWidget {
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                               ),
-                              decoration: KZ.cardDecoration(),
+                              decoration: KZ.flatCardDecoration(),
                               child: Row(
                                 children: [
                                   const Icon(
@@ -295,7 +287,12 @@ class HomeScreen extends ConsumerWidget {
                   if (data.featuredItems.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, KZ.sectionGap, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(
+                          16,
+                          KZ.sectionGap,
+                          16,
+                          12,
+                        ),
                         child: Text(
                           'home.featured_meals'.tr(),
                           style: KZ.sectionTitle,
@@ -323,7 +320,12 @@ class HomeScreen extends ConsumerWidget {
                   // ── 8. Best Sellers Section ──
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, KZ.sectionGap, 16, 12),
+                      padding: const EdgeInsets.fromLTRB(
+                        16,
+                        KZ.sectionGap,
+                        16,
+                        12,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -350,78 +352,91 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   if (context.isMobile)
                     SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 325,
-                        child: bestSellers.isEmpty
-                            ? KZEmptyState(
+                      child: bestSellers.isEmpty
+                          ? SizedBox(
+                              height: 240,
+                              child: KZEmptyState(
                                 icon: Icons.restaurant_menu_rounded,
                                 title: 'home.no_best_sellers'.tr(),
-                              )
-                            : ListView.separated(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                scrollDirection: Axis.horizontal,
-                                itemCount: bestSellers.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(width: 16),
-                                itemBuilder: (context, index) {
-                                  final item = bestSellers[index];
-                                  final isFav = favorites.contains(item.id);
-                                  return SizedBox(
-                                    width: 270,
-                                    child: ProductGridCard(
-                                      item: item,
-                                      isFavorite: isFav,
-                                      showDiscountPricing: true,
-                                      subtitle: item.localizedDescription(
-                                        context.locale.languageCode,
-                                      ),
-                                      onTap: () =>
-                                          context.push('/home/item/${item.id}'),
-                                      onAdd: () =>
-                                          _handleHomeAdd(context, ref, item),
-                                      onToggleFavorite: () async {
-                                        final success = await ref
-                                            .read(
-                                              customerFavoritesProvider
-                                                  .notifier,
-                                            )
-                                            .toggleFavorite(item.id);
-                                        if (!success && context.mounted) {
-                                          final err = ref
-                                              .read(customerFavoritesProvider)
-                                              .errorMessage;
-                                          if (err != null) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text(err),
-                                                behavior:
-                                                    SnackBarBehavior.floating,
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      },
-                                    ),
-                                  );
-                                },
                               ),
-                      ),
+                            )
+                          // A Row (not a fixed-height ListView) so every card
+                          // is as tall as the tallest one and names are never
+                          // cut off.
+                          : SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: IntrinsicHeight(
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    for (final (i, item)
+                                        in bestSellers.indexed) ...[
+                                      if (i > 0) const SizedBox(width: 14),
+                                      SizedBox(
+                                        width: 220,
+                                        child: ProductGridCard(
+                                          item: item,
+                                          isFavorite: favorites.contains(
+                                            item.id,
+                                          ),
+                                          showDiscountPricing: true,
+                                          subtitle: item.localizedDescription(
+                                            context.locale.languageCode,
+                                          ),
+                                          onTap: () => context.push(
+                                            '/home/item/${item.id}',
+                                          ),
+                                          onAdd: () => _handleHomeAdd(
+                                            context,
+                                            ref,
+                                            item,
+                                          ),
+                                          onToggleFavorite: () async {
+                                            final success = await ref
+                                                .read(
+                                                  customerFavoritesProvider
+                                                      .notifier,
+                                                )
+                                                .toggleFavorite(item.id);
+                                            if (!success && context.mounted) {
+                                              final err = ref
+                                                  .read(
+                                                    customerFavoritesProvider,
+                                                  )
+                                                  .errorMessage;
+                                              if (err != null) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(err),
+                                                    behavior: SnackBarBehavior
+                                                        .floating,
+                                                  ),
+                                                );
+                                              }
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ),
                     )
                   else
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverGrid(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: context.isDesktop ? 4 : 3,
-                          mainAxisSpacing: 16,
-                          crossAxisSpacing: 16,
-                          mainAxisExtent: 325,
-                        ),
-                        delegate: SliverChildBuilderDelegate((context, index) {
+                      sliver: SliverProductRows(
+                        columns: context.isDesktop ? 4 : 3,
+                        spacing: 16,
+                        itemCount: bestSellers.length,
+                        itemBuilder: (context, index) {
                           final item = bestSellers[index];
                           final isFav = favorites.contains(item.id);
                           return ProductGridCard(
@@ -452,7 +467,7 @@ class HomeScreen extends ConsumerWidget {
                               }
                             },
                           );
-                        }, childCount: bestSellers.length),
+                        },
                       ),
                     ),
 
@@ -460,7 +475,12 @@ class HomeScreen extends ConsumerWidget {
                   if (data.offers.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, KZ.sectionGap, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(
+                          16,
+                          KZ.sectionGap,
+                          16,
+                          12,
+                        ),
                         child: Text(
                           'home.featured'.tr(),
                           style: KZ.sectionTitle,
@@ -468,23 +488,25 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                     SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 132,
-                        child: ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: data.offers.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(width: 14),
-                          itemBuilder: (context, index) {
-                            return SizedBox(
-                              width: 300,
-                              child: _RecommendedTile(
-                                item: data.offers[index],
-                                isGrid: true,
-                              ),
-                            );
-                          },
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        scrollDirection: Axis.horizontal,
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (final (i, offer) in data.offers.indexed) ...[
+                                if (i > 0) const SizedBox(width: 14),
+                                SizedBox(
+                                  width: 300,
+                                  child: _RecommendedTile(
+                                    item: offer,
+                                    isGrid: true,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -494,7 +516,12 @@ class HomeScreen extends ConsumerWidget {
                   if (recentOrderItems.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, KZ.sectionGap, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(
+                          16,
+                          KZ.sectionGap,
+                          16,
+                          12,
+                        ),
                         child: Text(
                           'home.recently_ordered'.tr(),
                           style: KZ.sectionTitle,
@@ -502,16 +529,19 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                     SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 168,
-                        child: ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: recentOrderItems.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(width: 14),
-                          itemBuilder: (context, index) =>
-                              _RecentOrderTile(item: recentOrderItems[index]),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        scrollDirection: Axis.horizontal,
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (final (i, orderItem) in recentOrderItems.indexed) ...[
+                                if (i > 0) const SizedBox(width: 14),
+                                _RecentOrderTile(item: orderItem),
+                              ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -521,7 +551,12 @@ class HomeScreen extends ConsumerWidget {
                   if (data.popular.isNotEmpty) ...[
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, KZ.sectionGap, 16, 12),
+                        padding: const EdgeInsets.fromLTRB(
+                          16,
+                          KZ.sectionGap,
+                          16,
+                          12,
+                        ),
                         child: Text(
                           'home.recommended'.tr(),
                           style: KZ.sectionTitle,
@@ -529,37 +564,24 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                     if (context.isMobile)
-                      // A bare SliverList gives each child unbounded height,
-                      // but _RecommendedTile's price row uses Flexible,
-                      // which requires a bounded height to resolve — fixed
-                      // extent here, matching the grid variant's
-                      // mainAxisExtent below so both breakpoints render the
-                      // row at the same height.
-                      SliverFixedExtentList(
-                        itemExtent: 148,
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final item = data.popular[index];
-                          return _RecommendedTile(item: item);
-                        }, childCount: data.popular.length),
+                      // Content-sized so each tile grows to show the full
+                      // item name.
+                      SliverList.builder(
+                        itemCount: data.popular.length,
+                        itemBuilder: (context, index) =>
+                            _RecommendedTile(item: data.popular[index]),
                       )
                     else
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        sliver: SliverGrid(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: context.isDesktop ? 3 : 2,
-                                mainAxisSpacing: 12,
-                                crossAxisSpacing: 12,
-                                mainAxisExtent: 148,
-                              ),
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            index,
-                          ) {
-                            final item = data.popular[index];
-                            return _RecommendedTile(item: item, isGrid: true);
-                          }, childCount: data.popular.length),
+                        sliver: SliverProductRows(
+                          columns: context.isDesktop ? 3 : 2,
+                          spacing: 12,
+                          itemCount: data.popular.length,
+                          itemBuilder: (context, index) => _RecommendedTile(
+                            item: data.popular[index],
+                            isGrid: true,
+                          ),
                         ),
                       ),
                   ],
@@ -638,7 +660,6 @@ class _ShowcaseTile extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(KZ.radiusXl),
-            boxShadow: _kzElevatedShadow,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(KZ.radiusXl),
@@ -679,8 +700,6 @@ class _ShowcaseTile extends StatelessWidget {
                     children: [
                       Text(
                         item.localizedName(context.locale.languageCode),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                         style: KZ.sectionTitle.copyWith(color: Colors.white),
                       ),
                       const SizedBox(height: KZ.sp4),
@@ -746,24 +765,17 @@ class _RecommendedTile extends ConsumerWidget {
 
     final tileContent = InkWell(
       onTap: () => context.push('/home/item/${item.id}'),
-      borderRadius: BorderRadius.circular(KZ.radiusLg),
+      borderRadius: BorderRadius.circular(KZ.radiusXl),
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(KZ.radiusLg),
+          borderRadius: BorderRadius.circular(KZ.radiusXl),
           border: Border.all(
             color: HomeScreen.surfaceContainerHighestColor.withValues(
               alpha: 0.5,
             ),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Row(
           children: [
@@ -780,17 +792,16 @@ class _RecommendedTile extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Full name — never truncated; the tile grows to fit it.
                   Text(
                     item.localizedName(context.locale.languageCode),
                     style: KZ.itemTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 3),
                   Text(
                     item.localizedDescription(context.locale.languageCode),
                     style: KZ.bodySmall,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (item.badge != null || item.calories != null) ...[
@@ -820,38 +831,28 @@ class _RecommendedTile extends ConsumerWidget {
                         ),
                   ),
                   const SizedBox(height: 8),
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Row(
-                        children: [
-                          Text(
-                            formatCurrency(
-                              hasDiscount
-                                  ? item.discountPrice!
-                                  : item.basePrice,
-                              locale: context.locale,
-                            ),
-                            style: KZ.price,
-                          ),
-                          if (hasDiscount) ...[
-                            const SizedBox(width: 6),
-                            MenuItemComparePriceText(
-                              compareAtPrice: item.basePrice,
-                              style: KZ.bodySmall.copyWith(color: KZ.error),
-                            ),
-                          ],
-                          if (item.compareAtPrice != null &&
-                              item.compareAtPrice! > item.basePrice) ...[
-                            const SizedBox(width: 6),
-                            MenuItemComparePriceText(
-                              compareAtPrice: item.compareAtPrice!,
-                            ),
-                          ],
-                        ],
+                  Wrap(
+                    spacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        formatCurrency(
+                          hasDiscount ? item.discountPrice! : item.basePrice,
+                          locale: context.locale,
+                        ),
+                        style: KZ.price,
                       ),
-                    ),
+                      if (hasDiscount)
+                        MenuItemComparePriceText(
+                          compareAtPrice: item.basePrice,
+                          style: KZ.bodySmall.copyWith(color: KZ.error),
+                        ),
+                      if (item.compareAtPrice != null &&
+                          item.compareAtPrice! > item.basePrice)
+                        MenuItemComparePriceText(
+                          compareAtPrice: item.compareAtPrice!,
+                        ),
+                    ],
                   ),
                 ],
               ),
@@ -1040,14 +1041,11 @@ class _PromoHero extends StatelessWidget {
       child: GestureDetector(
         onTap: () => context.push('/home/item/${item.id}'),
         child: Container(
-          // Trimmed from 200 — kept conservative (not the full ~12-18%
-          // suggested range) since a 2-line item name + badge + button
-          // stack needs ~180px of internal content even after the padding
-          // trim below; going lower risks overflowing on a long name.
-          height: 184,
+          // A minimum, not a fixed height: a long item name wraps and the
+          // banner grows instead of cutting the name off.
+          constraints: const BoxConstraints(minHeight: _bannerMinHeight),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(KZ.radiusXl),
-            boxShadow: _kzElevatedShadow,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(KZ.radiusXl),
@@ -1085,48 +1083,54 @@ class _PromoHero extends StatelessWidget {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(KZ.sp16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.22),
-                          borderRadius: BorderRadius.circular(KZ.radiusFull),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.3),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: _bannerMinHeight,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(KZ.sp16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.22),
+                            borderRadius: BorderRadius.circular(KZ.radiusFull),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Text(
+                            percentOff != null
+                                ? '$percentOff% ${'home.sale'.tr()}'
+                                : 'home.limited_time'.tr(),
+                            style: KZ.statusLabel.copyWith(color: Colors.white),
                           ),
                         ),
-                        child: Text(
-                          percentOff != null
-                              ? '$percentOff% ${'home.sale'.tr()}'
-                              : 'home.limited_time'.tr(),
-                          style: KZ.statusLabel.copyWith(color: Colors.white),
+                        const SizedBox(height: KZ.sp8),
+                        SizedBox(
+                          width: 220,
+                          child: Text(
+                            item.localizedName(context.locale.languageCode),
+                            style: KZ.sectionTitle.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: KZ.sp8),
-                      SizedBox(
-                        width: 220,
-                        child: Text(
-                          item.localizedName(context.locale.languageCode),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: KZ.sectionTitle.copyWith(color: Colors.white),
+                        const SizedBox(height: KZ.sp12),
+                        KZButton(
+                          label: 'home.claim_now'.tr(),
+                          pill: true,
+                          onPressed: () =>
+                              context.push('/home/item/${item.id}'),
                         ),
-                      ),
-                      const SizedBox(height: KZ.sp12),
-                      KZButton(
-                        label: 'home.claim_now'.tr(),
-                        pill: true,
-                        onPressed: () => context.push('/home/item/${item.id}'),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -1166,12 +1170,7 @@ class _RecentOrderTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: KZ.sp8),
-            Text(
-              item.name,
-              style: KZ.itemTitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            Text(item.name, style: KZ.itemTitle),
             const SizedBox(height: 2),
             Text(
               formatCurrency(item.unitPrice, locale: context.locale),

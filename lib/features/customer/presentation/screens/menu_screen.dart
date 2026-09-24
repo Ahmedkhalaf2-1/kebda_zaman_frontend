@@ -26,20 +26,6 @@ int _menuColumnCount(BuildContext context) {
   return 2;
 }
 
-/// Responsive card extent, chosen so that a 70 % image block, a 2-line
-/// KZ.itemTitle name (15 px × 1.3 leading = 39 dp for two lines), and the
-/// price row all fit comfortably with 8 dp top / 6 dp bottom insets.
-///
-/// Verified at 360 dp (compact phone):
-///   extent = 260 dp  →  imageH = 182 dp  →  info = 78 dp
-///   content (78 − 14) = 64 dp  →  Expanded(name) = 64 − 4 − 20 = 40 dp ≥ 39 dp ✓
-double _cardExtent(BuildContext context) {
-  final w = MediaQuery.of(context).size.width;
-  if (w >= 600) return 272.0; // tablet
-  if (w >= 390) return 265.0; // large phone (390–599 dp)
-  return 260.0; //              compact phone (360–389 dp)
-}
-
 /// A category and the (already-loaded) items that belong to it, built
 /// locally from `MenuData` — no extra fetch, no repository mutation.
 /// Categories with zero available items are dropped by [buildMenuSections]
@@ -269,7 +255,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
         data: (data) {
           final columnCount = _menuColumnCount(context);
           final sections = buildMenuSections(data);
-          final extent = _cardExtent(context);
 
           // Fallback only — never written into the notifier here (mutating
           // it mid-build could notify a still-attached listener from the
@@ -457,14 +442,10 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                       // than the previous 16 dp, while the 14 dp cross/main
                       // spacing keeps the two-column grid from feeling cramped.
                       padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
-                      sliver: SliverGrid(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: columnCount,
-                          mainAxisSpacing: 14,
-                          crossAxisSpacing: 14,
-                          mainAxisExtent: extent,
-                        ),
-                        delegate: SliverChildBuilderDelegate((context, index) {
+                      sliver: SliverProductRows(
+                        columns: columnCount,
+                        itemCount: section.items.length,
+                        itemBuilder: (context, index) {
                           final item = section.items[index];
                           final isFav = favorites.contains(item.id);
                           return Consumer(
@@ -498,7 +479,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                               );
                             },
                           );
-                        }, childCount: section.items.length),
+                        },
                       ),
                     ),
                   ],
@@ -557,7 +538,7 @@ class _StickyMenuHeaderDelegate extends SliverPersistentHeaderDelegate {
                   child: Container(
                     height: KZ.searchBarHeight,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: KZ.cardDecoration(),
+                    decoration: KZ.flatCardDecoration(),
                     child: Row(
                       children: [
                         const Icon(

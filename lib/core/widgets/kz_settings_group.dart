@@ -23,32 +23,64 @@ class KZSettingsGroupHeader extends StatelessWidget {
   }
 }
 
-/// Card surface for one settings group — same radius/border/shadow
-/// language everywhere a group of settings rows appears.
+/// Card surface for a settings group — same radius/border/shadow language
+/// everywhere a group of settings rows appears.
+///
+/// By default every row gets its own flat, strongly rounded card (with a
+/// small gap between them) so each tappable row reads as a button rather
+/// than a flat list row; any [KZSettingsDivider]s in [rows] are dropped in
+/// that mode. Set [separateRows] to false for the single-card-with-hairlines
+/// layout.
 class KZSettingsGroup extends StatelessWidget {
   final List<Widget> rows;
-  const KZSettingsGroup({super.key, required this.rows});
+  final bool separateRows;
+  const KZSettingsGroup({
+    super.key,
+    required this.rows,
+    this.separateRows = true,
+  });
+
+  static final _cardDecoration = BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(KZ.radiusLg),
+    border: Border.all(
+      color: KZ.outlineVariant.withValues(alpha: 0.5),
+      width: 1,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: KZ.primary.withValues(alpha: 0.04),
+        blurRadius: 14,
+        offset: const Offset(0, 3),
+      ),
+    ],
+  );
+
+  // Rows are buttons: flat (no shadow), with near-pill corners that stay
+  // safe for two-line rows (language picker, biometric switch).
+  static final _rowDecoration = KZ.flatCardDecoration();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(KZ.radiusLg),
-        border: Border.all(
-          color: KZ.outlineVariant.withValues(alpha: 0.5),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: KZ.primary.withValues(alpha: 0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 3),
+    if (!separateRows) {
+      return Container(
+        decoration: _cardDecoration,
+        clipBehavior: Clip.antiAlias,
+        child: Column(children: rows),
+      );
+    }
+    final cards = rows.where((row) => row is! KZSettingsDivider).toList();
+    return Column(
+      children: [
+        for (var i = 0; i < cards.length; i++) ...[
+          if (i > 0) const SizedBox(height: KZ.sp8),
+          Container(
+            decoration: _rowDecoration,
+            clipBehavior: Clip.antiAlias,
+            child: cards[i],
           ),
         ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(children: rows),
+      ],
     );
   }
 }
@@ -94,6 +126,7 @@ class KZSettingsRow extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(KZ.radiusXl),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: KZ.sp16,

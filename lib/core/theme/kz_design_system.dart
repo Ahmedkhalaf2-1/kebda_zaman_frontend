@@ -230,6 +230,14 @@ class KZ {
     boxShadow: cardShadow,
   );
 
+  /// Flat card surface used across the customer app: white, strongly
+  /// rounded, hairline border, no shadow.
+  static BoxDecoration flatCardDecoration({Color? color}) => BoxDecoration(
+    color: color ?? Colors.white,
+    borderRadius: BorderRadius.circular(radiusXl),
+    border: Border.all(color: outlineVariant.withValues(alpha: 0.5)),
+  );
+
   static BoxDecoration sectionDecoration({Color? color}) => BoxDecoration(
     color: color ?? surfaceContainer,
     borderRadius: BorderRadius.circular(radiusLg),

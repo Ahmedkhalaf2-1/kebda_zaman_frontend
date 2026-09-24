@@ -187,7 +187,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
         children: [
           // Account — a real inline form instead of the old native dialog.
-          if (isLoggedIn && user != null) ...[
+          // Guests have no real account to edit.
+          if (isLoggedIn && user != null && !user.isGuest) ...[
             KZSettingsGroupHeader('profile.edit_profile'.tr()),
             const SizedBox(height: 8),
             _buildEditProfileForm(),
@@ -253,45 +254,48 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           const SizedBox(height: KZ.sectionGap),
 
-          // Account exit — separated from the groups above, exactly as it
-          // was on Profile (extra space + a quiet hairline, no card
-          // surface, no chevron on either row).
+          // Account exit — separated from the groups above by extra space
+          // and a quiet hairline; no chevron on either row.
           Divider(height: 1, color: KZ.outlineVariant.withValues(alpha: 0.4)),
-          const SizedBox(height: 4),
-          KZSettingsRow(
-            icon: isLoggedIn ? Icons.logout_rounded : Icons.login_rounded,
-            title: isLoggedIn ? 'profile.logout'.tr() : 'auth.login_btn'.tr(),
-            iconColor: KZ.primary,
-            titleColor: KZ.primary,
-            showChevron: false,
-            onTap: () async {
-              if (isLoggedIn) {
-                await ref.read(authNotifierProvider.notifier).logout();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('profile.logged_out'.tr()),
-                      backgroundColor: KZ.primary,
-                    ),
-                  );
-                  context.go('/login');
-                }
-              } else {
-                context.push('/login');
-              }
-            },
+          const SizedBox(height: KZ.sp12),
+          KZSettingsGroup(
+            rows: [
+              KZSettingsRow(
+                icon: isLoggedIn ? Icons.logout_rounded : Icons.login_rounded,
+                title: isLoggedIn ? 'profile.logout'.tr() : 'auth.login_btn'.tr(),
+                iconColor: KZ.primary,
+                titleColor: KZ.primary,
+                showChevron: false,
+                onTap: () async {
+                  if (isLoggedIn) {
+                    await ref.read(authNotifierProvider.notifier).logout();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('profile.logged_out'.tr()),
+                          backgroundColor: KZ.primary,
+                        ),
+                      );
+                      context.go('/login');
+                    }
+                  } else {
+                    context.push('/login');
+                  }
+                },
+              ),
+              // Delete Account — a real, persistent account only. Guests don't
+              // own a persistent account to delete, so this never renders.
+              if (isLoggedIn && user != null && !user.isGuest)
+                KZSettingsRow(
+                  icon: Icons.delete_forever_rounded,
+                  title: 'delete_account.tile_title'.tr(),
+                  iconColor: KZ.error,
+                  titleColor: KZ.error,
+                  showChevron: false,
+                  onTap: _handleDeleteAccount,
+                ),
+            ],
           ),
-          // Delete Account — a real, persistent account only. Guests don't
-          // own a persistent account to delete, so this never renders.
-          if (isLoggedIn && user != null && !user.isGuest)
-            KZSettingsRow(
-              icon: Icons.delete_forever_rounded,
-              title: 'delete_account.tile_title'.tr(),
-              iconColor: KZ.error,
-              titleColor: KZ.error,
-              showChevron: false,
-              onTap: _handleDeleteAccount,
-            ),
         ],
       ),
     );
@@ -300,7 +304,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildEditProfileForm() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: KZ.cardDecoration(),
+      decoration: KZ.flatCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -489,15 +493,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         decoration: BoxDecoration(
           color: selected ? KZ.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(999),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: KZ.primary.withValues(alpha: 0.25),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  ),
-                ]
-              : null,
         ),
         child: Text(
           label,
