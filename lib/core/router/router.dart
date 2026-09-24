@@ -220,8 +220,12 @@ final routerProvider = Provider.autoDispose<GoRouter>((ref) {
                   ),
                   GoRoute(
                     path: 'review/:id',
-                    builder: (context, state) =>
-                        OrderReviewScreen(orderId: state.pathParameters['id']!),
+                    builder: (context, state) => OrderReviewScreen(
+                      orderId: state.pathParameters['id']!,
+                      initialRating: int.tryParse(
+                        state.uri.queryParameters['rating'] ?? '',
+                      ),
+                    ),
                   ),
                 ],
               ),

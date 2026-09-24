@@ -320,6 +320,8 @@ abstract class  LocaleKeys {
   static const reviews_prompt_subtitle = 'reviews.prompt_subtitle';
   static const reviews_rate_order = 'reviews.rate_order';
   static const reviews_not_now = 'reviews.not_now';
+  static const reviews_tap_to_rate = 'reviews.tap_to_rate';
+  static const reviews_add_comment = 'reviews.add_comment';
   static const reviews = 'reviews';
   static const admin_reviews_title = 'admin_reviews.title';
   static const admin_reviews_item_reviews_average = 'admin_reviews.item_reviews_average';

@@ -344,7 +344,9 @@ class CodegenLoader extends AssetLoader{
     "prompt_title": "كيف كان طلبك؟",
     "prompt_subtitle": "قيّم تجربتك والأصناف التي طلبتها.",
     "rate_order": "قيّم الطلب",
-    "not_now": "ليس الآن"
+    "not_now": "ليس الآن",
+    "tap_to_rate": "اضغط على النجوم لتقييم طلبك",
+    "add_comment": "أضف تعليقًا"
   },
   "admin_reviews": {
     "title": "التقييمات والمراجعات",
@@ -1486,7 +1488,7 @@ static const Map<String,dynamic> _en = {
     "delivery_address": "Delivery Address",
     "change_address": "Change",
     "payment_method": "Payment Method",
-    "cash": "Cash on Delivery",
+    "cash": "Cash",
     "card": "Credit / Debit Card",
     "loyalty_redemption": "Use Loyalty Points",
     "redeem_points": "Redeem {points} Pts (-{amount})",
@@ -1508,7 +1510,7 @@ static const Map<String,dynamic> _en = {
     "promo_blocks_loyalty": "Only one discount method can be used per order. Remove your promo code{code} to redeem a loyalty reward instead.",
     "pickup_blocks_free_delivery": "Free delivery isn't available for pickup orders.",
     "reward_insufficient_points": "You don't have enough points for this reward.",
-    "pay_upon_receipt": "PAY UPON RECEIPT",
+    "pay_upon_receipt": "Pay when you receive your order",
     "coming_soon": "COMING SOON",
     "card_coming_soon_notice": "Card payments are coming soon. Please use Cash on Delivery.",
     "no_address_notice": "No saved delivery address — tap Change to add one",
@@ -1658,7 +1660,9 @@ static const Map<String,dynamic> _en = {
     "prompt_title": "How was your order?",
     "prompt_subtitle": "Rate your experience and the items you ordered.",
     "rate_order": "Rate Order",
-    "not_now": "Not now"
+    "not_now": "Not now",
+    "tap_to_rate": "Tap a star to rate your order",
+    "add_comment": "Add a comment"
   },
   "admin_reviews": {
     "title": "Ratings & Reviews",

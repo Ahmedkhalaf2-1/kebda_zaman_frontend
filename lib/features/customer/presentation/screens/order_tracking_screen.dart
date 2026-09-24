@@ -14,6 +14,7 @@ import '../notifiers/orders_notifier.dart';
 import 'package:kebda_zaman/core/theme/kz_design_system.dart';
 import 'package:kebda_zaman/core/theme/kz_motion.dart';
 import 'package:kebda_zaman/core/widgets/kz_button.dart';
+import 'package:kebda_zaman/core/widgets/kz_star_rating.dart';
 import 'package:kebda_zaman/core/widgets/kz_order_status.dart';
 import 'package:kebda_zaman/core/widgets/kz_state_views.dart';
 import 'package:kebda_zaman/core/widgets/kz_live_tracking_map.dart';
@@ -522,8 +523,6 @@ class _OrderTrackingScreenState extends ConsumerState<OrderTrackingScreen> {
                           children: [
                             Text(
                               item.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
@@ -1121,58 +1120,58 @@ class _ReviewPromptBannerState extends ConsumerState<_ReviewPromptBanner> {
                 data.orderFeedback == null);
         if (!needsReview) return const SizedBox.shrink();
 
+        // Tapping a star goes straight to the review page with that
+        // overall rating pre-filled — one tap instead of "Rate" + stars.
+        void openReview(int rating) => context.push(
+          '/orders/review/${widget.order.id}?rating=$rating',
+        );
+
         return Container(
-          padding: const EdgeInsets.all(KZ.sp16),
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            KZ.sp16,
+            KZ.sp8,
+            KZ.sp4,
+            KZ.sp12,
+          ),
           decoration: BoxDecoration(
-            color: KZ.primary.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(KZ.radiusLg),
-            border: Border.all(color: KZ.primary.withValues(alpha: 0.12)),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(KZ.radiusXl),
+            border: Border.all(
+              color: KZ.outlineVariant.withValues(alpha: 0.5),
+            ),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  const Icon(
-                    Icons.stars_rounded,
-                    color: KZ.primary,
-                    size: KZ.iconAction,
-                  ),
-                  const SizedBox(width: KZ.sp8),
                   Expanded(
-                    child: Text(
-                      'reviews.prompt_title'.tr(),
-                      style: KZ.itemTitle,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('reviews.prompt_title'.tr(), style: KZ.itemTitle),
+                        const SizedBox(height: 2),
+                        Text(
+                          'reviews.tap_to_rate'.tr(),
+                          style: KZ.bodySmall.copyWith(
+                            color: KZ.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _handleNotNow,
+                    tooltip: 'reviews.not_now'.tr(),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      size: 20,
+                      color: KZ.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: KZ.sp4),
-              Text(
-                'reviews.prompt_subtitle'.tr(),
-                style: KZ.bodySmall.copyWith(color: KZ.onSurfaceVariant),
-              ),
-              const SizedBox(height: KZ.sp12),
-              Row(
-                children: [
-                  Expanded(
-                    child: KZButton(
-                      label: 'reviews.not_now'.tr(),
-                      variant: KZButtonVariant.tertiary,
-                      onPressed: _handleNotNow,
-                    ),
-                  ),
-                  const SizedBox(width: KZ.sp12),
-                  Expanded(
-                    child: KZButton(
-                      label: 'reviews.rate_order'.tr(),
-                      icon: Icons.stars_rounded,
-                      onPressed: () =>
-                          context.push('/orders/review/${widget.order.id}'),
-                    ),
-                  ),
-                ],
-              ),
+              KZStarRating(rating: 0, size: 38, onChanged: openReview),
             ],
           ),
         );
@@ -1291,13 +1290,6 @@ class _StatusBannerCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: OrderTrackingScreen.primaryColor,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: OrderTrackingScreen.primaryColor.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: Row(
         children: [

@@ -279,7 +279,10 @@ Future<ProviderContainer> _pump(
       GoRoute(
         path: '/orders/review/:id',
         builder: (context, state) => Scaffold(
-          body: Text('REVIEW_SCREEN_${state.pathParameters['id']}'),
+          body: Text(
+            'REVIEW_SCREEN_${state.pathParameters['id']}'
+            '_${state.uri.queryParameters['rating']}',
+          ),
         ),
       ),
     ],
@@ -341,8 +344,9 @@ void main() {
         );
 
         expect(find.text('How was your order?'), findsOneWidget);
-        expect(find.text('Rate Order'), findsWidgets);
-        expect(find.text('Not now'), findsOneWidget);
+        expect(find.text('Tap a star to rate your order'), findsOneWidget);
+        expect(find.byIcon(Icons.star_outline_rounded), findsNWidgets(5));
+        expect(find.byTooltip('Not now'), findsOneWidget);
       },
     );
 
@@ -470,7 +474,7 @@ void main() {
       },
     );
 
-    testWidgets('tapping "Not now" hides the prompt and persists the dismissal', (
+    testWidgets('tapping close (Not now) hides the prompt and persists the dismissal', (
       tester,
     ) async {
       await _pump(
@@ -485,7 +489,7 @@ void main() {
 
       expect(find.text('How was your order?'), findsOneWidget);
 
-      await tester.tap(find.text('Not now'));
+      await tester.tap(find.byTooltip('Not now'));
       await _settle(tester);
 
       expect(find.text('How was your order?'), findsNothing);
@@ -497,7 +501,7 @@ void main() {
       );
     });
 
-    testWidgets('tapping "Rate Order" navigates to /orders/review/:id', (
+    testWidgets('tapping a star opens /orders/review/:id with that rating', (
       tester,
     ) async {
       await _pump(
@@ -510,10 +514,10 @@ void main() {
         loggedInUser: _testUser(),
       );
 
-      await tester.tap(find.text('Rate Order').first);
+      await tester.tap(find.byIcon(Icons.star_outline_rounded).at(3));
       await _settle(tester);
 
-      expect(find.text('REVIEW_SCREEN_order-1'), findsOneWidget);
+      expect(find.text('REVIEW_SCREEN_order-1_4'), findsOneWidget);
     });
   });
 }

@@ -156,7 +156,7 @@
     "delivery_address": "Delivery Address",
     "change_address": "Change",
     "payment_method": "Payment Method",
-    "cash": "Cash on Delivery",
+    "cash": "Cash",
     "card": "Credit / Debit Card",
     "loyalty_redemption": "Use Loyalty Points",
     "redeem_points": "Redeem {points} Pts (-{amount})",
@@ -178,7 +178,7 @@
     "promo_blocks_loyalty": "Only one discount method can be used per order. Remove your promo code{code} to redeem a loyalty reward instead.",
     "pickup_blocks_free_delivery": "Free delivery isn't available for pickup orders.",
     "reward_insufficient_points": "You don't have enough points for this reward.",
-    "pay_upon_receipt": "PAY UPON RECEIPT",
+    "pay_upon_receipt": "Pay when you receive your order",
     "coming_soon": "COMING SOON",
     "card_coming_soon_notice": "Card payments are coming soon. Please use Cash on Delivery.",
     "no_address_notice": "No saved delivery address — tap Change to add one",
@@ -328,7 +328,9 @@
     "prompt_title": "How was your order?",
     "prompt_subtitle": "Rate your experience and the items you ordered.",
     "rate_order": "Rate Order",
-    "not_now": "Not now"
+    "not_now": "Not now",
+    "tap_to_rate": "Tap a star to rate your order",
+    "add_comment": "Add a comment"
   },
   "admin_reviews": {
     "title": "Ratings & Reviews",
