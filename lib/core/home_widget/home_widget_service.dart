@@ -35,7 +35,11 @@ class HomeWidgetService {
   static const _keyOrderIsPickup = 'order_is_pickup';
   static const _keyLoyaltyPoints = 'loyalty_points';
 
-  bool get _androidOnly => !kIsWeb && Platform.isAndroid;
+  /// Whether this platform has a home-screen widget. iOS has no widget
+  /// extension or App Group, and the plugin throws there if called.
+  bool get isSupported => !kIsWeb && Platform.isAndroid;
+
+  bool get _androidOnly => isSupported;
 
   /// Call with the customer's active orders (non-terminal). Shows the most
   /// recently placed one; falls back to [syncNoActiveOrder] when empty.

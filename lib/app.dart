@@ -31,6 +31,7 @@ class _KebdaZamanAppState extends ConsumerState<KebdaZamanApp> {
   /// widget launch) to the target screen, mirroring how push-notification
   /// taps are handled by NotificationNavigationService.
   void _listenForWidgetTaps(GoRouter router) {
+    if (!HomeWidgetService.instance.isSupported) return;
     _widgetClickSub ??= HomeWidget.widgetClicked.listen(
       (uri) => HomeWidgetService.instance.handleWidgetUri(uri, router),
     );
@@ -184,7 +185,7 @@ class _KebdaZamanAppState extends ConsumerState<KebdaZamanApp> {
             padding: const WidgetStatePropertyAll(
               EdgeInsets.symmetric(vertical: 14, horizontal: 24),
             ),
-            elevation: const WidgetStatePropertyAll(4),
+            elevation: const WidgetStatePropertyAll(0),
             textStyle: const WidgetStatePropertyAll(
               TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
