@@ -14,6 +14,7 @@ enum AppNotificationPermissionStatus {
       case AuthorizationStatus.authorized:
         return AppNotificationPermissionStatus.authorized;
       case AuthorizationStatus.denied:
+      case AuthorizationStatus.deniedPermanently:
         return AppNotificationPermissionStatus.denied;
       case AuthorizationStatus.notDetermined:
         return AppNotificationPermissionStatus.notDetermined;
@@ -51,9 +52,14 @@ class NotificationPermissionService {
       final prefs = await SharedPreferences.getInstance();
       final alreadyRequested = prefs.getBool(_requestedKey) ?? false;
 
-      // Avoid repeatedly asking every launch unless forcePrompt is true
+      // Avoid repeatedly asking every launch unless forcePrompt is true.
+      // Installs that were previously granted only quiet "provisional"
+      // delivery get one real prompt so notifications can show as banners.
       if (alreadyRequested && !forcePrompt) {
-        return checkPermissionStatus();
+        final status = await checkPermissionStatus();
+        if (status != AppNotificationPermissionStatus.provisional) {
+          return status;
+        }
       }
 
       final settings = await _fcm.requestPermission(
@@ -62,7 +68,10 @@ class NotificationPermissionService {
         badge: true,
         carPlay: false,
         criticalAlert: false,
-        provisional: true,
+        // Full (not provisional) authorization: provisional delivers
+        // silently to Notification Center only — no banner, no sound, no
+        // prompt — which reads as "notifications don't work".
+        provisional: false,
         sound: true,
       );
 

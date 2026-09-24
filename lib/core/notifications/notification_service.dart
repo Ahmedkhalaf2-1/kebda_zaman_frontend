@@ -155,7 +155,17 @@ class NotificationService {
     // 3. Register FCM Background Handler
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-    // 4. Listen for Foreground Messages
+    // 4. Foreground messages. iOS shows FCM notifications itself while the
+    // app is open once these options are set (the local-notification
+    // fallback below is for Android, which has no equivalent).
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+    }
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
     // 5. Listen for Background Tap Navigation
@@ -221,6 +231,16 @@ class NotificationService {
   /// Handle incoming foreground messages and show local notification banner
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
     final payload = AppNotificationPayload.fromRemoteMessage(message);
+
+    // iOS already displayed this banner (see the presentation options set
+    // in initialize); showing a local copy too would duplicate it. Data-only
+    // messages have no system banner, so they still get a local one.
+    if (!kIsWeb &&
+        defaultTargetPlatform == TargetPlatform.iOS &&
+        message.notification != null) {
+      handleAdminNewOrderRefresh(payload);
+      return;
+    }
 
     const androidDetails = AndroidNotificationDetails(
       'kebda_zaman_high_importance_channel',

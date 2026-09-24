@@ -70,7 +70,22 @@ class DeviceService {
       // 1. Request notification permission (idempotent — will only prompt once)
       await NotificationService.instance.permissionService.requestPermission();
 
-      // 2. Obtain current FCM token
+      // 2. iOS only: FCM can't issue a token until APNs has delivered the
+      // device's push token, which arrives asynchronously after the
+      // permission prompt. Calling getToken() before that throws
+      // `apns-token-not-set`, so wait for it first.
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+        final apnsToken = await _waitForApnsToken();
+        if (apnsToken == null) {
+          debugPrint(
+            '⚠️ [DeviceService] No APNs token (push not available on this '
+            'device/simulator, or permission denied) — skipping registration',
+          );
+          return;
+        }
+      }
+
+      // 3. Obtain current FCM token
       final token = await FirebaseMessaging.instance.getToken();
       if (token == null || token.isEmpty) {
         debugPrint(
@@ -100,6 +115,16 @@ class DeviceService {
         '⚠️ [DeviceService] onSessionEstablished error (non-blocking): $e',
       );
     }
+  }
+
+  /// Polls for the APNs token for up to ~10s; null if it never arrives.
+  Future<String?> _waitForApnsToken() async {
+    for (var attempt = 0; attempt < 20; attempt++) {
+      final token = await FirebaseMessaging.instance.getAPNSToken();
+      if (token != null) return token;
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    }
+    return null;
   }
 
   /// Call before session teardown (logout).
